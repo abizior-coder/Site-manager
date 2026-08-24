@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus } from "lucide-react";
 
 const COLORS = {
   shell: "#1B1B1A",
@@ -106,7 +106,11 @@ const T = {
     invalidCode: "That code couldn't be read — check it was copied in full.",
     shareHint: "Send this code to your crew member via WhatsApp or email — they paste it into \"Import project\" on their phone.",
     sentReports: "Sent reports", editReportHint: "Adjust the hours or add a note if something needs correcting.",
-    hoursFieldLabel: "Hours", adjustHoursTitle: "Adjust hours", generateReportBtn: "Generate report", totalHoursLabel: "Total hours", machinesToolsLabel: "Machines & tools", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
+    hoursFieldLabel: "Hours", adjustHoursTitle: "Adjust hours", generateReportBtn: "Generate report", totalHoursLabel: "Total hours", machinesToolsLabel: "Machines & tools", rangeLeaveBtn: "Add multiple days off", dateFromLabel: "From date", dateToLabel: "To date",
+    navMaterials: "Materials", shopTab: "Shop", toolsTab: "Tools", transportTab: "Transport",
+    basketLabel: "Basket", emptyBasketLabel: "Basket is empty", transferToProjectBtn: "Transfer to project",
+    chooseProjectLabel: "Choose project", addedToBasketToast: "Added to basket", voiceNotSupported: "Voice input not supported on this device",
+    openCatalogBtn: "Open catalog", clearBasketBtn: "Clear basket", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
     noReportsYet: "No reports sent yet", sentOnLabel: "Sent", editedTag: "Edited", generatedOnLabel: "Generated",
     backupTitle: "Backup & restore", exportBackup: "Export backup", importBackupBtn: "Restore from backup",
     backupHint: "Copy this code somewhere safe (Notes app, email to yourself). If the app ever loses your data, paste it back in here to restore everything.",
@@ -196,7 +200,11 @@ const T = {
     invalidCode: "Der Code konnte nicht gelesen werden — prüfen Sie, ob er vollständig kopiert wurde.",
     shareHint: "Senden Sie diesen Code per WhatsApp oder E-Mail an Ihr Team — sie fügen ihn unter «Projekt importieren» auf ihrem Handy ein.",
     sentReports: "Gesendete Berichte", editReportHint: "Stunden anpassen oder eine Notiz hinzufügen, falls etwas korrigiert werden muss.",
-    hoursFieldLabel: "Stunden", adjustHoursTitle: "Stunden anpassen", generateReportBtn: "Bericht erstellen", totalHoursLabel: "Gesamtstunden", machinesToolsLabel: "Maschinen & Werkzeug", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
+    hoursFieldLabel: "Stunden", adjustHoursTitle: "Stunden anpassen", generateReportBtn: "Bericht erstellen", totalHoursLabel: "Gesamtstunden", machinesToolsLabel: "Maschinen & Werkzeug", rangeLeaveBtn: "Mehrere Tage frei eintragen", dateFromLabel: "Von Datum", dateToLabel: "Bis Datum",
+    navMaterials: "Material", shopTab: "Shop", toolsTab: "Werkzeug", transportTab: "Transport",
+    basketLabel: "Warenkorb", emptyBasketLabel: "Warenkorb ist leer", transferToProjectBtn: "Zu Projekt übertragen",
+    chooseProjectLabel: "Projekt wählen", addedToBasketToast: "Zum Warenkorb hinzugefügt", voiceNotSupported: "Spracheingabe auf diesem Gerät nicht unterstützt",
+    openCatalogBtn: "Katalog öffnen", clearBasketBtn: "Warenkorb leeren", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
     noReportsYet: "Noch keine Berichte gesendet", sentOnLabel: "Gesendet", editedTag: "Bearbeitet", generatedOnLabel: "Erstellt",
     backupTitle: "Backup & Wiederherstellung", exportBackup: "Backup exportieren", importBackupBtn: "Aus Backup wiederherstellen",
     backupHint: "Kopieren Sie diesen Code an einen sicheren Ort (Notizen-App, E-Mail an sich selbst). Sollte die App jemals Daten verlieren, fügen Sie ihn hier ein, um alles wiederherzustellen.",
@@ -286,7 +294,11 @@ const T = {
     invalidCode: "Ce code n'a pas pu être lu — vérifiez qu'il a été copié en entier.",
     shareHint: "Envoyez ce code à votre collègue par WhatsApp ou e-mail — il le colle dans « Importer un projet » sur son téléphone.",
     sentReports: "Rapports envoyés", editReportHint: "Ajustez les heures ou ajoutez une note si quelque chose doit être corrigé.",
-    hoursFieldLabel: "Heures", adjustHoursTitle: "Ajuster les heures", generateReportBtn: "Générer un rapport", totalHoursLabel: "Total des heures", machinesToolsLabel: "Machines & outils", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
+    hoursFieldLabel: "Heures", adjustHoursTitle: "Ajuster les heures", generateReportBtn: "Générer un rapport", totalHoursLabel: "Total des heures", machinesToolsLabel: "Machines & outils", rangeLeaveBtn: "Ajouter plusieurs jours de congé", dateFromLabel: "Date de début", dateToLabel: "Date de fin",
+    navMaterials: "Matériaux", shopTab: "Boutique", toolsTab: "Outils", transportTab: "Transport",
+    basketLabel: "Panier", emptyBasketLabel: "Le panier est vide", transferToProjectBtn: "Transférer au projet",
+    chooseProjectLabel: "Choisir un projet", addedToBasketToast: "Ajouté au panier", voiceNotSupported: "Saisie vocale non prise en charge sur cet appareil",
+    openCatalogBtn: "Ouvrir le catalogue", clearBasketBtn: "Vider le panier", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
     noReportsYet: "Aucun rapport envoyé pour l'instant", sentOnLabel: "Envoyé", editedTag: "Modifié", generatedOnLabel: "Généré",
     backupTitle: "Sauvegarde et restauration", exportBackup: "Exporter une sauvegarde", importBackupBtn: "Restaurer depuis une sauvegarde",
     backupHint: "Copiez ce code en lieu sûr (application Notes, e-mail à vous-même). Si l'appli perd vos données, collez-le ici pour tout restaurer.",
@@ -376,7 +388,11 @@ const T = {
     invalidCode: "Impossibile leggere il codice — verifica di averlo copiato per intero.",
     shareHint: "Invia questo codice al tuo collega via WhatsApp o e-mail — lo incollerà in \"Importa progetto\" sul suo telefono.",
     sentReports: "Rapporti inviati", editReportHint: "Modifica le ore o aggiungi una nota se qualcosa va corretto.",
-    hoursFieldLabel: "Ore", adjustHoursTitle: "Modifica ore", generateReportBtn: "Genera rapporto", totalHoursLabel: "Ore totali", machinesToolsLabel: "Macchine e attrezzi", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
+    hoursFieldLabel: "Ore", adjustHoursTitle: "Modifica ore", generateReportBtn: "Genera rapporto", totalHoursLabel: "Ore totali", machinesToolsLabel: "Macchine e attrezzi", rangeLeaveBtn: "Aggiungi più giorni di assenza", dateFromLabel: "Data di inizio", dateToLabel: "Data di fine",
+    navMaterials: "Materiali", shopTab: "Negozio", toolsTab: "Attrezzi", transportTab: "Trasporto",
+    basketLabel: "Carrello", emptyBasketLabel: "Il carrello è vuoto", transferToProjectBtn: "Trasferisci al progetto",
+    chooseProjectLabel: "Scegli progetto", addedToBasketToast: "Aggiunto al carrello", voiceNotSupported: "Immissione vocale non supportata su questo dispositivo",
+    openCatalogBtn: "Apri catalogo", clearBasketBtn: "Svuota carrello", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
     noReportsYet: "Nessun rapporto inviato ancora", sentOnLabel: "Inviato", editedTag: "Modificato", generatedOnLabel: "Generato",
     backupTitle: "Backup e ripristino", exportBackup: "Esporta backup", importBackupBtn: "Ripristina da backup",
     backupHint: "Copia questo codice in un posto sicuro (app Note, e-mail a te stesso). Se l'app perde i dati, incollalo qui per ripristinare tutto.",
@@ -466,7 +482,11 @@ const T = {
     invalidCode: "No se pudo leer ese código — comprueba que lo copiaste completo.",
     shareHint: "Envía este código a tu compañero por WhatsApp o correo — lo pegará en \"Importar proyecto\" en su teléfono.",
     sentReports: "Informes enviados", editReportHint: "Ajusta las horas o añade una nota si algo necesita corrección.",
-    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", generateReportBtn: "Generar informe", totalHoursLabel: "Horas totales", machinesToolsLabel: "Máquinas y herramientas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
+    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", generateReportBtn: "Generar informe", totalHoursLabel: "Horas totales", machinesToolsLabel: "Máquinas y herramientas", rangeLeaveBtn: "Añadir varios días libres", dateFromLabel: "Fecha de inicio", dateToLabel: "Fecha de fin",
+    navMaterials: "Materiales", shopTab: "Tienda", toolsTab: "Herramientas", transportTab: "Transporte",
+    basketLabel: "Cesta", emptyBasketLabel: "La cesta está vacía", transferToProjectBtn: "Transferir al proyecto",
+    chooseProjectLabel: "Elegir proyecto", addedToBasketToast: "Añadido a la cesta", voiceNotSupported: "Entrada de voz no compatible con este dispositivo",
+    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Vaciar cesta", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
     noReportsYet: "Aún no se ha enviado ningún informe", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Generado",
     backupTitle: "Copia de seguridad y restauración", exportBackup: "Exportar copia de seguridad", importBackupBtn: "Restaurar copia de seguridad",
     backupHint: "Copia este código en un lugar seguro (app Notas, correo a ti mismo). Si la app pierde tus datos, pégalo aquí para restaurarlo todo.",
@@ -556,7 +576,11 @@ const T = {
     invalidCode: "Não foi possível ler esse código — verifique se foi copiado por inteiro.",
     shareHint: "Envie este código à sua equipa por WhatsApp ou email — eles colam em \"Importar projeto\" no telemóvel deles.",
     sentReports: "Relatórios enviados", editReportHint: "Ajuste as horas ou adicione uma nota se algo precisar de correção.",
-    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", generateReportBtn: "Gerar relatório", totalHoursLabel: "Total de horas", machinesToolsLabel: "Máquinas e ferramentas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
+    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", generateReportBtn: "Gerar relatório", totalHoursLabel: "Total de horas", machinesToolsLabel: "Máquinas e ferramentas", rangeLeaveBtn: "Adicionar vários dias de folga", dateFromLabel: "Data de início", dateToLabel: "Data de fim",
+    navMaterials: "Materiais", shopTab: "Loja", toolsTab: "Ferramentas", transportTab: "Transporte",
+    basketLabel: "Cesto", emptyBasketLabel: "O cesto está vazio", transferToProjectBtn: "Transferir para o projeto",
+    chooseProjectLabel: "Escolher projeto", addedToBasketToast: "Adicionado ao cesto", voiceNotSupported: "Entrada de voz não suportada neste dispositivo",
+    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Esvaziar cesto", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
     noReportsYet: "Ainda não foi enviado nenhum relatório", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Gerado",
     backupTitle: "Cópia de segurança e restauro", exportBackup: "Exportar cópia de segurança", importBackupBtn: "Restaurar cópia de segurança",
     backupHint: "Copie este código para um local seguro (app Notas, email para si mesmo). Se a app perder os seus dados, cole-o aqui para restaurar tudo.",
@@ -646,7 +670,11 @@ const T = {
     invalidCode: "Nie udało się odczytać tego kodu — sprawdź, czy skopiowano go w całości.",
     shareHint: "Wyślij ten kod do pracownika przez WhatsApp lub e-mail — wklei go w \"Importuj projekt\" na swoim telefonie.",
     sentReports: "Wysłane raporty", editReportHint: "Popraw godziny lub dodaj notatkę, jeśli coś wymaga korekty.",
-    hoursFieldLabel: "Godziny", adjustHoursTitle: "Popraw godziny", generateReportBtn: "Wygeneruj raport", totalHoursLabel: "Suma godzin", machinesToolsLabel: "Maszyny i narzędzia", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
+    hoursFieldLabel: "Godziny", adjustHoursTitle: "Popraw godziny", generateReportBtn: "Wygeneruj raport", totalHoursLabel: "Suma godzin", machinesToolsLabel: "Maszyny i narzędzia", rangeLeaveBtn: "Dodaj kilka dni wolnego", dateFromLabel: "Data od", dateToLabel: "Data do",
+    navMaterials: "Materiały", shopTab: "Sklep", toolsTab: "Narzędzia", transportTab: "Transport",
+    basketLabel: "Koszyk", emptyBasketLabel: "Koszyk jest pusty", transferToProjectBtn: "Przenieś do projektu",
+    chooseProjectLabel: "Wybierz projekt", addedToBasketToast: "Dodano do koszyka", voiceNotSupported: "Wprowadzanie głosowe nie jest obsługiwane na tym urządzeniu",
+    openCatalogBtn: "Otwórz katalog", clearBasketBtn: "Wyczyść koszyk", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
     noReportsYet: "Jeszcze nie wysłano żadnego raportu", sentOnLabel: "Wysłano", editedTag: "Edytowano", generatedOnLabel: "Wygenerowano",
     backupTitle: "Kopia zapasowa i przywracanie", exportBackup: "Eksportuj kopię zapasową", importBackupBtn: "Przywróć z kopii zapasowej",
     backupHint: "Skopiuj ten kod w bezpieczne miejsce (aplikacja Notatki, e-mail do siebie). Jeśli aplikacja kiedykolwiek utraci dane, wklej go tutaj, aby wszystko przywrócić.",
@@ -736,7 +764,11 @@ const T = {
     invalidCode: "Tento kód sa nepodarilo prečítať — skontrolujte, či bol skopírovaný celý.",
     shareHint: "Pošlite tento kód svojmu zamestnancovi cez WhatsApp alebo e-mail — vloží ho do \"Importovať projekt\" vo svojom telefóne.",
     sentReports: "Odoslané reporty", editReportHint: "Upravte hodiny alebo pridajte poznámku, ak je potrebná oprava.",
-    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upraviť hodiny", generateReportBtn: "Vygenerovať report", totalHoursLabel: "Celkové hodiny", machinesToolsLabel: "Stroje a náradie", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
+    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upraviť hodiny", generateReportBtn: "Vygenerovať report", totalHoursLabel: "Celkové hodiny", machinesToolsLabel: "Stroje a náradie", rangeLeaveBtn: "Pridať viacero voľných dní", dateFromLabel: "Dátum od", dateToLabel: "Dátum do",
+    navMaterials: "Materiály", shopTab: "Obchod", toolsTab: "Náradie", transportTab: "Doprava",
+    basketLabel: "Košík", emptyBasketLabel: "Košík je prázdny", transferToProjectBtn: "Preniesť do projektu",
+    chooseProjectLabel: "Vybrať projekt", addedToBasketToast: "Pridané do košíka", voiceNotSupported: "Hlasový vstup nie je na tomto zariadení podporovaný",
+    openCatalogBtn: "Otvoriť katalóg", clearBasketBtn: "Vyprázdniť košík", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
     noReportsYet: "Zatiaľ nebol odoslaný žiadny report", sentOnLabel: "Odoslané", editedTag: "Upravené", generatedOnLabel: "Vygenerované",
     backupTitle: "Záloha a obnovenie", exportBackup: "Exportovať zálohu", importBackupBtn: "Obnoviť zo zálohy",
     backupHint: "Skopírujte tento kód na bezpečné miesto (aplikácia Poznámky, e-mail sebe). Ak aplikácia niekedy stratí vaše dáta, vložte ho sem a obnovte všetko.",
@@ -826,7 +858,11 @@ const T = {
     invalidCode: "Tento kód se nepodařilo přečíst — zkontrolujte, zda byl zkopírován celý.",
     shareHint: "Pošlete tento kód svému zaměstnanci přes WhatsApp nebo e-mail — vloží ho do \"Importovat projekt\" ve svém telefonu.",
     sentReports: "Odeslané reporty", editReportHint: "Upravte hodiny nebo přidejte poznámku, pokud je potřeba oprava.",
-    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upravit hodiny", generateReportBtn: "Vygenerovat report", totalHoursLabel: "Celkové hodiny", machinesToolsLabel: "Stroje a nářadí", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
+    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upravit hodiny", generateReportBtn: "Vygenerovat report", totalHoursLabel: "Celkové hodiny", machinesToolsLabel: "Stroje a nářadí", rangeLeaveBtn: "Přidat více volných dnů", dateFromLabel: "Datum od", dateToLabel: "Datum do",
+    navMaterials: "Materiály", shopTab: "Obchod", toolsTab: "Nářadí", transportTab: "Doprava",
+    basketLabel: "Košík", emptyBasketLabel: "Košík je prázdný", transferToProjectBtn: "Přenést do projektu",
+    chooseProjectLabel: "Vybrat projekt", addedToBasketToast: "Přidáno do košíku", voiceNotSupported: "Hlasový vstup není na tomto zařízení podporován",
+    openCatalogBtn: "Otevřít katalog", clearBasketBtn: "Vyprázdnit košík", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
     noReportsYet: "Zatím nebyl odeslán žádný report", sentOnLabel: "Odesláno", editedTag: "Upraveno", generatedOnLabel: "Vygenerováno",
     backupTitle: "Záloha a obnovení", exportBackup: "Exportovat zálohu", importBackupBtn: "Obnovit ze zálohy",
     backupHint: "Zkopírujte tento kód na bezpečné místo (aplikace Poznámky, e-mail sami sobě). Pokud aplikace někdy ztratí vaše data, vložte ho sem a obnovte vše.",
@@ -1447,6 +1483,180 @@ const MATERIALS_CATALOG = {
   },
 };
 
+
+const TOOLS_CATALOG = {
+  en: {
+    cats: { hgc: "HGC (tools)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Machines", items: ["HGC cordless drill", "HGC rotary hammer", "HGC angle grinder"] },
+        { group: "Hand tools", items: ["HGC tool box set", "HGC measuring tools"] },
+      ],
+      sfs: [
+        { group: "Power tools", items: ["SFS Bosch rotary hammer", "SFS Festool circular saw", "SFS Milwaukee cordless driver", "SFS Fein Multimaster"] },
+        { group: "Hand tools", items: ["SFS Knipex pliers set", "SFS PB Swiss Tools screwdriver set"] },
+        { group: "Protective equipment", items: ["SFS Zarges aluminium ladder", "SFS PSA safety kit"] },
+      ],
+      hasler: [
+        { group: "Rental equipment", items: ["Hasler rental drill", "Hasler rental pressure washer", "Hasler rental scarifier"] },
+        { group: "Tools & PPE", items: ["Hasler tool set", "Hasler personal protective equipment"] },
+      ],
+    },
+  },
+  de: {
+    cats: { hgc: "HGC (Werkzeuge)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Maschinen", items: ["HGC Akkubohrschrauber", "HGC Bohrhammer", "HGC Winkelschleifer"] },
+        { group: "Handwerkzeug", items: ["HGC Werkzeugkoffer-Set", "HGC Messwerkzeuge"] },
+      ],
+      sfs: [
+        { group: "Elektrowerkzeuge", items: ["SFS Bosch Bohrhammer", "SFS Festool Handkreissäge", "SFS Milwaukee Akkuschrauber", "SFS Fein Multimaster"] },
+        { group: "Handwerkzeug", items: ["SFS Knipex Zangenset", "SFS PB Swiss Tools Schraubenzieher-Set"] },
+        { group: "Schutzausrüstung", items: ["SFS Zarges Alu-Leiter", "SFS PSA-Sicherheitsset"] },
+      ],
+      hasler: [
+        { group: "Mietgeräte", items: ["Hasler Mietbohrmaschine", "Hasler Miet-Hochdruckreiniger", "Hasler Miet-Vertikutierer"] },
+        { group: "Werkzeug & PSA", items: ["Hasler Werkzeugset", "Hasler persönliche Schutzausrüstung"] },
+      ],
+    },
+  },
+  fr: {
+    cats: { hgc: "HGC (outils)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Machines", items: ["HGC perceuse-visseuse sans fil", "HGC marteau-perforateur", "HGC meuleuse d'angle"] },
+        { group: "Outils à main", items: ["HGC coffret d'outils", "HGC outils de mesure"] },
+      ],
+      sfs: [
+        { group: "Outils électriques", items: ["SFS Bosch marteau-perforateur", "SFS Festool scie circulaire", "SFS Milwaukee visseuse sans fil", "SFS Fein Multimaster"] },
+        { group: "Outils à main", items: ["SFS Knipex jeu de pinces", "SFS PB Swiss Tools jeu de tournevis"] },
+        { group: "Équipement de protection", items: ["SFS Zarges échelle aluminium", "SFS kit de sécurité EPI"] },
+      ],
+      hasler: [
+        { group: "Location de matériel", items: ["Hasler perceuse de location", "Hasler nettoyeur haute pression de location", "Hasler scarificateur de location"] },
+        { group: "Outils & EPI", items: ["Hasler set d'outils", "Hasler équipement de protection individuelle"] },
+      ],
+    },
+  },
+  it: {
+    cats: { hgc: "HGC (attrezzi)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Macchine", items: ["HGC trapano avvitatore a batteria", "HGC martello perforatore", "HGC smerigliatrice angolare"] },
+        { group: "Utensili manuali", items: ["HGC set cassetta attrezzi", "HGC strumenti di misura"] },
+      ],
+      sfs: [
+        { group: "Utensili elettrici", items: ["SFS Bosch martello perforatore", "SFS Festool sega circolare", "SFS Milwaukee avvitatore a batteria", "SFS Fein Multimaster"] },
+        { group: "Utensili manuali", items: ["SFS Knipex set pinze", "SFS PB Swiss Tools set cacciaviti"] },
+        { group: "Dispositivi di protezione", items: ["SFS Zarges scala in alluminio", "SFS kit sicurezza DPI"] },
+      ],
+      hasler: [
+        { group: "Noleggio attrezzature", items: ["Hasler trapano a noleggio", "Hasler idropulitrice a noleggio", "Hasler scarificatore a noleggio"] },
+        { group: "Utensili e DPI", items: ["Hasler set utensili", "Hasler dispositivi di protezione individuale"] },
+      ],
+    },
+  },
+  es: {
+    cats: { hgc: "HGC (herramientas)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Máquinas", items: ["HGC taladro atornillador a batería", "HGC martillo perforador", "HGC amoladora angular"] },
+        { group: "Herramientas manuales", items: ["HGC set de caja de herramientas", "HGC instrumentos de medición"] },
+      ],
+      sfs: [
+        { group: "Herramientas eléctricas", items: ["SFS Bosch martillo perforador", "SFS Festool sierra circular", "SFS Milwaukee atornillador a batería", "SFS Fein Multimaster"] },
+        { group: "Herramientas manuales", items: ["SFS Knipex juego de alicates", "SFS PB Swiss Tools juego de destornilladores"] },
+        { group: "Equipo de protección", items: ["SFS Zarges escalera de aluminio", "SFS kit de seguridad EPI"] },
+      ],
+      hasler: [
+        { group: "Equipos de alquiler", items: ["Hasler taladro de alquiler", "Hasler hidrolimpiadora de alquiler", "Hasler escarificador de alquiler"] },
+        { group: "Herramientas y EPI", items: ["Hasler set de herramientas", "Hasler equipo de protección individual"] },
+      ],
+    },
+  },
+  pt: {
+    cats: { hgc: "HGC (ferramentas)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Máquinas", items: ["HGC berbequim aparafusadora a bateria", "HGC martelo perfurador", "HGC rebarbadora angular"] },
+        { group: "Ferramentas manuais", items: ["HGC conjunto de caixa de ferramentas", "HGC instrumentos de medição"] },
+      ],
+      sfs: [
+        { group: "Ferramentas elétricas", items: ["SFS Bosch martelo perfurador", "SFS Festool serra circular", "SFS Milwaukee aparafusadora a bateria", "SFS Fein Multimaster"] },
+        { group: "Ferramentas manuais", items: ["SFS Knipex conjunto de alicates", "SFS PB Swiss Tools conjunto de chaves de fendas"] },
+        { group: "Equipamento de proteção", items: ["SFS Zarges escada de alumínio", "SFS kit de segurança EPI"] },
+      ],
+      hasler: [
+        { group: "Equipamento de aluguer", items: ["Hasler berbequim de aluguer", "Hasler lavadora de alta pressão de aluguer", "Hasler escarificador de aluguer"] },
+        { group: "Ferramentas e EPI", items: ["Hasler conjunto de ferramentas", "Hasler equipamento de proteção individual"] },
+      ],
+    },
+  },
+  pl: {
+    cats: { hgc: "HGC (narzędzia)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Maszyny", items: ["HGC wkrętarko-wiertarka akumulatorowa", "HGC młot udarowy", "HGC szlifierka kątowa"] },
+        { group: "Narzędzia ręczne", items: ["HGC zestaw skrzynki narzędziowej", "HGC przyrządy pomiarowe"] },
+      ],
+      sfs: [
+        { group: "Elektronarzędzia", items: ["SFS Bosch młot udarowy", "SFS Festool pilarka tarczowa", "SFS Milwaukee wkrętarka akumulatorowa", "SFS Fein Multimaster"] },
+        { group: "Narzędzia ręczne", items: ["SFS Knipex zestaw szczypiec", "SFS PB Swiss Tools zestaw śrubokrętów"] },
+        { group: "Sprzęt ochronny", items: ["SFS Zarges drabina aluminiowa", "SFS zestaw bezpieczeństwa PSA"] },
+      ],
+      hasler: [
+        { group: "Sprzęt wynajmowany", items: ["Hasler wiertarka do wynajęcia", "Hasler myjka ciśnieniowa do wynajęcia", "Hasler wertykulator do wynajęcia"] },
+        { group: "Narzędzia i PSA", items: ["Hasler zestaw narzędzi", "Hasler środki ochrony indywidualnej"] },
+      ],
+    },
+  },
+  sk: {
+    cats: { hgc: "HGC (náradie)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Stroje", items: ["HGC akumulátorová vŕtačka", "HGC vŕtacie kladivo", "HGC uhlová brúska"] },
+        { group: "Ručné náradie", items: ["HGC sada kufra na náradie", "HGC meracie nástroje"] },
+      ],
+      sfs: [
+        { group: "Elektrické náradie", items: ["SFS Bosch vŕtacie kladivo", "SFS Festool okružná píla", "SFS Milwaukee akumulátorová vŕtačka", "SFS Fein Multimaster"] },
+        { group: "Ručné náradie", items: ["SFS Knipex sada klieští", "SFS PB Swiss Tools sada skrutkovačov"] },
+        { group: "Ochranné vybavenie", items: ["SFS Zarges hliníkový rebrík", "SFS bezpečnostná súprava OOPP"] },
+      ],
+      hasler: [
+        { group: "Prenajímané zariadenia", items: ["Hasler prenájom vŕtačky", "Hasler prenájom vysokotlakového čističa", "Hasler prenájom vertikutátora"] },
+        { group: "Náradie a OOPP", items: ["Hasler sada náradia", "Hasler osobné ochranné prostriedky"] },
+      ],
+    },
+  },
+  cs: {
+    cats: { hgc: "HGC (nářadí)", sfs: "SFS", hasler: "Hasler (Proficenter)" },
+    links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
+    items: {
+      hgc: [
+        { group: "Stroje", items: ["HGC akumulátorová vrtačka", "HGC vrtací kladivo", "HGC úhlová bruska"] },
+        { group: "Ruční nářadí", items: ["HGC sada kufru na nářadí", "HGC měřicí nástroje"] },
+      ],
+      sfs: [
+        { group: "Elektrické nářadí", items: ["SFS Bosch vrtací kladivo", "SFS Festool okružní pila", "SFS Milwaukee akumulátorová vrtačka", "SFS Fein Multimaster"] },
+        { group: "Ruční nářadí", items: ["SFS Knipex sada kleští", "SFS PB Swiss Tools sada šroubováků"] },
+        { group: "Ochranné vybavení", items: ["SFS Zarges hliníkový žebřík", "SFS bezpečnostní sada OOPP"] },
+      ],
+      hasler: [
+        { group: "Pronajímaná technika", items: ["Hasler pronájem vrtačky", "Hasler pronájem vysokotlakého čističe", "Hasler pronájem vertikutátoru"] },
+        { group: "Nářadí a OOPP", items: ["Hasler sada nářadí", "Hasler osobní ochranné prostředky"] },
+      ],
+    },
+  },
+};
 function cprSteps(t) {
   return [1, 2, 3, 4, 5, 6, 7].map((n) => ({ title: t[`cpr${n}t`], text: t[`cpr${n}x`] }));
 }
@@ -1603,6 +1813,12 @@ export default function SiteManager() {
   const [activeClock, setActiveClock] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [noteText, setNoteText] = useState("");
+  const [voiceListening, setVoiceListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const [materialsSubTab, setMaterialsSubTab] = useState("shop");
+  const [shopCat, setShopCat] = useState(null);
+  const [basket, setBasket] = useState([]);
+  const [basketProjectModalOpen, setBasketProjectModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -1653,6 +1869,8 @@ export default function SiteManager() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [leaveForm, setLeaveForm] = useState({ type: "vacation", note: "" });
+  const [rangeLeaveModalOpen, setRangeLeaveModalOpen] = useState(false);
+  const [rangeLeaveForm, setRangeLeaveForm] = useState({ from: "", to: "", type: "vacation", note: "" });
   const [insuranceCards, setInsuranceCards] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [insuranceForm, setInsuranceForm] = useState(null); // {id?, label, provider, policyNumber, phone, photo}
@@ -1796,6 +2014,31 @@ export default function SiteManager() {
       updated = [...leaveRequests, { id: uid(), date: selectedDay, type: leaveForm.type, note: leaveForm.note, status: "pending", createdAt: Date.now() }];
     }
     persist({ leaveRequests: updated });
+  }
+
+  function submitRangeLeave() {
+    if (!rangeLeaveForm.from || !rangeLeaveForm.to) return;
+    const start = new Date(rangeLeaveForm.from + "T00:00:00");
+    const end = new Date(rangeLeaveForm.to + "T00:00:00");
+    if (end < start) return;
+    const pad = (n) => String(n).padStart(2, "0");
+    const dates = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      dates.push(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);
+    }
+    let updated = [...leaveRequests];
+    dates.forEach((dateStr) => {
+      const existing = updated.find((r) => r.date === dateStr);
+      if (existing) {
+        updated = updated.map((r) => (r.id === existing.id ? { ...r, type: rangeLeaveForm.type, note: rangeLeaveForm.note } : r));
+      } else {
+        updated.push({ id: uid(), date: dateStr, type: rangeLeaveForm.type, note: rangeLeaveForm.note, status: "pending", createdAt: Date.now() });
+      }
+    });
+    persist({ leaveRequests: updated });
+    setRangeLeaveModalOpen(false);
+    setRangeLeaveForm({ from: "", to: "", type: "vacation", note: "" });
+    showToast(t.projectAdded);
   }
 
   function setLeaveStatus(id, status) {
@@ -2214,6 +2457,67 @@ export default function SiteManager() {
     setNoteText("");
   }
 
+  function toggleVoiceInput() {
+    if (voiceListening) {
+      recognitionRef.current?.stop();
+      setVoiceListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast(t.voiceNotSupported);
+      return;
+    }
+    const localeMap = { en: "en-US", de: "de-CH", fr: "fr-CH", it: "it-CH", es: "es-ES", pt: "pt-PT", pl: "pl-PL", sk: "sk-SK", cs: "cs-CZ" };
+    const recog = new SpeechRecognition();
+    recog.lang = localeMap[lang] || "en-US";
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+    recog.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setNoteText((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+    };
+    recog.onerror = () => setVoiceListening(false);
+    recog.onend = () => setVoiceListening(false);
+    recognitionRef.current = recog;
+    setVoiceListening(true);
+    try {
+      recog.start();
+    } catch (e) {
+      setVoiceListening(false);
+    }
+  }
+
+  function addToBasket(name, kind) {
+    setBasket((b) => {
+      const existing = b.find((i) => i.name === name && i.kind === kind);
+      if (existing) {
+        return b.map((i) => (i === existing ? { ...i, qty: (parseFloat(i.qty) || 0) + 1 } : i));
+      }
+      return [...b, { id: uid(), name, kind, qty: 1, unit: materialUnits[name.trim().toLowerCase()] || "" }];
+    });
+    showToast(t.addedToBasketToast);
+  }
+
+  function updateBasketItem(id, field, value) {
+    setBasket((b) => b.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
+  }
+
+  function removeBasketItem(id) {
+    setBasket((b) => b.filter((i) => i.id !== id));
+  }
+
+  function transferBasketToProject(projectId) {
+    const newEntries = basket.map((i) => ({
+      id: uid(), date: todayKey(), createdAt: Date.now(),
+      type: i.kind, projectId, description: i.name, qty: i.qty, unit: i.unit,
+    }));
+    persist({ entries: [...newEntries, ...entries] });
+    setBasket([]);
+    setBasketProjectModalOpen(false);
+    showToast(t.projectAdded);
+  }
+
   function openAdd(type, projectId) {
     setForm({ description: "", qty: "", unit: "" });
     setPhotoPreview(null);
@@ -2333,8 +2637,8 @@ export default function SiteManager() {
     });
   }
 
-  function openScan(mode) {
-    setScanModal({ mode, images: [], items: null, loading: false, error: null, projectId: activeClock?.projectId || projects[0]?.id || null });
+  function openScan(mode, projectId) {
+    setScanModal({ mode, images: [], items: null, loading: false, error: null, projectId: projectId || activeClock?.projectId || projects[0]?.id || null });
   }
 
   async function addScanImage(e) {
@@ -2494,7 +2798,7 @@ export default function SiteManager() {
             <SwissCross size={13} />
             <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</div>
           </div>
-          <div className="text-xl font-black uppercase tracking-tight">{tab === "today" ? t.navToday : tab === "calendar" ? t.navCalendar : tab === "projects" ? t.navProjects : tab === "reports" ? t.navReports : t.navSafety}</div>
+          <div className="text-xl font-black uppercase tracking-tight">{tab === "today" ? t.navToday : tab === "materials" ? t.navMaterials : tab === "calendar" ? t.navCalendar : tab === "projects" ? t.navProjects : tab === "reports" ? t.navReports : t.navSafety}</div>
         </div>
         <div className="relative flex items-center gap-2">
           {activeClock ? (
@@ -2583,38 +2887,15 @@ export default function SiteManager() {
               </div>
               <div className="flex gap-2">
                 <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitNote()} placeholder={t.tellLogPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+                <button onClick={toggleVoiceInput} style={{ background: voiceListening ? COLORS.danger : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 flex items-center justify-center"><Mic size={16} color={voiceListening ? "#fff" : COLORS.muted} /></button>
                 <button onClick={submitNote} style={{ background: COLORS.accent }} className="rounded-lg px-3 flex items-center justify-center"><Send size={16} /></button>
               </div>
               <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.autoSortHint}</div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {["material", "tool", "photo"].map((ty) => {
-                const meta = typeMeta(ty, t);
-                const Icon = meta.icon;
-                return (
-                  <button key={ty} onClick={() => openAdd(ty, activeClock?.projectId || projects[0]?.id)} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="rounded-xl p-3 flex flex-col items-center gap-1">
-                    <Icon size={18} color={meta.color} />
-                    <span className="text-xs font-semibold">{meta.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => openScan("single")} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="rounded-xl p-3 flex flex-col items-center gap-1">
-                <ScanLine size={18} color={COLORS.success} />
-                <span className="text-xs font-semibold text-center">{t.scanDelivery}</span>
-              </button>
-              <button onClick={() => openScan("compare")} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="rounded-xl p-3 flex flex-col items-center gap-1">
-                <ImagePlus size={18} color={COLORS.success} />
-                <span className="text-xs font-semibold text-center">{t.beforeAfter}</span>
-              </button>
-            </div>
-
-            <button onClick={openPickup} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed #C9A6F5`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
-              <QrCode size={18} color="#C9A6F5" />
-              <span className="text-sm font-semibold">{t.pickupCode}</span>
+            <button onClick={() => openAdd("tool", activeClock?.projectId || projects[0]?.id)} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
+              <Wrench size={18} color={COLORS.amber} />
+              <span className="text-sm font-semibold">{t.tools}</span>
             </button>
 
             <button onClick={openInspection} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed #6FB3D9`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
@@ -2624,10 +2905,120 @@ export default function SiteManager() {
 
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 mt-2">{t.todaysTickets}</div>
-              <EntryGroups entries={todayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
+              <EntryGroups entries={todayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
             </div>
           </div>
         )}
+
+        {tab === "materials" && (() => {
+          const catalog = MATERIALS_CATALOG[lang] || MATERIALS_CATALOG.en;
+          const toolsCatalog = TOOLS_CATALOG[lang] || TOOLS_CATALOG.en;
+          return (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={() => { setMaterialsSubTab("shop"); setShopCat(null); }} style={{ background: materialsSubTab === "shop" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><ShoppingCart size={14} /> {t.shopTab}</button>
+                <button onClick={() => { setMaterialsSubTab("tools"); setShopCat(null); }} style={{ background: materialsSubTab === "tools" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Wrench size={14} /> {t.toolsTab}</button>
+                <button onClick={() => { setMaterialsSubTab("transport"); setShopCat(null); }} style={{ background: materialsSubTab === "transport" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Truck size={14} /> {t.transportTab}</button>
+              </div>
+
+              {materialsSubTab === "shop" && (
+                <>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {Object.entries(catalog.cats).map(([key, label]) => (
+                      <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {shopCat && (
+                    <div className="flex flex-col gap-2">
+                      {catalog.items[shopCat].map((grp) => (
+                        <div key={grp.group}>
+                          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {grp.items.map((name) => (
+                              <button key={name} onClick={() => addToBasket(name, "material")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {materialsSubTab === "tools" && (
+                <>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {Object.entries(toolsCatalog.cats).map(([key, label]) => (
+                      <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {shopCat && (
+                    <div className="flex flex-col gap-2">
+                      <a href={toolsCatalog.links[shopCat]} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 underline">
+                        <BookOpen size={13} /> {t.openCatalogBtn}
+                      </a>
+                      {toolsCatalog.items[shopCat].map((grp) => (
+                        <div key={grp.group}>
+                          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {grp.items.map((name) => (
+                              <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {materialsSubTab === "transport" && (
+                <div className="flex flex-col gap-2">
+                  <button onClick={() => openScan("single")} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
+                    <ScanLine size={18} color={COLORS.success} />
+                    <span className="text-sm font-semibold">{t.scanDelivery}</span>
+                  </button>
+                  <button onClick={() => openScan("compare")} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
+                    <ImagePlus size={18} color={COLORS.success} />
+                    <span className="text-sm font-semibold">{t.beforeAfter}</span>
+                  </button>
+                  <button onClick={openPickup} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed #C9A6F5`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
+                    <QrCode size={18} color="#C9A6F5" />
+                    <span className="text-sm font-semibold">{t.pickupCode}</span>
+                  </button>
+                </div>
+              )}
+
+              {materialsSubTab !== "transport" && basket.length > 0 && (
+                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide flex items-center gap-1"><ShoppingCart size={13} /> {t.basketLabel} ({basket.length})</div>
+                    <button onClick={() => setBasket([])} style={{ color: COLORS.danger }} className="text-xs font-bold uppercase">{t.clearBasketBtn}</button>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {basket.map((i) => (
+                      <div key={i.id} className="flex items-center gap-2">
+                        <span className="flex-1 text-sm truncate">{i.name}</span>
+                        <input value={i.qty} onChange={(e) => updateBasketItem(i.id, "qty", e.target.value)} inputMode="decimal" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-12 text-xs rounded px-1.5 py-1.5 outline-none" />
+                        <input value={i.unit} onChange={(e) => updateBasketItem(i.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-16 text-xs rounded px-1.5 py-1.5 outline-none" />
+                        <button onClick={() => removeBasketItem(i.id)} style={{ color: COLORS.muted }}><X size={14} /></button>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={() => setBasketProjectModalOpen(true)} style={{ background: COLORS.accent }} className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase">{t.transferToProjectBtn}</button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {tab === "calendar" && (() => {
           const localeMap = { en: "en-US", de: "de-CH", fr: "fr-CH", it: "it-CH", es: "es-ES", pt: "pt-PT", pl: "pl-PL", sk: "sk-SK", cs: "cs-CZ" };
@@ -2689,6 +3080,9 @@ export default function SiteManager() {
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" /> {t.statusPending}</div>
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.statusApproved}</div>
               </div>
+              <button onClick={() => setRangeLeaveModalOpen(true)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                <CalendarDays size={16} /> {t.rangeLeaveBtn}
+              </button>
             </div>
           );
         })()}
@@ -2760,7 +3154,7 @@ export default function SiteManager() {
             })()}
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.entriesTitle}</div>
-              <EntryGroups entries={reportView === "daily" ? todayEntries : monthEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
+              <EntryGroups entries={reportView === "daily" ? todayEntries : monthEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
             </div>
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.sentReports}</div>
@@ -2836,9 +3230,19 @@ export default function SiteManager() {
         )}
       </div>
 
+      <button
+        onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
+        disabled={projects.length === 0}
+        style={{ background: COLORS.accent, opacity: projects.length === 0 ? 0.4 : 1 }}
+        className="fixed bottom-20 right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30"
+      >
+        <Camera size={22} color="#fff" />
+      </button>
+
       <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex">
         {[
           { id: "today", label: t.navToday, icon: Clock },
+          { id: "materials", label: t.navMaterials, icon: Package },
           { id: "calendar", label: t.navCalendar, icon: CalendarDays },
           { id: "projects", label: t.navProjects, icon: MapPin },
           { id: "reports", label: t.navReports, icon: FileText },
@@ -3001,6 +3405,45 @@ export default function SiteManager() {
         </Modal>
       )}
 
+      {basketProjectModalOpen && (
+        <Modal onClose={() => setBasketProjectModalOpen(false)} title={t.chooseProjectLabel}>
+          <div className="flex flex-col gap-2">
+            {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
+            {projects.map((p) => (
+              <button key={p.id} onClick={() => transferBasketToProject(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2.5 text-sm font-semibold">
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </Modal>
+      )}
+
+      {rangeLeaveModalOpen && (
+        <Modal onClose={() => setRangeLeaveModalOpen(false)} title={t.rangeLeaveBtn}>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.dateFromLabel}</div>
+                <input type="date" value={rangeLeaveForm.from} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, from: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              </div>
+              <div className="flex-1">
+                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.dateToLabel}</div>
+                <input type="date" value={rangeLeaveForm.to} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, to: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-1">
+              {["vacation", "sick", "other"].map((ty) => (
+                <button key={ty} onClick={() => setRangeLeaveForm((f) => ({ ...f, type: ty }))} style={{ background: rangeLeaveForm.type === ty ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">
+                  {ty === "vacation" ? t.leaveVacation : ty === "sick" ? t.leaveSick : t.leaveOther}
+                </button>
+              ))}
+            </div>
+            <input value={rangeLeaveForm.note} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <button onClick={submitRangeLeave} disabled={!rangeLeaveForm.from || !rangeLeaveForm.to} style={{ background: COLORS.accent, opacity: rangeLeaveForm.from && rangeLeaveForm.to ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.requestLeave}</button>
+          </div>
+        </Modal>
+      )}
+
       {selectedDay && (() => {
         const dayEntries = entries.filter((e) => e.date === selectedDay);
         const leave = leaveRequests.find((r) => r.date === selectedDay);
@@ -3009,7 +3452,7 @@ export default function SiteManager() {
             <div className="flex flex-col gap-4">
               <div>
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.dayJournalHeading}</div>
-                <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
+                <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
               </div>
 
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-4">
@@ -3056,6 +3499,7 @@ export default function SiteManager() {
           onCopyEntry={copyEntryFn}
           onDeleteEntry={deleteEntryFn}
           onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
+          onScanCompare={(projectId) => openScan("compare", projectId)}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
             setEditProject({ id: p.id, name: p.name, client: p.client || "", address: p.address || "", category: p.category || "flat" });
@@ -3178,6 +3622,13 @@ export default function SiteManager() {
               />
             )}
             <button onClick={saveEditTime} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+            <button
+              onClick={() => { deleteEntryFn(editTimeModal); setEditTimeModal(null); }}
+              style={{ color: COLORS.danger }}
+              className="w-full mt-2 py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
+            >
+              <Trash2 size={13} /> {t.deleteLabel}
+            </button>
           </div>
         </Modal>
       )}
@@ -3564,9 +4015,10 @@ function Stat({ label, value, color }) {
   );
 }
 
-function EntryRow({ entry, projectName, t, onEditTime }) {
+function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) {
   const meta = typeMeta(entry.type, t);
   const Icon = meta.icon;
+  const handleEdit = entry.type === "time" ? onEditTime : onEditEntry;
   return (
     <div style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="rounded-lg p-3 flex items-start gap-3">
       <div style={{ background: COLORS.shell, border: `1px solid ${meta.color}` }} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5">
@@ -3579,16 +4031,17 @@ function EntryRow({ entry, projectName, t, onEditTime }) {
         </div>
         {entry.photo && <img src={entry.photo} alt="" className="w-full rounded-md mt-2 max-h-32 object-cover" />}
       </div>
-      {entry.type === "time" && onEditTime && (
-        <button onClick={() => onEditTime(entry)} style={{ color: COLORS.muted }} className="shrink-0"><Pencil size={14} /></button>
-      )}
+      <div className="flex items-center gap-2 shrink-0">
+        {handleEdit && <button onClick={() => handleEdit(entry)} style={{ color: COLORS.muted }}><Pencil size={14} /></button>}
+        {onDelete && <button onClick={() => onDelete(entry)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>}
+      </div>
     </div>
   );
 }
 
 const ENTRY_TYPE_ORDER = ["time", "material", "tool", "photo", "pickup", "inspection", "note"];
 
-function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime }) {
+function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEntry, onDelete }) {
   const [expanded, setExpanded] = useState({});
   if (!entries || entries.length === 0) {
     return emptyLabel ? <div style={{ color: COLORS.muted }} className="text-sm">{emptyLabel}</div> : null;
@@ -3614,7 +4067,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime }) {
             </button>
             {isOpen && (
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="px-3 pt-2 pb-3 flex flex-col gap-2">
-                {items.map((e) => (<EntryRow key={e.id} entry={e} projectName={projectName} t={t} onEditTime={onEditTime} />))}
+                {items.map((e) => (<EntryRow key={e.id} entry={e} projectName={projectName} t={t} onEditTime={onEditTime} onEditEntry={onEditEntry} onDelete={onDelete} />))}
               </div>
             )}
           </div>
@@ -3624,7 +4077,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime }) {
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -3662,7 +4115,8 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button onClick={() => onAdd("material")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Package size={13} color={COLORS.success} /> {t.materials}</button>
           <button onClick={() => onAdd("tool")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Wrench size={13} color={COLORS.amber} /> {t.tools}</button>
-          <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 col-span-2"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
+          <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
+          <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
         </div>
         <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
         <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
