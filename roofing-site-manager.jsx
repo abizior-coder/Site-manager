@@ -110,7 +110,9 @@ const T = {
     navMaterials: "Materials", shopTab: "Shop", toolsTab: "Tools", transportTab: "Transport",
     basketLabel: "Basket", emptyBasketLabel: "Basket is empty", transferToProjectBtn: "Transfer to project",
     chooseProjectLabel: "Choose project", addedToBasketToast: "Added to basket", voiceNotSupported: "Voice input not supported on this device",
-    openCatalogBtn: "Open catalog", clearBasketBtn: "Clear basket", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
+    openCatalogBtn: "Open catalog", clearBasketBtn: "Clear basket",
+    sortByTypeBtn: "By type", sortBySupplierBtn: "By supplier", openShopBtn: "Open shop",
+    typePower: "Power tools", typeHand: "Hand tools", typeSafety: "Safety equipment", typeRental: "Rental equipment", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
     noReportsYet: "No reports sent yet", sentOnLabel: "Sent", editedTag: "Edited", generatedOnLabel: "Generated",
     backupTitle: "Backup & restore", exportBackup: "Export backup", importBackupBtn: "Restore from backup",
     backupHint: "Copy this code somewhere safe (Notes app, email to yourself). If the app ever loses your data, paste it back in here to restore everything.",
@@ -204,7 +206,9 @@ const T = {
     navMaterials: "Material", shopTab: "Shop", toolsTab: "Werkzeug", transportTab: "Transport",
     basketLabel: "Warenkorb", emptyBasketLabel: "Warenkorb ist leer", transferToProjectBtn: "Zu Projekt übertragen",
     chooseProjectLabel: "Projekt wählen", addedToBasketToast: "Zum Warenkorb hinzugefügt", voiceNotSupported: "Spracheingabe auf diesem Gerät nicht unterstützt",
-    openCatalogBtn: "Katalog öffnen", clearBasketBtn: "Warenkorb leeren", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
+    openCatalogBtn: "Katalog öffnen", clearBasketBtn: "Warenkorb leeren",
+    sortByTypeBtn: "Nach Typ", sortBySupplierBtn: "Nach Lieferant", openShopBtn: "Shop öffnen",
+    typePower: "Elektrowerkzeuge", typeHand: "Handwerkzeug", typeSafety: "Schutzausrüstung", typeRental: "Mietgeräte", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
     noReportsYet: "Noch keine Berichte gesendet", sentOnLabel: "Gesendet", editedTag: "Bearbeitet", generatedOnLabel: "Erstellt",
     backupTitle: "Backup & Wiederherstellung", exportBackup: "Backup exportieren", importBackupBtn: "Aus Backup wiederherstellen",
     backupHint: "Kopieren Sie diesen Code an einen sicheren Ort (Notizen-App, E-Mail an sich selbst). Sollte die App jemals Daten verlieren, fügen Sie ihn hier ein, um alles wiederherzustellen.",
@@ -298,7 +302,9 @@ const T = {
     navMaterials: "Matériaux", shopTab: "Boutique", toolsTab: "Outils", transportTab: "Transport",
     basketLabel: "Panier", emptyBasketLabel: "Le panier est vide", transferToProjectBtn: "Transférer au projet",
     chooseProjectLabel: "Choisir un projet", addedToBasketToast: "Ajouté au panier", voiceNotSupported: "Saisie vocale non prise en charge sur cet appareil",
-    openCatalogBtn: "Ouvrir le catalogue", clearBasketBtn: "Vider le panier", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
+    openCatalogBtn: "Ouvrir le catalogue", clearBasketBtn: "Vider le panier",
+    sortByTypeBtn: "Par type", sortBySupplierBtn: "Par fournisseur", openShopBtn: "Ouvrir la boutique",
+    typePower: "Outils électriques", typeHand: "Outils à main", typeSafety: "Équipement de protection", typeRental: "Location de matériel", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
     noReportsYet: "Aucun rapport envoyé pour l'instant", sentOnLabel: "Envoyé", editedTag: "Modifié", generatedOnLabel: "Généré",
     backupTitle: "Sauvegarde et restauration", exportBackup: "Exporter une sauvegarde", importBackupBtn: "Restaurer depuis une sauvegarde",
     backupHint: "Copiez ce code en lieu sûr (application Notes, e-mail à vous-même). Si l'appli perd vos données, collez-le ici pour tout restaurer.",
@@ -392,7 +398,9 @@ const T = {
     navMaterials: "Materiali", shopTab: "Negozio", toolsTab: "Attrezzi", transportTab: "Trasporto",
     basketLabel: "Carrello", emptyBasketLabel: "Il carrello è vuoto", transferToProjectBtn: "Trasferisci al progetto",
     chooseProjectLabel: "Scegli progetto", addedToBasketToast: "Aggiunto al carrello", voiceNotSupported: "Immissione vocale non supportata su questo dispositivo",
-    openCatalogBtn: "Apri catalogo", clearBasketBtn: "Svuota carrello", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
+    openCatalogBtn: "Apri catalogo", clearBasketBtn: "Svuota carrello",
+    sortByTypeBtn: "Per tipo", sortBySupplierBtn: "Per fornitore", openShopBtn: "Apri negozio",
+    typePower: "Utensili elettrici", typeHand: "Utensili manuali", typeSafety: "Dispositivi di protezione", typeRental: "Noleggio attrezzature", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
     noReportsYet: "Nessun rapporto inviato ancora", sentOnLabel: "Inviato", editedTag: "Modificato", generatedOnLabel: "Generato",
     backupTitle: "Backup e ripristino", exportBackup: "Esporta backup", importBackupBtn: "Ripristina da backup",
     backupHint: "Copia questo codice in un posto sicuro (app Note, e-mail a te stesso). Se l'app perde i dati, incollalo qui per ripristinare tutto.",
@@ -486,7 +494,9 @@ const T = {
     navMaterials: "Materiales", shopTab: "Tienda", toolsTab: "Herramientas", transportTab: "Transporte",
     basketLabel: "Cesta", emptyBasketLabel: "La cesta está vacía", transferToProjectBtn: "Transferir al proyecto",
     chooseProjectLabel: "Elegir proyecto", addedToBasketToast: "Añadido a la cesta", voiceNotSupported: "Entrada de voz no compatible con este dispositivo",
-    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Vaciar cesta", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
+    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Vaciar cesta",
+    sortByTypeBtn: "Por tipo", sortBySupplierBtn: "Por proveedor", openShopBtn: "Abrir tienda",
+    typePower: "Herramientas eléctricas", typeHand: "Herramientas manuales", typeSafety: "Equipo de protección", typeRental: "Equipos de alquiler", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
     noReportsYet: "Aún no se ha enviado ningún informe", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Generado",
     backupTitle: "Copia de seguridad y restauración", exportBackup: "Exportar copia de seguridad", importBackupBtn: "Restaurar copia de seguridad",
     backupHint: "Copia este código en un lugar seguro (app Notas, correo a ti mismo). Si la app pierde tus datos, pégalo aquí para restaurarlo todo.",
@@ -580,7 +590,9 @@ const T = {
     navMaterials: "Materiais", shopTab: "Loja", toolsTab: "Ferramentas", transportTab: "Transporte",
     basketLabel: "Cesto", emptyBasketLabel: "O cesto está vazio", transferToProjectBtn: "Transferir para o projeto",
     chooseProjectLabel: "Escolher projeto", addedToBasketToast: "Adicionado ao cesto", voiceNotSupported: "Entrada de voz não suportada neste dispositivo",
-    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Esvaziar cesto", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
+    openCatalogBtn: "Abrir catálogo", clearBasketBtn: "Esvaziar cesto",
+    sortByTypeBtn: "Por tipo", sortBySupplierBtn: "Por fornecedor", openShopBtn: "Abrir loja",
+    typePower: "Ferramentas elétricas", typeHand: "Ferramentas manuais", typeSafety: "Equipamento de proteção", typeRental: "Equipamento de aluguer", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
     noReportsYet: "Ainda não foi enviado nenhum relatório", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Gerado",
     backupTitle: "Cópia de segurança e restauro", exportBackup: "Exportar cópia de segurança", importBackupBtn: "Restaurar cópia de segurança",
     backupHint: "Copie este código para um local seguro (app Notas, email para si mesmo). Se a app perder os seus dados, cole-o aqui para restaurar tudo.",
@@ -674,7 +686,9 @@ const T = {
     navMaterials: "Materiały", shopTab: "Sklep", toolsTab: "Narzędzia", transportTab: "Transport",
     basketLabel: "Koszyk", emptyBasketLabel: "Koszyk jest pusty", transferToProjectBtn: "Przenieś do projektu",
     chooseProjectLabel: "Wybierz projekt", addedToBasketToast: "Dodano do koszyka", voiceNotSupported: "Wprowadzanie głosowe nie jest obsługiwane na tym urządzeniu",
-    openCatalogBtn: "Otwórz katalog", clearBasketBtn: "Wyczyść koszyk", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
+    openCatalogBtn: "Otwórz katalog", clearBasketBtn: "Wyczyść koszyk",
+    sortByTypeBtn: "Wg typu", sortBySupplierBtn: "Wg dostawcy", openShopBtn: "Otwórz sklep",
+    typePower: "Elektronarzędzia", typeHand: "Narzędzia ręczne", typeSafety: "Sprzęt ochronny", typeRental: "Sprzęt wynajmowany", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
     noReportsYet: "Jeszcze nie wysłano żadnego raportu", sentOnLabel: "Wysłano", editedTag: "Edytowano", generatedOnLabel: "Wygenerowano",
     backupTitle: "Kopia zapasowa i przywracanie", exportBackup: "Eksportuj kopię zapasową", importBackupBtn: "Przywróć z kopii zapasowej",
     backupHint: "Skopiuj ten kod w bezpieczne miejsce (aplikacja Notatki, e-mail do siebie). Jeśli aplikacja kiedykolwiek utraci dane, wklej go tutaj, aby wszystko przywrócić.",
@@ -768,7 +782,9 @@ const T = {
     navMaterials: "Materiály", shopTab: "Obchod", toolsTab: "Náradie", transportTab: "Doprava",
     basketLabel: "Košík", emptyBasketLabel: "Košík je prázdny", transferToProjectBtn: "Preniesť do projektu",
     chooseProjectLabel: "Vybrať projekt", addedToBasketToast: "Pridané do košíka", voiceNotSupported: "Hlasový vstup nie je na tomto zariadení podporovaný",
-    openCatalogBtn: "Otvoriť katalóg", clearBasketBtn: "Vyprázdniť košík", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
+    openCatalogBtn: "Otvoriť katalóg", clearBasketBtn: "Vyprázdniť košík",
+    sortByTypeBtn: "Podľa typu", sortBySupplierBtn: "Podľa dodávateľa", openShopBtn: "Otvoriť obchod",
+    typePower: "Elektrické náradie", typeHand: "Ručné náradie", typeSafety: "Ochranné vybavenie", typeRental: "Prenajímané zariadenia", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
     noReportsYet: "Zatiaľ nebol odoslaný žiadny report", sentOnLabel: "Odoslané", editedTag: "Upravené", generatedOnLabel: "Vygenerované",
     backupTitle: "Záloha a obnovenie", exportBackup: "Exportovať zálohu", importBackupBtn: "Obnoviť zo zálohy",
     backupHint: "Skopírujte tento kód na bezpečné miesto (aplikácia Poznámky, e-mail sebe). Ak aplikácia niekedy stratí vaše dáta, vložte ho sem a obnovte všetko.",
@@ -862,7 +878,9 @@ const T = {
     navMaterials: "Materiály", shopTab: "Obchod", toolsTab: "Nářadí", transportTab: "Doprava",
     basketLabel: "Košík", emptyBasketLabel: "Košík je prázdný", transferToProjectBtn: "Přenést do projektu",
     chooseProjectLabel: "Vybrat projekt", addedToBasketToast: "Přidáno do košíku", voiceNotSupported: "Hlasový vstup není na tomto zařízení podporován",
-    openCatalogBtn: "Otevřít katalog", clearBasketBtn: "Vyprázdnit košík", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
+    openCatalogBtn: "Otevřít katalog", clearBasketBtn: "Vyprázdnit košík",
+    sortByTypeBtn: "Podle typu", sortBySupplierBtn: "Podle dodavatele", openShopBtn: "Otevřít obchod",
+    typePower: "Elektrické nářadí", typeHand: "Ruční nářadí", typeSafety: "Ochranné vybavení", typeRental: "Pronajímaná technika", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
     noReportsYet: "Zatím nebyl odeslán žádný report", sentOnLabel: "Odesláno", editedTag: "Upraveno", generatedOnLabel: "Vygenerováno",
     backupTitle: "Záloha a obnovení", exportBackup: "Exportovat zálohu", importBackupBtn: "Obnovit ze zálohy",
     backupHint: "Zkopírujte tento kód na bezpečné místo (aplikace Poznámky, e-mail sami sobě). Pokud aplikace někdy ztratí vaše data, vložte ho sem a obnovte vše.",
@@ -880,6 +898,7 @@ const T = {
 const MATERIALS_CATALOG = {
   en: {
     cats: { wood: "Wood", membranes: "Membranes", metal: "Flashing & metalwork", insulation: "Insulation", fasteners: "Fasteners", covering: "Roof covering", hgc: "HGC (wholesaler)", gabs: "GABS (Spenglerei)", soprema: "Soprema (Liquids)", velux: "Velux (roof windows)", glaromat: "Glaromat (fasteners)", gyso: "Gyso (adhesives & sealants)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Battens", items: ["Counter battens", "Battens", "Ridge battens", "Ventilation battens"] },
@@ -947,6 +966,7 @@ const MATERIALS_CATALOG = {
   },
   de: {
     cats: { wood: "Holz", membranes: "Membranen", metal: "Spenglerarbeiten", insulation: "Dämmung", fasteners: "Befestigungsmaterial", covering: "Dacheindeckung", hgc: "HGC (Grossist)", gabs: "GABS (Spenglerei)", soprema: "Soprema (Liquids)", velux: "Velux (Dachfenster)", glaromat: "Glaromat (Schrauben)", gyso: "Gyso (Kleben/Dichten/Schützen)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Latten", items: ["Konterlatten", "Dachlatten", "Firstlatten", "Konterlattung Belüftung"] },
@@ -1014,6 +1034,7 @@ const MATERIALS_CATALOG = {
   },
   fr: {
     cats: { wood: "Bois", membranes: "Membranes", metal: "Ferblanterie", insulation: "Isolation", fasteners: "Fixations", covering: "Couverture", hgc: "HGC (grossiste)", gabs: "GABS (ferblanterie)", soprema: "Soprema (Liquids)", velux: "Velux (fenêtres de toit)", glaromat: "Glaromat (vis)", gyso: "Gyso (collage/étanchéité)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Liteaux", items: ["Contre-lattes", "Liteaux", "Liteaux de faîtage", "Liteaux de ventilation"] },
@@ -1081,6 +1102,7 @@ const MATERIALS_CATALOG = {
   },
   it: {
     cats: { wood: "Legno", membranes: "Membrane", metal: "Lattoneria", insulation: "Isolamento", fasteners: "Fissaggi", covering: "Copertura", hgc: "HGC (grossista)", gabs: "GABS (lattoneria)", soprema: "Soprema (Liquids)", velux: "Velux (finestre per tetti)", glaromat: "Glaromat (viti)", gyso: "Gyso (incollaggio/sigillatura)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Listelli", items: ["Controlistelli", "Listelli", "Listelli di colmo", "Listelli di ventilazione"] },
@@ -1148,6 +1170,7 @@ const MATERIALS_CATALOG = {
   },
   es: {
     cats: { wood: "Madera", membranes: "Membranas", metal: "Chapistería", insulation: "Aislamiento", fasteners: "Fijaciones", covering: "Cubierta", hgc: "HGC (mayorista)", gabs: "GABS (chapistería)", soprema: "Soprema (Liquids)", velux: "Velux (ventanas de tejado)", glaromat: "Glaromat (tornillos)", gyso: "Gyso (adhesivos/sellado)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Listones", items: ["Contralistones", "Listones", "Listones de cumbrera", "Listones de ventilación"] },
@@ -1215,6 +1238,7 @@ const MATERIALS_CATALOG = {
   },
   pt: {
     cats: { wood: "Madeira", membranes: "Membranas", metal: "Serralharia/Latoaria", insulation: "Isolamento", fasteners: "Fixações", covering: "Cobertura", hgc: "HGC (grossista)", gabs: "GABS (latoaria)", soprema: "Soprema (Liquids)", velux: "Velux (janelas de telhado)", glaromat: "Glaromat (parafusos)", gyso: "Gyso (colagem/vedação)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Ripas", items: ["Contra-ripas", "Ripas", "Ripas de cumeeira", "Ripas de ventilação"] },
@@ -1282,6 +1306,7 @@ const MATERIALS_CATALOG = {
   },
   pl: {
     cats: { wood: "Drewno", membranes: "Membrany", metal: "Obróbki blacharskie", insulation: "Izolacja", fasteners: "Łączniki", covering: "Pokrycie dachowe", hgc: "HGC (hurtownia)", gabs: "GABS (blacharstwo)", soprema: "Soprema (Liquids)", velux: "Velux (okna dachowe)", glaromat: "Glaromat (śruby)", gyso: "Gyso (klejenie/uszczelnianie)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Łaty", items: ["Kontrłaty", "Łaty", "Łaty kalenicowe", "Łaty wentylacyjne"] },
@@ -1349,6 +1374,7 @@ const MATERIALS_CATALOG = {
   },
   sk: {
     cats: { wood: "Drevo", membranes: "Membrány", metal: "Klampiarske práce", insulation: "Izolácia", fasteners: "Spojovací materiál", covering: "Strešná krytina", hgc: "HGC (veľkoobchod)", gabs: "GABS (klampiarstvo)", soprema: "Soprema (Liquids)", velux: "Velux (strešné okná)", glaromat: "Glaromat (skrutky)", gyso: "Gyso (lepenie/tesnenie)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Laty", items: ["Kontralaty", "Laty", "Hrebeňové laty", "Vetracie laty"] },
@@ -1416,6 +1442,7 @@ const MATERIALS_CATALOG = {
   },
   cs: {
     cats: { wood: "Dřevo", membranes: "Membrány", metal: "Klempířské práce", insulation: "Izolace", fasteners: "Spojovací materiál", covering: "Střešní krytina", hgc: "HGC (velkoobchod)", gabs: "GABS (klempířství)", soprema: "Soprema (Liquids)", velux: "Velux (střešní okna)", glaromat: "Glaromat (šrouby)", gyso: "Gyso (lepení/těsnění)" },
+    links: { hgc: "https://www.hgc.ch", gabs: "https://www.gabs.ch", soprema: "https://www.soprema.ch", velux: "https://www.velux.ch", glaromat: "https://www.glaromat.ch", gyso: "https://www.gyso.ch" },
     items: {
       wood: [
         { group: "Latě", items: ["Kontralatě", "Latě", "Hřebenové latě", "Větrací latě"] },
@@ -1490,17 +1517,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Machines", items: ["HGC cordless drill", "HGC rotary hammer", "HGC angle grinder"] },
-        { group: "Hand tools", items: ["HGC tool box set", "HGC measuring tools"] },
+        { group: "Machines", type: "power", items: ["HGC cordless drill", "HGC rotary hammer", "HGC angle grinder"] },
+        { group: "Hand tools", type: "hand", items: ["HGC tool box set", "HGC measuring tools"] },
       ],
       sfs: [
-        { group: "Power tools", items: ["SFS Bosch rotary hammer", "SFS Festool circular saw", "SFS Milwaukee cordless driver", "SFS Fein Multimaster"] },
-        { group: "Hand tools", items: ["SFS Knipex pliers set", "SFS PB Swiss Tools screwdriver set"] },
-        { group: "Protective equipment", items: ["SFS Zarges aluminium ladder", "SFS PSA safety kit"] },
+        { group: "Power tools", type: "power", items: ["SFS Bosch rotary hammer", "SFS Festool circular saw", "SFS Milwaukee cordless driver", "SFS Fein Multimaster"] },
+        { group: "Hand tools", type: "hand", items: ["SFS Knipex pliers set", "SFS PB Swiss Tools screwdriver set"] },
+        { group: "Protective equipment", type: "safety", items: ["SFS Zarges aluminium ladder", "SFS PSA safety kit"] },
       ],
       hasler: [
-        { group: "Rental equipment", items: ["Hasler rental drill", "Hasler rental pressure washer", "Hasler rental scarifier"] },
-        { group: "Tools & PPE", items: ["Hasler tool set", "Hasler personal protective equipment"] },
+        { group: "Rental equipment", type: "rental", items: ["Hasler rental drill", "Hasler rental pressure washer", "Hasler rental scarifier"] },
+        { group: "Tools & PPE", type: "safety", items: ["Hasler tool set", "Hasler personal protective equipment"] },
       ],
     },
   },
@@ -1509,17 +1536,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Maschinen", items: ["HGC Akkubohrschrauber", "HGC Bohrhammer", "HGC Winkelschleifer"] },
-        { group: "Handwerkzeug", items: ["HGC Werkzeugkoffer-Set", "HGC Messwerkzeuge"] },
+        { group: "Maschinen", type: "power", items: ["HGC Akkubohrschrauber", "HGC Bohrhammer", "HGC Winkelschleifer"] },
+        { group: "Handwerkzeug", type: "hand", items: ["HGC Werkzeugkoffer-Set", "HGC Messwerkzeuge"] },
       ],
       sfs: [
-        { group: "Elektrowerkzeuge", items: ["SFS Bosch Bohrhammer", "SFS Festool Handkreissäge", "SFS Milwaukee Akkuschrauber", "SFS Fein Multimaster"] },
-        { group: "Handwerkzeug", items: ["SFS Knipex Zangenset", "SFS PB Swiss Tools Schraubenzieher-Set"] },
-        { group: "Schutzausrüstung", items: ["SFS Zarges Alu-Leiter", "SFS PSA-Sicherheitsset"] },
+        { group: "Elektrowerkzeuge", type: "power", items: ["SFS Bosch Bohrhammer", "SFS Festool Handkreissäge", "SFS Milwaukee Akkuschrauber", "SFS Fein Multimaster"] },
+        { group: "Handwerkzeug", type: "hand", items: ["SFS Knipex Zangenset", "SFS PB Swiss Tools Schraubenzieher-Set"] },
+        { group: "Schutzausrüstung", type: "safety", items: ["SFS Zarges Alu-Leiter", "SFS PSA-Sicherheitsset"] },
       ],
       hasler: [
-        { group: "Mietgeräte", items: ["Hasler Mietbohrmaschine", "Hasler Miet-Hochdruckreiniger", "Hasler Miet-Vertikutierer"] },
-        { group: "Werkzeug & PSA", items: ["Hasler Werkzeugset", "Hasler persönliche Schutzausrüstung"] },
+        { group: "Mietgeräte", type: "rental", items: ["Hasler Mietbohrmaschine", "Hasler Miet-Hochdruckreiniger", "Hasler Miet-Vertikutierer"] },
+        { group: "Werkzeug & PSA", type: "safety", items: ["Hasler Werkzeugset", "Hasler persönliche Schutzausrüstung"] },
       ],
     },
   },
@@ -1528,17 +1555,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Machines", items: ["HGC perceuse-visseuse sans fil", "HGC marteau-perforateur", "HGC meuleuse d'angle"] },
-        { group: "Outils à main", items: ["HGC coffret d'outils", "HGC outils de mesure"] },
+        { group: "Machines", type: "power", items: ["HGC perceuse-visseuse sans fil", "HGC marteau-perforateur", "HGC meuleuse d'angle"] },
+        { group: "Outils à main", type: "hand", items: ["HGC coffret d'outils", "HGC outils de mesure"] },
       ],
       sfs: [
-        { group: "Outils électriques", items: ["SFS Bosch marteau-perforateur", "SFS Festool scie circulaire", "SFS Milwaukee visseuse sans fil", "SFS Fein Multimaster"] },
-        { group: "Outils à main", items: ["SFS Knipex jeu de pinces", "SFS PB Swiss Tools jeu de tournevis"] },
-        { group: "Équipement de protection", items: ["SFS Zarges échelle aluminium", "SFS kit de sécurité EPI"] },
+        { group: "Outils électriques", type: "power", items: ["SFS Bosch marteau-perforateur", "SFS Festool scie circulaire", "SFS Milwaukee visseuse sans fil", "SFS Fein Multimaster"] },
+        { group: "Outils à main", type: "hand", items: ["SFS Knipex jeu de pinces", "SFS PB Swiss Tools jeu de tournevis"] },
+        { group: "Équipement de protection", type: "safety", items: ["SFS Zarges échelle aluminium", "SFS kit de sécurité EPI"] },
       ],
       hasler: [
-        { group: "Location de matériel", items: ["Hasler perceuse de location", "Hasler nettoyeur haute pression de location", "Hasler scarificateur de location"] },
-        { group: "Outils & EPI", items: ["Hasler set d'outils", "Hasler équipement de protection individuelle"] },
+        { group: "Location de matériel", type: "rental", items: ["Hasler perceuse de location", "Hasler nettoyeur haute pression de location", "Hasler scarificateur de location"] },
+        { group: "Outils & EPI", type: "safety", items: ["Hasler set d'outils", "Hasler équipement de protection individuelle"] },
       ],
     },
   },
@@ -1547,17 +1574,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Macchine", items: ["HGC trapano avvitatore a batteria", "HGC martello perforatore", "HGC smerigliatrice angolare"] },
-        { group: "Utensili manuali", items: ["HGC set cassetta attrezzi", "HGC strumenti di misura"] },
+        { group: "Macchine", type: "power", items: ["HGC trapano avvitatore a batteria", "HGC martello perforatore", "HGC smerigliatrice angolare"] },
+        { group: "Utensili manuali", type: "hand", items: ["HGC set cassetta attrezzi", "HGC strumenti di misura"] },
       ],
       sfs: [
-        { group: "Utensili elettrici", items: ["SFS Bosch martello perforatore", "SFS Festool sega circolare", "SFS Milwaukee avvitatore a batteria", "SFS Fein Multimaster"] },
-        { group: "Utensili manuali", items: ["SFS Knipex set pinze", "SFS PB Swiss Tools set cacciaviti"] },
-        { group: "Dispositivi di protezione", items: ["SFS Zarges scala in alluminio", "SFS kit sicurezza DPI"] },
+        { group: "Utensili elettrici", type: "power", items: ["SFS Bosch martello perforatore", "SFS Festool sega circolare", "SFS Milwaukee avvitatore a batteria", "SFS Fein Multimaster"] },
+        { group: "Utensili manuali", type: "hand", items: ["SFS Knipex set pinze", "SFS PB Swiss Tools set cacciaviti"] },
+        { group: "Dispositivi di protezione", type: "safety", items: ["SFS Zarges scala in alluminio", "SFS kit sicurezza DPI"] },
       ],
       hasler: [
-        { group: "Noleggio attrezzature", items: ["Hasler trapano a noleggio", "Hasler idropulitrice a noleggio", "Hasler scarificatore a noleggio"] },
-        { group: "Utensili e DPI", items: ["Hasler set utensili", "Hasler dispositivi di protezione individuale"] },
+        { group: "Noleggio attrezzature", type: "rental", items: ["Hasler trapano a noleggio", "Hasler idropulitrice a noleggio", "Hasler scarificatore a noleggio"] },
+        { group: "Utensili e DPI", type: "safety", items: ["Hasler set utensili", "Hasler dispositivi di protezione individuale"] },
       ],
     },
   },
@@ -1566,17 +1593,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Máquinas", items: ["HGC taladro atornillador a batería", "HGC martillo perforador", "HGC amoladora angular"] },
-        { group: "Herramientas manuales", items: ["HGC set de caja de herramientas", "HGC instrumentos de medición"] },
+        { group: "Máquinas", type: "power", items: ["HGC taladro atornillador a batería", "HGC martillo perforador", "HGC amoladora angular"] },
+        { group: "Herramientas manuales", type: "hand", items: ["HGC set de caja de herramientas", "HGC instrumentos de medición"] },
       ],
       sfs: [
-        { group: "Herramientas eléctricas", items: ["SFS Bosch martillo perforador", "SFS Festool sierra circular", "SFS Milwaukee atornillador a batería", "SFS Fein Multimaster"] },
-        { group: "Herramientas manuales", items: ["SFS Knipex juego de alicates", "SFS PB Swiss Tools juego de destornilladores"] },
-        { group: "Equipo de protección", items: ["SFS Zarges escalera de aluminio", "SFS kit de seguridad EPI"] },
+        { group: "Herramientas eléctricas", type: "power", items: ["SFS Bosch martillo perforador", "SFS Festool sierra circular", "SFS Milwaukee atornillador a batería", "SFS Fein Multimaster"] },
+        { group: "Herramientas manuales", type: "hand", items: ["SFS Knipex juego de alicates", "SFS PB Swiss Tools juego de destornilladores"] },
+        { group: "Equipo de protección", type: "safety", items: ["SFS Zarges escalera de aluminio", "SFS kit de seguridad EPI"] },
       ],
       hasler: [
-        { group: "Equipos de alquiler", items: ["Hasler taladro de alquiler", "Hasler hidrolimpiadora de alquiler", "Hasler escarificador de alquiler"] },
-        { group: "Herramientas y EPI", items: ["Hasler set de herramientas", "Hasler equipo de protección individual"] },
+        { group: "Equipos de alquiler", type: "rental", items: ["Hasler taladro de alquiler", "Hasler hidrolimpiadora de alquiler", "Hasler escarificador de alquiler"] },
+        { group: "Herramientas y EPI", type: "safety", items: ["Hasler set de herramientas", "Hasler equipo de protección individual"] },
       ],
     },
   },
@@ -1585,17 +1612,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Máquinas", items: ["HGC berbequim aparafusadora a bateria", "HGC martelo perfurador", "HGC rebarbadora angular"] },
-        { group: "Ferramentas manuais", items: ["HGC conjunto de caixa de ferramentas", "HGC instrumentos de medição"] },
+        { group: "Máquinas", type: "power", items: ["HGC berbequim aparafusadora a bateria", "HGC martelo perfurador", "HGC rebarbadora angular"] },
+        { group: "Ferramentas manuais", type: "hand", items: ["HGC conjunto de caixa de ferramentas", "HGC instrumentos de medição"] },
       ],
       sfs: [
-        { group: "Ferramentas elétricas", items: ["SFS Bosch martelo perfurador", "SFS Festool serra circular", "SFS Milwaukee aparafusadora a bateria", "SFS Fein Multimaster"] },
-        { group: "Ferramentas manuais", items: ["SFS Knipex conjunto de alicates", "SFS PB Swiss Tools conjunto de chaves de fendas"] },
-        { group: "Equipamento de proteção", items: ["SFS Zarges escada de alumínio", "SFS kit de segurança EPI"] },
+        { group: "Ferramentas elétricas", type: "power", items: ["SFS Bosch martelo perfurador", "SFS Festool serra circular", "SFS Milwaukee aparafusadora a bateria", "SFS Fein Multimaster"] },
+        { group: "Ferramentas manuais", type: "hand", items: ["SFS Knipex conjunto de alicates", "SFS PB Swiss Tools conjunto de chaves de fendas"] },
+        { group: "Equipamento de proteção", type: "safety", items: ["SFS Zarges escada de alumínio", "SFS kit de segurança EPI"] },
       ],
       hasler: [
-        { group: "Equipamento de aluguer", items: ["Hasler berbequim de aluguer", "Hasler lavadora de alta pressão de aluguer", "Hasler escarificador de aluguer"] },
-        { group: "Ferramentas e EPI", items: ["Hasler conjunto de ferramentas", "Hasler equipamento de proteção individual"] },
+        { group: "Equipamento de aluguer", type: "rental", items: ["Hasler berbequim de aluguer", "Hasler lavadora de alta pressão de aluguer", "Hasler escarificador de aluguer"] },
+        { group: "Ferramentas e EPI", type: "safety", items: ["Hasler conjunto de ferramentas", "Hasler equipamento de proteção individual"] },
       ],
     },
   },
@@ -1604,17 +1631,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Maszyny", items: ["HGC wkrętarko-wiertarka akumulatorowa", "HGC młot udarowy", "HGC szlifierka kątowa"] },
-        { group: "Narzędzia ręczne", items: ["HGC zestaw skrzynki narzędziowej", "HGC przyrządy pomiarowe"] },
+        { group: "Maszyny", type: "power", items: ["HGC wkrętarko-wiertarka akumulatorowa", "HGC młot udarowy", "HGC szlifierka kątowa"] },
+        { group: "Narzędzia ręczne", type: "hand", items: ["HGC zestaw skrzynki narzędziowej", "HGC przyrządy pomiarowe"] },
       ],
       sfs: [
-        { group: "Elektronarzędzia", items: ["SFS Bosch młot udarowy", "SFS Festool pilarka tarczowa", "SFS Milwaukee wkrętarka akumulatorowa", "SFS Fein Multimaster"] },
-        { group: "Narzędzia ręczne", items: ["SFS Knipex zestaw szczypiec", "SFS PB Swiss Tools zestaw śrubokrętów"] },
-        { group: "Sprzęt ochronny", items: ["SFS Zarges drabina aluminiowa", "SFS zestaw bezpieczeństwa PSA"] },
+        { group: "Elektronarzędzia", type: "power", items: ["SFS Bosch młot udarowy", "SFS Festool pilarka tarczowa", "SFS Milwaukee wkrętarka akumulatorowa", "SFS Fein Multimaster"] },
+        { group: "Narzędzia ręczne", type: "hand", items: ["SFS Knipex zestaw szczypiec", "SFS PB Swiss Tools zestaw śrubokrętów"] },
+        { group: "Sprzęt ochronny", type: "safety", items: ["SFS Zarges drabina aluminiowa", "SFS zestaw bezpieczeństwa PSA"] },
       ],
       hasler: [
-        { group: "Sprzęt wynajmowany", items: ["Hasler wiertarka do wynajęcia", "Hasler myjka ciśnieniowa do wynajęcia", "Hasler wertykulator do wynajęcia"] },
-        { group: "Narzędzia i PSA", items: ["Hasler zestaw narzędzi", "Hasler środki ochrony indywidualnej"] },
+        { group: "Sprzęt wynajmowany", type: "rental", items: ["Hasler wiertarka do wynajęcia", "Hasler myjka ciśnieniowa do wynajęcia", "Hasler wertykulator do wynajęcia"] },
+        { group: "Narzędzia i PSA", type: "safety", items: ["Hasler zestaw narzędzi", "Hasler środki ochrony indywidualnej"] },
       ],
     },
   },
@@ -1623,17 +1650,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Stroje", items: ["HGC akumulátorová vŕtačka", "HGC vŕtacie kladivo", "HGC uhlová brúska"] },
-        { group: "Ručné náradie", items: ["HGC sada kufra na náradie", "HGC meracie nástroje"] },
+        { group: "Stroje", type: "power", items: ["HGC akumulátorová vŕtačka", "HGC vŕtacie kladivo", "HGC uhlová brúska"] },
+        { group: "Ručné náradie", type: "hand", items: ["HGC sada kufra na náradie", "HGC meracie nástroje"] },
       ],
       sfs: [
-        { group: "Elektrické náradie", items: ["SFS Bosch vŕtacie kladivo", "SFS Festool okružná píla", "SFS Milwaukee akumulátorová vŕtačka", "SFS Fein Multimaster"] },
-        { group: "Ručné náradie", items: ["SFS Knipex sada klieští", "SFS PB Swiss Tools sada skrutkovačov"] },
-        { group: "Ochranné vybavenie", items: ["SFS Zarges hliníkový rebrík", "SFS bezpečnostná súprava OOPP"] },
+        { group: "Elektrické náradie", type: "power", items: ["SFS Bosch vŕtacie kladivo", "SFS Festool okružná píla", "SFS Milwaukee akumulátorová vŕtačka", "SFS Fein Multimaster"] },
+        { group: "Ručné náradie", type: "hand", items: ["SFS Knipex sada klieští", "SFS PB Swiss Tools sada skrutkovačov"] },
+        { group: "Ochranné vybavenie", type: "safety", items: ["SFS Zarges hliníkový rebrík", "SFS bezpečnostná súprava OOPP"] },
       ],
       hasler: [
-        { group: "Prenajímané zariadenia", items: ["Hasler prenájom vŕtačky", "Hasler prenájom vysokotlakového čističa", "Hasler prenájom vertikutátora"] },
-        { group: "Náradie a OOPP", items: ["Hasler sada náradia", "Hasler osobné ochranné prostriedky"] },
+        { group: "Prenajímané zariadenia", type: "rental", items: ["Hasler prenájom vŕtačky", "Hasler prenájom vysokotlakového čističa", "Hasler prenájom vertikutátora"] },
+        { group: "Náradie a OOPP", type: "safety", items: ["Hasler sada náradia", "Hasler osobné ochranné prostriedky"] },
       ],
     },
   },
@@ -1642,17 +1669,17 @@ const TOOLS_CATALOG = {
     links: { hgc: "https://www.hgc.ch", sfs: "https://www.construction-sfs.ch", hasler: "https://www.hasler.ch" },
     items: {
       hgc: [
-        { group: "Stroje", items: ["HGC akumulátorová vrtačka", "HGC vrtací kladivo", "HGC úhlová bruska"] },
-        { group: "Ruční nářadí", items: ["HGC sada kufru na nářadí", "HGC měřicí nástroje"] },
+        { group: "Stroje", type: "power", items: ["HGC akumulátorová vrtačka", "HGC vrtací kladivo", "HGC úhlová bruska"] },
+        { group: "Ruční nářadí", type: "hand", items: ["HGC sada kufru na nářadí", "HGC měřicí nástroje"] },
       ],
       sfs: [
-        { group: "Elektrické nářadí", items: ["SFS Bosch vrtací kladivo", "SFS Festool okružní pila", "SFS Milwaukee akumulátorová vrtačka", "SFS Fein Multimaster"] },
-        { group: "Ruční nářadí", items: ["SFS Knipex sada kleští", "SFS PB Swiss Tools sada šroubováků"] },
-        { group: "Ochranné vybavení", items: ["SFS Zarges hliníkový žebřík", "SFS bezpečnostní sada OOPP"] },
+        { group: "Elektrické nářadí", type: "power", items: ["SFS Bosch vrtací kladivo", "SFS Festool okružní pila", "SFS Milwaukee akumulátorová vrtačka", "SFS Fein Multimaster"] },
+        { group: "Ruční nářadí", type: "hand", items: ["SFS Knipex sada kleští", "SFS PB Swiss Tools sada šroubováků"] },
+        { group: "Ochranné vybavení", type: "safety", items: ["SFS Zarges hliníkový žebřík", "SFS bezpečnostní sada OOPP"] },
       ],
       hasler: [
-        { group: "Pronajímaná technika", items: ["Hasler pronájem vrtačky", "Hasler pronájem vysokotlakého čističe", "Hasler pronájem vertikutátoru"] },
-        { group: "Nářadí a OOPP", items: ["Hasler sada nářadí", "Hasler osobní ochranné prostředky"] },
+        { group: "Pronajímaná technika", type: "rental", items: ["Hasler pronájem vrtačky", "Hasler pronájem vysokotlakého čističe", "Hasler pronájem vertikutátoru"] },
+        { group: "Nářadí a OOPP", type: "safety", items: ["Hasler sada nářadí", "Hasler osobní ochranné prostředky"] },
       ],
     },
   },
@@ -1816,6 +1843,7 @@ export default function SiteManager() {
   const [voiceListening, setVoiceListening] = useState(false);
   const recognitionRef = useRef(null);
   const [materialsSubTab, setMaterialsSubTab] = useState("shop");
+  const [sortMode, setSortMode] = useState("type");
   const [shopCat, setShopCat] = useState(null);
   const [basket, setBasket] = useState([]);
   const [basketProjectModalOpen, setBasketProjectModalOpen] = useState(false);
@@ -2804,6 +2832,9 @@ export default function SiteManager() {
           {activeClock ? (
             <div style={{ background: "#2E2620", color: COLORS.amber, border: `1px solid ${COLORS.amber}` }} className="text-xs font-bold px-2 py-1 rounded uppercase">{t.onSite}</div>
           ) : null}
+          <button onClick={() => setTab("safety")} style={{ background: tab === "safety" ? COLORS.danger : COLORS.card, border: `1px solid ${tab === "safety" ? COLORS.danger : COLORS.border}` }} className="flex items-center justify-center w-7 h-7 rounded-full">
+            <ShieldAlert size={13} color={tab === "safety" ? "#fff" : COLORS.muted} />
+          </button>
           <button onClick={openProfile} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center justify-center w-7 h-7 rounded-full">
             <User size={13} color={COLORS.muted} />
           </button>
@@ -2913,6 +2944,19 @@ export default function SiteManager() {
         {tab === "materials" && (() => {
           const catalog = MATERIALS_CATALOG[lang] || MATERIALS_CATALOG.en;
           const toolsCatalog = TOOLS_CATALOG[lang] || TOOLS_CATALOG.en;
+          const MATERIAL_TYPE_KEYS = ["wood", "membranes", "metal", "insulation", "fasteners", "covering"];
+          const MATERIAL_SUPPLIER_KEYS = ["hgc", "gabs", "soprema", "velux", "glaromat", "gyso"];
+          const TOOL_SUPPLIER_KEYS = ["hgc", "sfs", "hasler"];
+          const TOOL_TYPE_KEYS = ["power", "hand", "safety", "rental"];
+          const TOOL_TYPE_LABELS = { power: t.typePower, hand: t.typeHand, safety: t.typeSafety, rental: t.typeRental };
+
+          const SortToggle = () => (
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { setSortMode("type"); setShopCat(null); }} style={{ background: sortMode === "type" ? COLORS.accentDim : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold">{t.sortByTypeBtn}</button>
+              <button onClick={() => { setSortMode("supplier"); setShopCat(null); }} style={{ background: sortMode === "supplier" ? COLORS.accentDim : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold">{t.sortBySupplierBtn}</button>
+            </div>
+          );
+
           return (
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-3 gap-2">
@@ -2923,15 +2967,21 @@ export default function SiteManager() {
 
               {materialsSubTab === "shop" && (
                 <>
+                  <SortToggle />
                   <div className="flex gap-1.5 overflow-x-auto pb-1">
-                    {Object.entries(catalog.cats).map(([key, label]) => (
+                    {(sortMode === "type" ? MATERIAL_TYPE_KEYS : MATERIAL_SUPPLIER_KEYS).map((key) => (
                       <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
-                        {label}
+                        {catalog.cats[key]}
                       </button>
                     ))}
                   </div>
                   {shopCat && (
                     <div className="flex flex-col gap-2">
+                      {sortMode === "supplier" && catalog.links[shopCat] && (
+                        <a href={catalog.links[shopCat]} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 underline">
+                          <ExternalLink size={13} /> {t.openShopBtn}
+                        </a>
+                      )}
                       {catalog.items[shopCat].map((grp) => (
                         <div key={grp.group}>
                           <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
@@ -2951,31 +3001,66 @@ export default function SiteManager() {
 
               {materialsSubTab === "tools" && (
                 <>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1">
-                    {Object.entries(toolsCatalog.cats).map(([key, label]) => (
-                      <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  {shopCat && (
-                    <div className="flex flex-col gap-2">
-                      <a href={toolsCatalog.links[shopCat]} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 underline">
-                        <BookOpen size={13} /> {t.openCatalogBtn}
-                      </a>
-                      {toolsCatalog.items[shopCat].map((grp) => (
-                        <div key={grp.group}>
-                          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {grp.items.map((name) => (
-                              <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
-                                {name}
-                              </button>
-                            ))}
-                          </div>
+                  <SortToggle />
+                  {sortMode === "supplier" ? (
+                    <>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {TOOL_SUPPLIER_KEYS.map((key) => (
+                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                            {toolsCatalog.cats[key]}
+                          </button>
+                        ))}
+                      </div>
+                      {shopCat && (
+                        <div className="flex flex-col gap-2">
+                          <a href={toolsCatalog.links[shopCat]} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 underline">
+                            <ExternalLink size={13} /> {t.openShopBtn}
+                          </a>
+                          {toolsCatalog.items[shopCat].map((grp) => (
+                            <div key={grp.group}>
+                              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {grp.items.map((name) => (
+                                  <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                    {name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {TOOL_TYPE_KEYS.map((key) => (
+                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                            {TOOL_TYPE_LABELS[key]}
+                          </button>
+                        ))}
+                      </div>
+                      {shopCat && (
+                        <div className="flex flex-col gap-2">
+                          {TOOL_SUPPLIER_KEYS.map((supplierKey) => {
+                            const matchingGroups = toolsCatalog.items[supplierKey].filter((g) => g.type === shopCat);
+                            if (matchingGroups.length === 0) return null;
+                            return (
+                              <div key={supplierKey}>
+                                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{toolsCatalog.cats[supplierKey]}</div>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {matchingGroups.flatMap((g) => g.items).map((name) => (
+                                    <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                      {name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}
@@ -3246,7 +3331,6 @@ export default function SiteManager() {
           { id: "calendar", label: t.navCalendar, icon: CalendarDays },
           { id: "projects", label: t.navProjects, icon: MapPin },
           { id: "reports", label: t.navReports, icon: FileText },
-          { id: "safety", label: t.navSafety, icon: ShieldAlert },
         ].map((it) => {
           const Icon = it.icon;
           const active = tab === it.id;
