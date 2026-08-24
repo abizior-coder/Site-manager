@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler } from "lucide-react";
 
 const COLORS = {
   shell: "#1B1B1A",
@@ -3315,6 +3315,8 @@ export default function SiteManager() {
         )}
       </div>
 
+      <ToolScatterDecor />
+
       <button
         onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
         disabled={projects.length === 0}
@@ -4054,6 +4056,42 @@ export default function SiteManager() {
           )}
         </Modal>
       )}
+    </div>
+  );
+}
+
+function ToolScatterDecor() {
+  const tools = [
+    { Icon: Wrench, x: "6%", bottomOffset: 6, rotate: -16, size: 20 },
+    { Icon: Hammer, x: "24%", bottomOffset: 20, rotate: 10, size: 17 },
+    { Icon: Ruler, x: "44%", bottomOffset: 4, rotate: -9, size: 18 },
+    { Icon: HardHat, x: "62%", bottomOffset: 18, rotate: 14, size: 18 },
+    { Icon: Shovel, x: "70%", bottomOffset: 6, rotate: -13, size: 17 },
+  ];
+  return (
+    <div className="fixed left-0 right-0 max-w-md mx-auto pointer-events-none" style={{ bottom: 66, height: 44, zIndex: 25 }}>
+      {tools.map(({ Icon, x, bottomOffset, rotate, size }, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: x,
+            bottom: bottomOffset,
+            transform: `rotate(${rotate}deg)`,
+            width: size + 16,
+            height: size + 16,
+            borderRadius: 10,
+            background: "linear-gradient(145deg, #34322e, #1c1b19)",
+            boxShadow: "3px 4px 7px rgba(0,0,0,0.55), -1px -1px 2px rgba(255,255,255,0.06)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: 0.88,
+          }}
+        >
+          <Icon size={size} color={COLORS.accent} strokeWidth={2} />
+        </div>
+      ))}
     </div>
   );
 }
