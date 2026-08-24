@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Site Log — local test build</title>
+<title>Site Log</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   html, body { margin: 0; padding: 0; background: #1B1B1A; }
@@ -13,40 +13,53 @@
 <body>
 <div id="root"></div>
 
-<!-- Minimal window.storage shim so the app's save/load calls work locally via
-     the browser's own localStorage, instead of Claude.ai's artifact storage. -->
-<script>
-  (function () {
-    function k(key, shared) { return (shared ? "shared:" : "local:") + key; }
-    window.storage = {
-      async get(key, shared) {
-        const raw = localStorage.getItem(k(key, !!shared));
-        if (raw === null) return null;
-        return { key, value: raw, shared: !!shared };
-      },
-      async set(key, value, shared) {
-        localStorage.setItem(k(key, !!shared), value);
-        return { key, value, shared: !!shared };
-      },
-      async delete(key, shared) {
-        localStorage.removeItem(k(key, !!shared));
-        return { key, deleted: true, shared: !!shared };
-      },
-      async list(prefix, shared) {
-        const p = k(prefix || "", !!shared);
-        const keys = Object.keys(localStorage)
-          .filter((x) => x.startsWith(p))
-          .map((x) => x.slice((shared ? "shared:" : "local:").length));
-        return { keys, prefix: prefix || "", shared: !!shared };
-      },
-    };
-  })();
+<!-- Firebase-backed storage: replaces the app's save/load calls with real
+     Firestore reads/writes, so every device that opens this page shares the
+     same data (projects, materials, entries, reports, profile, etc). -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw",
+    authDomain: "site-log-ab6a9.firebaseapp.com",
+    projectId: "site-log-ab6a9",
+    storageBucket: "site-log-ab6a9.firebasestorage.app",
+    messagingSenderId: "72854783892",
+    appId: "1:72854783892:web:0fa812d5485b505612f181"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  function ref(key, shared) {
+    return doc(db, shared ? "shared" : "local", key);
+  }
+
+  window.storage = {
+    async get(key, shared) {
+      const snap = await getDoc(ref(key, !!shared));
+      if (!snap.exists()) return null;
+      return { key, value: snap.data().value, shared: !!shared };
+    },
+    async set(key, value, shared) {
+      await setDoc(ref(key, !!shared), { value });
+      return { key, value, shared: !!shared };
+    },
+    async delete(key, shared) {
+      await deleteDoc(ref(key, !!shared));
+      return { key, deleted: true, shared: !!shared };
+    },
+    async list(prefix, shared) {
+      const snaps = await getDocs(collection(db, shared ? "shared" : "local"));
+      const keys = [];
+      snaps.forEach((d) => { if (!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
+      return { keys, prefix: prefix || "", shared: !!shared };
+    },
+  };
 </script>
 
-<!-- Fully self-contained bundle: React, ReactDOM, the icon library, and the
-     whole app are all compiled into this ONE plain script. No ES modules,
-     no import maps, no CDN dependency for the app code itself — this loads
-     the same way whether you double-click the file or serve it locally. -->
-<script src="bundle.js"></script>
+<!-- Fully self-contained app bundle (React, icons, and all app code). -->
+<script type="module" src="bundle.js"></script>
 </body>
 </html>
