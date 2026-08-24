@@ -63,7 +63,7 @@ const T = {
     qrLabel: "QR code", barcodeLabel: "Barcode", generateCode: "Generate code",
     showScreenHint: "Show this screen at the counter. Needs a data connection to load the code image.", doneLabel: "Done",
     inspectionTitle: "Roof inspection", inspectionPlaceholder: "Describe the inspection — condition, what you're doing, anything notable…",
-    startTimeLabel: "Start time", ladderLabel: "Ladder (m)", psaLabel: "PSA count",
+    startTimeLabel: "Start time", endTimeLabel: "End time", ladderLabel: "Ladder (m)", psaLabel: "PSA count",
     sendToAdvisors: "Send to the advisors",
     advisorsHint: "A safety advisor, a materials estimator, and a report compiler will review this in turn.",
     logInspection: "Log inspection", materialsAlsoLog: "Materials to also log — uncheck anything wrong",
@@ -106,7 +106,7 @@ const T = {
     invalidCode: "That code couldn't be read — check it was copied in full.",
     shareHint: "Send this code to your crew member via WhatsApp or email — they paste it into \"Import project\" on their phone.",
     sentReports: "Sent reports", editReportHint: "Adjust the hours or add a note if something needs correcting.",
-    hoursFieldLabel: "Hours", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
+    hoursFieldLabel: "Hours", adjustHoursTitle: "Adjust hours", notesLabel: "Notes", savePdfBtn: "Save as PDF", resendBtn: "Resend to supervisor",
     noReportsYet: "No reports sent yet", sentOnLabel: "Sent", editedTag: "Edited", generatedOnLabel: "Generated",
     backupTitle: "Backup & restore", exportBackup: "Export backup", importBackupBtn: "Restore from backup",
     backupHint: "Copy this code somewhere safe (Notes app, email to yourself). If the app ever loses your data, paste it back in here to restore everything.",
@@ -153,7 +153,7 @@ const T = {
     qrLabel: "QR-Code", barcodeLabel: "Strichcode", generateCode: "Code erstellen",
     showScreenHint: "Diesen Bildschirm am Schalter zeigen. Benötigt eine Datenverbindung, um das Bild zu laden.", doneLabel: "Fertig",
     inspectionTitle: "Dachinspektion", inspectionPlaceholder: "Inspektion beschreiben — Zustand, was Sie tun, Auffälligkeiten…",
-    startTimeLabel: "Startzeit", ladderLabel: "Leiter (m)", psaLabel: "Anzahl PSA",
+    startTimeLabel: "Startzeit", endTimeLabel: "Endzeit", ladderLabel: "Leiter (m)", psaLabel: "Anzahl PSA",
     sendToAdvisors: "An die Berater senden",
     advisorsHint: "Ein Sicherheitsberater, ein Materialschätzer und ein Berichtsersteller prüfen dies nacheinander.",
     logInspection: "Inspektion protokollieren", materialsAlsoLog: "Zusätzlich zu erfassendes Material — Falsches abwählen",
@@ -196,7 +196,7 @@ const T = {
     invalidCode: "Der Code konnte nicht gelesen werden — prüfen Sie, ob er vollständig kopiert wurde.",
     shareHint: "Senden Sie diesen Code per WhatsApp oder E-Mail an Ihr Team — sie fügen ihn unter «Projekt importieren» auf ihrem Handy ein.",
     sentReports: "Gesendete Berichte", editReportHint: "Stunden anpassen oder eine Notiz hinzufügen, falls etwas korrigiert werden muss.",
-    hoursFieldLabel: "Stunden", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
+    hoursFieldLabel: "Stunden", adjustHoursTitle: "Stunden anpassen", notesLabel: "Notizen", savePdfBtn: "Als PDF speichern", resendBtn: "Erneut an Vorgesetzten senden",
     noReportsYet: "Noch keine Berichte gesendet", sentOnLabel: "Gesendet", editedTag: "Bearbeitet", generatedOnLabel: "Erstellt",
     backupTitle: "Backup & Wiederherstellung", exportBackup: "Backup exportieren", importBackupBtn: "Aus Backup wiederherstellen",
     backupHint: "Kopieren Sie diesen Code an einen sicheren Ort (Notizen-App, E-Mail an sich selbst). Sollte die App jemals Daten verlieren, fügen Sie ihn hier ein, um alles wiederherzustellen.",
@@ -243,7 +243,7 @@ const T = {
     qrLabel: "Code QR", barcodeLabel: "Code-barres", generateCode: "Générer le code",
     showScreenHint: "Montrez cet écran au comptoir. Nécessite une connexion pour charger l'image du code.", doneLabel: "Terminé",
     inspectionTitle: "Inspection de toiture", inspectionPlaceholder: "Décrivez l'inspection — état, ce que vous faites, tout élément notable…",
-    startTimeLabel: "Heure de début", ladderLabel: "Échelle (m)", psaLabel: "Nombre d'EPI antichute",
+    startTimeLabel: "Heure de début", endTimeLabel: "Heure de fin", ladderLabel: "Échelle (m)", psaLabel: "Nombre d'EPI antichute",
     sendToAdvisors: "Envoyer aux conseillers",
     advisorsHint: "Un conseiller sécurité, un estimateur de matériaux et un rédacteur de rapport examineront ceci tour à tour.",
     logInspection: "Enregistrer l'inspection", materialsAlsoLog: "Matériaux à enregistrer également — décochez ce qui est faux",
@@ -286,7 +286,7 @@ const T = {
     invalidCode: "Ce code n'a pas pu être lu — vérifiez qu'il a été copié en entier.",
     shareHint: "Envoyez ce code à votre collègue par WhatsApp ou e-mail — il le colle dans « Importer un projet » sur son téléphone.",
     sentReports: "Rapports envoyés", editReportHint: "Ajustez les heures ou ajoutez une note si quelque chose doit être corrigé.",
-    hoursFieldLabel: "Heures", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
+    hoursFieldLabel: "Heures", adjustHoursTitle: "Ajuster les heures", notesLabel: "Notes", savePdfBtn: "Enregistrer en PDF", resendBtn: "Renvoyer au responsable",
     noReportsYet: "Aucun rapport envoyé pour l'instant", sentOnLabel: "Envoyé", editedTag: "Modifié", generatedOnLabel: "Généré",
     backupTitle: "Sauvegarde et restauration", exportBackup: "Exporter une sauvegarde", importBackupBtn: "Restaurer depuis une sauvegarde",
     backupHint: "Copiez ce code en lieu sûr (application Notes, e-mail à vous-même). Si l'appli perd vos données, collez-le ici pour tout restaurer.",
@@ -333,7 +333,7 @@ const T = {
     qrLabel: "Codice QR", barcodeLabel: "Codice a barre", generateCode: "Genera codice",
     showScreenHint: "Mostra questa schermata al banco. Serve una connessione dati per caricare l'immagine del codice.", doneLabel: "Fatto",
     inspectionTitle: "Ispezione tetto", inspectionPlaceholder: "Descrivi l'ispezione — condizioni, cosa stai facendo, dettagli rilevanti…",
-    startTimeLabel: "Ora di inizio", ladderLabel: "Scala (m)", psaLabel: "Numero DPI anticaduta",
+    startTimeLabel: "Ora di inizio", endTimeLabel: "Ora di fine", ladderLabel: "Scala (m)", psaLabel: "Numero DPI anticaduta",
     sendToAdvisors: "Invia ai consulenti",
     advisorsHint: "Un consulente per la sicurezza, uno stimatore di materiali e un compilatore di rapporti esamineranno questo a turno.",
     logInspection: "Registra ispezione", materialsAlsoLog: "Materiali da registrare anche — deseleziona ciò che è sbagliato",
@@ -376,7 +376,7 @@ const T = {
     invalidCode: "Impossibile leggere il codice — verifica di averlo copiato per intero.",
     shareHint: "Invia questo codice al tuo collega via WhatsApp o e-mail — lo incollerà in \"Importa progetto\" sul suo telefono.",
     sentReports: "Rapporti inviati", editReportHint: "Modifica le ore o aggiungi una nota se qualcosa va corretto.",
-    hoursFieldLabel: "Ore", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
+    hoursFieldLabel: "Ore", adjustHoursTitle: "Modifica ore", notesLabel: "Note", savePdfBtn: "Salva come PDF", resendBtn: "Invia di nuovo al responsabile",
     noReportsYet: "Nessun rapporto inviato ancora", sentOnLabel: "Inviato", editedTag: "Modificato", generatedOnLabel: "Generato",
     backupTitle: "Backup e ripristino", exportBackup: "Esporta backup", importBackupBtn: "Ripristina da backup",
     backupHint: "Copia questo codice in un posto sicuro (app Note, e-mail a te stesso). Se l'app perde i dati, incollalo qui per ripristinare tutto.",
@@ -423,7 +423,7 @@ const T = {
     qrLabel: "Código QR", barcodeLabel: "Código de barras", generateCode: "Generar código",
     showScreenHint: "Muestra esta pantalla en el mostrador. Necesita conexión de datos para cargar la imagen del código.", doneLabel: "Listo",
     inspectionTitle: "Inspección de tejado", inspectionPlaceholder: "Describe la inspección — estado, qué estás haciendo, algo destacable…",
-    startTimeLabel: "Hora de inicio", ladderLabel: "Escalera (m)", psaLabel: "Número de EPI anticaídas",
+    startTimeLabel: "Hora de inicio", endTimeLabel: "Hora de fin", ladderLabel: "Escalera (m)", psaLabel: "Número de EPI anticaídas",
     sendToAdvisors: "Enviar a los asesores",
     advisorsHint: "Un asesor de seguridad, un estimador de materiales y un redactor de informes revisarán esto por turnos.",
     logInspection: "Registrar inspección", materialsAlsoLog: "Materiales que también registrar — desmarca lo que esté mal",
@@ -466,7 +466,7 @@ const T = {
     invalidCode: "No se pudo leer ese código — comprueba que lo copiaste completo.",
     shareHint: "Envía este código a tu compañero por WhatsApp o correo — lo pegará en \"Importar proyecto\" en su teléfono.",
     sentReports: "Informes enviados", editReportHint: "Ajusta las horas o añade una nota si algo necesita corrección.",
-    hoursFieldLabel: "Horas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
+    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar al supervisor",
     noReportsYet: "Aún no se ha enviado ningún informe", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Generado",
     backupTitle: "Copia de seguridad y restauración", exportBackup: "Exportar copia de seguridad", importBackupBtn: "Restaurar copia de seguridad",
     backupHint: "Copia este código en un lugar seguro (app Notas, correo a ti mismo). Si la app pierde tus datos, pégalo aquí para restaurarlo todo.",
@@ -513,7 +513,7 @@ const T = {
     qrLabel: "Código QR", barcodeLabel: "Código de barras", generateCode: "Gerar código",
     showScreenHint: "Mostre este ecrã no balcão. Precisa de ligação de dados para carregar a imagem do código.", doneLabel: "Concluído",
     inspectionTitle: "Inspeção de telhado", inspectionPlaceholder: "Descreva a inspeção — condição, o que está a fazer, algo notável…",
-    startTimeLabel: "Hora de início", ladderLabel: "Escada (m)", psaLabel: "Número de EPI antiqueda",
+    startTimeLabel: "Hora de início", endTimeLabel: "Hora de fim", ladderLabel: "Escada (m)", psaLabel: "Número de EPI antiqueda",
     sendToAdvisors: "Enviar aos consultores",
     advisorsHint: "Um consultor de segurança, um estimador de materiais e um redator de relatórios irão rever isto por ordem.",
     logInspection: "Registar inspeção", materialsAlsoLog: "Materiais a registar também — desmarque o que estiver errado",
@@ -556,7 +556,7 @@ const T = {
     invalidCode: "Não foi possível ler esse código — verifique se foi copiado por inteiro.",
     shareHint: "Envie este código à sua equipa por WhatsApp ou email — eles colam em \"Importar projeto\" no telemóvel deles.",
     sentReports: "Relatórios enviados", editReportHint: "Ajuste as horas ou adicione uma nota se algo precisar de correção.",
-    hoursFieldLabel: "Horas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
+    hoursFieldLabel: "Horas", adjustHoursTitle: "Ajustar horas", notesLabel: "Notas", savePdfBtn: "Guardar como PDF", resendBtn: "Reenviar ao supervisor",
     noReportsYet: "Ainda não foi enviado nenhum relatório", sentOnLabel: "Enviado", editedTag: "Editado", generatedOnLabel: "Gerado",
     backupTitle: "Cópia de segurança e restauro", exportBackup: "Exportar cópia de segurança", importBackupBtn: "Restaurar cópia de segurança",
     backupHint: "Copie este código para um local seguro (app Notas, email para si mesmo). Se a app perder os seus dados, cole-o aqui para restaurar tudo.",
@@ -603,7 +603,7 @@ const T = {
     qrLabel: "Kod QR", barcodeLabel: "Kod kreskowy", generateCode: "Wygeneruj kod",
     showScreenHint: "Pokaż ten ekran przy ladzie. Do wczytania obrazu kodu potrzebne jest połączenie z internetem.", doneLabel: "Gotowe",
     inspectionTitle: "Inspekcja dachu", inspectionPlaceholder: "Opisz inspekcję — stan, co robisz, coś istotnego…",
-    startTimeLabel: "Godzina rozpoczęcia", ladderLabel: "Drabina (m)", psaLabel: "Liczba uprzęży (PSA)",
+    startTimeLabel: "Godzina rozpoczęcia", endTimeLabel: "Godzina zakończenia", ladderLabel: "Drabina (m)", psaLabel: "Liczba uprzęży (PSA)",
     sendToAdvisors: "Wyślij do doradców",
     advisorsHint: "Doradca ds. bezpieczeństwa, szacujący materiały i sporządzający raport przejrzą to po kolei.",
     logInspection: "Zapisz inspekcję", materialsAlsoLog: "Materiały do dodatkowego zapisania — odznacz błędne",
@@ -646,7 +646,7 @@ const T = {
     invalidCode: "Nie udało się odczytać tego kodu — sprawdź, czy skopiowano go w całości.",
     shareHint: "Wyślij ten kod do pracownika przez WhatsApp lub e-mail — wklei go w \"Importuj projekt\" na swoim telefonie.",
     sentReports: "Wysłane raporty", editReportHint: "Popraw godziny lub dodaj notatkę, jeśli coś wymaga korekty.",
-    hoursFieldLabel: "Godziny", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
+    hoursFieldLabel: "Godziny", adjustHoursTitle: "Popraw godziny", notesLabel: "Notatki", savePdfBtn: "Zapisz jako PDF", resendBtn: "Wyślij ponownie do przełożonego",
     noReportsYet: "Jeszcze nie wysłano żadnego raportu", sentOnLabel: "Wysłano", editedTag: "Edytowano", generatedOnLabel: "Wygenerowano",
     backupTitle: "Kopia zapasowa i przywracanie", exportBackup: "Eksportuj kopię zapasową", importBackupBtn: "Przywróć z kopii zapasowej",
     backupHint: "Skopiuj ten kod w bezpieczne miejsce (aplikacja Notatki, e-mail do siebie). Jeśli aplikacja kiedykolwiek utraci dane, wklej go tutaj, aby wszystko przywrócić.",
@@ -693,7 +693,7 @@ const T = {
     qrLabel: "QR kód", barcodeLabel: "Čiarový kód", generateCode: "Vygenerovať kód",
     showScreenHint: "Ukážte túto obrazovku na pulte. Na načítanie obrázka kódu je potrebné pripojenie na internet.", doneLabel: "Hotovo",
     inspectionTitle: "Kontrola strechy", inspectionPlaceholder: "Opíšte kontrolu — stav, čo robíte, čokoľvek pozoruhodné…",
-    startTimeLabel: "Čas začiatku", ladderLabel: "Rebrík (m)", psaLabel: "Počet OOPP proti pádu",
+    startTimeLabel: "Čas začiatku", endTimeLabel: "Čas ukončenia", ladderLabel: "Rebrík (m)", psaLabel: "Počet OOPP proti pádu",
     sendToAdvisors: "Odoslať poradcom",
     advisorsHint: "Poradca pre bezpečnosť, odhadca materiálu a autor správy si to postupne prejdú.",
     logInspection: "Zaznamenať kontrolu", materialsAlsoLog: "Materiál na dodatočné zaznamenanie — odznačte nesprávne",
@@ -736,7 +736,7 @@ const T = {
     invalidCode: "Tento kód sa nepodarilo prečítať — skontrolujte, či bol skopírovaný celý.",
     shareHint: "Pošlite tento kód svojmu zamestnancovi cez WhatsApp alebo e-mail — vloží ho do \"Importovať projekt\" vo svojom telefóne.",
     sentReports: "Odoslané reporty", editReportHint: "Upravte hodiny alebo pridajte poznámku, ak je potrebná oprava.",
-    hoursFieldLabel: "Hodiny", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
+    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upraviť hodiny", notesLabel: "Poznámky", savePdfBtn: "Uložiť ako PDF", resendBtn: "Odoslať znova nadriadenému",
     noReportsYet: "Zatiaľ nebol odoslaný žiadny report", sentOnLabel: "Odoslané", editedTag: "Upravené", generatedOnLabel: "Vygenerované",
     backupTitle: "Záloha a obnovenie", exportBackup: "Exportovať zálohu", importBackupBtn: "Obnoviť zo zálohy",
     backupHint: "Skopírujte tento kód na bezpečné miesto (aplikácia Poznámky, e-mail sebe). Ak aplikácia niekedy stratí vaše dáta, vložte ho sem a obnovte všetko.",
@@ -783,7 +783,7 @@ const T = {
     qrLabel: "QR kód", barcodeLabel: "Čárový kód", generateCode: "Vygenerovat kód",
     showScreenHint: "Ukažte tuto obrazovku na pultu. K načtení obrázku kódu je potřeba datové připojení.", doneLabel: "Hotovo",
     inspectionTitle: "Kontrola střechy", inspectionPlaceholder: "Popište kontrolu — stav, co děláte, cokoliv pozoruhodného…",
-    startTimeLabel: "Čas zahájení", ladderLabel: "Žebřík (m)", psaLabel: "Počet OOPP proti pádu",
+    startTimeLabel: "Čas zahájení", endTimeLabel: "Čas ukončení", ladderLabel: "Žebřík (m)", psaLabel: "Počet OOPP proti pádu",
     sendToAdvisors: "Odeslat poradcům",
     advisorsHint: "Poradce pro bezpečnost, odhadce materiálu a autor zprávy si to postupně projdou.",
     logInspection: "Zaznamenat kontrolu", materialsAlsoLog: "Materiál k dodatečnému zaznamenání — odškrtněte nesprávné",
@@ -826,7 +826,7 @@ const T = {
     invalidCode: "Tento kód se nepodařilo přečíst — zkontrolujte, zda byl zkopírován celý.",
     shareHint: "Pošlete tento kód svému zaměstnanci přes WhatsApp nebo e-mail — vloží ho do \"Importovat projekt\" ve svém telefonu.",
     sentReports: "Odeslané reporty", editReportHint: "Upravte hodiny nebo přidejte poznámku, pokud je potřeba oprava.",
-    hoursFieldLabel: "Hodiny", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
+    hoursFieldLabel: "Hodiny", adjustHoursTitle: "Upravit hodiny", notesLabel: "Poznámky", savePdfBtn: "Uložit jako PDF", resendBtn: "Odeslat znovu nadřízenému",
     noReportsYet: "Zatím nebyl odeslán žádný report", sentOnLabel: "Odesláno", editedTag: "Upraveno", generatedOnLabel: "Vygenerováno",
     backupTitle: "Záloha a obnovení", exportBackup: "Exportovat zálohu", importBackupBtn: "Obnovit ze zálohy",
     backupHint: "Zkopírujte tento kód na bezpečné místo (aplikace Poznámky, e-mail sami sobě). Pokud aplikace někdy ztratí vaše data, vložte ho sem a obnovte vše.",
@@ -1490,6 +1490,7 @@ const SAFETY_CATEGORIES = [
 ];
 
 const SWISS_EMERGENCY_NUMS = ["144", "117", "118", "112"];
+const UNIT_SUGGESTIONS = ["pcs", "bags", "m", "m²", "m³", "kg", "l", "rolls", "pallets", "boxes", "pairs", "sets", "tubes"];
 
 const PROJECT_CATEGORIES = [
   { key: "flat", labelKey: "projectCatFlat" },
@@ -1612,6 +1613,12 @@ export default function SiteManager() {
   const [importError, setImportError] = useState(null);
   const [sentReports, setSentReports] = useState([]);
   const [reportViewModal, setReportViewModal] = useState(null); // report object being viewed/edited
+  const [editTimeModal, setEditTimeModal] = useState(null); // the time entry being adjusted
+  const [editHoursInput, setEditHoursInput] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
+  const [materialUnits, setMaterialUnits] = useState({});
+  const [unitSuggestFocused, setUnitSuggestFocused] = useState(false);
   const [backupModal, setBackupModal] = useState(null); // 'export' | 'import' | null
   const [backupCodeOutput, setBackupCodeOutput] = useState("");
   const [backupCodeInput, setBackupCodeInput] = useState("");
@@ -1693,6 +1700,10 @@ export default function SiteManager() {
           setInsuranceCards(docs.insurance || []);
           setCertificates(docs.certificates || []);
         }
+      } catch (e) {}
+      try {
+        const unitsRes = await window.storage.get("site-material-units");
+        if (unitsRes && unitsRes.value) setMaterialUnits(JSON.parse(unitsRes.value));
       } catch (e) {}
       setReady(true);
     })();
@@ -2098,10 +2109,15 @@ export default function SiteManager() {
   function clockOut() {
     if (!activeClock) return;
     const durationMs = Date.now() - activeClock.startedAt;
+    const pad = (n) => String(n).padStart(2, "0");
+    const startD = new Date(activeClock.startedAt);
+    const endD = new Date();
     const e = {
       id: uid(), date: todayKey(), createdAt: Date.now(), type: "time",
       projectId: activeClock.projectId, description: `${fmtHM(durationMs)}`,
       qty: (durationMs / 3600000).toFixed(2), unit: "h",
+      startTime: `${pad(startD.getHours())}:${pad(startD.getMinutes())}`,
+      endTime: `${pad(endD.getHours())}:${pad(endD.getMinutes())}`,
     };
     persist({ entries: [e, ...entries], activeClock: null });
     showToast(t.clockedOutLogged);
@@ -2133,6 +2149,40 @@ export default function SiteManager() {
     setAddModal({ type: entry.type, projectId: entry.projectId, editingId: entry.id });
   }
 
+  function openEditTime(entry) {
+    setEditHoursInput(entry.qty || "");
+    setEditStartTime(entry.startTime || "");
+    setEditEndTime(entry.endTime || "");
+    setEditTimeModal(entry);
+  }
+
+  function saveEditTime() {
+    if (!editTimeModal) return;
+    if (editStartTime && editEndTime) {
+      const [sh, sm] = editStartTime.split(":").map(Number);
+      const [eh, em] = editEndTime.split(":").map(Number);
+      let startMinutes = sh * 60 + sm;
+      let endMinutes = eh * 60 + em;
+      if (endMinutes < startMinutes) endMinutes += 24 * 60; // crossed midnight
+      const hours = (endMinutes - startMinutes) / 60;
+      if (hours <= 0) return;
+      const updated = entries.map((e) =>
+        e.id === editTimeModal.id
+          ? { ...e, qty: hours.toFixed(2), description: fmtHM(hours * 3600000), startTime: editStartTime, endTime: editEndTime }
+          : e
+      );
+      persist({ entries: updated });
+    } else {
+      const hours = parseFloat(editHoursInput);
+      if (isNaN(hours) || hours < 0) return;
+      const updated = entries.map((e) =>
+        e.id === editTimeModal.id ? { ...e, qty: hours.toFixed(2), description: fmtHM(hours * 3600000) } : e
+      );
+      persist({ entries: updated });
+    }
+    setEditTimeModal(null);
+  }
+
   function confirmSuggestion() {
     if (!pendingSuggestion) return;
     const size = sizeInput.trim();
@@ -2145,6 +2195,15 @@ export default function SiteManager() {
   function copyEntryFn(entry) {
     addEntry({ type: entry.type, projectId: entry.projectId, description: entry.description, qty: entry.qty, unit: entry.unit });
     showToast(t.projectAdded);
+  }
+
+  function deleteEntryFn(entry) {
+    persist({ entries: entries.filter((e) => e.id !== entry.id) });
+  }
+
+  function setDescriptionWithUnitMemory(name) {
+    const remembered = materialUnits[name.trim().toLowerCase()];
+    setForm((f) => ({ ...f, description: name, unit: !f.unit && remembered ? remembered : f.unit }));
   }
 
   function submitAdd() {
@@ -2161,6 +2220,12 @@ export default function SiteManager() {
         persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit } : e)) });
       } else {
         addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit });
+      }
+      if ((addModal.type === "material" || addModal.type === "tool") && form.unit.trim()) {
+        const key = form.description.trim().toLowerCase();
+        const updatedUnits = { ...materialUnits, [key]: form.unit.trim() };
+        setMaterialUnits(updatedUnits);
+        window.storage.set("site-material-units", JSON.stringify(updatedUnits)).catch(() => {});
       }
     }
     setAddModal(null);
@@ -2476,7 +2541,7 @@ export default function SiteManager() {
 
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 mt-2">{t.todaysTickets}</div>
-              <EntryGroups entries={todayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} />
+              <EntryGroups entries={todayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
             </div>
           </div>
         )}
@@ -2609,7 +2674,7 @@ export default function SiteManager() {
             })()}
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.entriesTitle}</div>
-              <EntryGroups entries={reportView === "daily" ? todayEntries : monthEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} />
+              <EntryGroups entries={reportView === "daily" ? todayEntries : monthEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
             </div>
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.sentReports}</div>
@@ -2858,7 +2923,7 @@ export default function SiteManager() {
             <div className="flex flex-col gap-4">
               <div>
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.dayJournalHeading}</div>
-                <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} />
+                <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} />
               </div>
 
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-4">
@@ -2903,6 +2968,7 @@ export default function SiteManager() {
           onAdd={(type) => openAdd(type, selectedProject)}
           onEditEntry={openEditEntry}
           onCopyEntry={copyEntryFn}
+          onDeleteEntry={deleteEntryFn}
           onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
@@ -2982,6 +3048,54 @@ export default function SiteManager() {
         </Modal>
       )}
 
+      {editTimeModal && (
+        <Modal onClose={() => setEditTimeModal(null)} title={t.adjustHoursTitle}>
+          <div className="flex flex-col gap-2">
+            <div style={{ color: COLORS.muted }} className="text-xs mb-1">{editTimeModal.date}{editTimeModal.projectId ? ` · ${projectName(editTimeModal.projectId)}` : ""}</div>
+            {editTimeModal.startTime ? (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.startTimeLabel}</div>
+                  <input
+                    type="time"
+                    autoFocus
+                    value={editStartTime}
+                    onChange={(e) => setEditStartTime(e.target.value)}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+                <div className="flex-1">
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.endTimeLabel}</div>
+                  <input
+                    type="time"
+                    value={editEndTime}
+                    onChange={(e) => setEditEndTime(e.target.value)}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                </div>
+              </div>
+            ) : (
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.1"
+                min="0"
+                autoFocus
+                value={editHoursInput}
+                onChange={(e) => setEditHoursInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && saveEditTime()}
+                placeholder={t.hoursFieldLabel}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            )}
+            <button onClick={saveEditTime} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          </div>
+        </Modal>
+      )}
+
       {reportViewModal && (
         <Modal onClose={() => setReportViewModal(null)} title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}>
           <div className="flex flex-col gap-3">
@@ -2993,7 +3107,7 @@ export default function SiteManager() {
             <div style={{ color: COLORS.muted }} className="text-xs">{t.editReportHint}</div>
             <div className="flex items-center gap-2">
               <span style={{ color: COLORS.muted }} className="text-xs">{t.hoursFieldLabel}</span>
-              <input type="number" step="0.1" value={reportViewModal.hours} onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+              <input type="number" inputMode="decimal" step="0.1" value={reportViewModal.hours} onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
             </div>
             <textarea value={reportViewModal.notes} onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))} placeholder={t.notesLabel} rows={3} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
             <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
@@ -3030,7 +3144,7 @@ export default function SiteManager() {
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t.whatUsedPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input value={form.description} onChange={(e) => setDescriptionWithUnitMemory(e.target.value)} placeholder={t.whatUsedPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
 
               {addModal.type === "material" && (() => {
                 const catalog = MATERIALS_CATALOG[lang] || MATERIALS_CATALOG.en;
@@ -3071,7 +3185,7 @@ export default function SiteManager() {
                         <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.suggestionsTitle}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {searchResults.map((it) => (
-                            <button key={it.name} onClick={() => { setPendingSuggestion(it); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                            <button key={it.name} onClick={() => { setDescriptionWithUnitMemory(it.name); setPendingSuggestion(it); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
                               {it.name}
                             </button>
                           ))}
@@ -3084,7 +3198,7 @@ export default function SiteManager() {
                             <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1 mt-1">{grp.group}</div>
                             <div className="flex flex-wrap gap-1.5">
                               {grp.items.map((name) => (
-                                <button key={name} onClick={() => { setPendingSuggestion({ name, catKey: suggestCat }); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                <button key={name} onClick={() => { setDescriptionWithUnitMemory(name); setPendingSuggestion({ name, catKey: suggestCat }); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
                                   {name}
                                 </button>
                               ))}
@@ -3098,12 +3212,48 @@ export default function SiteManager() {
               })()}
 
               <div className="flex gap-2">
-                <input value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input type="number" inputMode="decimal" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+                <div className="w-1/2 relative">
+                  <input
+                    value={form.unit}
+                    onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                    onFocus={() => setUnitSuggestFocused(true)}
+                    onBlur={() => setTimeout(() => setUnitSuggestFocused(false), 150)}
+                    placeholder={t.unitPlaceholder}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                  {unitSuggestFocused && (() => {
+                    const q = form.unit.trim().toLowerCase();
+                    const matches = (q ? UNIT_SUGGESTIONS.filter((u) => u.toLowerCase().startsWith(q)) : UNIT_SUGGESTIONS).slice(0, 6);
+                    if (matches.length === 0) return null;
+                    return (
+                      <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="absolute z-10 mt-1 left-0 right-0 rounded-lg p-1.5 flex flex-wrap gap-1">
+                        {matches.map((u) => (
+                          <button key={u} onMouseDown={(e) => e.preventDefault()} onClick={() => setForm((f) => ({ ...f, unit: u }))} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded text-[11px]">
+                            {u}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           )}
           <button onClick={submitAdd} style={{ background: COLORS.accent }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{addModal.editingId ? t.saveLabel : t.logItBtn}</button>
+          {addModal.editingId && (
+            <button
+              onClick={() => {
+                deleteEntryFn({ id: addModal.editingId });
+                setAddModal(null);
+              }}
+              style={{ color: COLORS.danger }}
+              className="w-full mt-2 py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
+            >
+              <Trash2 size={13} /> {t.deleteLabel}
+            </button>
+          )}
         </Modal>
       )}
 
@@ -3328,7 +3478,7 @@ function Stat({ label, value, color }) {
   );
 }
 
-function EntryRow({ entry, projectName, t }) {
+function EntryRow({ entry, projectName, t, onEditTime }) {
   const meta = typeMeta(entry.type, t);
   const Icon = meta.icon;
   return (
@@ -3343,13 +3493,16 @@ function EntryRow({ entry, projectName, t }) {
         </div>
         {entry.photo && <img src={entry.photo} alt="" className="w-full rounded-md mt-2 max-h-32 object-cover" />}
       </div>
+      {entry.type === "time" && onEditTime && (
+        <button onClick={() => onEditTime(entry)} style={{ color: COLORS.muted }} className="shrink-0"><Pencil size={14} /></button>
+      )}
     </div>
   );
 }
 
 const ENTRY_TYPE_ORDER = ["time", "material", "tool", "photo", "pickup", "inspection", "note"];
 
-function EntryGroups({ entries, projectName, t, emptyLabel }) {
+function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime }) {
   const [expanded, setExpanded] = useState({});
   if (!entries || entries.length === 0) {
     return emptyLabel ? <div style={{ color: COLORS.muted }} className="text-sm">{emptyLabel}</div> : null;
@@ -3375,7 +3528,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel }) {
             </button>
             {isOpen && (
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="px-3 pt-2 pb-3 flex flex-col gap-2">
-                {items.map((e) => (<EntryRow key={e.id} entry={e} projectName={projectName} t={t} />))}
+                {items.map((e) => (<EntryRow key={e.id} entry={e} projectName={projectName} t={t} onEditTime={onEditTime} />))}
               </div>
             )}
           </div>
@@ -3385,7 +3538,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel }) {
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onShare, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -3425,13 +3578,20 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("tool")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Wrench size={13} color={COLORS.amber} /> {t.tools}</button>
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1 col-span-2"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
         </div>
-        <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} t={t} />
-        <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} t={t} />
+        <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
+        <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
         {photos.length > 0 && (
           <div className="mt-3">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.photoLabel}</div>
             <div className="grid grid-cols-3 gap-2">
-              {photos.map((p) => (<img key={p.id} src={p.photo} alt="" className="w-full h-20 object-cover rounded-md" />))}
+              {photos.map((p) => (
+                <div key={p.id} className="relative">
+                  <img src={p.photo} alt="" className="w-full h-20 object-cover rounded-md" />
+                  <button onClick={() => onDeleteEntry(p)} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
+                    <X size={12} color="#fff" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -3440,7 +3600,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
   );
 }
 
-function Section({ title, items, onEditItem, onCopyItem, t }) {
+function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, t }) {
   if (items.length === 0) return null;
   return (
     <div className="mb-3">
@@ -3455,6 +3615,7 @@ function Section({ title, items, onEditItem, onCopyItem, t }) {
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => onCopyItem(i)} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={13} /></button>
               <button onClick={() => onEditItem(i)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
+              <button onClick={() => onDeleteItem(i)} title={t.deleteLabel} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
             </div>
           </div>
         ))}
