@@ -2924,11 +2924,6 @@ export default function SiteManager() {
               <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.autoSortHint}</div>
             </div>
 
-            <button onClick={() => openAdd("tool", activeClock?.projectId || projects[0]?.id)} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
-              <Wrench size={18} color={COLORS.amber} />
-              <span className="text-sm font-semibold">{t.tools}</span>
-            </button>
-
             <button onClick={openInspection} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed #6FB3D9`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
               <ClipboardCheck size={18} color="#6FB3D9" />
               <span className="text-sm font-semibold">{t.newInspection}</span>
@@ -2968,9 +2963,9 @@ export default function SiteManager() {
               {materialsSubTab === "shop" && (
                 <>
                   <SortToggle />
-                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  <div className="grid grid-cols-2 gap-2">
                     {(sortMode === "type" ? MATERIAL_TYPE_KEYS : MATERIAL_SUPPLIER_KEYS).map((key) => (
-                      <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                      <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-2.5 rounded-lg text-xs font-bold text-center">
                         {catalog.cats[key]}
                       </button>
                     ))}
@@ -3004,9 +2999,9 @@ export default function SiteManager() {
                   <SortToggle />
                   {sortMode === "supplier" ? (
                     <>
-                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                      <div className="grid grid-cols-3 gap-2">
                         {TOOL_SUPPLIER_KEYS.map((key) => (
-                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-2.5 rounded-lg text-xs font-bold text-center">
                             {toolsCatalog.cats[key]}
                           </button>
                         ))}
@@ -3033,9 +3028,9 @@ export default function SiteManager() {
                     </>
                   ) : (
                     <>
-                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                      <div className="grid grid-cols-2 gap-2">
                         {TOOL_TYPE_KEYS.map((key) => (
-                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                          <button key={key} onClick={() => setShopCat((c) => (c === key ? null : key))} style={{ background: shopCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-2.5 rounded-lg text-xs font-bold text-center">
                             {TOOL_TYPE_LABELS[key]}
                           </button>
                         ))}
