@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical } from "lucide-react";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -97,6 +97,7 @@ const T = {
     copyBtn: "Copy", suggestionsTitle: "Suggestions",
     sizePlaceholder: "Size / dimension (e.g. 5x80, optional)",
     categoryLabel: "Category", projectCatFlat: "Flat roof", projectCatPitched: "Pitched roof", projectCatFacade: "Facade", projectCatOther: "Other",
+    projStatusLabel: "Status", projStatusWaiting: "Waiting", projStatusConstruction: "Under construction", projStatusHold: "On hold", projStatusCompleted: "Completed",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -202,6 +203,7 @@ const T = {
     copyBtn: "Kopieren", suggestionsTitle: "Vorschläge",
     sizePlaceholder: "Grösse / Mass (z. B. 5x80, optional)",
     categoryLabel: "Kategorie", projectCatFlat: "Flachdach", projectCatPitched: "Steildach", projectCatFacade: "Fassade", projectCatOther: "Sonstiges",
+    projStatusLabel: "Status", projStatusWaiting: "Wartend", projStatusConstruction: "In Ausführung", projStatusHold: "Pausiert", projStatusCompleted: "Abgeschlossen",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -307,6 +309,7 @@ const T = {
     copyBtn: "Copier", suggestionsTitle: "Suggestions",
     sizePlaceholder: "Taille / dimension (ex. 5x80, facultatif)",
     categoryLabel: "Catégorie", projectCatFlat: "Toit plat", projectCatPitched: "Toit en pente", projectCatFacade: "Façade", projectCatOther: "Autre",
+    projStatusLabel: "Statut", projStatusWaiting: "En attente", projStatusConstruction: "En cours", projStatusHold: "Suspendu", projStatusCompleted: "Terminé",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -412,6 +415,7 @@ const T = {
     copyBtn: "Copia", suggestionsTitle: "Suggerimenti",
     sizePlaceholder: "Misura / dimensione (es. 5x80, facoltativo)",
     categoryLabel: "Categoria", projectCatFlat: "Tetto piano", projectCatPitched: "Tetto a falde", projectCatFacade: "Facciata", projectCatOther: "Altro",
+    projStatusLabel: "Stato", projStatusWaiting: "In attesa", projStatusConstruction: "In corso", projStatusHold: "Sospeso", projStatusCompleted: "Completato",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -517,6 +521,7 @@ const T = {
     copyBtn: "Copiar", suggestionsTitle: "Sugerencias",
     sizePlaceholder: "Tamaño / medida (ej. 5x80, opcional)",
     categoryLabel: "Categoría", projectCatFlat: "Cubierta plana", projectCatPitched: "Cubierta inclinada", projectCatFacade: "Fachada", projectCatOther: "Otro",
+    projStatusLabel: "Estado", projStatusWaiting: "En espera", projStatusConstruction: "En ejecución", projStatusHold: "En pausa", projStatusCompleted: "Completado",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -622,6 +627,7 @@ const T = {
     copyBtn: "Copiar", suggestionsTitle: "Sugestões",
     sizePlaceholder: "Tamanho / medida (ex. 5x80, opcional)",
     categoryLabel: "Categoria", projectCatFlat: "Telhado plano", projectCatPitched: "Telhado inclinado", projectCatFacade: "Fachada", projectCatOther: "Outro",
+    projStatusLabel: "Estado", projStatusWaiting: "Em espera", projStatusConstruction: "Em execução", projStatusHold: "Suspenso", projStatusCompleted: "Concluído",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -727,6 +733,7 @@ const T = {
     copyBtn: "Kopiuj", suggestionsTitle: "Sugestie",
     sizePlaceholder: "Rozmiar / wymiar (np. 5x80, opcjonalnie)",
     categoryLabel: "Kategoria", projectCatFlat: "Dach płaski", projectCatPitched: "Dach skośny", projectCatFacade: "Fasada", projectCatOther: "Inne",
+    projStatusLabel: "Status", projStatusWaiting: "Oczekuje", projStatusConstruction: "W trakcie", projStatusHold: "Wstrzymany", projStatusCompleted: "Zakończony",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -832,6 +839,7 @@ const T = {
     copyBtn: "Kopírovať", suggestionsTitle: "Návrhy",
     sizePlaceholder: "Veľkosť / rozmer (napr. 5x80, voliteľné)",
     categoryLabel: "Kategória", projectCatFlat: "Plochá strecha", projectCatPitched: "Šikmá strecha", projectCatFacade: "Fasáda", projectCatOther: "Iné",
+    projStatusLabel: "Stav", projStatusWaiting: "Čaká", projStatusConstruction: "Prebieha", projStatusHold: "Pozastavený", projStatusCompleted: "Dokončený",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -937,6 +945,7 @@ const T = {
     copyBtn: "Kopírovat", suggestionsTitle: "Návrhy",
     sizePlaceholder: "Velikost / rozměr (např. 5x80, volitelné)",
     categoryLabel: "Kategorie", projectCatFlat: "Plochá střecha", projectCatPitched: "Šikmá střecha", projectCatFacade: "Fasáda", projectCatOther: "Jiné",
+    projStatusLabel: "Stav", projStatusWaiting: "Čeká", projStatusConstruction: "Probíhá", projStatusHold: "Pozastaveno", projStatusCompleted: "Dokončeno",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -1823,6 +1832,17 @@ const PROJECT_CATEGORIES = [
   { key: "other", labelKey: "projectCatOther" },
 ];
 
+const PROJECT_STATUSES = [
+  { key: "waiting", labelKey: "projStatusWaiting", color: "#6B7280" },
+  { key: "construction", labelKey: "projStatusConstruction", color: "#6FB3D9" },
+  { key: "hold", labelKey: "projStatusHold", color: "#E8B923" },
+  { key: "completed", labelKey: "projStatusCompleted", color: "#7FA65C" },
+];
+const DEFAULT_PROJECT_STATUS = "waiting";
+function statusMeta(status) {
+  return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES[0];
+}
+
 function todayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
 function monthKey(d = new Date()) { return d.toISOString().slice(0, 7); }
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -1944,6 +1964,7 @@ export default function SiteManager() {
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectClient, setNewProjectClient] = useState("");
   const [newProjectCat, setNewProjectCat] = useState("flat");
+  const [newProjectStatus, setNewProjectStatus] = useState(DEFAULT_PROJECT_STATUS);
   const [shareProjectModal, setShareProjectModal] = useState(null); // project object
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importCodeInput, setImportCodeInput] = useState("");
@@ -2501,22 +2522,44 @@ export default function SiteManager() {
 
   function addProject() {
     if (!newProjectName.trim()) return;
-    const p = { id: uid(), name: newProjectName.trim(), client: newProjectClient.trim(), address: newProjectAddr.trim(), category: newProjectCat, createdAt: Date.now() };
+    const p = { id: uid(), name: newProjectName.trim(), client: newProjectClient.trim(), address: newProjectAddr.trim(), category: newProjectCat, status: newProjectStatus, createdAt: Date.now() };
     persist({ projects: [p, ...projects] });
     setNewProjectName("");
     setNewProjectClient("");
     setNewProjectAddr("");
     setNewProjectCat("flat");
+    setNewProjectStatus(DEFAULT_PROJECT_STATUS);
     setNewProjectOpen(false);
     showToast(t.projectAdded);
   }
 
   function saveProjectEdit() {
     if (!editProject) return;
-    const updated = projects.map((p) => (p.id === editProject.id ? { ...p, name: editProject.name.trim() || p.name, client: editProject.client.trim(), address: editProject.address.trim(), category: editProject.category } : p));
+    const updated = projects.map((p) => (p.id === editProject.id ? { ...p, name: editProject.name.trim() || p.name, client: editProject.client.trim(), address: editProject.address.trim(), category: editProject.category, status: editProject.status } : p));
     persist({ projects: updated });
     setEditProject(null);
     showToast(t.projectUpdated);
+  }
+
+  function reorderProjects(idsInOrder) {
+    const byId = new Map(projects.map((p) => [p.id, p]));
+    persist({ projects: idsInOrder.map((id) => byId.get(id)).filter(Boolean) });
+  }
+
+  // Materials and tools are shown as filtered slices of one flat `entries`
+  // array, so reordering a slice has to write the new order back into just the
+  // positions that slice occupies, leaving every other entry where it was.
+  function reorderEntries(idsInOrder) {
+    const idSet = new Set(idsInOrder);
+    const slots = [];
+    entries.forEach((e, i) => { if (idSet.has(e.id)) slots.push(i); });
+    const byId = new Map(entries.map((e) => [e.id, e]));
+    const next = entries.slice();
+    idsInOrder.forEach((id, k) => {
+      const entry = byId.get(id);
+      if (entry && slots[k] !== undefined) next[slots[k]] = entry;
+    });
+    persist({ entries: next });
   }
 
   function shareProjectVia(project, entriesForProject, channel) {
@@ -3483,31 +3526,43 @@ export default function SiteManager() {
             <button onClick={() => { setReportProjectSelection([]); setReportProjectPickerOpen(true); }} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
               <FileText size={16} /> {t.generateReportBtn}
             </button>
-            {projects.map((p) => {
-              const pEntries = entries.filter((e) => e.projectId === p.id);
-              return (
-                <button key={p.id} onClick={() => setSelectedProject(p.id)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-xl p-4 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="font-bold">{p.name}</div>
-                      {p.category && (
-                        <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
-                        </span>
-                      )}
-                    </div>
-                    {p.client && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{p.client}</div>}
-                    {p.address && (
-                      <a href={mapsUrl(p.address)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5">
-                        <MapPin size={11} /> {p.address}
-                      </a>
-                    )}
-                    <div style={{ color: COLORS.muted }} className="text-xs mt-1">{pEntries.length} {t.entriesLabelFmt}</div>
+            <ReorderList
+              items={projects}
+              gapClass="gap-2"
+              onReorder={reorderProjects}
+              renderItem={(p, handle) => {
+                const pEntries = entries.filter((e) => e.projectId === p.id);
+                const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
+                return (
+                  <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1">
+                    {handle}
+                    <button onClick={() => setSelectedProject(p.id)} className="flex-1 min-w-0 text-left flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="font-bold">{p.name}</div>
+                          {p.category && (
+                            <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
+                            </span>
+                          )}
+                          <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                            {t[sm.labelKey]}
+                          </span>
+                        </div>
+                        {p.client && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{p.client}</div>}
+                        {p.address && (
+                          <a href={mapsUrl(p.address)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5">
+                            <MapPin size={11} /> {p.address}
+                          </a>
+                        )}
+                        <div style={{ color: COLORS.muted }} className="text-xs mt-1">{pEntries.length} {t.entriesLabelFmt}</div>
+                      </div>
+                      <ChevronRight size={18} color={COLORS.muted} />
+                    </button>
                   </div>
-                  <ChevronRight size={18} color={COLORS.muted} />
-                </button>
-              );
-            })}
+                );
+              }}
+            />
             {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">{t.noProjectsYet}</div>}
           </div>
         )}
@@ -3925,9 +3980,10 @@ export default function SiteManager() {
           onDeleteEntry={deleteEntryFn}
           onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
           onScanCompare={(projectId) => openScan("compare", projectId)}
+          onReorderEntries={reorderEntries}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
-            setEditProject({ id: p.id, name: p.name, client: p.client || "", address: p.address || "", category: p.category || "flat" });
+            setEditProject({ id: p.id, name: p.name, client: p.client || "", address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS });
           }}
           t={t}
         />
@@ -3943,6 +3999,14 @@ export default function SiteManager() {
             {PROJECT_CATEGORIES.map((c) => (
               <button key={c.key} onClick={() => setNewProjectCat(c.key)} style={{ background: newProjectCat === c.key ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-3 py-1.5 rounded-full text-xs font-bold">
                 {t[c.labelKey]}
+              </button>
+            ))}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.projStatusLabel}</div>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {PROJECT_STATUSES.map((s) => (
+              <button key={s.key} onClick={() => setNewProjectStatus(s.key)} style={{ background: newProjectStatus === s.key ? `${s.color}33` : COLORS.cardAlt, border: `1px solid ${newProjectStatus === s.key ? s.color : COLORS.border}`, color: newProjectStatus === s.key ? s.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+                {t[s.labelKey]}
               </button>
             ))}
           </div>
@@ -3962,6 +4026,17 @@ export default function SiteManager() {
                 {t[c.labelKey]}
               </button>
             ))}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.projStatusLabel}</div>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {PROJECT_STATUSES.map((s) => {
+              const active = (editProject.status || DEFAULT_PROJECT_STATUS) === s.key;
+              return (
+                <button key={s.key} onClick={() => setEditProject((st) => ({ ...st, status: s.key }))} style={{ background: active ? `${s.color}33` : COLORS.cardAlt, border: `1px solid ${active ? s.color : COLORS.border}`, color: active ? s.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+                  {t[s.labelKey]}
+                </button>
+              );
+            })}
           </div>
           <button onClick={saveProjectEdit} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
         </Modal>
@@ -4579,7 +4654,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -4596,6 +4671,14 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
                   {t[PROJECT_CATEGORIES.find((c) => c.key === project.category)?.labelKey] || project.category}
                 </span>
               )}
+              {(() => {
+                const sm = statusMeta(project.status || DEFAULT_PROJECT_STATUS);
+                return (
+                  <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                    {t[sm.labelKey]}
+                  </span>
+                );
+              })()}
             </div>
             {project.client && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{project.client}</div>}
             {project.address ? (
@@ -4620,8 +4703,8 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
           <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
         </div>
-        <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
-        <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} t={t} />
+        <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
+        <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
         {photos.length > 0 && (
           <div className="mt-3">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.photoLabel}</div>
@@ -4642,14 +4725,17 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
   );
 }
 
-function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, t }) {
+function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder, t }) {
   if (items.length === 0) return null;
   return (
     <div className="mb-3">
       <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{title}</div>
-      <div className="flex flex-col gap-1.5">
-        {items.map((i) => (
-          <div key={i.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 text-sm flex items-center justify-between gap-2">
+      <ReorderList
+        items={items}
+        onReorder={onReorder}
+        renderItem={(i, handle) => (
+          <div style={{ background: COLORS.card }} className="rounded-lg pl-1 pr-3 py-2 text-sm flex items-center justify-between gap-2">
+            {handle}
             <div className="flex-1 min-w-0">
               <div className="truncate">{i.description}</div>
             </div>
@@ -4660,8 +4746,92 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, t }) {
               <button onClick={() => onDeleteItem(i)} title={t.deleteLabel} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
             </div>
           </div>
-        ))}
-      </div>
+        )}
+      />
+    </div>
+  );
+}
+
+// Drag-to-reorder list. Uses pointer events rather than HTML5 drag-and-drop,
+// which doesn't fire on touch devices — this app is used on phones on site.
+// Dragging is started from the grip handle only, so the row itself stays
+// tappable and the list still scrolls normally.
+function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
+  const [dragId, setDragId] = useState(null);
+  const [order, setOrder] = useState(null);
+  const rowRefs = useRef({});
+  const startedRef = useRef(false);
+
+  const view = order ? order.map((id) => items.find((i) => i.id === id)).filter(Boolean) : items;
+
+  function beginDrag(e, id) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    startedRef.current = false;
+    setDragId(id);
+    setOrder(items.map((i) => i.id));
+  }
+
+  function onMove(e) {
+    if (!dragId || !order) return;
+    startedRef.current = true;
+    const y = e.clientY;
+    const from = order.indexOf(dragId);
+    let to = from;
+    for (let idx = 0; idx < order.length; idx++) {
+      const el = rowRefs.current[order[idx]];
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (y < r.top + r.height / 2) { to = idx; break; }
+      to = idx;
+    }
+    if (to !== from) {
+      const next = order.slice();
+      next.splice(to, 0, next.splice(from, 1)[0]);
+      setOrder(next);
+    }
+  }
+
+  function endDrag() {
+    if (dragId && order && startedRef.current) {
+      const before = items.map((i) => i.id);
+      if (order.some((id, i) => before[i] !== id)) onReorder(order);
+    }
+    setDragId(null);
+    setOrder(null);
+    startedRef.current = false;
+  }
+
+  return (
+    <div className={`flex flex-col ${gapClass}`}>
+      {view.map((item) => (
+        <div
+          key={item.id}
+          ref={(el) => { rowRefs.current[item.id] = el; }}
+          style={{
+            opacity: dragId === item.id ? 0.85 : 1,
+            transform: dragId === item.id ? "scale(1.02)" : "none",
+            boxShadow: dragId === item.id ? "0 6px 18px rgba(0,0,0,0.45)" : "none",
+            transition: dragId ? "none" : "transform 0.12s",
+          }}
+          className="relative"
+        >
+          {renderItem(item, (
+            <button
+              onPointerDown={(e) => beginDrag(e, item.id)}
+              onPointerMove={onMove}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              style={{ color: COLORS.muted, touchAction: "none", cursor: "grab" }}
+              className="shrink-0 px-1 py-1 -my-1"
+              aria-label="Reorder"
+            >
+              <GripVertical size={15} />
+            </button>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
