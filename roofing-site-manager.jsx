@@ -2106,11 +2106,11 @@ export default function SiteManager() {
     }
   }
 
-  function sendReportToSupervisor(view, summary, list) {
+  function sendReportToSupervisor(view, summary, list, periodLabelOverride) {
     const report = {
       id: uid(),
       period: view,
-      periodLabel: view === "daily" ? todayKey() : monthKey(),
+      periodLabel: periodLabelOverride || (view === "daily" ? todayKey() : monthKey()),
       hours: Number(summary.hours.toFixed(2)),
       materialsCount: summary.materials.length,
       toolsCount: summary.tools.length,
@@ -2123,6 +2123,12 @@ export default function SiteManager() {
     persist({ sentReports: [report, ...sentReports] });
     setReportViewModal(report);
     sendReportVia(report);
+  }
+
+  function generateDayReport(dateStr) {
+    const dayEntries = entries.filter((e) => e.date === dateStr);
+    const summary = dailySummary(dayEntries);
+    sendReportToSupervisor("daily", summary, dayEntries, dateStr);
   }
 
   function saveReportEdits() {
@@ -3536,6 +3542,12 @@ export default function SiteManager() {
                 <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
               </div>
 
+              {dayEntries.length > 0 && (
+                <button onClick={() => generateDayReport(selectedDay)} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+                  <FileText size={15} /> {t.generateReportBtn}
+                </button>
+              )}
+
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-4">
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 flex items-center gap-1"><CalendarDays size={12} /> {t.requestLeave}</div>
                 <div className="flex gap-2 mb-2">
@@ -4057,14 +4069,14 @@ export default function SiteManager() {
 
 function ToolScatterDecor() {
   const tools = [
-    { Icon: Wrench, x: "6%", bottomOffset: 6, rotate: -16, size: 20 },
-    { Icon: Hammer, x: "24%", bottomOffset: 20, rotate: 10, size: 17 },
-    { Icon: Ruler, x: "44%", bottomOffset: 4, rotate: -9, size: 18 },
-    { Icon: HardHat, x: "62%", bottomOffset: 18, rotate: 14, size: 18 },
-    { Icon: Shovel, x: "70%", bottomOffset: 6, rotate: -13, size: 17 },
+    { Icon: Wrench, x: "6%", bottomOffset: -12, rotate: -16, size: 20 },
+    { Icon: Hammer, x: "24%", bottomOffset: 2, rotate: 10, size: 17 },
+    { Icon: Ruler, x: "44%", bottomOffset: -14, rotate: -9, size: 18 },
+    { Icon: HardHat, x: "62%", bottomOffset: 0, rotate: 14, size: 18 },
+    { Icon: Shovel, x: "70%", bottomOffset: -12, rotate: -13, size: 17 },
   ];
   return (
-    <div className="fixed left-0 right-0 max-w-md mx-auto pointer-events-none" style={{ bottom: 66, height: 44, zIndex: 25 }}>
+    <div className="fixed left-0 right-0 max-w-md mx-auto pointer-events-none" style={{ bottom: 60, height: 40 }}>
       {tools.map(({ Icon, x, bottomOffset, rotate, size }, i) => (
         <div
           key={i}
