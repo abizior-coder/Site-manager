@@ -125,6 +125,14 @@ const T = {
     emergencyContact: "Emergency contact", contactName: "Contact name", contactRelationship: "Relationship",
     contactPhone: "Contact phone", saveProfile: "Save profile", callEmergencyContact: "Call emergency contact",
     safetyCatRoof: "Roofing", safetyCatMetal: "Metalwork", safetyCatFormwork: "Formwork", safetyCatGround: "Groundwork",
+    libraryTab: "Library", techLibraryTitle: "Technical library", scanSpecSheet: "Scan spec sheet", addManually: "Add manually",
+    noLibraryItemsYet: "No technical data saved yet — scan a spec sheet or add one manually.", specSearchPlaceholder: "Search name, supplier, article number…",
+    itemNameLabel: "Name", manufacturerLabel: "Supplier / manufacturer", articleNumberLabel: "Article number", techCategoryLabel: "Category (optional)",
+    specsLabel: "Specifications", addSpecRowBtn: "Add spec", specKeyPlaceholder: "Property (e.g. R-value)", specValuePlaceholder: "Value",
+    readingSpecSheet: "Reading spec sheet…", specScanErrorHint: "Couldn't read that clearly — try again or add manually.",
+    keepPhotoLabel: "Keep photo on this device (not synced)", reviewBeforeSaving: "Check the details below before saving",
+    saveToLibraryBtn: "Save to library", editLibraryItemTitle: "Edit technical entry", newLibraryItemTitle: "New technical entry",
+    addedToLibraryToast: "Saved to technical library", libraryItemDeleted: "Entry deleted", scanNewSpec: "Scan new spec sheet",
   },
   de: {
     appLabel: "Baustellenprotokoll", onSite: "Vor Ort",
@@ -222,6 +230,14 @@ const T = {
     emergencyContact: "Notfallkontakt", contactName: "Name der Kontaktperson", contactRelationship: "Beziehung",
     contactPhone: "Telefonnummer Kontakt", saveProfile: "Profil speichern", callEmergencyContact: "Notfallkontakt anrufen",
     safetyCatRoof: "Dacharbeiten", safetyCatMetal: "Metallbau", safetyCatFormwork: "Schalungsbau", safetyCatGround: "Erdarbeiten",
+    libraryTab: "Bibliothek", techLibraryTitle: "Technische Bibliothek", scanSpecSheet: "Datenblatt scannen", addManually: "Manuell hinzufügen",
+    noLibraryItemsYet: "Noch keine technischen Daten gespeichert — Datenblatt scannen oder manuell hinzufügen.", specSearchPlaceholder: "Name, Lieferant, Artikelnummer suchen…",
+    itemNameLabel: "Name", manufacturerLabel: "Lieferant / Hersteller", articleNumberLabel: "Artikelnummer", techCategoryLabel: "Kategorie (optional)",
+    specsLabel: "Technische Daten", addSpecRowBtn: "Eigenschaft hinzufügen", specKeyPlaceholder: "Eigenschaft (z. B. R-Wert)", specValuePlaceholder: "Wert",
+    readingSpecSheet: "Datenblatt wird gelesen…", specScanErrorHint: "Konnte das nicht klar lesen — nochmals versuchen oder manuell hinzufügen.",
+    keepPhotoLabel: "Foto auf diesem Gerät behalten (nicht synchronisiert)", reviewBeforeSaving: "Angaben vor dem Speichern prüfen",
+    saveToLibraryBtn: "In Bibliothek speichern", editLibraryItemTitle: "Technischen Eintrag bearbeiten", newLibraryItemTitle: "Neuer technischer Eintrag",
+    addedToLibraryToast: "In technischer Bibliothek gespeichert", libraryItemDeleted: "Eintrag gelöscht", scanNewSpec: "Neues Datenblatt scannen",
   },
   fr: {
     appLabel: "Journal de chantier", onSite: "Sur site",
@@ -319,6 +335,14 @@ const T = {
     emergencyContact: "Contact d'urgence", contactName: "Nom du contact", contactRelationship: "Lien de parenté",
     contactPhone: "Téléphone du contact", saveProfile: "Enregistrer le profil", callEmergencyContact: "Appeler le contact d'urgence",
     safetyCatRoof: "Toiture", safetyCatMetal: "Métallerie", safetyCatFormwork: "Coffrage", safetyCatGround: "Terrassement",
+    libraryTab: "Bibliothèque", techLibraryTitle: "Bibliothèque technique", scanSpecSheet: "Scanner la fiche technique", addManually: "Ajouter manuellement",
+    noLibraryItemsYet: "Aucune donnée technique enregistrée — scannez une fiche ou ajoutez-la manuellement.", specSearchPlaceholder: "Rechercher nom, fournisseur, référence…",
+    itemNameLabel: "Nom", manufacturerLabel: "Fournisseur / fabricant", articleNumberLabel: "Numéro d'article", techCategoryLabel: "Catégorie (facultatif)",
+    specsLabel: "Caractéristiques techniques", addSpecRowBtn: "Ajouter une caractéristique", specKeyPlaceholder: "Propriété (ex. valeur R)", specValuePlaceholder: "Valeur",
+    readingSpecSheet: "Lecture de la fiche technique…", specScanErrorHint: "Impossible de lire clairement — réessayez ou ajoutez manuellement.",
+    keepPhotoLabel: "Garder la photo sur cet appareil (non synchronisée)", reviewBeforeSaving: "Vérifiez les détails avant d'enregistrer",
+    saveToLibraryBtn: "Enregistrer dans la bibliothèque", editLibraryItemTitle: "Modifier l'entrée technique", newLibraryItemTitle: "Nouvelle entrée technique",
+    addedToLibraryToast: "Enregistré dans la bibliothèque technique", libraryItemDeleted: "Entrée supprimée", scanNewSpec: "Scanner une nouvelle fiche",
   },
   it: {
     appLabel: "Registro di cantiere", onSite: "In cantiere",
@@ -416,6 +440,14 @@ const T = {
     emergencyContact: "Contatto di emergenza", contactName: "Nome del contatto", contactRelationship: "Parentela",
     contactPhone: "Telefono del contatto", saveProfile: "Salva profilo", callEmergencyContact: "Chiama il contatto di emergenza",
     safetyCatRoof: "Tetti", safetyCatMetal: "Carpenteria metallica", safetyCatFormwork: "Casseforme", safetyCatGround: "Scavi",
+    libraryTab: "Libreria", techLibraryTitle: "Libreria tecnica", scanSpecSheet: "Scansiona scheda tecnica", addManually: "Aggiungi manualmente",
+    noLibraryItemsYet: "Nessun dato tecnico salvato ancora — scansiona una scheda o aggiungila manualmente.", specSearchPlaceholder: "Cerca nome, fornitore, codice articolo…",
+    itemNameLabel: "Nome", manufacturerLabel: "Fornitore / produttore", articleNumberLabel: "Codice articolo", techCategoryLabel: "Categoria (facoltativo)",
+    specsLabel: "Specifiche tecniche", addSpecRowBtn: "Aggiungi specifica", specKeyPlaceholder: "Proprietà (es. valore R)", specValuePlaceholder: "Valore",
+    readingSpecSheet: "Lettura scheda tecnica…", specScanErrorHint: "Impossibile leggere chiaramente — riprova o aggiungi manualmente.",
+    keepPhotoLabel: "Mantieni la foto su questo dispositivo (non sincronizzata)", reviewBeforeSaving: "Controlla i dettagli prima di salvare",
+    saveToLibraryBtn: "Salva nella libreria", editLibraryItemTitle: "Modifica voce tecnica", newLibraryItemTitle: "Nuova voce tecnica",
+    addedToLibraryToast: "Salvato nella libreria tecnica", libraryItemDeleted: "Voce eliminata", scanNewSpec: "Scansiona nuova scheda",
   },
   es: {
     appLabel: "Registro de obra", onSite: "En obra",
@@ -513,6 +545,14 @@ const T = {
     emergencyContact: "Contacto de emergencia", contactName: "Nombre del contacto", contactRelationship: "Parentesco",
     contactPhone: "Teléfono del contacto", saveProfile: "Guardar perfil", callEmergencyContact: "Llamar al contacto de emergencia",
     safetyCatRoof: "Tejados", safetyCatMetal: "Metalistería", safetyCatFormwork: "Encofrado", safetyCatGround: "Movimiento de tierras",
+    libraryTab: "Biblioteca", techLibraryTitle: "Biblioteca técnica", scanSpecSheet: "Escanear ficha técnica", addManually: "Añadir manualmente",
+    noLibraryItemsYet: "Aún no hay datos técnicos guardados — escanea una ficha o añádela manualmente.", specSearchPlaceholder: "Buscar nombre, proveedor, número de artículo…",
+    itemNameLabel: "Nombre", manufacturerLabel: "Proveedor / fabricante", articleNumberLabel: "Número de artículo", techCategoryLabel: "Categoría (opcional)",
+    specsLabel: "Especificaciones técnicas", addSpecRowBtn: "Añadir especificación", specKeyPlaceholder: "Propiedad (ej. valor R)", specValuePlaceholder: "Valor",
+    readingSpecSheet: "Leyendo la ficha técnica…", specScanErrorHint: "No se pudo leer con claridad — inténtalo de nuevo o añade manualmente.",
+    keepPhotoLabel: "Conservar la foto en este dispositivo (no sincronizada)", reviewBeforeSaving: "Revisa los detalles antes de guardar",
+    saveToLibraryBtn: "Guardar en la biblioteca", editLibraryItemTitle: "Editar entrada técnica", newLibraryItemTitle: "Nueva entrada técnica",
+    addedToLibraryToast: "Guardado en la biblioteca técnica", libraryItemDeleted: "Entrada eliminada", scanNewSpec: "Escanear nueva ficha",
   },
   pt: {
     appLabel: "Registo de obra", onSite: "Na obra",
@@ -610,6 +650,14 @@ const T = {
     emergencyContact: "Contacto de emergência", contactName: "Nome do contacto", contactRelationship: "Parentesco",
     contactPhone: "Telefone do contacto", saveProfile: "Guardar perfil", callEmergencyContact: "Ligar ao contacto de emergência",
     safetyCatRoof: "Coberturas", safetyCatMetal: "Serralharia", safetyCatFormwork: "Cofragem", safetyCatGround: "Terraplanagem",
+    libraryTab: "Biblioteca", techLibraryTitle: "Biblioteca técnica", scanSpecSheet: "Digitalizar ficha técnica", addManually: "Adicionar manualmente",
+    noLibraryItemsYet: "Ainda sem dados técnicos guardados — digitalize uma ficha ou adicione manualmente.", specSearchPlaceholder: "Procurar nome, fornecedor, número de artigo…",
+    itemNameLabel: "Nome", manufacturerLabel: "Fornecedor / fabricante", articleNumberLabel: "Número de artigo", techCategoryLabel: "Categoria (opcional)",
+    specsLabel: "Especificações técnicas", addSpecRowBtn: "Adicionar especificação", specKeyPlaceholder: "Propriedade (ex. valor R)", specValuePlaceholder: "Valor",
+    readingSpecSheet: "A ler a ficha técnica…", specScanErrorHint: "Não foi possível ler claramente — tente novamente ou adicione manualmente.",
+    keepPhotoLabel: "Manter a foto neste dispositivo (não sincronizada)", reviewBeforeSaving: "Reveja os detalhes antes de guardar",
+    saveToLibraryBtn: "Guardar na biblioteca", editLibraryItemTitle: "Editar entrada técnica", newLibraryItemTitle: "Nova entrada técnica",
+    addedToLibraryToast: "Guardado na biblioteca técnica", libraryItemDeleted: "Entrada eliminada", scanNewSpec: "Digitalizar nova ficha",
   },
   pl: {
     appLabel: "Dziennik budowy", onSite: "Na budowie",
@@ -707,6 +755,14 @@ const T = {
     emergencyContact: "Kontakt alarmowy", contactName: "Imię kontaktu", contactRelationship: "Pokrewieństwo",
     contactPhone: "Telefon kontaktu", saveProfile: "Zapisz profil", callEmergencyContact: "Zadzwoń do kontaktu alarmowego",
     safetyCatRoof: "Dekarstwo", safetyCatMetal: "Prace metalowe", safetyCatFormwork: "Deskowanie", safetyCatGround: "Roboty ziemne",
+    libraryTab: "Biblioteka", techLibraryTitle: "Biblioteka techniczna", scanSpecSheet: "Zeskanuj kartę techniczną", addManually: "Dodaj ręcznie",
+    noLibraryItemsYet: "Brak zapisanych danych technicznych — zeskanuj kartę lub dodaj ręcznie.", specSearchPlaceholder: "Szukaj nazwy, dostawcy, numeru artykułu…",
+    itemNameLabel: "Nazwa", manufacturerLabel: "Dostawca / producent", articleNumberLabel: "Numer artykułu", techCategoryLabel: "Kategoria (opcjonalnie)",
+    specsLabel: "Dane techniczne", addSpecRowBtn: "Dodaj parametr", specKeyPlaceholder: "Właściwość (np. wartość R)", specValuePlaceholder: "Wartość",
+    readingSpecSheet: "Odczytywanie karty technicznej…", specScanErrorHint: "Nie udało się wyraźnie odczytać — spróbuj ponownie lub dodaj ręcznie.",
+    keepPhotoLabel: "Zachowaj zdjęcie na tym urządzeniu (bez synchronizacji)", reviewBeforeSaving: "Sprawdź dane przed zapisaniem",
+    saveToLibraryBtn: "Zapisz w bibliotece", editLibraryItemTitle: "Edytuj wpis techniczny", newLibraryItemTitle: "Nowy wpis techniczny",
+    addedToLibraryToast: "Zapisano w bibliotece technicznej", libraryItemDeleted: "Wpis usunięty", scanNewSpec: "Zeskanuj nową kartę",
   },
   sk: {
     appLabel: "Denník stavby", onSite: "Na stavbe",
@@ -804,6 +860,14 @@ const T = {
     emergencyContact: "Núdzový kontakt", contactName: "Meno kontaktu", contactRelationship: "Vzťah",
     contactPhone: "Telefón kontaktu", saveProfile: "Uložiť profil", callEmergencyContact: "Zavolať núdzový kontakt",
     safetyCatRoof: "Strešné práce", safetyCatMetal: "Kovovýroba", safetyCatFormwork: "Debnenie", safetyCatGround: "Zemné práce",
+    libraryTab: "Knižnica", techLibraryTitle: "Technická knižnica", scanSpecSheet: "Naskenovať technický list", addManually: "Pridať ručne",
+    noLibraryItemsYet: "Zatiaľ žiadne uložené technické údaje — naskenujte list alebo pridajte ručne.", specSearchPlaceholder: "Hľadať názov, dodávateľa, číslo artikla…",
+    itemNameLabel: "Názov", manufacturerLabel: "Dodávateľ / výrobca", articleNumberLabel: "Číslo artikla", techCategoryLabel: "Kategória (voliteľné)",
+    specsLabel: "Technické parametre", addSpecRowBtn: "Pridať parameter", specKeyPlaceholder: "Vlastnosť (napr. hodnota R)", specValuePlaceholder: "Hodnota",
+    readingSpecSheet: "Číta sa technický list…", specScanErrorHint: "Nepodarilo sa jasne prečítať — skúste znova alebo pridajte ručne.",
+    keepPhotoLabel: "Ponechať fotku v tomto zariadení (nesynchronizované)", reviewBeforeSaving: "Pred uložením skontrolujte údaje",
+    saveToLibraryBtn: "Uložiť do knižnice", editLibraryItemTitle: "Upraviť technický záznam", newLibraryItemTitle: "Nový technický záznam",
+    addedToLibraryToast: "Uložené do technickej knižnice", libraryItemDeleted: "Záznam vymazaný", scanNewSpec: "Naskenovať nový list",
   },
   cs: {
     appLabel: "Deník stavby", onSite: "Na stavbě",
@@ -901,6 +965,14 @@ const T = {
     emergencyContact: "Nouzový kontakt", contactName: "Jméno kontaktu", contactRelationship: "Vztah",
     contactPhone: "Telefon kontaktu", saveProfile: "Uložit profil", callEmergencyContact: "Zavolat nouzový kontakt",
     safetyCatRoof: "Střešní práce", safetyCatMetal: "Kovovýroba", safetyCatFormwork: "Bednění", safetyCatGround: "Zemní práce",
+    libraryTab: "Knihovna", techLibraryTitle: "Technická knihovna", scanSpecSheet: "Naskenovat technický list", addManually: "Přidat ručně",
+    noLibraryItemsYet: "Zatím žádná uložená technická data — naskenujte list nebo přidejte ručně.", specSearchPlaceholder: "Hledat název, dodavatele, číslo artiklu…",
+    itemNameLabel: "Název", manufacturerLabel: "Dodavatel / výrobce", articleNumberLabel: "Číslo artiklu", techCategoryLabel: "Kategorie (volitelné)",
+    specsLabel: "Technické parametry", addSpecRowBtn: "Přidat parametr", specKeyPlaceholder: "Vlastnost (např. hodnota R)", specValuePlaceholder: "Hodnota",
+    readingSpecSheet: "Čtení technického listu…", specScanErrorHint: "Nepodařilo se jasně přečíst — zkuste to znovu nebo přidejte ručně.",
+    keepPhotoLabel: "Ponechat foto v tomto zařízení (nesynchronizováno)", reviewBeforeSaving: "Před uložením zkontrolujte údaje",
+    saveToLibraryBtn: "Uložit do knihovny", editLibraryItemTitle: "Upravit technický záznam", newLibraryItemTitle: "Nový technický záznam",
+    addedToLibraryToast: "Uloženo do technické knihovny", libraryItemDeleted: "Záznam smazán", scanNewSpec: "Naskenovat nový list",
   },
 };
 
@@ -1852,6 +1924,10 @@ export default function SiteManager() {
   const [voiceListening, setVoiceListening] = useState(false);
   const recognitionRef = useRef(null);
   const [materialsSubTab, setMaterialsSubTab] = useState("shop");
+  const [techLibrary, setTechLibrary] = useState([]);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [libraryScanModal, setLibraryScanModal] = useState(null);
+  const [libraryEditModal, setLibraryEditModal] = useState(null);
   const [sortMode, setSortMode] = useState("type");
   const [shopCat, setShopCat] = useState(null);
   const [basket, setBasket] = useState([]);
@@ -1893,6 +1969,7 @@ export default function SiteManager() {
   const [cprStep, setCprStep] = useState(0);
   const [scanModal, setScanModal] = useState(null);
   const scanFileRef = useRef(null);
+  const libraryScanFileRef = useRef(null);
   const [pickupModal, setPickupModal] = useState(null);
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
@@ -1963,6 +2040,10 @@ export default function SiteManager() {
         const unitsRes = await window.storage.get("site-material-units");
         if (unitsRes && unitsRes.value) setMaterialUnits(JSON.parse(unitsRes.value));
       } catch (e) {}
+      try {
+        const libRes = await window.storage.get("site-tech-library");
+        if (libRes && libRes.value) setTechLibrary(JSON.parse(libRes.value));
+      } catch (e) {}
       setReady(true);
     })();
   }, []);
@@ -1988,6 +2069,11 @@ export default function SiteManager() {
     if (next.insurance) setInsuranceCards(next.insurance);
     if (next.certificates) setCertificates(next.certificates);
     try { await window.storage.set("site-docs", JSON.stringify(data)); } catch (e) {}
+  }
+
+  async function saveTechLibrary(next) {
+    setTechLibrary(next);
+    try { await window.storage.set("site-tech-library", JSON.stringify(next)); } catch (e) { showToast(t.couldntSave); }
   }
 
   function openInsuranceForm(existing) {
@@ -2743,6 +2829,94 @@ export default function SiteManager() {
     setScanModal(null);
   }
 
+  function openLibraryScan() {
+    setLibraryScanModal({ image: null, keepPhoto: false, loading: false, error: null, result: null });
+  }
+
+  async function addLibraryScanImage(e) {
+    const file = e.target.files?.[0];
+    if (!file || !libraryScanModal) return;
+    try {
+      const b64 = await fileToBase64(file);
+      setLibraryScanModal((s) => ({ ...s, image: { b64, mediaType: file.type || "image/jpeg" }, result: null, error: null }));
+    } catch {
+      setLibraryScanModal((s) => ({ ...s, error: t.specScanErrorHint }));
+    }
+  }
+
+  async function runLibraryScan() {
+    if (!libraryScanModal || !libraryScanModal.image) return;
+    setLibraryScanModal((s) => ({ ...s, loading: true, error: null }));
+    const prompt = "This photo shows a product label, datasheet, or technical spec sheet for a construction material or tool. Extract what's legible. Respond ONLY with JSON, no markdown, no prose: {\"name\":string,\"supplier\":string,\"articleNumber\":string,\"category\":string,\"specs\":[{\"key\":string,\"value\":string}]}. Use empty string for anything not legible or not present. Keep \"specs\" to the technical properties only (dimensions, ratings, performance values, materials, etc.), not marketing text.";
+    try {
+      const content = [
+        { type: "image", source: { type: "base64", media_type: libraryScanModal.image.mediaType, data: libraryScanModal.image.b64 } },
+        { type: "text", text: prompt },
+      ];
+      const text = await callClaude(content);
+      const parsed = parseJsonSafe(text, { name: "", supplier: "", articleNumber: "", category: "", specs: [] });
+      const result = {
+        name: parsed.name || "", supplier: parsed.supplier || "", articleNumber: parsed.articleNumber || "", category: parsed.category || "",
+        specs: (parsed.specs || []).map((s) => ({ id: uid(), key: s.key || "", value: s.value || "" })),
+      };
+      setLibraryScanModal((s) => ({ ...s, loading: false, result }));
+    } catch (err) {
+      setLibraryScanModal((s) => ({ ...s, loading: false, error: t.specScanErrorHint }));
+    }
+  }
+
+  function confirmLibraryScan() {
+    if (!libraryScanModal || !libraryScanModal.result) return;
+    const r = libraryScanModal.result;
+    const entry = {
+      id: uid(), createdAt: Date.now(), name: r.name, supplier: r.supplier, articleNumber: r.articleNumber, category: r.category,
+      specs: r.specs.filter((s) => s.key.trim() || s.value.trim()),
+      photo: libraryScanModal.keepPhoto && libraryScanModal.image ? `data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}` : null,
+    };
+    saveTechLibrary([entry, ...techLibrary]);
+    showToast(t.addedToLibraryToast);
+    setLibraryScanModal(null);
+  }
+
+  function openLibraryEdit(existing) {
+    setLibraryEditModal(existing
+      ? { ...existing, specs: existing.specs.map((s) => ({ ...s })) }
+      : { id: null, name: "", supplier: "", articleNumber: "", category: "", specs: [], photo: null });
+  }
+
+  function updateLibraryEditField(field, value) {
+    setLibraryEditModal((m) => ({ ...m, [field]: value }));
+  }
+
+  function addLibrarySpecRow() {
+    setLibraryEditModal((m) => ({ ...m, specs: [...m.specs, { id: uid(), key: "", value: "" }] }));
+  }
+
+  function updateLibrarySpecRow(id, field, value) {
+    setLibraryEditModal((m) => ({ ...m, specs: m.specs.map((s) => (s.id === id ? { ...s, [field]: value } : s)) }));
+  }
+
+  function removeLibrarySpecRow(id) {
+    setLibraryEditModal((m) => ({ ...m, specs: m.specs.filter((s) => s.id !== id) }));
+  }
+
+  function submitLibraryEdit() {
+    if (!libraryEditModal || !libraryEditModal.name.trim()) return;
+    const cleanSpecs = libraryEditModal.specs.filter((s) => s.key.trim() || s.value.trim());
+    if (libraryEditModal.id) {
+      saveTechLibrary(techLibrary.map((it) => (it.id === libraryEditModal.id ? { ...libraryEditModal, specs: cleanSpecs } : it)));
+    } else {
+      saveTechLibrary([{ ...libraryEditModal, id: uid(), createdAt: Date.now(), specs: cleanSpecs }, ...techLibrary]);
+    }
+    showToast(t.addedToLibraryToast);
+    setLibraryEditModal(null);
+  }
+
+  function deleteLibraryItem(id) {
+    saveTechLibrary(techLibrary.filter((it) => it.id !== id));
+    showToast(t.libraryItemDeleted);
+  }
+
   function openPickup() {
     setPickupModal({ step: "form", orderRef: "", supplier: "", projectId: activeClock?.projectId || projects[0]?.id || null, codeType: "qr" });
   }
@@ -2974,10 +3148,11 @@ export default function SiteManager() {
 
           return (
             <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <button onClick={() => { setMaterialsSubTab("shop"); setShopCat(null); }} style={{ background: materialsSubTab === "shop" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><ShoppingCart size={14} /> {t.shopTab}</button>
                 <button onClick={() => { setMaterialsSubTab("tools"); setShopCat(null); }} style={{ background: materialsSubTab === "tools" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Wrench size={14} /> {t.toolsTab}</button>
                 <button onClick={() => { setMaterialsSubTab("transport"); setShopCat(null); }} style={{ background: materialsSubTab === "transport" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Truck size={14} /> {t.transportTab}</button>
+                <button onClick={() => { setMaterialsSubTab("library"); setShopCat(null); }} style={{ background: materialsSubTab === "library" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><BookOpen size={14} /> {t.libraryTab}</button>
               </div>
 
               {materialsSubTab === "shop" && (
@@ -3097,7 +3272,64 @@ export default function SiteManager() {
                 </div>
               )}
 
-              {materialsSubTab !== "transport" && basket.length > 0 && (
+              {materialsSubTab === "library" && (
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={openLibraryScan} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="rounded-xl p-3 flex flex-col items-center justify-center gap-1">
+                      <ScanLine size={18} color={COLORS.success} />
+                      <span className="text-xs font-semibold text-center">{t.scanSpecSheet}</span>
+                    </button>
+                    <button onClick={() => openLibraryEdit(null)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="rounded-xl p-3 flex flex-col items-center justify-center gap-1">
+                      <Plus size={18} color={COLORS.muted} />
+                      <span className="text-xs font-semibold text-center">{t.addManually}</span>
+                    </button>
+                  </div>
+                  {techLibrary.length > 0 && (
+                    <input value={librarySearch} onChange={(e) => setLibrarySearch(e.target.value)} placeholder={t.specSearchPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                  )}
+                  {techLibrary.length === 0 ? (
+                    <div style={{ color: COLORS.muted }} className="text-xs text-center py-6">{t.noLibraryItemsYet}</div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {techLibrary
+                        .filter((it) => {
+                          const q = librarySearch.trim().toLowerCase();
+                          if (!q) return true;
+                          return [it.name, it.supplier, it.articleNumber].filter(Boolean).some((f) => f.toLowerCase().includes(q));
+                        })
+                        .map((it) => (
+                          <div key={it.id} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 flex flex-col gap-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-bold truncate">{it.name}</div>
+                                {(it.supplier || it.articleNumber) && (
+                                  <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                                    {[it.supplier, it.articleNumber].filter(Boolean).join(" · ")}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <button onClick={() => openLibraryEdit(it)} style={{ color: COLORS.muted }}><Pencil size={15} /></button>
+                                <button onClick={() => deleteLibraryItem(it.id)} style={{ color: COLORS.danger }}><Trash2 size={15} /></button>
+                              </div>
+                            </div>
+                            {it.specs && it.specs.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-1">
+                                {it.specs.map((s) => (
+                                  <span key={s.id} style={{ background: COLORS.cardAlt, color: COLORS.muted }} className="text-[11px] rounded-md px-2 py-1">
+                                    <b style={{ color: COLORS.text }}>{s.key}:</b> {s.value}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {materialsSubTab !== "transport" && materialsSubTab !== "library" && basket.length > 0 && (
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
                   <div className="flex items-center justify-between mb-2">
                     <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide flex items-center gap-1"><ShoppingCart size={13} /> {t.basketLabel} ({basket.length})</div>
@@ -4022,6 +4254,80 @@ export default function SiteManager() {
                 <button onClick={confirmScan} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2">{t.addToMaterialsLog}</button>
               </div>
             )}
+          </div>
+        </Modal>
+      )}
+
+      {libraryScanModal && (
+        <Modal onClose={() => setLibraryScanModal(null)} title={t.scanSpecSheet}>
+          <div className="flex flex-col gap-3">
+            {!libraryScanModal.image ? (
+              <button onClick={() => libraryScanFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="h-32 rounded-lg flex flex-col items-center justify-center gap-1">
+                <ImagePlus size={20} color={COLORS.muted} />
+                <span style={{ color: COLORS.muted }} className="text-xs">{t.photoLabel}</span>
+              </button>
+            ) : (
+              <img src={`data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}`} alt="" className="w-full h-40 object-cover rounded-lg" />
+            )}
+            <input ref={libraryScanFileRef} type="file" accept="image/*" capture="environment" onChange={addLibraryScanImage} className="hidden" />
+            {libraryScanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{libraryScanModal.error}</div>}
+
+            {!libraryScanModal.result && (
+              <button onClick={runLibraryScan} disabled={!libraryScanModal.image || libraryScanModal.loading} style={{ background: COLORS.success, opacity: !libraryScanModal.image || libraryScanModal.loading ? 0.6 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+                {libraryScanModal.loading ? <Loader2 size={16} className="animate-spin" /> : <ScanLine size={16} />}
+                {libraryScanModal.loading ? t.readingSpecSheet : t.scanSpecSheet}
+              </button>
+            )}
+
+            {libraryScanModal.result && (
+              <div className="flex flex-col gap-2">
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.reviewBeforeSaving}</div>
+                <input value={libraryScanModal.result.name} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, name: e.target.value } }))} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input value={libraryScanModal.result.supplier} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, supplier: e.target.value } }))} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input value={libraryScanModal.result.articleNumber} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, articleNumber: e.target.value } }))} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input value={libraryScanModal.result.category} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, category: e.target.value } }))} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
+                {libraryScanModal.result.specs.map((s) => (
+                  <div key={s.id} className="flex gap-2">
+                    <input value={s.key} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, key: e.target.value } : x)) } }))} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                    <input value={s.value} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, value: e.target.value } : x)) } }))} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                    <button onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) } }))} style={{ color: COLORS.danger }}><X size={16} /></button>
+                  </div>
+                ))}
+                <button onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: [...st.result.specs, { id: uid(), key: "", value: "" }] } }))} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
+
+                <label style={{ background: COLORS.cardAlt }} className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs mt-1">
+                  <input type="checkbox" checked={libraryScanModal.keepPhoto} onChange={(e) => setLibraryScanModal((s) => ({ ...s, keepPhoto: e.target.checked }))} />
+                  {t.keepPhotoLabel}
+                </label>
+
+                <button onClick={confirmLibraryScan} disabled={!libraryScanModal.result.name.trim()} style={{ background: COLORS.accent, opacity: libraryScanModal.result.name.trim() ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-1">{t.saveToLibraryBtn}</button>
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
+      {libraryEditModal && (
+        <Modal onClose={() => setLibraryEditModal(null)} title={libraryEditModal.id ? t.editLibraryItemTitle : t.newLibraryItemTitle}>
+          <div className="flex flex-col gap-2">
+            <input value={libraryEditModal.name} onChange={(e) => updateLibraryEditField("name", e.target.value)} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input value={libraryEditModal.supplier} onChange={(e) => updateLibraryEditField("supplier", e.target.value)} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input value={libraryEditModal.articleNumber} onChange={(e) => updateLibraryEditField("articleNumber", e.target.value)} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input value={libraryEditModal.category} onChange={(e) => updateLibraryEditField("category", e.target.value)} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
+            {libraryEditModal.specs.map((s) => (
+              <div key={s.id} className="flex gap-2">
+                <input value={s.key} onChange={(e) => updateLibrarySpecRow(s.id, "key", e.target.value)} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                <input value={s.value} onChange={(e) => updateLibrarySpecRow(s.id, "value", e.target.value)} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                <button onClick={() => removeLibrarySpecRow(s.id)} style={{ color: COLORS.danger }}><X size={16} /></button>
+              </div>
+            ))}
+            <button onClick={addLibrarySpecRow} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
+
+            <button onClick={submitLibraryEdit} disabled={!libraryEditModal.name.trim()} style={{ background: COLORS.accent, opacity: libraryEditModal.name.trim() ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2">{t.saveToLibraryBtn}</button>
           </div>
         </Modal>
       )}
