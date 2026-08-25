@@ -2118,8 +2118,8 @@ export default function SiteManager() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const b64 = await fileToBase64(file);
-      setter((s) => ({ ...s, photo: `data:${file.type || "image/jpeg"};base64,${b64}` }));
+      const { dataUrl } = await fileToScaledImage(file);
+      setter((s) => ({ ...s, photo: dataUrl }));
     } catch (err) {}
   }
 
@@ -2752,23 +2752,42 @@ export default function SiteManager() {
     setAddModal(null);
   }
 
-  function handleFile(e) {
+  async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhotoPreview(URL.createObjectURL(file));
+    // Must be a data URL, not URL.createObjectURL: a blob: URL dies with the
+    // page session, so a persisted entry would show a broken image on reload
+    // and never render on another device.
+    try {
+      const { dataUrl } = await fileToScaledImage(file);
+      setPhotoPreview(dataUrl);
+    } catch {
+      showToast(t.couldntSave);
+    }
   }
 
   function logIncident() {
     addEntry({ type: "note", projectId: activeClock?.projectId || null, description: "SOS" });
   }
 
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result.split(",")[1]);
-      r.onerror = () => reject(new Error("read failed"));
-      r.readAsDataURL(file);
-    });
+  // Phone photos are far too big to send as-is: the vision API rejects images
+  // over ~5MB of base64, and a full-size photo also blows past Firestore's 1MB
+  // document limit. Re-encoding through a canvas also converts HEIC (iPhone) to
+  // JPEG, which the API does accept.
+  const MAX_IMAGE_EDGE = 1568;
+
+  async function fileToScaledImage(file) {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    return { b64: dataUrl.split(",")[1], mediaType: "image/jpeg", dataUrl };
   }
 
   function openScan(mode, projectId) {
@@ -2779,15 +2798,22 @@ export default function SiteManager() {
     const file = e.target.files?.[0];
     if (!file || !scanModal) return;
     try {
-      const b64 = await fileToBase64(file);
-      setScanModal((s) => ({ ...s, images: [...s.images, { b64, mediaType: file.type || "image/jpeg" }], items: null, error: null }));
+      const { b64, mediaType } = await fileToScaledImage(file);
+      setScanModal((s) => ({ ...s, images: [...s.images, { b64, mediaType }], items: null, error: null }));
     } catch {
       setScanModal((s) => ({ ...s, error: t.scanErrorHint }));
     }
   }
 
   async function callClaude(content) {
-    return window.callClaude(content);
+    try {
+      return await window.callClaude(content);
+    } catch (err) {
+      // The generic "couldn't read that" toasts hide why a scan failed
+      // (billing, oversized image, proxy down) — keep the real reason visible.
+      console.error("callClaude failed:", err);
+      throw err;
+    }
   }
 
   function parseJsonSafe(text, fallback) {
@@ -2831,8 +2857,8 @@ export default function SiteManager() {
     const file = e.target.files?.[0];
     if (!file || !libraryScanModal) return;
     try {
-      const b64 = await fileToBase64(file);
-      setLibraryScanModal((s) => ({ ...s, image: { b64, mediaType: file.type || "image/jpeg" }, result: null, error: null }));
+      const { b64, mediaType } = await fileToScaledImage(file);
+      setLibraryScanModal((s) => ({ ...s, image: { b64, mediaType }, result: null, error: null }));
     } catch {
       setLibraryScanModal((s) => ({ ...s, error: t.specScanErrorHint }));
     }
@@ -2933,8 +2959,8 @@ export default function SiteManager() {
     const file = e.target.files?.[0];
     if (!file || !inspectionModal) return;
     try {
-      const b64 = await fileToBase64(file);
-      setInspectionModal((s) => ({ ...s, images: [...s.images, { b64, mediaType: file.type || "image/jpeg" }] }));
+      const { b64, mediaType } = await fileToScaledImage(file);
+      setInspectionModal((s) => ({ ...s, images: [...s.images, { b64, mediaType }] }));
     } catch {
       setInspectionModal((s) => ({ ...s, error: t.scanErrorHint }));
     }
