@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler } from "lucide-react";
 
+// Cloudflare Worker that holds the Anthropic API key server-side.
+// Kept in the bundle (not only in index.html) so a cached HTML file can't
+// leave the app without a way to reach the proxy.
+const CLAUDE_PROXY_URL = "https://site-log-claude-proxy.abizior.workers.dev";
+
 const COLORS = {
   shell: "#1B1B1A",
   card: "#242322",
@@ -2807,7 +2812,18 @@ export default function SiteManager() {
 
   async function callClaude(content) {
     try {
-      return await window.callClaude(content);
+      // Call the proxy directly rather than relying on window.callClaude from
+      // index.html: browsers cache index.html and bundle.js independently, so a
+      // stale HTML file either leaves the global undefined or, worse, points it
+      // at an abandoned endpoint. Owning the call here keeps it deterministic.
+      const res = await fetch(CLAUDE_PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `proxy error ${res.status}`);
+      return data.text;
     } catch (err) {
       // The generic "couldn't read that" toasts hide why a scan failed
       // (billing, oversized image, proxy down) — keep the real reason visible.

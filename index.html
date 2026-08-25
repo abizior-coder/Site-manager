@@ -32,21 +32,10 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Proxies Claude requests through a Cloudflare Worker, which holds the
-  // Anthropic API key server-side (never expose it in client code).
-  // Replace with your worker's URL after running `wrangler deploy` in /worker.
-  const CLAUDE_PROXY_URL = "https://site-log-claude-proxy.abizior.workers.dev";
-
-  window.callClaude = async (content) => {
-    const res = await fetch(CLAUDE_PROXY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || `proxy error ${res.status}`);
-    return data.text;
-  };
+  // Claude requests go through a Cloudflare Worker that holds the Anthropic
+  // API key server-side. That call lives in the app bundle (CLAUDE_PROXY_URL
+  // in roofing-site-manager.jsx), not here, so a cached copy of this file
+  // can't leave the app pointing at a stale or missing endpoint.
 
   function ref(key, shared) {
     return doc(db, shared ? "shared" : "local", key);
@@ -76,6 +65,6 @@
 </script>
 
 <!-- Fully self-contained app bundle (React, icons, and all app code). -->
-<script type="module" src="bundle.js?v=5aa706ce"></script>
+<script type="module" src="bundle.js?v=df029ac8"></script>
 </body>
 </html>
