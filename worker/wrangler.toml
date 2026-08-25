@@ -1,0 +1,8 @@
+name = "site-log-claude-proxy"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Restrict who can call this worker with real credentials/browser CORS.
+# Add your GitHub Pages origin here (and http://localhost:5566 while testing).
+[vars]
+ALLOWED_ORIGINS = "https://abizior-coder.github.io,http://localhost:5566"
