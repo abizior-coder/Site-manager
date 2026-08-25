@@ -35,7 +35,7 @@
   // Proxies Claude requests through a Cloudflare Worker, which holds the
   // Anthropic API key server-side (never expose it in client code).
   // Replace with your worker's URL after running `wrangler deploy` in /worker.
-  const CLAUDE_PROXY_URL = "https://site-log-claude-proxy.YOUR-SUBDOMAIN.workers.dev";
+  const CLAUDE_PROXY_URL = "https://site-log-claude-proxy.abizior.workers.dev";
 
   window.callClaude = async (content) => {
     const res = await fetch(CLAUDE_PROXY_URL, {
