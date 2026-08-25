@@ -96,6 +96,7 @@ const T = {
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
     supervisorNameLabel: "Supervisor name", supervisorEmailLabel: "Supervisor email", supervisorPhoneLabel: "Supervisor phone",
+    webhookLabel: "Automation webhook (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Optional: paste a Zapier or Make.com webhook URL to automatically send your logged hours and reports there.",
     sendRequestBtn: "Send to supervisor", dayJournalHeading: "Logged that day",
     profileInsurance: "Insurance cards", profileCertificates: "Certificates", addInsuranceCard: "Add insurance card", addCertificate: "Add certificate",
     insuranceTypeLabel: "Type (e.g. health, accident)", providerLabel: "Provider / company", policyNumberLabel: "Policy / card number", insurancePhoneLabel: "Claims phone number",
@@ -192,6 +193,7 @@ const T = {
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
     supervisorNameLabel: "Name Vorgesetzte(r)", supervisorEmailLabel: "E-Mail Vorgesetzte(r)", supervisorPhoneLabel: "Telefon Vorgesetzte(r)",
+    webhookLabel: "Automatisierungs-Webhook (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Optional: Fügen Sie eine Zapier- oder Make.com-Webhook-URL ein, um erfasste Stunden und Berichte automatisch dorthin zu senden.",
     sendRequestBtn: "An Vorgesetzten senden", dayJournalHeading: "An diesem Tag erfasst",
     profileInsurance: "Versicherungskarten", profileCertificates: "Zertifikate", addInsuranceCard: "Versicherungskarte hinzufügen", addCertificate: "Zertifikat hinzufügen",
     insuranceTypeLabel: "Art (z. B. Kranken-, Unfallversicherung)", providerLabel: "Versicherer / Firma", policyNumberLabel: "Policen- / Kartennummer", insurancePhoneLabel: "Telefonnummer für Schadenfälle",
@@ -288,6 +290,7 @@ const T = {
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
     supervisorNameLabel: "Nom du responsable", supervisorEmailLabel: "E-mail du responsable", supervisorPhoneLabel: "Téléphone du responsable",
+    webhookLabel: "Webhook d'automatisation (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Facultatif : collez une URL de webhook Zapier ou Make.com pour y envoyer automatiquement vos heures et rapports.",
     sendRequestBtn: "Envoyer au responsable", dayJournalHeading: "Enregistré ce jour-là",
     profileInsurance: "Cartes d'assurance", profileCertificates: "Certificats", addInsuranceCard: "Ajouter une carte d'assurance", addCertificate: "Ajouter un certificat",
     insuranceTypeLabel: "Type (ex. maladie, accident)", providerLabel: "Assureur / entreprise", policyNumberLabel: "Numéro de police / carte", insurancePhoneLabel: "Numéro pour déclarer un sinistre",
@@ -384,6 +387,7 @@ const T = {
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
     supervisorNameLabel: "Nome del responsabile", supervisorEmailLabel: "Email del responsabile", supervisorPhoneLabel: "Telefono del responsabile",
+    webhookLabel: "Webhook di automazione (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Facoltativo: incolla un URL webhook Zapier o Make.com per inviare automaticamente ore e rapporti registrati.",
     sendRequestBtn: "Invia al responsabile", dayJournalHeading: "Registrato quel giorno",
     profileInsurance: "Carte assicurative", profileCertificates: "Certificati", addInsuranceCard: "Aggiungi carta assicurativa", addCertificate: "Aggiungi certificato",
     insuranceTypeLabel: "Tipo (es. malattia, infortuni)", providerLabel: "Assicuratore / azienda", policyNumberLabel: "Numero di polizza / tessera", insurancePhoneLabel: "Numero per sinistri",
@@ -480,6 +484,7 @@ const T = {
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
     supervisorNameLabel: "Nombre del supervisor", supervisorEmailLabel: "Correo del supervisor", supervisorPhoneLabel: "Teléfono del supervisor",
+    webhookLabel: "Webhook de automatización (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Opcional: pega una URL de webhook de Zapier o Make.com para enviar automáticamente tus horas e informes registrados.",
     sendRequestBtn: "Enviar al supervisor", dayJournalHeading: "Registrado ese día",
     profileInsurance: "Tarjetas de seguro", profileCertificates: "Certificados", addInsuranceCard: "Añadir tarjeta de seguro", addCertificate: "Añadir certificado",
     insuranceTypeLabel: "Tipo (ej. salud, accidentes)", providerLabel: "Aseguradora / empresa", policyNumberLabel: "Número de póliza / tarjeta", insurancePhoneLabel: "Teléfono para siniestros",
@@ -576,6 +581,7 @@ const T = {
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
     supervisorNameLabel: "Nome do supervisor", supervisorEmailLabel: "Email do supervisor", supervisorPhoneLabel: "Telefone do supervisor",
+    webhookLabel: "Webhook de automação (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Opcional: cole um URL de webhook do Zapier ou Make.com para enviar automaticamente as suas horas e relatórios registados.",
     sendRequestBtn: "Enviar ao supervisor", dayJournalHeading: "Registado nesse dia",
     profileInsurance: "Cartões de seguro", profileCertificates: "Certificados", addInsuranceCard: "Adicionar cartão de seguro", addCertificate: "Adicionar certificado",
     insuranceTypeLabel: "Tipo (ex. saúde, acidentes)", providerLabel: "Seguradora / empresa", policyNumberLabel: "Número de apólice / cartão", insurancePhoneLabel: "Telefone para sinistros",
@@ -672,6 +678,7 @@ const T = {
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
     supervisorNameLabel: "Imię przełożonego", supervisorEmailLabel: "E-mail przełożonego", supervisorPhoneLabel: "Telefon przełożonego",
+    webhookLabel: "Webhook automatyzacji (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Opcjonalnie: wklej adres URL webhooka Zapier lub Make.com, aby automatycznie wysyłać tam zarejestrowane godziny i raporty.",
     sendRequestBtn: "Wyślij do przełożonego", dayJournalHeading: "Zarejestrowane tego dnia",
     profileInsurance: "Karty ubezpieczeniowe", profileCertificates: "Certyfikaty", addInsuranceCard: "Dodaj kartę ubezpieczeniową", addCertificate: "Dodaj certyfikat",
     insuranceTypeLabel: "Typ (np. zdrowotne, wypadkowe)", providerLabel: "Ubezpieczyciel / firma", policyNumberLabel: "Numer polisy / karty", insurancePhoneLabel: "Telefon do zgłoszeń szkód",
@@ -768,6 +775,7 @@ const T = {
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
     supervisorNameLabel: "Meno nadriadeného", supervisorEmailLabel: "E-mail nadriadeného", supervisorPhoneLabel: "Telefón nadriadeného",
+    webhookLabel: "Automatizačný webhook (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Voliteľné: vložte URL webhooku Zapier alebo Make.com na automatické odosielanie zaznamenaných hodín a reportov.",
     sendRequestBtn: "Odoslať nadriadenému", dayJournalHeading: "Zaznamenané v tento deň",
     profileInsurance: "Poistné karty", profileCertificates: "Certifikáty", addInsuranceCard: "Pridať poistnú kartu", addCertificate: "Pridať certifikát",
     insuranceTypeLabel: "Typ (napr. zdravotné, úrazové)", providerLabel: "Poisťovňa / firma", policyNumberLabel: "Číslo poistky / karty", insurancePhoneLabel: "Telefón pre hlásenie škody",
@@ -864,6 +872,7 @@ const T = {
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
     supervisorNameLabel: "Jméno nadřízeného", supervisorEmailLabel: "E-mail nadřízeného", supervisorPhoneLabel: "Telefon nadřízeného",
+    webhookLabel: "Automatizační webhook (Zapier/Make)", webhookPlaceholder: "https://hooks.zapier.com/...", webhookHint: "Volitelné: vložte URL webhooku Zapier nebo Make.com pro automatické odesílání zaznamenaných hodin a reportů.",
     sendRequestBtn: "Odeslat nadřízenému", dayJournalHeading: "Zaznamenáno tento den",
     profileInsurance: "Pojistné karty", profileCertificates: "Certifikáty", addInsuranceCard: "Přidat pojistnou kartu", addCertificate: "Přidat certifikát",
     insuranceTypeLabel: "Typ (např. zdravotní, úrazové)", providerLabel: "Pojišťovna / firma", policyNumberLabel: "Číslo pojistky / karty", insurancePhoneLabel: "Telefon pro hlášení škody",
@@ -1891,7 +1900,7 @@ export default function SiteManager() {
   const [weatherEditOpen, setWeatherEditOpen] = useState(false);
   const [weatherCityInput, setWeatherCityInput] = useState("");
   const [safetyCat, setSafetyCat] = useState("roof");
-  const [profile, setProfile] = useState({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "" });
+  const [profile, setProfile] = useState({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [selectedDay, setSelectedDay] = useState(null);
@@ -2123,6 +2132,7 @@ export default function SiteManager() {
     persist({ sentReports: [report, ...sentReports] });
     setReportViewModal(report);
     sendReportVia(report);
+    sendWebhook("report", { period: report.period, periodLabel: report.periodLabel, hours: report.hours, materialsCount: report.materialsCount, toolsCount: report.toolsCount, sitesVisited: report.sitesVisited, entries: report.entries });
   }
 
   function generateDayReport(dateStr) {
@@ -2145,33 +2155,49 @@ export default function SiteManager() {
       .map((e) => {
         const meta = typeMeta(e.type, t);
         const qtyStr = e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label;
-        return `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">${e.description || ""}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">${meta.label}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">${qtyStr}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;">${e.projectName || ""}</td></tr>`;
+        return `<tr><td>${e.description || ""}</td><td>${meta.label}</td><td>${qtyStr}</td><td>${e.projectName || ""}</td></tr>`;
       })
       .join("");
     return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${t.appLabel} — ${periodLabel} ${report.periodLabel}</title>
       <style>
-        body { font-family: -apple-system, system-ui, sans-serif; color: #111; padding: 32px; max-width: 700px; margin: 0 auto; }
-        h1 { font-size: 20px; margin-bottom: 2px; }
-        .sub { color: #666; margin-bottom: 20px; font-size: 14px; }
-        .field { margin-bottom: 6px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
-        th { text-align: left; padding: 6px 8px; border-bottom: 2px solid #333; }
+        body { font-family: -apple-system, system-ui, sans-serif; color: #111; padding: 32px; max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #DA291C; padding-bottom: 12px; margin-bottom: 20px; }
+        .header .sub { color: #666; font-size: 12px; margin-top: 2px; }
+        .header h1 { font-size: 20px; margin: 0; }
+        .header img { opacity: 0.9; max-width: 160px; max-height: 70px; object-fit: contain; }
+        .section { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 16px; }
+        .field { margin-bottom: 6px; font-size: 13px; }
+        .totalhours { font-weight: 700; font-size: 14px; margin: 10px 0; background: #f5f5f5; padding: 8px 10px; border-radius: 4px; display: inline-block; }
+        .tablabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin: 12px 0 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-bottom: 8px; }
+        th { text-align: left; background: #fafafa; border-bottom: 2px solid #333; padding: 6px 8px; }
+        td { padding: 6px 8px; border-bottom: 1px solid #eee; word-wrap: break-word; }
+        th:nth-child(1), td:nth-child(1) { width: 40%; }
+        th:nth-child(2), td:nth-child(2) { width: 20%; }
+        th:nth-child(3), td:nth-child(3) { width: 20%; }
+        th:nth-child(4), td:nth-child(4) { width: 20%; }
         .footer { margin-top: 24px; font-size: 11px; color: #999; }
-        @media print { body { padding: 0; } }
+        @media print { body { padding: 0; } .section { page-break-inside: avoid; } }
       </style>
       </head><body>
-        <h1>${t.appLabel}</h1>
-        <div class="sub">${periodLabel} · ${report.periodLabel}</div>
-        <div class="field"><strong>${t.yourName}:</strong> ${profile.name || "—"}</div>
-        <div class="field"><strong>${t.hoursFieldLabel}:</strong> ${report.hours}</div>
-        <div class="field"><strong>${t.materialsLogged}:</strong> ${report.materialsCount}</div>
-        <div class="field"><strong>${t.toolsLogged}:</strong> ${report.toolsCount}</div>
-        <div class="field"><strong>${t.sitesLabel}:</strong> ${report.sitesVisited.join(", ") || "—"}</div>
-        ${report.notes ? `<div class="field"><strong>${t.notesLabel}:</strong> ${report.notes}</div>` : ""}
-        <table>
-          <thead><tr><th>${t.entriesTitle}</th><th>${t.categoryLabel}</th><th>${t.hoursFieldLabel}/${t.qtyPlaceholder}</th><th>${t.sitesLabel}</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+        <div class="header">
+          <div>
+            <h1>${t.appLabel}</h1>
+            <div class="sub">${periodLabel} · ${report.periodLabel}</div>
+          </div>
+          <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
+        </div>
+        <div class="section">
+          <div class="field"><strong>${t.yourName}:</strong> ${profile.name || "—"}</div>
+          <div class="field"><strong>${t.sitesLabel}:</strong> ${report.sitesVisited.join(", ") || "—"}</div>
+          ${report.notes ? `<div class="field"><strong>${t.notesLabel}:</strong> ${report.notes}</div>` : ""}
+          <div class="totalhours">${t.totalHoursLabel}: ${report.hours} h</div>
+          <div class="tablabel">${t.entriesTitle}</div>
+          <table>
+            <thead><tr><th>${t.entriesTitle}</th><th>${t.categoryLabel}</th><th>${t.qtyPlaceholder}</th><th>${t.sitesLabel}</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
         <div class="footer">${t.generatedOnLabel}: ${new Date().toLocaleString()}${report.editedAt ? ` · ${t.editedTag}` : ""}</div>
       </body></html>`;
   }
@@ -2466,6 +2492,17 @@ export default function SiteManager() {
     showToast(t.clockedIn);
   }
 
+  function sendWebhook(eventType, payload) {
+    if (!profile.webhookUrl) return;
+    try {
+      fetch(profile.webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: eventType, employee: profile.name || "", sentAt: new Date().toISOString(), ...payload }),
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
   function clockOut() {
     if (!activeClock) return;
     const durationMs = Date.now() - activeClock.startedAt;
@@ -2481,6 +2518,7 @@ export default function SiteManager() {
     };
     persist({ entries: [e, ...entries], activeClock: null });
     showToast(t.clockedOutLogged);
+    sendWebhook("time_entry", { project: projectName(activeClock.projectId), date: e.date, hours: e.qty, startTime: e.startTime, endTime: e.endTime });
   }
 
   function submitNote() {
@@ -3372,6 +3410,9 @@ export default function SiteManager() {
             <input value={profileDraft.supervisorName} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))} placeholder={t.supervisorNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <input value={profileDraft.supervisorEmail} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))} placeholder={t.supervisorEmailLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <input value={profileDraft.supervisorPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))} placeholder={t.supervisorPhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.webhookLabel}</div>
+            <input value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <div style={{ color: COLORS.muted }} className="text-[10px]">{t.webhookHint}</div>
             <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
 
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>
