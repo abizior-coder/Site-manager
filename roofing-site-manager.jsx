@@ -2820,6 +2820,21 @@ export default function SiteManager() {
     try { return JSON.parse(text.replace(/```json|```/g, "").trim()); } catch { return fallback; }
   }
 
+  // The friendly "couldn't read that" message hides why a scan actually failed,
+  // which makes issues on someone else's phone impossible to diagnose. Keep a
+  // short technical line alongside it.
+  function errDetail(err, images) {
+    const msg = String((err && err.message) || err || "unknown error");
+    const kb = (images || []).reduce((n, i) => n + (i.b64 ? i.b64.length : 0), 0) / 1024;
+    // Include the loaded bundle version so a stale cached build is obvious.
+    let build = "?";
+    try {
+      const src = document.querySelector('script[src^="bundle.js"]')?.getAttribute("src") || "";
+      build = src.split("?v=")[1] || "unstamped";
+    } catch {}
+    return `${msg} · ${images ? images.length : 0} img · ${Math.round(kb)}KB · build ${build}`;
+  }
+
   async function runScan() {
     if (!scanModal || scanModal.images.length === 0) return;
     setScanModal((s) => ({ ...s, loading: true, error: null }));
@@ -2835,9 +2850,9 @@ export default function SiteManager() {
       const text = await callClaude(content);
       const parsed = parseJsonSafe(text, { items: [] });
       const items = (parsed.items || []).map((it) => ({ ...it, id: uid(), checked: true }));
-      setScanModal((s) => ({ ...s, loading: false, items }));
+      setScanModal((s) => ({ ...s, loading: false, items, detail: null }));
     } catch (err) {
-      setScanModal((s) => ({ ...s, loading: false, error: t.scanErrorHint }));
+      setScanModal((s) => ({ ...s, loading: false, error: t.scanErrorHint, detail: errDetail(err, scanModal.images) }));
     }
   }
 
@@ -2879,9 +2894,9 @@ export default function SiteManager() {
         name: parsed.name || "", supplier: parsed.supplier || "", articleNumber: parsed.articleNumber || "", category: parsed.category || "",
         specs: (parsed.specs || []).map((s) => ({ id: uid(), key: s.key || "", value: s.value || "" })),
       };
-      setLibraryScanModal((s) => ({ ...s, loading: false, result }));
+      setLibraryScanModal((s) => ({ ...s, loading: false, result, detail: null }));
     } catch (err) {
-      setLibraryScanModal((s) => ({ ...s, loading: false, error: t.specScanErrorHint }));
+      setLibraryScanModal((s) => ({ ...s, loading: false, error: t.specScanErrorHint, detail: errDetail(err, libraryScanModal.image ? [libraryScanModal.image] : []) }));
     }
   }
 
@@ -2989,7 +3004,7 @@ export default function SiteManager() {
 
       setInspectionModal((s) => ({ ...s, step: "result", report: reportText.trim(), materials, safety }));
     } catch (err) {
-      setInspectionModal((s) => ({ ...s, step: "form", error: t.couldntReach }));
+      setInspectionModal((s) => ({ ...s, step: "form", error: t.couldntReach, detail: errDetail(err, inspectionModal.images) }));
     }
   }
 
@@ -4255,6 +4270,7 @@ export default function SiteManager() {
             </div>
             <input ref={scanFileRef} type="file" accept="image/*" onChange={addScanImage} className="hidden" />
             {scanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{scanModal.error}</div>}
+            {scanModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{scanModal.detail}</div>}
             {!scanModal.items && (
               <button onClick={runScan} disabled={scanModal.loading || (scanModal.mode === "single" ? scanModal.images.length < 1 : scanModal.images.length < 2)} style={{ background: COLORS.success, opacity: scanModal.loading ? 0.7 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
                 {scanModal.loading ? <Loader2 size={16} className="animate-spin" /> : <ScanLine size={16} />}
@@ -4291,6 +4307,7 @@ export default function SiteManager() {
             )}
             <input ref={libraryScanFileRef} type="file" accept="image/*" capture="environment" onChange={addLibraryScanImage} className="hidden" />
             {libraryScanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{libraryScanModal.error}</div>}
+            {libraryScanModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{libraryScanModal.detail}</div>}
 
             {!libraryScanModal.result && (
               <button onClick={runLibraryScan} disabled={!libraryScanModal.image || libraryScanModal.loading} style={{ background: COLORS.success, opacity: !libraryScanModal.image || libraryScanModal.loading ? 0.6 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
@@ -4405,6 +4422,7 @@ export default function SiteManager() {
               </div>
               <input ref={inspectionFileRef} type="file" accept="image/*" onChange={addInspectionImage} className="hidden" />
               {inspectionModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{inspectionModal.error}</div>}
+              {inspectionModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{inspectionModal.detail}</div>}
               <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>
               <div style={{ color: COLORS.muted }} className="text-[10px]">{t.advisorsHint}</div>
             </div>
