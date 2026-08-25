@@ -2787,13 +2787,7 @@ export default function SiteManager() {
   }
 
   async function callClaude(content) {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, messages: [{ role: "user", content }] }),
-    });
-    const data = await response.json();
-    return (data.content || []).map((b) => b.text || "").join("\n");
+    return window.callClaude(content);
   }
 
   function parseJsonSafe(text, fallback) {

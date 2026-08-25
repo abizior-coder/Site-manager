@@ -19,6 +19,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw",
@@ -31,6 +32,15 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const functions = getFunctions(app);
+  const callClaudeFn = httpsCallable(functions, "callClaude");
+
+  // Proxies Claude requests through the callClaude Cloud Function, which
+  // holds the Anthropic API key server-side (never expose it in client code).
+  window.callClaude = async (content) => {
+    const result = await callClaudeFn({ content });
+    return result.data.text;
+  };
 
   function ref(key, shared) {
     return doc(db, shared ? "shared" : "local", key);
