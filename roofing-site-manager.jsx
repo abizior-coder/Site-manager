@@ -1856,6 +1856,8 @@ export default function SiteManager() {
   const [shopCat, setShopCat] = useState(null);
   const [basket, setBasket] = useState([]);
   const [basketProjectModalOpen, setBasketProjectModalOpen] = useState(false);
+  const [reportProjectPickerOpen, setReportProjectPickerOpen] = useState(false);
+  const [reportProjectSelection, setReportProjectSelection] = useState([]);
   const [toast, setToast] = useState(null);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -2202,8 +2204,9 @@ export default function SiteManager() {
       </body></html>`;
   }
 
-  function buildProjectsReportHtml() {
-    const sections = projects
+  function buildProjectsReportHtml(projectIds) {
+    const orderedProjects = projectIds && projectIds.length ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean) : projects;
+    const sections = orderedProjects
       .map((p) => {
         const pEntries = entries.filter((e) => e.projectId === p.id);
         const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
@@ -2273,9 +2276,13 @@ export default function SiteManager() {
       </body></html>`;
   }
 
-  function generateProjectsReport() {
+  function toggleReportProject(id) {
+    setReportProjectSelection((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
+  }
+
+  function generateProjectsReport(projectIds) {
     try {
-      const html = buildProjectsReportHtml();
+      const html = buildProjectsReportHtml(projectIds);
       const blob = new Blob([html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
@@ -3221,7 +3228,7 @@ export default function SiteManager() {
                 <ClipboardPaste size={16} /> {t.importProject}
               </button>
             </div>
-            <button onClick={generateProjectsReport} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+            <button onClick={() => { setReportProjectSelection([]); setReportProjectPickerOpen(true); }} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
               <FileText size={16} /> {t.generateReportBtn}
             </button>
             {projects.map((p) => {
@@ -3353,8 +3360,6 @@ export default function SiteManager() {
           </div>
         )}
       </div>
-
-      <ToolScatterDecor />
 
       <button
         onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
@@ -3542,6 +3547,40 @@ export default function SiteManager() {
                 {p.name}
               </button>
             ))}
+          </div>
+        </Modal>
+      )}
+
+      {reportProjectPickerOpen && (
+        <Modal onClose={() => setReportProjectPickerOpen(false)} title={t.chooseProjectLabel}>
+          <div className="flex flex-col gap-2">
+            {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
+            {projects.map((p) => {
+              const selectedIndex = reportProjectSelection.indexOf(p.id);
+              const isSelected = selectedIndex !== -1;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => toggleReportProject(p.id)}
+                  style={{ background: isSelected ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="w-full text-left rounded-lg px-3 py-2.5 flex items-center justify-between gap-2"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold truncate">{p.name}</div>
+                    {p.address && <div style={{ color: isSelected ? "rgba(0,0,0,0.6)" : COLORS.muted }} className="text-xs truncate">{p.address}</div>}
+                  </div>
+                  {isSelected && <span style={{ background: "rgba(0,0,0,0.25)" }} className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white">{selectedIndex + 1}</span>}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => { setReportProjectPickerOpen(false); generateProjectsReport(reportProjectSelection); }}
+              disabled={reportProjectSelection.length === 0}
+              style={{ background: COLORS.accent, opacity: reportProjectSelection.length === 0 ? 0.5 : 1 }}
+              className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+            >
+              <FileText size={15} /> {t.generateReportBtn}
+            </button>
           </div>
         </Modal>
       )}
@@ -4104,42 +4143,6 @@ export default function SiteManager() {
           )}
         </Modal>
       )}
-    </div>
-  );
-}
-
-function ToolScatterDecor() {
-  const tools = [
-    { Icon: Wrench, x: "6%", bottomOffset: -12, rotate: -16, size: 20 },
-    { Icon: Hammer, x: "24%", bottomOffset: 2, rotate: 10, size: 17 },
-    { Icon: Ruler, x: "44%", bottomOffset: -14, rotate: -9, size: 18 },
-    { Icon: HardHat, x: "62%", bottomOffset: 0, rotate: 14, size: 18 },
-    { Icon: Shovel, x: "70%", bottomOffset: -12, rotate: -13, size: 17 },
-  ];
-  return (
-    <div className="fixed left-0 right-0 max-w-md mx-auto pointer-events-none" style={{ bottom: 60, height: 40 }}>
-      {tools.map(({ Icon, x, bottomOffset, rotate, size }, i) => (
-        <div
-          key={i}
-          style={{
-            position: "absolute",
-            left: x,
-            bottom: bottomOffset,
-            transform: `rotate(${rotate}deg)`,
-            width: size + 16,
-            height: size + 16,
-            borderRadius: 10,
-            background: "linear-gradient(145deg, #34322e, #1c1b19)",
-            boxShadow: "3px 4px 7px rgba(0,0,0,0.55), -1px -1px 2px rgba(255,255,255,0.06)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: 0.88,
-          }}
-        >
-          <Icon size={size} color={COLORS.accent} strokeWidth={2} />
-        </div>
-      ))}
     </div>
   );
 }
