@@ -2151,71 +2151,7 @@ export default function SiteManager() {
     showToast(t.saveProfile);
   }
 
-  function buildReportHtml(report) {
-    const periodLabel = report.period === "daily" ? t.daily : t.monthly;
-    const rows = report.entries
-      .map((e) => {
-        const meta = typeMeta(e.type, t);
-        const qtyStr = e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label;
-        return `<tr><td>${e.description || ""}</td><td>${meta.label}</td><td>${qtyStr}</td><td>${e.projectName || ""}</td></tr>`;
-      })
-      .join("");
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${t.appLabel} — ${periodLabel} ${report.periodLabel}</title>
-      <style>
-        body { font-family: -apple-system, system-ui, sans-serif; color: #111; padding: 32px; max-width: 800px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #DA291C; padding-bottom: 12px; margin-bottom: 20px; }
-        .header .sub { color: #666; font-size: 12px; margin-top: 2px; }
-        .header h1 { font-size: 20px; margin: 0; }
-        .header img { opacity: 0.9; max-width: 160px; max-height: 70px; object-fit: contain; }
-        .section { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 16px; }
-        .field { margin-bottom: 6px; font-size: 13px; }
-        .totalhours { font-weight: 700; font-size: 14px; margin: 10px 0; background: #f5f5f5; padding: 8px 10px; border-radius: 4px; display: inline-block; }
-        .tablabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin: 12px 0 4px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-bottom: 8px; }
-        th { text-align: left; background: #fafafa; border-bottom: 2px solid #333; padding: 6px 8px; }
-        td { padding: 6px 8px; border-bottom: 1px solid #eee; word-wrap: break-word; }
-        th:nth-child(1), td:nth-child(1) { width: 40%; }
-        th:nth-child(2), td:nth-child(2) { width: 20%; }
-        th:nth-child(3), td:nth-child(3) { width: 20%; }
-        th:nth-child(4), td:nth-child(4) { width: 20%; }
-        .footer { margin-top: 24px; font-size: 11px; color: #999; }
-        @media print { body { padding: 0; } .section { page-break-inside: avoid; } }
-      </style>
-      </head><body>
-        <div class="header">
-          <div>
-            <h1>${t.appLabel}</h1>
-            <div class="sub">${periodLabel} · ${report.periodLabel}</div>
-          </div>
-          <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
-        </div>
-        <div class="section">
-          <div class="field"><strong>${t.yourName}:</strong> ${profile.name || "—"}</div>
-          <div class="field"><strong>${t.sitesLabel}:</strong> ${report.sitesVisited.join(", ") || "—"}</div>
-          ${report.notes ? `<div class="field"><strong>${t.notesLabel}:</strong> ${report.notes}</div>` : ""}
-          <div class="totalhours">${t.totalHoursLabel}: ${report.hours} h</div>
-          <div class="tablabel">${t.entriesTitle}</div>
-          <table>
-            <thead><tr><th>${t.entriesTitle}</th><th>${t.categoryLabel}</th><th>${t.qtyPlaceholder}</th><th>${t.sitesLabel}</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-        <div class="footer">${t.generatedOnLabel}: ${new Date().toLocaleString()}${report.editedAt ? ` · ${t.editedTag}` : ""}</div>
-      </body></html>`;
-  }
-
-  function buildProjectsReportHtml(projectIds) {
-    const orderedProjects = projectIds && projectIds.length ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean) : projects;
-    const sections = orderedProjects
-      .map((p) => {
-        const pEntries = entries.filter((e) => e.projectId === p.id);
-        const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
-        const materials = pEntries.filter((e) => e.type === "material");
-        const machines = pEntries.filter((e) => e.type === "tool");
-        return { project: p, hours, materials, machines };
-      })
-      .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0);
-
+  function renderReportDocument(subtitle, sections) {
     const rowsHtml = (items) =>
       items
         .map((i) => `<tr><td>${i.description || ""}</td><td>${i.qty || ""}</td><td>${i.unit || ""}</td></tr>`)
@@ -2232,9 +2168,9 @@ export default function SiteManager() {
       .map(
         (s) => `
       <div class="section">
-        <h2>${s.project.name}</h2>
-        ${s.project.client ? `<div class="meta">${s.project.client}</div>` : ""}
-        ${s.project.address ? `<div class="meta">${s.project.address}</div>` : ""}
+        <h2>${s.title}</h2>
+        ${s.client ? `<div class="meta">${s.client}</div>` : ""}
+        ${s.address ? `<div class="meta">${s.address}</div>` : ""}
         <div class="totalhours">${t.totalHoursLabel}: ${s.hours.toFixed(1)} h</div>
         ${tableHtml(t.materialsLogged, s.materials)}
         ${tableHtml(t.machinesToolsLabel, s.machines)}
@@ -2267,13 +2203,46 @@ export default function SiteManager() {
         <div class="header">
           <div>
             <h1>${t.appLabel}</h1>
-            <div class="sub">${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}</div>
+            <div class="sub">${subtitle}</div>
           </div>
           <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
         </div>
         ${sectionsHtml || `<div class="meta">${t.noProjectsYet}</div>`}
         <div class="footer">${t.generatedOnLabel}: ${new Date().toLocaleString()}</div>
       </body></html>`;
+  }
+
+  function buildReportHtml(report) {
+    const periodLabel = report.period === "daily" ? t.daily : t.monthly;
+    const bySite = {};
+    report.entries.forEach((e) => {
+      const key = e.projectName || t.sitesLabel;
+      (bySite[key] = bySite[key] || []).push(e);
+    });
+    const sections = Object.entries(bySite).map(([siteName, ents]) => {
+      const proj = projects.find((p) => p.name === siteName);
+      const hours = ents.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
+      const materials = ents.filter((e) => e.type === "material");
+      const machines = ents.filter((e) => e.type === "tool");
+      return { title: siteName, client: proj?.client || "", address: proj?.address || "", hours, materials, machines };
+    });
+    const subtitle = `${periodLabel} · ${report.periodLabel}${profile.name ? " · " + profile.name : ""}`;
+    return renderReportDocument(subtitle, sections);
+  }
+
+  function buildProjectsReportHtml(projectIds) {
+    const orderedProjects = projectIds && projectIds.length ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean) : projects;
+    const sections = orderedProjects
+      .map((p) => {
+        const pEntries = entries.filter((e) => e.projectId === p.id);
+        const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
+        const materials = pEntries.filter((e) => e.type === "material");
+        const machines = pEntries.filter((e) => e.type === "tool");
+        return { title: p.name, client: p.client || "", address: p.address || "", hours, materials, machines };
+      })
+      .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0);
+    const subtitle = `${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}`;
+    return renderReportDocument(subtitle, sections);
   }
 
   function toggleReportProject(id) {
