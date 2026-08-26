@@ -208,6 +208,17 @@ removing them shifts every later field so banks reject the bill.
   technical line (`errDetail`) shows the real error, image count, payload
   size and build hash underneath. It exists because guessing wasted hours —
   leave it in.
+- **Offline persistence hides server rejections.** `setDoc` resolves as soon
+  as the write is queued locally, so a rules denial surfaces later as a silent
+  rollback. Onboarding once appeared to succeed and then didn't. For anything
+  that must be true before the app moves on, read it back with
+  `getDocFromServer` rather than trusting the write.
+- **Rules tests must cover the founding case.** Seeding members with rules
+  disabled hid a rule that required `isOwner()` to create the owner's own
+  membership — so a new owner had to already be an owner, and creating a
+  company was impossible. Test the paths where *nothing exists yet*: they are
+  exactly the ones a seeded fixture skips. The same pass caught deletes
+  failing because `request.resource` is null on a delete.
 - **Testing hits live production data.** There is no staging Firestore
   project. Snapshot before, restore after, or add a test project.
 
