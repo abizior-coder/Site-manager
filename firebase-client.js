@@ -108,6 +108,15 @@ export async function importLegacy(docs) {
   return written;
 }
 
+// The Claude proxy requires proof of a signed-in account. Firebase refreshes
+// the token itself when it is close to expiry.
+export async function getIdToken() {
+  await initFirebase();
+  const user = sdk.auth.currentUser;
+  if (!user) throw new Error("not signed in");
+  return user.getIdToken();
+}
+
 export async function onAuthChange(cb) {
   await initFirebase();
   return sdk.authApi.onAuthStateChanged(sdk.auth, cb);
