@@ -1925,7 +1925,7 @@ const VAT_RATES = [
 ];
 
 const DEFAULT_PROJECT_STATUS = "waiting";
-function statusMeta(status) {
+export function statusMeta(status) {
   return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES.find((s) => s.key === DEFAULT_PROJECT_STATUS);
 }
 
@@ -1944,7 +1944,7 @@ function contactKindMeta(kind) {
 // One-time promotion of `project.client` strings into customer records.
 // Matches case-insensitively on name so two projects for the same client
 // collapse into one customer rather than duplicating them.
-function migrateClientsToCustomers(projects, customers) {
+export function migrateClientsToCustomers(projects, customers) {
   const next = customers.slice();
   const byName = new Map(next.map((c) => [c.name.trim().toLowerCase(), c]));
   let changed = false;
@@ -1980,7 +1980,7 @@ const DOC_STATUSES = {
 
 // Quote and invoice totals. Money is computed in one place so the printed
 // document, the on-screen summary and the QR-bill amount can never disagree.
-function documentTotals(doc) {
+export function documentTotals(doc) {
   const net = (doc.lineItems || []).reduce((sum, li) => {
     const qty = parseFloat(li.qty || 0) || 0;
     const price = parseFloat(li.unitPrice || 0) || 0;
@@ -1996,7 +1996,7 @@ function documentTotals(doc) {
 // Paid / partly paid / overdue is derived from the amount recorded against
 // the invoice rather than stored separately, so a status can never drift out
 // of step with the money actually received.
-function documentState(doc, today) {
+export function documentState(doc, today) {
   const totals = documentTotals(doc);
   const paid = parseFloat(doc.paidAmount || 0) || 0;
   const outstanding = Math.max(0, Math.round((totals.gross - paid) * 100) / 100);
@@ -2014,7 +2014,7 @@ function documentState(doc, today) {
   return { key, meta, totals, paid, outstanding, overdue };
 }
 
-function nextDocNumber(documents, type, year) {
+export function nextDocNumber(documents, type, year) {
   const prefix = `${type === "invoice" ? "R" : "O"}-${year}-`;
   const used = (documents || [])
     .filter((d) => d.type === type && String(d.number || "").startsWith(prefix))
@@ -2078,13 +2078,13 @@ function StoredImage({ photoId, photo, className, alt = "" }) {
 function todayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
 function monthKey(d = new Date()) { return d.toISOString().slice(0, 7); }
 function uid() { return Math.random().toString(36).slice(2, 10); }
-function fmtHM(ms) {
+export function fmtHM(ms) {
   const h = Math.floor(ms / 3600000);
   const m = Math.floor((ms % 3600000) / 60000);
   return `${h}h ${m}m`;
 }
 function mapsUrl(address) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`; }
-function encodeProjectCode(project, entries) {
+export function encodeProjectCode(project, entries) {
   const items = (entries || [])
     .filter((e) => e.type !== "photo") // keep the code a manageable size — photos aren't included
     .map((e) => ({ type: e.type, description: e.description, qty: e.qty || "", unit: e.unit || "", date: e.date }));
@@ -2095,19 +2095,33 @@ function encodeProjectCode(project, entries) {
     return "";
   }
 }
-function extractCode(text, prefix) {
+export function extractCode(text, prefix) {
   if (!text) return null;
   const stripped = text.replace(/\s+/g, ""); // strip all whitespace/newlines, e.g. from email line-wrapping
   const re = new RegExp(prefix + "[A-Za-z0-9+/=]+");
   const m = stripped.match(re);
   return m ? m[0] : null;
 }
-function decodeProjectCode(code) {
+
+// Base64 uses ordinary letters, so a code pasted with text after it -- a
+// signature, a closing greeting -- has that text swallowed by the match and
+// fails to decode. Try the longest prefix that actually parses, stepping in
+// fours because valid base64 comes in four-character groups.
+function decodePayload(raw) {
+  for (let len = raw.length - (raw.length % 4); len >= 8; len -= 4) {
+    try {
+      const obj = JSON.parse(decodeURIComponent(escape(atob(raw.slice(0, len)))));
+      if (obj && typeof obj === "object") return obj;
+    } catch (e) { /* keep trimming */ }
+  }
+  return null;
+}
+export function decodeProjectCode(code) {
   try {
     const found = extractCode(code, "SITE1-");
     if (!found) return null;
     const raw = found.replace(/^SITE1-/, "");
-    const obj = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    const obj = decodePayload(raw);
     if (!obj || !obj.name) return null;
     if (!Array.isArray(obj.entries)) obj.entries = [];
     return obj;
@@ -2115,25 +2129,25 @@ function decodeProjectCode(code) {
     return null;
   }
 }
-function encodeBackup(obj) {
+export function encodeBackup(obj) {
   try {
     return "BACKUP1-" + btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
   } catch (e) {
     return "";
   }
 }
-function decodeBackup(code) {
+export function decodeBackup(code) {
   try {
     const found = extractCode(code, "BACKUP1-");
     if (!found) return null;
     const raw = found.replace(/^BACKUP1-/, "");
-    return JSON.parse(decodeURIComponent(escape(atob(raw))));
+    return decodePayload(raw);
   } catch (e) {
     return null;
   }
 }
 
-function classifyNote(text) {
+export function classifyNote(text) {
   const t = text.toLowerCase();
   if (/(kg|bag|bags|m2|m²|sq m|pallet|szt|piece|pieces|tile|tiles|nail|shingle|membrane|insulation|felt|beam|plank|sack|zement|ciment|cemento|worki|vrec|pytl)/.test(t)) return "material";
   if (/(drill|saw|ladder|nail gun|hammer|scaffold|harness|tool|grinder|compressor|leiter|échelle|scala|escalera|escada|drabina|rebrík|žebřík)/.test(t)) return "tool";
@@ -3032,7 +3046,9 @@ export default function SiteManager() {
     // screen but nothing else, so a "restored" backup vanished on reload.
     await persist({
       projects: data.projects || [],
-      entries: data.entries || [],
+      // Older backups predate attribution; without a userId the rules would
+      // refuse every restored entry.
+      entries: (data.entries || []).map((e) => ({ ...e, userId: e.userId || user?.uid || null })),
       customers: data.customers || [],
       documents: data.documents || [],
       leaveRequests: data.leaveRequests || [],
@@ -3151,11 +3167,15 @@ export default function SiteManager() {
     setTimeout(() => setToast(null), 2200);
   }
 
+  // Every entry must be stamped with who created it: the security rules reject
+  // a create whose userId is not the signed-in user, so any code path building
+  // an entry by hand would be silently refused. Build them all through here.
+  function newEntry(partial) {
+    return { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...partial };
+  }
+
   function addEntry(entry) {
-    // Attribution is required by the rules, and is what makes per-person
-    // hours possible.
-    const e = { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...entry };
-    persist({ entries: [e, ...entries] });
+    persist({ entries: [newEntry(entry), ...entries] });
   }
 
   function addProject() {
@@ -3431,10 +3451,8 @@ export default function SiteManager() {
       return;
     }
     const p = { id: uid(), name: obj.name, client: obj.client || "", address: obj.address || "", category: obj.category || "flat", createdAt: Date.now() };
-    const newEntries = (obj.entries || []).map((e) => ({
-      id: uid(),
+    const newEntries = (obj.entries || []).map((e) => newEntry({
       date: e.date || todayKey(),
-      createdAt: Date.now(),
       type: e.type,
       projectId: p.id,
       description: e.description,
@@ -3471,13 +3489,13 @@ export default function SiteManager() {
     const pad = (n) => String(n).padStart(2, "0");
     const startD = new Date(activeClock.startedAt);
     const endD = new Date();
-    const e = {
-      id: uid(), date: todayKey(), createdAt: Date.now(), type: "time",
+    const e = newEntry({
+      type: "time",
       projectId: activeClock.projectId, description: `${fmtHM(durationMs)}`,
       qty: (durationMs / 3600000).toFixed(2), unit: "h",
       startTime: `${pad(startD.getHours())}:${pad(startD.getMinutes())}`,
       endTime: `${pad(endD.getHours())}:${pad(endD.getMinutes())}`,
-    };
+    });
     persist({ entries: [e, ...entries], activeClock: null });
     showToast(t.clockedOutLogged);
     sendWebhook("time_entry", { project: projectName(activeClock.projectId), date: e.date, hours: e.qty, startTime: e.startTime, endTime: e.endTime });
@@ -3542,8 +3560,7 @@ export default function SiteManager() {
   }
 
   function transferBasketToProject(projectId) {
-    const newEntries = basket.map((i) => ({
-      id: uid(), date: todayKey(), createdAt: Date.now(),
+    const newEntries = basket.map((i) => newEntry({
       type: i.kind, projectId, description: i.name, qty: i.qty, unit: i.unit,
     }));
     persist({ entries: [...newEntries, ...entries] });
@@ -3806,7 +3823,7 @@ export default function SiteManager() {
   function confirmScan() {
     if (!scanModal || !scanModal.items) return;
     const chosen = scanModal.items.filter((i) => i.checked);
-    const newEntries = chosen.map((i) => ({ id: uid(), date: todayKey(), createdAt: Date.now(), type: "material", projectId: scanModal.projectId, description: i.name, qty: i.qty, unit: i.unit }));
+    const newEntries = chosen.map((i) => newEntry({ type: "material", projectId: scanModal.projectId, description: i.name, qty: i.qty, unit: i.unit }));
     persist({ entries: [...newEntries, ...entries] });
     setScanModal(null);
   }
@@ -3966,8 +3983,8 @@ export default function SiteManager() {
     if (!inspectionModal || !inspectionModal.report) return;
     const chosenMaterials = (inspectionModal.materials || []).filter((i) => i.checked);
     const newEntries = [
-      { id: uid(), date: todayKey(), createdAt: Date.now(), type: "inspection", projectId: inspectionModal.projectId, description: inspectionModal.report },
-      ...chosenMaterials.map((i) => ({ id: uid(), date: todayKey(), createdAt: Date.now(), type: "material", projectId: inspectionModal.projectId, description: i.name, qty: i.qty, unit: i.unit })),
+      newEntry({ type: "inspection", projectId: inspectionModal.projectId, description: inspectionModal.report }),
+      ...chosenMaterials.map((i) => newEntry({ type: "material", projectId: inspectionModal.projectId, description: i.name, qty: i.qty, unit: i.unit })),
     ];
     persist({ entries: [...newEntries, ...entries] });
     showToast(t.inspectionLogged);

@@ -29,7 +29,12 @@ the primary users are German-speaking Swiss crews).
 |---|---|---|
 | App | `roofing-site-manager.jsx` | The whole app — one ~4,700-line React component tree |
 | Mount | `entry.jsx` | Build entry; mounts `SiteManager` into `#root` |
-| Shell | `index.html` | Tailwind CDN + Firebase Firestore shim (`window.storage`) |
+| Shell | `index.html` | Tailwind CDN only — deliberately no app logic |
+| Firebase | `firebase-client.js` | SDK boot, auth, offline cache |
+| Company store | `company-store.js` | Company-scoped storage, diff writes, invites, migration |
+| QR-bill | `swiss-qr.js` | Swiss QR-Rechnung payload |
+| Rules | `firestore.rules` | The real access control |
+| Tests | `logic.test.mjs`, `rules.test.mjs` | `npm test` |
 | Bundle | `bundle.js` | **Generated — never edit by hand** |
 | Cache-bust | `scripts/stamp.mjs` | Stamps `bundle.js?v=<hash>` into `index.html` |
 | AI proxy | `worker/src/index.js` | Cloudflare Worker holding the Anthropic key |
@@ -66,27 +71,37 @@ committing, or the deployed app will not contain your change.
 
 ## 4. Data model
 
-All persistence goes through `window.storage`, defined in the **bundle**
-(`firebase-client.js`, wired up in `entry.jsx`) — not in `index.html`.
-Every document is scoped to the signed-in account at
-**`users/{uid}/kv/{key}`**, and reads/writes throw while signed out.
-`firestore.rules` enforces that server-side; the client cannot bypass it.
+Everything is scoped to a **company**, not to a person. Storage lives in the
+bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 
-| Key | Contents |
+| Path | Contents |
 |---|---|
-| `site-data` | `{ projects, entries, customers, documents, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
-| `site-billing` | Company name, address, IBAN, VAT number, payment term |
-| `site-material-prices` | Remembered unit price per material name |
-| `photo-<id>` | **One document per photo** (data URL). Referenced by `photoId` |
-| `site-profile` | User + supervisor details, webhook URL |
-| `site-docs` | `{ insurance, certificates }` |
-| `site-tech-library` | Scanned spec-sheet entries |
-| `site-material-units` | Remembered unit per material name |
-| `site-lang`, `site-weather-loc` | Preferences |
+| `companies/{cid}/projects/{id}` | One document per project |
+| `companies/{cid}/entries/{id}` | One per entry, each carrying `userId` |
+| `companies/{cid}/customers/{id}` | One per customer, with `contacts` history |
+| `companies/{cid}/documents/{id}` | Quotes and invoices — **owner only** |
+| `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
+| `companies/{cid}/members/{uid}` | `role: owner \| crew` |
+| `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>` |
+| `users/{uid}` | Which company the account belongs to |
+| `invites/{code}` | Short-lived join codes |
 
-**Entries are one flat array** with a `type` discriminator:
-`time`, `material`, `tool`, `note`, `photo`, `pickup`, `inspection`.
-Materials and tools shown in a project are *filtered slices* of this array.
+The app still holds `projects`, `entries`, `customers` and `documents` as
+arrays in React state. `persist()` **diffs each array against the last known
+one and writes only changed documents** (`syncCollection`), which is what
+keeps two phones from overwriting each other. Call sites did not have to
+change; do not "simplify" persist back into a single write.
+
+**Entries** use a `type` discriminator: `time`, `material`, `tool`, `note`,
+`photo`, `pickup`, `inspection`. Materials and tools shown in a project are
+*filtered slices* of the entries array.
+
+> **Build every entry through `newEntry()`.** The rules reject a create whose
+> `userId` is not the signed-in user, so an entry object assembled by hand is
+> silently refused. This already broke clock-out, AI scans, inspections,
+> pickup codes, basket transfer and project import at once.
+
+> The clock is **per person** (`clock-<uid>`), not per company.
 
 > Reordering a slice must write the new order back into **only the array
 > slots that slice occupies** — see `reorderEntries`. Rebuilding the array
@@ -106,7 +121,7 @@ any project that still has only a string, once, on load.
 > different people.
 
 Projects carry `category` (`PROJECT_CATEGORIES`) and `status`
-(`PROJECT_STATUSES`: waiting / construction / hold / completed). Projects
+(`PROJECT_STATUSES`: lead / quoted / waiting / construction / hold / completed / lost). Projects
 saved before statuses existed have no `status` field and must read as
 `waiting` — always go through `statusMeta(p.status || DEFAULT_PROJECT_STATUS)`.
 
@@ -118,17 +133,23 @@ These are real and currently unfixed. Ordered by how much damage they do.
    everyone, so it is unreachable rather than exposed, but it has not been
    deleted. Remove it from the Firebase console once you are satisfied the
    imported copy under your account is complete.
-2. **Whole-document writes.** Every change rewrites all entries, so two
-   phones editing concurrently silently clobber each other. Fix: split into
-   `projects/{id}` and `entries/{id}` collections.
-3. **The Worker has no rate limit.** It caps images per request
-   (`MAX_IMAGE_BLOCKS = 4`) but nothing stops repeated calls running up the
-   Anthropic bill. It is a public endpoint.
-4. **Backup and share codes do not carry photo contents.** They reference
-   `photoId`s, so a backup restored where those photo documents are not
-   readable will show empty images. Acceptable while everything lives in one
-   Firestore project; revisit alongside auth.
-5. `roofing-site-manager.html` is an unused stale duplicate of the shell.
+2. **Large parts of the app have never been exercised by a person.** A
+   verification pass over untested features found the clock-in list silently
+   capped at four projects, backup restore writing to a key nothing reads, and
+   six entry-creation paths missing `userId`. Reports, the calendar and leave
+   flow, safety/SOS, the materials shop and the technical library are **still
+   unverified**. Assume nothing there works until it has been tried.
+3. **The Worker's rate limit is optional.** Requests now require a signed-in
+   account, but the per-account daily cap only applies when a KV namespace is
+   bound, and none is. Sign-up is open, so a determined abuser could still
+   register and spend the Anthropic balance.
+4. **Backup and share codes do not carry photo contents**, and a shared
+   project's photos are unreadable to the recipient's company. Fixing that
+   properly needs cross-company sharing, which does not exist.
+5. **Leave requests and sent reports still share one `site-meta` document**,
+   so concurrent edits to those can still clobber. Low frequency, but the last
+   remnant of the old blob model.
+6. `roofing-site-manager.html` is an unused stale duplicate of the shell.
    It is not the deployed entry point (`index.html` is) and can be deleted.
 
 ### Changing security rules
@@ -137,16 +158,20 @@ These are real and currently unfixed. Ordered by how much damage they do.
 panel is not permission; a crew member with the browser console must still be
 unable to read the labour rate.
 
-There is a test suite. **Run it after any rules change:**
+There are two test suites. **Run them after any change:**
 
 ```text
-npm run test:rules
+npm test
 ```
 
-It asserts what the server allows: crew cannot read invoices or finance,
-cannot edit another person's hours, cannot promote themselves, and expired or
-forged invite codes are rejected. Requires Java (Temurin JRE) for the
-Firestore emulator.
+`test:logic` covers share and backup codes, document numbering, the client
+migration and note classification.
+
+`test:rules` asserts what the server allows: crew cannot read invoices or
+finance, cannot edit another person's hours, cannot promote themselves, and
+expired or forged invite codes are rejected. It also covers founding a company,
+where nothing exists yet. Requires Java (Temurin JRE) for the Firestore
+emulator.
 
 Then deploy and re-check from a real browser:
 
