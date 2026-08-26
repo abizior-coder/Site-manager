@@ -74,7 +74,9 @@ Every document is scoped to the signed-in account at
 
 | Key | Contents |
 |---|---|
-| `site-data` | `{ projects, entries, customers, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
+| `site-data` | `{ projects, entries, customers, documents, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
+| `site-billing` | Company name, address, IBAN, VAT number, payment term |
+| `site-material-prices` | Remembered unit price per material name |
 | `photo-<id>` | **One document per photo** (data URL). Referenced by `photoId` |
 | `site-profile` | User + supervisor details, webhook URL |
 | `site-docs` | `{ insurance, certificates }` |
@@ -142,6 +144,28 @@ Then **verify from a signed-out browser** that a read of `local/site-data`,
 an anonymous write, and a read of another uid's subtree are all denied. A
 rules file that deploys cleanly but does not deny is worse than none, because
 it creates false confidence.
+
+### Swiss QR-bill
+
+`swiss-qr.js` builds the QR-Rechnung payload: **31 lines terminated by `EPD`**,
+per the SIX implementation guidelines. Field *order and count* are what make it
+scannable — the seven blank ultimate-creditor lines are load-bearing, and
+removing them shifts every later field so banks reject the bill.
+
+- The QR is rendered **locally** (`qrcode` package). Never move this to a QR
+  image service: the payload carries an IBAN plus the customer's name and
+  address.
+- `SCOR` requires a real ISO 11649 reference. Passing a bare invoice number
+  produces a bill that scans and is then rejected — `buildQrPayload` formats
+  it unless an `RF…` reference is supplied.
+- The payment part is printed **only** when `validateBillingProfile` passes.
+  A QR-bill with a wrong IBAN scans perfectly and sends money to the wrong
+  account, so no slip is much better than a plausible one.
+- Verified by decoding a generated QR back to the exact payload. **Not
+  verified against a bank** — before sending real invoices, run a sample
+  through the official SIX validation portal.
+- VAT rates in `VAT_RATES` are the 2024 federal rates. They have changed
+  before; check estv.admin.ch rather than trusting the constant.
 
 ## 6. Gotchas that have already cost time
 

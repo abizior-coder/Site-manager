@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
+import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -103,6 +104,7 @@ const T = {
     authIntro: "Sign in to reach your site data.", authEmail: "Email", authPassword: "Password", authSignIn: "Sign in", authSignUp: "Create account", authNeedAccount: "Create an account", authHaveAccount: "I already have an account", authForgot: "Forgot password?", authResetSent: "Reset email sent — check your inbox.", authErrMissing: "Enter your email and password.", authErrMissingEmail: "Enter your email address first.", authErrInvalidEmail: "That email address doesn't look right.", authErrWeakPassword: "Use a password of at least 6 characters.", authErrEmailInUse: "An account already exists for that email — sign in instead.", authErrBadLogin: "Wrong email or password.", authErrTooMany: "Too many attempts — wait a moment and try again.", authErrProviderOff: "Email sign-in is not enabled for this project yet.", authErrNetwork: "No connection — check your signal and try again.", authErrGeneric: "That didn't work — try again.", authPrivacyNote: "Your site data and customer details are private to your account.", signedInAs: "Signed in as", signOut: "Sign out",
     legacyImportTitle: "Existing data found", legacyImportHint: "Data from before accounts existed was found on this project. Import it into your account to keep it — it will then be private to you.", legacyImportCount: "records found", legacyImportBtn: "Import into my account", legacyImportSkip: "Not now",
     costingTitle: "Job costing", labourCost: "Labour", materialCost: "Materials", totalCost: "Total cost", quotedLabel: "Quoted", quotedPlaceholder: "Quoted amount", marginLabel: "Margin", unitPriceLabel: "Unit price", labourRateLabel: "Hourly rate", labourRateHint: "Used to cost logged hours. Stays on your account — never shown in reports sent to a supervisor.", costingNoRate: "Set an hourly rate in your profile to cost labour.", costingUnpriced: "items have no price yet.",
+    quoteLabel: "Quote", invoiceLabel: "Invoice", newQuote: "New quote", newInvoice: "New invoice", convertToInvoice: "Make invoice", invoiceCreated: "Invoice created", docSaved: "Saved", docNeedsLine: "Add at least one line.", docLines: "Lines", docAddLine: "Add line", docDescription: "Description", docLineTotal: "Total", docNet: "Subtotal", docVat: "VAT", docTotal: "Total", docDate: "Date", docDue: "Due", vatStandard: "Standard", vatReduced: "Reduced", vatLodging: "Lodging", vatNone: "None", vatNumberLabel: "VAT number", billingTitle: "Billing details", billingHint: "Used on quotes and invoices, and to build the Swiss QR-bill. Needs a Swiss IBAN.", billingCompany: "Company name", billingStreet: "Street", billingBuilding: "No.", billingPostal: "Postcode", billingTown: "Town", paymentDaysLabel: "Payment term (days)", qrPaymentPart: "Payment part", qrReceipt: "Receipt", qrPayableTo: "Account / Payable to", qrPayableBy: "Payable by", qrReference: "Reference", qrAmount: "Amount", qrCurrency: "Currency", qrMissingBilling: "Add your billing details to print a QR-bill.", qrErrName: "Company name is required.", qrErrIban: "That is not a valid Swiss IBAN.", qrErrAddress: "Postcode and town are required.",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -213,6 +215,7 @@ const T = {
     authIntro: "Anmelden, um auf Ihre Baustellendaten zuzugreifen.", authEmail: "E-Mail", authPassword: "Passwort", authSignIn: "Anmelden", authSignUp: "Konto erstellen", authNeedAccount: "Konto erstellen", authHaveAccount: "Ich habe bereits ein Konto", authForgot: "Passwort vergessen?", authResetSent: "E-Mail zum Zurücksetzen gesendet — Posteingang prüfen.", authErrMissing: "E-Mail und Passwort eingeben.", authErrMissingEmail: "Zuerst die E-Mail-Adresse eingeben.", authErrInvalidEmail: "Diese E-Mail-Adresse sieht nicht korrekt aus.", authErrWeakPassword: "Passwort mit mindestens 6 Zeichen verwenden.", authErrEmailInUse: "Für diese E-Mail besteht bereits ein Konto — bitte anmelden.", authErrBadLogin: "Falsche E-Mail oder falsches Passwort.", authErrTooMany: "Zu viele Versuche — kurz warten und erneut versuchen.", authErrProviderOff: "E-Mail-Anmeldung ist für dieses Projekt noch nicht aktiviert.", authErrNetwork: "Keine Verbindung — Empfang prüfen und erneut versuchen.", authErrGeneric: "Das hat nicht geklappt — nochmals versuchen.", authPrivacyNote: "Ihre Baustellendaten und Kundendaten sind nur für Ihr Konto sichtbar.", signedInAs: "Angemeldet als", signOut: "Abmelden",
     legacyImportTitle: "Bestehende Daten gefunden", legacyImportHint: "Es wurden Daten aus der Zeit vor den Konten gefunden. Importieren Sie sie in Ihr Konto, um sie zu behalten — danach sind sie privat.", legacyImportCount: "Datensätze gefunden", legacyImportBtn: "In mein Konto importieren", legacyImportSkip: "Jetzt nicht",
     costingTitle: "Nachkalkulation", labourCost: "Arbeit", materialCost: "Material", totalCost: "Gesamtkosten", quotedLabel: "Offeriert", quotedPlaceholder: "Offertbetrag", marginLabel: "Marge", unitPriceLabel: "Einzelpreis", labourRateLabel: "Stundensatz", labourRateHint: "Zur Bewertung der erfassten Stunden. Bleibt in Ihrem Konto — erscheint nie in Berichten an Vorgesetzte.", costingNoRate: "Stundensatz im Profil hinterlegen, um die Arbeit zu bewerten.", costingUnpriced: "Positionen haben noch keinen Preis.",
+    quoteLabel: "Offerte", invoiceLabel: "Rechnung", newQuote: "Neue Offerte", newInvoice: "Neue Rechnung", convertToInvoice: "Rechnung erstellen", invoiceCreated: "Rechnung erstellt", docSaved: "Gespeichert", docNeedsLine: "Mindestens eine Position erfassen.", docLines: "Positionen", docAddLine: "Position hinzufügen", docDescription: "Bezeichnung", docLineTotal: "Total", docNet: "Zwischentotal", docVat: "MWST", docTotal: "Total", docDate: "Datum", docDue: "Fällig", vatStandard: "Normalsatz", vatReduced: "Reduziert", vatLodging: "Beherbergung", vatNone: "Keine", vatNumberLabel: "MWST-Nummer", billingTitle: "Rechnungsangaben", billingHint: "Für Offerten und Rechnungen sowie den Schweizer QR-Einzahlungsschein. Benötigt eine Schweizer IBAN.", billingCompany: "Firmenname", billingStreet: "Strasse", billingBuilding: "Nr.", billingPostal: "PLZ", billingTown: "Ort", paymentDaysLabel: "Zahlungsfrist (Tage)", qrPaymentPart: "Zahlteil", qrReceipt: "Empfangsschein", qrPayableTo: "Konto / Zahlbar an", qrPayableBy: "Zahlbar durch", qrReference: "Referenz", qrAmount: "Betrag", qrCurrency: "Währung", qrMissingBilling: "Rechnungsangaben erfassen, um einen QR-Einzahlungsschein zu drucken.", qrErrName: "Firmenname ist erforderlich.", qrErrIban: "Das ist keine gültige Schweizer IBAN.", qrErrAddress: "PLZ und Ort sind erforderlich.",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -323,6 +326,7 @@ const T = {
     authIntro: "Connectez-vous pour accéder à vos données de chantier.", authEmail: "E-mail", authPassword: "Mot de passe", authSignIn: "Se connecter", authSignUp: "Créer un compte", authNeedAccount: "Créer un compte", authHaveAccount: "J'ai déjà un compte", authForgot: "Mot de passe oublié ?", authResetSent: "E-mail de réinitialisation envoyé — vérifiez votre boîte.", authErrMissing: "Saisissez votre e-mail et votre mot de passe.", authErrMissingEmail: "Saisissez d'abord votre adresse e-mail.", authErrInvalidEmail: "Cette adresse e-mail semble incorrecte.", authErrWeakPassword: "Utilisez un mot de passe d'au moins 6 caractères.", authErrEmailInUse: "Un compte existe déjà pour cet e-mail — connectez-vous.", authErrBadLogin: "E-mail ou mot de passe incorrect.", authErrTooMany: "Trop de tentatives — patientez un instant.", authErrProviderOff: "La connexion par e-mail n'est pas encore activée pour ce projet.", authErrNetwork: "Pas de connexion — vérifiez votre réseau.", authErrGeneric: "Cela n'a pas fonctionné — réessayez.", authPrivacyNote: "Vos données de chantier et vos clients restent privés à votre compte.", signedInAs: "Connecté en tant que", signOut: "Se déconnecter",
     legacyImportTitle: "Données existantes trouvées", legacyImportHint: "Des données antérieures aux comptes ont été trouvées. Importez-les dans votre compte pour les conserver — elles deviendront privées.", legacyImportCount: "enregistrements trouvés", legacyImportBtn: "Importer dans mon compte", legacyImportSkip: "Pas maintenant",
     costingTitle: "Calcul des coûts", labourCost: "Main-d'œuvre", materialCost: "Matériaux", totalCost: "Coût total", quotedLabel: "Devis", quotedPlaceholder: "Montant du devis", marginLabel: "Marge", unitPriceLabel: "Prix unitaire", labourRateLabel: "Taux horaire", labourRateHint: "Sert à valoriser les heures saisies. Reste dans votre compte — jamais dans les rapports envoyés.", costingNoRate: "Définissez un taux horaire dans votre profil.", costingUnpriced: "postes sans prix.",
+    quoteLabel: "Devis", invoiceLabel: "Facture", newQuote: "Nouveau devis", newInvoice: "Nouvelle facture", convertToInvoice: "Créer la facture", invoiceCreated: "Facture créée", docSaved: "Enregistré", docNeedsLine: "Ajoutez au moins une ligne.", docLines: "Lignes", docAddLine: "Ajouter une ligne", docDescription: "Désignation", docLineTotal: "Total", docNet: "Sous-total", docVat: "TVA", docTotal: "Total", docDate: "Date", docDue: "Échéance", vatStandard: "Normal", vatReduced: "Réduit", vatLodging: "Hébergement", vatNone: "Aucune", vatNumberLabel: "N° TVA", billingTitle: "Coordonnées de facturation", billingHint: "Utilisées sur les devis et factures et pour le QR-facture suisse. IBAN suisse requis.", billingCompany: "Nom de l'entreprise", billingStreet: "Rue", billingBuilding: "N°", billingPostal: "NPA", billingTown: "Localité", paymentDaysLabel: "Délai de paiement (jours)", qrPaymentPart: "Section paiement", qrReceipt: "Récépissé", qrPayableTo: "Compte / Payable à", qrPayableBy: "Payable par", qrReference: "Référence", qrAmount: "Montant", qrCurrency: "Monnaie", qrMissingBilling: "Complétez vos coordonnées pour imprimer un QR-facture.", qrErrName: "Le nom de l'entreprise est requis.", qrErrIban: "IBAN suisse non valide.", qrErrAddress: "NPA et localité requis.",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -433,6 +437,7 @@ const T = {
     authIntro: "Accedi per raggiungere i dati del cantiere.", authEmail: "E-mail", authPassword: "Password", authSignIn: "Accedi", authSignUp: "Crea account", authNeedAccount: "Crea un account", authHaveAccount: "Ho già un account", authForgot: "Password dimenticata?", authResetSent: "E-mail di reimpostazione inviata — controlla la posta.", authErrMissing: "Inserisci e-mail e password.", authErrMissingEmail: "Inserisci prima il tuo indirizzo e-mail.", authErrInvalidEmail: "Questo indirizzo e-mail non sembra corretto.", authErrWeakPassword: "Usa una password di almeno 6 caratteri.", authErrEmailInUse: "Esiste già un account con questa e-mail — accedi.", authErrBadLogin: "E-mail o password errati.", authErrTooMany: "Troppi tentativi — attendi un momento.", authErrProviderOff: "L'accesso via e-mail non è ancora attivo per questo progetto.", authErrNetwork: "Nessuna connessione — controlla il segnale.", authErrGeneric: "Non ha funzionato — riprova.", authPrivacyNote: "I dati di cantiere e dei clienti restano privati del tuo account.", signedInAs: "Connesso come", signOut: "Esci",
     legacyImportTitle: "Dati esistenti trovati", legacyImportHint: "Sono stati trovati dati precedenti agli account. Importali nel tuo account per conservarli — diventeranno privati.", legacyImportCount: "record trovati", legacyImportBtn: "Importa nel mio account", legacyImportSkip: "Non ora",
     costingTitle: "Calcolo costi", labourCost: "Manodopera", materialCost: "Materiali", totalCost: "Costo totale", quotedLabel: "Preventivo", quotedPlaceholder: "Importo preventivo", marginLabel: "Margine", unitPriceLabel: "Prezzo unitario", labourRateLabel: "Tariffa oraria", labourRateHint: "Serve a valorizzare le ore registrate. Resta nel tuo account — mai nei rapporti inviati.", costingNoRate: "Imposta una tariffa oraria nel profilo.", costingUnpriced: "voci senza prezzo.",
+    quoteLabel: "Preventivo", invoiceLabel: "Fattura", newQuote: "Nuovo preventivo", newInvoice: "Nuova fattura", convertToInvoice: "Crea fattura", invoiceCreated: "Fattura creata", docSaved: "Salvato", docNeedsLine: "Aggiungi almeno una riga.", docLines: "Righe", docAddLine: "Aggiungi riga", docDescription: "Descrizione", docLineTotal: "Totale", docNet: "Subtotale", docVat: "IVA", docTotal: "Totale", docDate: "Data", docDue: "Scadenza", vatStandard: "Normale", vatReduced: "Ridotta", vatLodging: "Alloggio", vatNone: "Nessuna", vatNumberLabel: "N. IVA", billingTitle: "Dati di fatturazione", billingHint: "Usati su preventivi e fatture e per la QR-fattura svizzera. Serve un IBAN svizzero.", billingCompany: "Nome azienda", billingStreet: "Via", billingBuilding: "N.", billingPostal: "NPA", billingTown: "Località", paymentDaysLabel: "Termine di pagamento (giorni)", qrPaymentPart: "Sezione pagamento", qrReceipt: "Ricevuta", qrPayableTo: "Conto / Pagabile a", qrPayableBy: "Pagabile da", qrReference: "Riferimento", qrAmount: "Importo", qrCurrency: "Valuta", qrMissingBilling: "Inserisci i dati di fatturazione per stampare una QR-fattura.", qrErrName: "Il nome dell'azienda è obbligatorio.", qrErrIban: "IBAN svizzero non valido.", qrErrAddress: "NPA e località obbligatori.",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -543,6 +548,7 @@ const T = {
     authIntro: "Inicia sesión para acceder a los datos de obra.", authEmail: "Correo", authPassword: "Contraseña", authSignIn: "Iniciar sesión", authSignUp: "Crear cuenta", authNeedAccount: "Crear una cuenta", authHaveAccount: "Ya tengo una cuenta", authForgot: "¿Olvidaste la contraseña?", authResetSent: "Correo de restablecimiento enviado — revisa tu bandeja.", authErrMissing: "Introduce tu correo y contraseña.", authErrMissingEmail: "Introduce primero tu correo.", authErrInvalidEmail: "Ese correo no parece correcto.", authErrWeakPassword: "Usa una contraseña de al menos 6 caracteres.", authErrEmailInUse: "Ya existe una cuenta con ese correo — inicia sesión.", authErrBadLogin: "Correo o contraseña incorrectos.", authErrTooMany: "Demasiados intentos — espera un momento.", authErrProviderOff: "El inicio de sesión por correo aún no está habilitado.", authErrNetwork: "Sin conexión — comprueba tu señal.", authErrGeneric: "No ha funcionado — inténtalo de nuevo.", authPrivacyNote: "Tus datos de obra y clientes son privados de tu cuenta.", signedInAs: "Sesión iniciada como", signOut: "Cerrar sesión",
     legacyImportTitle: "Datos existentes encontrados", legacyImportHint: "Se encontraron datos anteriores a las cuentas. Impórtalos a tu cuenta para conservarlos — pasarán a ser privados.", legacyImportCount: "registros encontrados", legacyImportBtn: "Importar a mi cuenta", legacyImportSkip: "Ahora no",
     costingTitle: "Cálculo de costes", labourCost: "Mano de obra", materialCost: "Materiales", totalCost: "Coste total", quotedLabel: "Presupuestado", quotedPlaceholder: "Importe presupuestado", marginLabel: "Margen", unitPriceLabel: "Precio unitario", labourRateLabel: "Tarifa por hora", labourRateHint: "Sirve para valorar las horas registradas. Queda en tu cuenta — nunca en los informes enviados.", costingNoRate: "Define una tarifa por hora en tu perfil.", costingUnpriced: "partidas sin precio.",
+    quoteLabel: "Presupuesto", invoiceLabel: "Factura", newQuote: "Nuevo presupuesto", newInvoice: "Nueva factura", convertToInvoice: "Crear factura", invoiceCreated: "Factura creada", docSaved: "Guardado", docNeedsLine: "Añade al menos una línea.", docLines: "Líneas", docAddLine: "Añadir línea", docDescription: "Descripción", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Fecha", docDue: "Vencimiento", vatStandard: "General", vatReduced: "Reducido", vatLodging: "Alojamiento", vatNone: "Ninguno", vatNumberLabel: "N.º de IVA", billingTitle: "Datos de facturación", billingHint: "Se usan en presupuestos y facturas y para la QR-factura suiza. Requiere IBAN suizo.", billingCompany: "Nombre de la empresa", billingStreet: "Calle", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidad", paymentDaysLabel: "Plazo de pago (días)", qrPaymentPart: "Sección de pago", qrReceipt: "Recibo", qrPayableTo: "Cuenta / Pagadero a", qrPayableBy: "Pagado por", qrReference: "Referencia", qrAmount: "Importe", qrCurrency: "Moneda", qrMissingBilling: "Completa tus datos para imprimir una QR-factura.", qrErrName: "El nombre de la empresa es obligatorio.", qrErrIban: "IBAN suizo no válido.", qrErrAddress: "Código postal y localidad obligatorios.",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -653,6 +659,7 @@ const T = {
     authIntro: "Inicie sessão para aceder aos dados de obra.", authEmail: "E-mail", authPassword: "Palavra-passe", authSignIn: "Iniciar sessão", authSignUp: "Criar conta", authNeedAccount: "Criar uma conta", authHaveAccount: "Já tenho conta", authForgot: "Esqueceu a palavra-passe?", authResetSent: "E-mail de reposição enviado — verifique a caixa de entrada.", authErrMissing: "Introduza o e-mail e a palavra-passe.", authErrMissingEmail: "Introduza primeiro o seu e-mail.", authErrInvalidEmail: "Esse e-mail não parece correto.", authErrWeakPassword: "Use uma palavra-passe com pelo menos 6 caracteres.", authErrEmailInUse: "Já existe uma conta com esse e-mail — inicie sessão.", authErrBadLogin: "E-mail ou palavra-passe incorretos.", authErrTooMany: "Demasiadas tentativas — aguarde um momento.", authErrProviderOff: "O início de sessão por e-mail ainda não está ativado.", authErrNetwork: "Sem ligação — verifique o sinal.", authErrGeneric: "Não resultou — tente novamente.", authPrivacyNote: "Os seus dados de obra e clientes são privados da sua conta.", signedInAs: "Sessão iniciada como", signOut: "Terminar sessão",
     legacyImportTitle: "Dados existentes encontrados", legacyImportHint: "Foram encontrados dados anteriores às contas. Importe-os para a sua conta para os manter — passarão a ser privados.", legacyImportCount: "registos encontrados", legacyImportBtn: "Importar para a minha conta", legacyImportSkip: "Agora não",
     costingTitle: "Cálculo de custos", labourCost: "Mão de obra", materialCost: "Materiais", totalCost: "Custo total", quotedLabel: "Orçamentado", quotedPlaceholder: "Valor orçamentado", marginLabel: "Margem", unitPriceLabel: "Preço unitário", labourRateLabel: "Valor à hora", labourRateHint: "Usado para valorizar as horas registadas. Fica na sua conta — nunca nos relatórios enviados.", costingNoRate: "Defina um valor à hora no seu perfil.", costingUnpriced: "itens sem preço.",
+    quoteLabel: "Orçamento", invoiceLabel: "Fatura", newQuote: "Novo orçamento", newInvoice: "Nova fatura", convertToInvoice: "Criar fatura", invoiceCreated: "Fatura criada", docSaved: "Guardado", docNeedsLine: "Adicione pelo menos uma linha.", docLines: "Linhas", docAddLine: "Adicionar linha", docDescription: "Descrição", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Data", docDue: "Vencimento", vatStandard: "Normal", vatReduced: "Reduzido", vatLodging: "Alojamento", vatNone: "Nenhum", vatNumberLabel: "N.º de IVA", billingTitle: "Dados de faturação", billingHint: "Usados em orçamentos e faturas e para a QR-fatura suíça. Requer IBAN suíço.", billingCompany: "Nome da empresa", billingStreet: "Rua", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidade", paymentDaysLabel: "Prazo de pagamento (dias)", qrPaymentPart: "Secção de pagamento", qrReceipt: "Recibo", qrPayableTo: "Conta / Pagável a", qrPayableBy: "Pago por", qrReference: "Referência", qrAmount: "Montante", qrCurrency: "Moeda", qrMissingBilling: "Preencha os dados de faturação para imprimir uma QR-fatura.", qrErrName: "O nome da empresa é obrigatório.", qrErrIban: "IBAN suíço inválido.", qrErrAddress: "Código postal e localidade obrigatórios.",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -763,6 +770,7 @@ const T = {
     authIntro: "Zaloguj się, aby uzyskać dostęp do danych budowy.", authEmail: "E-mail", authPassword: "Hasło", authSignIn: "Zaloguj się", authSignUp: "Załóż konto", authNeedAccount: "Załóż konto", authHaveAccount: "Mam już konto", authForgot: "Nie pamiętasz hasła?", authResetSent: "Wysłano e-mail resetujący — sprawdź skrzynkę.", authErrMissing: "Podaj e-mail i hasło.", authErrMissingEmail: "Najpierw podaj adres e-mail.", authErrInvalidEmail: "Ten adres e-mail wygląda niepoprawnie.", authErrWeakPassword: "Użyj hasła o długości co najmniej 6 znaków.", authErrEmailInUse: "Konto z tym e-mailem już istnieje — zaloguj się.", authErrBadLogin: "Błędny e-mail lub hasło.", authErrTooMany: "Zbyt wiele prób — odczekaj chwilę.", authErrProviderOff: "Logowanie e-mailem nie jest jeszcze włączone.", authErrNetwork: "Brak połączenia — sprawdź zasięg.", authErrGeneric: "Nie udało się — spróbuj ponownie.", authPrivacyNote: "Twoje dane budowy i klientów są prywatne dla Twojego konta.", signedInAs: "Zalogowano jako", signOut: "Wyloguj",
     legacyImportTitle: "Znaleziono istniejące dane", legacyImportHint: "Znaleziono dane sprzed wprowadzenia kont. Zaimportuj je na swoje konto, aby je zachować — staną się prywatne.", legacyImportCount: "znalezionych rekordów", legacyImportBtn: "Importuj na moje konto", legacyImportSkip: "Nie teraz",
     costingTitle: "Kalkulacja kosztów", labourCost: "Robocizna", materialCost: "Materiały", totalCost: "Koszt całkowity", quotedLabel: "Wyceniono", quotedPlaceholder: "Kwota wyceny", marginLabel: "Marża", unitPriceLabel: "Cena jednostkowa", labourRateLabel: "Stawka godzinowa", labourRateHint: "Służy do wyceny zapisanych godzin. Pozostaje na Twoim koncie — nigdy w wysyłanych raportach.", costingNoRate: "Ustaw stawkę godzinową w profilu.", costingUnpriced: "pozycji bez ceny.",
+    quoteLabel: "Oferta", invoiceLabel: "Faktura", newQuote: "Nowa oferta", newInvoice: "Nowa faktura", convertToInvoice: "Utwórz fakturę", invoiceCreated: "Utworzono fakturę", docSaved: "Zapisano", docNeedsLine: "Dodaj co najmniej jedną pozycję.", docLines: "Pozycje", docAddLine: "Dodaj pozycję", docDescription: "Opis", docLineTotal: "Razem", docNet: "Suma częściowa", docVat: "VAT", docTotal: "Razem", docDate: "Data", docDue: "Termin", vatStandard: "Podstawowa", vatReduced: "Obniżona", vatLodging: "Zakwaterowanie", vatNone: "Brak", vatNumberLabel: "Numer VAT", billingTitle: "Dane do faktury", billingHint: "Używane na ofertach i fakturach oraz do szwajcarskiego QR-rachunku. Wymaga szwajcarskiego IBAN.", billingCompany: "Nazwa firmy", billingStreet: "Ulica", billingBuilding: "Nr", billingPostal: "Kod pocztowy", billingTown: "Miejscowość", paymentDaysLabel: "Termin płatności (dni)", qrPaymentPart: "Część płatnicza", qrReceipt: "Potwierdzenie", qrPayableTo: "Konto / Odbiorca", qrPayableBy: "Płatnik", qrReference: "Referencja", qrAmount: "Kwota", qrCurrency: "Waluta", qrMissingBilling: "Uzupełnij dane, aby wydrukować QR-rachunek.", qrErrName: "Nazwa firmy jest wymagana.", qrErrIban: "To nie jest poprawny szwajcarski IBAN.", qrErrAddress: "Kod pocztowy i miejscowość są wymagane.",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -873,6 +881,7 @@ const T = {
     authIntro: "Prihláste sa pre prístup k údajom zo stavby.", authEmail: "E-mail", authPassword: "Heslo", authSignIn: "Prihlásiť sa", authSignUp: "Vytvoriť účet", authNeedAccount: "Vytvoriť účet", authHaveAccount: "Už mám účet", authForgot: "Zabudli ste heslo?", authResetSent: "E-mail na obnovu odoslaný — skontrolujte schránku.", authErrMissing: "Zadajte e-mail a heslo.", authErrMissingEmail: "Najprv zadajte e-mailovú adresu.", authErrInvalidEmail: "Táto e-mailová adresa nevyzerá správne.", authErrWeakPassword: "Použite heslo s aspoň 6 znakmi.", authErrEmailInUse: "Účet s týmto e-mailom už existuje — prihláste sa.", authErrBadLogin: "Nesprávny e-mail alebo heslo.", authErrTooMany: "Príliš veľa pokusov — chvíľu počkajte.", authErrProviderOff: "Prihlásenie e-mailom zatiaľ nie je povolené.", authErrNetwork: "Žiadne pripojenie — skontrolujte signál.", authErrGeneric: "Nepodarilo sa — skúste znova.", authPrivacyNote: "Vaše údaje zo stavby a o zákazníkoch sú súkromné pre váš účet.", signedInAs: "Prihlásený ako", signOut: "Odhlásiť sa",
     legacyImportTitle: "Nájdené existujúce údaje", legacyImportHint: "Našli sa údaje spred zavedenia účtov. Importujte ich do svojho účtu, aby ste ich zachovali — potom budú súkromné.", legacyImportCount: "nájdených záznamov", legacyImportBtn: "Importovať do môjho účtu", legacyImportSkip: "Teraz nie",
     costingTitle: "Kalkulácia nákladov", labourCost: "Práca", materialCost: "Materiál", totalCost: "Celkové náklady", quotedLabel: "Ponuka", quotedPlaceholder: "Suma ponuky", marginLabel: "Marža", unitPriceLabel: "Jednotková cena", labourRateLabel: "Hodinová sadzba", labourRateHint: "Slúži na ocenenie zaznamenaných hodín. Zostáva vo vašom účte — nikdy v odoslaných reportoch.", costingNoRate: "Nastavte hodinovú sadzbu v profile.", costingUnpriced: "položiek nemá cenu.",
+    quoteLabel: "Ponuka", invoiceLabel: "Faktúra", newQuote: "Nová ponuka", newInvoice: "Nová faktúra", convertToInvoice: "Vytvoriť faktúru", invoiceCreated: "Faktúra vytvorená", docSaved: "Uložené", docNeedsLine: "Pridajte aspoň jednu položku.", docLines: "Položky", docAddLine: "Pridať položku", docDescription: "Popis", docLineTotal: "Spolu", docNet: "Medzisúčet", docVat: "DPH", docTotal: "Spolu", docDate: "Dátum", docDue: "Splatnosť", vatStandard: "Základná", vatReduced: "Znížená", vatLodging: "Ubytovanie", vatNone: "Žiadna", vatNumberLabel: "IČ DPH", billingTitle: "Fakturačné údaje", billingHint: "Použité na ponukách a faktúrach a pre švajčiarsky QR-doklad. Vyžaduje švajčiarsky IBAN.", billingCompany: "Názov firmy", billingStreet: "Ulica", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Mesto", paymentDaysLabel: "Splatnosť (dni)", qrPaymentPart: "Platobná časť", qrReceipt: "Potvrdenie", qrPayableTo: "Účet / Príjemca", qrPayableBy: "Platiteľ", qrReference: "Referencia", qrAmount: "Suma", qrCurrency: "Mena", qrMissingBilling: "Doplňte fakturačné údaje pre tlač QR-dokladu.", qrErrName: "Názov firmy je povinný.", qrErrIban: "Neplatný švajčiarsky IBAN.", qrErrAddress: "PSČ a mesto sú povinné.",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -983,6 +992,7 @@ const T = {
     authIntro: "Přihlaste se pro přístup k datům ze stavby.", authEmail: "E-mail", authPassword: "Heslo", authSignIn: "Přihlásit se", authSignUp: "Vytvořit účet", authNeedAccount: "Vytvořit účet", authHaveAccount: "Už mám účet", authForgot: "Zapomněli jste heslo?", authResetSent: "E-mail pro obnovu odeslán — zkontrolujte schránku.", authErrMissing: "Zadejte e-mail a heslo.", authErrMissingEmail: "Nejprve zadejte e-mailovou adresu.", authErrInvalidEmail: "Tato e-mailová adresa nevypadá správně.", authErrWeakPassword: "Použijte heslo alespoň o 6 znacích.", authErrEmailInUse: "Účet s tímto e-mailem už existuje — přihlaste se.", authErrBadLogin: "Nesprávný e-mail nebo heslo.", authErrTooMany: "Příliš mnoho pokusů — chvíli počkejte.", authErrProviderOff: "Přihlášení e-mailem zatím není povoleno.", authErrNetwork: "Není připojení — zkontrolujte signál.", authErrGeneric: "Nepovedlo se — zkuste to znovu.", authPrivacyNote: "Vaše data ze stavby a o zákaznících jsou soukromá pro váš účet.", signedInAs: "Přihlášen jako", signOut: "Odhlásit se",
     legacyImportTitle: "Nalezena existující data", legacyImportHint: "Byla nalezena data z doby před zavedením účtů. Importujte je do svého účtu, abyste je zachovali — poté budou soukromá.", legacyImportCount: "nalezených záznamů", legacyImportBtn: "Importovat do mého účtu", legacyImportSkip: "Teď ne",
     costingTitle: "Kalkulace nákladů", labourCost: "Práce", materialCost: "Materiál", totalCost: "Celkové náklady", quotedLabel: "Nabídka", quotedPlaceholder: "Částka nabídky", marginLabel: "Marže", unitPriceLabel: "Jednotková cena", labourRateLabel: "Hodinová sazba", labourRateHint: "Slouží k ocenění zaznamenaných hodin. Zůstává ve vašem účtu — nikdy v odeslaných reportech.", costingNoRate: "Nastavte hodinovou sazbu v profilu.", costingUnpriced: "položek nemá cenu.",
+    quoteLabel: "Nabídka", invoiceLabel: "Faktura", newQuote: "Nová nabídka", newInvoice: "Nová faktura", convertToInvoice: "Vytvořit fakturu", invoiceCreated: "Faktura vytvořena", docSaved: "Uloženo", docNeedsLine: "Přidejte alespoň jednu položku.", docLines: "Položky", docAddLine: "Přidat položku", docDescription: "Popis", docLineTotal: "Celkem", docNet: "Mezisoučet", docVat: "DPH", docTotal: "Celkem", docDate: "Datum", docDue: "Splatnost", vatStandard: "Základní", vatReduced: "Snížená", vatLodging: "Ubytování", vatNone: "Žádná", vatNumberLabel: "DIČ", billingTitle: "Fakturační údaje", billingHint: "Použity na nabídkách a fakturách a pro švýcarský QR-doklad. Vyžaduje švýcarský IBAN.", billingCompany: "Název firmy", billingStreet: "Ulice", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Město", paymentDaysLabel: "Splatnost (dny)", qrPaymentPart: "Platební část", qrReceipt: "Potvrzení", qrPayableTo: "Účet / Příjemce", qrPayableBy: "Plátce", qrReference: "Reference", qrAmount: "Částka", qrCurrency: "Měna", qrMissingBilling: "Doplňte fakturační údaje pro tisk QR-dokladu.", qrErrName: "Název firmy je povinný.", qrErrIban: "Neplatný švýcarský IBAN.", qrErrAddress: "PSČ a město jsou povinné.",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -1881,6 +1891,16 @@ const PROJECT_STATUSES = [
   { key: "completed", labelKey: "projStatusCompleted", color: "#7FA65C" },
   { key: "lost", labelKey: "projStatusLost", color: "#E5484D" },
 ];
+// Swiss VAT (MWST) rates as of 1 January 2024. These are set by federal law
+// and have changed before — verify against estv.admin.ch rather than trusting
+// this list if a rate looks wrong.
+const VAT_RATES = [
+  { key: "standard", rate: 8.1, labelKey: "vatStandard" },
+  { key: "reduced", rate: 2.6, labelKey: "vatReduced" },
+  { key: "lodging", rate: 3.8, labelKey: "vatLodging" },
+  { key: "none", rate: 0, labelKey: "vatNone" },
+];
+
 const DEFAULT_PROJECT_STATUS = "waiting";
 function statusMeta(status) {
   return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES.find((s) => s.key === DEFAULT_PROJECT_STATUS);
@@ -1918,6 +1938,31 @@ function migrateClientsToCustomers(projects, customers) {
     return { ...p, customerId: customer.id };
   });
   return { projects: migrated, customers: next, changed };
+}
+
+// Quote and invoice totals. Money is computed in one place so the printed
+// document, the on-screen summary and the QR-bill amount can never disagree.
+function documentTotals(doc) {
+  const net = (doc.lineItems || []).reduce((sum, li) => {
+    const qty = parseFloat(li.qty || 0) || 0;
+    const price = parseFloat(li.unitPrice || 0) || 0;
+    return sum + qty * price;
+  }, 0);
+  const rate = parseFloat(doc.vatRate ?? 0) || 0;
+  const vat = net * (rate / 100);
+  // Swiss invoices are rounded to 0.05 at the total.
+  const gross = Math.round((net + vat) * 20) / 20;
+  return { net, vat, gross, rate };
+}
+
+function nextDocNumber(documents, type, year) {
+  const prefix = `${type === "invoice" ? "R" : "O"}-${year}-`;
+  const used = (documents || [])
+    .filter((d) => d.type === type && String(d.number || "").startsWith(prefix))
+    .map((d) => parseInt(String(d.number).slice(prefix.length), 10))
+    .filter((n) => !isNaN(n));
+  const next = used.length ? Math.max(...used) + 1 : 1;
+  return `${prefix}${String(next).padStart(3, "0")}`;
 }
 
 function telHref(v) { return `tel:${String(v).replace(/[^\d+]/g, "")}`; }
@@ -2075,6 +2120,11 @@ export default function SiteManager() {
   const [tab, setTab] = useState("today");
   const [projects, setProjects] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [docEditor, setDocEditor] = useState(null);
+  const [billingModalOpen, setBillingModalOpen] = useState(false);
+  const [billingDraft, setBillingDraft] = useState(null);
+  const [billing, setBilling] = useState({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
   const [customerForm, setCustomerForm] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
@@ -2199,6 +2249,7 @@ export default function SiteManager() {
           setProjects(migratedProjects);
           setCustomers(migratedCustomers);
           setEntries(data.entries || []);
+          setDocuments(data.documents || []);
           setActiveClock(data.activeClock || null);
           setLeaveRequests(data.leaveRequests || []);
           setSentReports(data.sentReports || []);
@@ -2238,6 +2289,10 @@ export default function SiteManager() {
       try {
         const pricesRes = await window.storage.get("site-material-prices");
         if (pricesRes && pricesRes.value) setMaterialPrices(JSON.parse(pricesRes.value));
+      } catch (e) {}
+      try {
+        const billRes = await window.storage.get("site-billing");
+        if (billRes && billRes.value) setBilling((b) => ({ ...b, ...JSON.parse(billRes.value) }));
       } catch (e) {}
       try {
         const libRes = await window.storage.get("site-tech-library");
@@ -2578,6 +2633,133 @@ export default function SiteManager() {
     return renderReportDocument(subtitle, sections);
   }
 
+  async function printDocument(doc) {
+    const customer = customers.find((c) => c.id === doc.customerId);
+    const project = projects.find((p) => p.id === doc.projectId);
+    const totals = documentTotals(doc);
+    const cur = profile.currency || "CHF";
+    const isInvoice = doc.type === "invoice";
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const fmt = (n) => n.toLocaleString("de-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // The payment part is only produced when the billing details are actually
+    // valid. A QR-bill with a wrong IBAN scans fine and sends money to the
+    // wrong place, so a missing slip is far better than a plausible one.
+    let paymentPart = "";
+    if (isInvoice) {
+      const problems = validateBillingProfile(billing);
+      if (problems.length === 0) {
+        const payload = buildQrPayload({
+          iban: billing.iban,
+          creditor: {
+            name: billing.companyName, street: billing.street, buildingNumber: billing.buildingNumber,
+            postalCode: billing.postalCode, town: billing.town, country: billing.country || "CH",
+          },
+          debtor: customer && customer.name
+            ? { name: customer.name, street: customer.address || "", buildingNumber: "", postalCode: "", town: "", country: "CH" }
+            : null,
+          amount: totals.gross,
+          currency: cur,
+          reference: doc.number,
+          message: `${isInvoice ? t.invoiceLabel : t.quoteLabel} ${doc.number}`,
+        });
+        const qr = await qrDataUrl(payload);
+        const crossSvg = `data:image/svg+xml;base64,${btoa(SWISS_CROSS_SVG)}`;
+        paymentPart = `
+        <div class="pp">
+          <div class="pp-receipt">
+            <div class="pp-h">${esc(t.qrReceipt)}</div>
+            <div class="pp-lbl">${esc(t.qrPayableTo)}</div>
+            <div class="pp-val">${esc(normaliseIban(billing.iban))}<br>${esc(billing.companyName)}<br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}</div>
+            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(customer.address || "")}</div>` : ""}
+            <div class="pp-lbl">${esc(t.qrCurrency)} / ${esc(t.qrAmount)}</div>
+            <div class="pp-val">${esc(cur)} ${fmt(totals.gross)}</div>
+          </div>
+          <div class="pp-pay">
+            <div class="pp-h">${esc(t.qrPaymentPart)}</div>
+            <div class="pp-qrwrap">
+              <img class="pp-qr" src="${qr}" alt="Swiss QR">
+              <img class="pp-cross" src="${crossSvg}" alt="">
+            </div>
+            <div class="pp-lbl">${esc(t.qrCurrency)} / ${esc(t.qrAmount)}</div>
+            <div class="pp-val">${esc(cur)} ${fmt(totals.gross)}</div>
+            <div class="pp-lbl">${esc(t.qrPayableTo)}</div>
+            <div class="pp-val">${esc(normaliseIban(billing.iban))}<br>${esc(billing.companyName)}<br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}</div>
+            <div class="pp-lbl">${esc(t.qrReference)}</div>
+            <div class="pp-val">${esc(creditorReference(doc.number))}</div>
+            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(customer.address || "")}</div>` : ""}
+          </div>
+        </div>`;
+      } else {
+        paymentPart = `<div class="warn">${esc(t.qrMissingBilling)}</div>`;
+      }
+    }
+
+    const rows = (doc.lineItems || []).map((li) => {
+      const qty = parseFloat(li.qty || 0) || 0;
+      const price = parseFloat(li.unitPrice || 0) || 0;
+      return `<tr><td>${esc(li.description)}</td><td class="r">${fmt(qty)} ${esc(li.unit || "")}</td><td class="r">${fmt(price)}</td><td class="r">${fmt(qty * price)}</td></tr>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(doc.number)}</title>
+    <style>
+      @page { size: A4; margin: 18mm 18mm 0 18mm; }
+      body { font-family: Helvetica, Arial, sans-serif; color:#111; font-size:11pt; }
+      .head { display:flex; justify-content:space-between; margin-bottom:14mm; }
+      .from { font-size:9pt; line-height:1.45; }
+      .to { font-size:10pt; line-height:1.45; }
+      h1 { font-size:15pt; margin:0 0 2mm; }
+      .meta { font-size:9pt; color:#444; margin-bottom:8mm; }
+      table { width:100%; border-collapse:collapse; margin-bottom:6mm; }
+      th { text-align:left; font-size:8.5pt; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #333; padding:2mm 1mm; }
+      td { padding:2mm 1mm; border-bottom:1px solid #e5e5e5; font-size:10pt; }
+      td.r, th.r { text-align:right; }
+      .tot { width:62mm; margin-left:auto; font-size:10pt; }
+      .tot div { display:flex; justify-content:space-between; padding:1.2mm 0; }
+      .tot .g { font-weight:bold; border-top:1px solid #333; margin-top:1mm; padding-top:2mm; }
+      .notes { font-size:9pt; color:#333; margin-top:6mm; white-space:pre-wrap; }
+      .warn { border:1px solid #b00; color:#b00; padding:3mm; font-size:9pt; margin-top:8mm; }
+      .pp { position:fixed; bottom:0; left:0; right:0; height:105mm; border-top:1px dashed #666; display:flex; font-size:8pt; }
+      .pp-receipt { width:62mm; padding:5mm; border-right:1px dashed #666; }
+      .pp-pay { flex:1; padding:5mm; }
+      .pp-h { font-size:11pt; font-weight:bold; margin-bottom:3mm; }
+      .pp-lbl { font-weight:bold; font-size:6.5pt; margin-top:2mm; }
+      .pp-val { font-size:8pt; line-height:1.3; }
+      .pp-qrwrap { position:relative; width:46mm; height:46mm; margin:2mm 0; }
+      .pp-qr { width:46mm; height:46mm; display:block; }
+      .pp-cross { position:absolute; width:7mm; height:7mm; left:19.5mm; top:19.5mm; }
+      @media print { .pp { position:fixed; } }
+    </style></head><body>
+      <div class="head">
+        <div class="from"><strong>${esc(billing.companyName || profile.name)}</strong><br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}${billing.vatNumber ? `<br>${esc(t.vatNumberLabel)}: ${esc(billing.vatNumber)}` : ""}${profile.phone ? `<br>${esc(profile.phone)}` : ""}</div>
+        <div class="to">${customer ? `${esc(customer.name)}<br>${esc(customer.company || "")}${customer.company ? "<br>" : ""}${esc(customer.address || "")}` : ""}</div>
+      </div>
+      <h1>${esc(isInvoice ? t.invoiceLabel : t.quoteLabel)} ${esc(doc.number)}</h1>
+      <div class="meta">
+        ${esc(t.docDate)}: ${esc(doc.date)}${isInvoice ? ` &nbsp;·&nbsp; ${esc(t.docDue)}: ${esc(doc.dueDate)}` : ""}
+        ${project ? ` &nbsp;·&nbsp; ${esc(project.name)}` : ""}${project && project.address ? `, ${esc(project.address)}` : ""}
+      </div>
+      <table>
+        <thead><tr><th>${esc(t.docDescription)}</th><th class="r">${esc(t.qtyPlaceholder)}</th><th class="r">${esc(t.unitPriceLabel)}</th><th class="r">${esc(t.docLineTotal)}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="tot">
+        <div><span>${esc(t.docNet)}</span><span>${fmt(totals.net)}</span></div>
+        <div><span>${esc(t.docVat)} ${fmt(totals.rate)}%</span><span>${fmt(totals.vat)}</span></div>
+        <div class="g"><span>${esc(t.docTotal)} ${esc(cur)}</span><span>${fmt(totals.gross)}</span></div>
+      </div>
+      ${doc.notes ? `<div class="notes">${esc(doc.notes)}</div>` : ""}
+      ${paymentPart}
+    </body></html>`;
+
+    try {
+      const blob = new Blob([html], { type: "text/html" });
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch (e) {
+      showToast(t.couldntSave);
+    }
+  }
+
   function toggleReportProject(id) {
     setReportProjectSelection((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
   }
@@ -2716,11 +2898,13 @@ export default function SiteManager() {
       projects: next.projects ?? projects,
       entries: next.entries ?? entries,
       customers: next.customers ?? customers,
+      documents: next.documents ?? documents,
       activeClock: next.activeClock !== undefined ? next.activeClock : activeClock,
       leaveRequests: next.leaveRequests ?? leaveRequests,
       sentReports: next.sentReports ?? sentReports,
     };
     if (next.customers) setCustomers(next.customers);
+    if (next.documents) setDocuments(next.documents);
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -2798,6 +2982,98 @@ export default function SiteManager() {
     try { await signOutUser(); } catch {}
     setProfileModalOpen(false);
     setTab("today");
+  }
+
+  async function saveBilling() {
+    setBilling(billingDraft);
+    setBillingModalOpen(false);
+    try { await window.storage.set("site-billing", JSON.stringify(billingDraft)); } catch (e) { showToast(t.couldntSave); }
+  }
+
+  // A quote starts from what was actually logged on site — hours at the
+  // profile rate, plus every priced material — so the office does not retype
+  // work the crew already recorded.
+  function newDocumentFor(project, type) {
+    const list = entries.filter((e) => e.projectId === project.id);
+    const hours = list.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
+    const rate = parseFloat(profile.labourRate || 0) || 0;
+    const lineItems = [];
+
+    if (hours > 0 && rate > 0) {
+      lineItems.push({ id: uid(), description: t.labourCost, qty: String(Math.round(hours * 100) / 100), unit: "h", unitPrice: String(rate) });
+    }
+    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
+      const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
+      if (price) {
+        lineItems.push({ id: uid(), description: e.description, qty: String(e.qty || 1), unit: e.unit || "", unitPrice: String(price) });
+      }
+    });
+    if (lineItems.length === 0) lineItems.push({ id: uid(), description: "", qty: "1", unit: "", unitPrice: "" });
+
+    const vatKey = billing.defaultVatKey || "standard";
+    const vatRate = (VAT_RATES.find((v) => v.key === vatKey) || VAT_RATES[0]).rate;
+    const today = todayKey();
+    const due = new Date();
+    due.setDate(due.getDate() + (parseInt(billing.paymentDays, 10) || 30));
+
+    setDocEditor({
+      id: null,
+      type,
+      projectId: project.id,
+      customerId: project.customerId || null,
+      number: nextDocNumber(documents, type, new Date().getFullYear()),
+      date: today,
+      dueDate: due.toISOString().slice(0, 10),
+      lineItems,
+      vatRate,
+      notes: "",
+      status: "draft",
+    });
+  }
+
+  function saveDocument() {
+    if (!docEditor) return;
+    const clean = {
+      ...docEditor,
+      lineItems: (docEditor.lineItems || []).filter((li) => String(li.description || "").trim()),
+    };
+    if (clean.lineItems.length === 0) { showToast(t.docNeedsLine); return; }
+    if (clean.id) {
+      persist({ documents: documents.map((d) => (d.id === clean.id ? clean : d)) });
+    } else {
+      persist({ documents: [{ ...clean, id: uid(), createdAt: Date.now() }, ...documents] });
+    }
+    setDocEditor(null);
+    showToast(t.docSaved);
+  }
+
+  function deleteDocument(id) {
+    persist({ documents: documents.filter((d) => d.id !== id) });
+    setDocEditor(null);
+  }
+
+  // Converting keeps the quote intact: the two are separate records, because
+  // an accepted quote and the invoice raised against it are both documents a
+  // business has to be able to show later.
+  function convertQuoteToInvoice(quote) {
+    const due = new Date();
+    due.setDate(due.getDate() + (parseInt(billing.paymentDays, 10) || 30));
+    const invoice = {
+      ...quote,
+      id: uid(),
+      type: "invoice",
+      number: nextDocNumber(documents, "invoice", new Date().getFullYear()),
+      date: todayKey(),
+      dueDate: due.toISOString().slice(0, 10),
+      status: "open",
+      fromQuote: quote.number,
+      createdAt: Date.now(),
+    };
+    persist({
+      documents: [invoice, ...documents.map((d) => (d.id === quote.id ? { ...d, status: "accepted" } : d))],
+    });
+    showToast(t.invoiceCreated);
+    setDocEditor(invoice);
   }
 
   function openCustomerForm(existing) {
@@ -4263,6 +4539,123 @@ export default function SiteManager() {
         })}
       </div>
 
+      {docEditor && (() => {
+        const totals = documentTotals(docEditor);
+        const isInvoice = docEditor.type === "invoice";
+        const cur = profile.currency || "CHF";
+        const setLine = (id, field, value) =>
+          setDocEditor((s) => ({ ...s, lineItems: s.lineItems.map((li) => (li.id === id ? { ...li, [field]: value } : li)) }));
+        return (
+          <Modal onClose={() => setDocEditor(null)} title={`${isInvoice ? t.invoiceLabel : t.quoteLabel} ${docEditor.number}`}>
+            <div className="flex gap-2 mb-3">
+              <div className="w-1/2">
+                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase mb-1">{t.docDate}</div>
+                <input type="date" value={docEditor.date} onChange={(e) => setDocEditor((s) => ({ ...s, date: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
+              </div>
+              {isInvoice && (
+                <div className="w-1/2">
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase mb-1">{t.docDue}</div>
+                  <input type="date" value={docEditor.dueDate} onChange={(e) => setDocEditor((s) => ({ ...s, dueDate: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
+                </div>
+              )}
+            </div>
+
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.docLines}</div>
+            <div className="flex flex-col gap-2 mb-3">
+              {docEditor.lineItems.map((li) => (
+                <div key={li.id} style={{ background: COLORS.card }} className="rounded-lg p-2">
+                  <div className="flex gap-1.5 mb-1.5">
+                    <input value={li.description} onChange={(e) => setLine(li.id, "description", e.target.value)} placeholder={t.docDescription} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded px-2 py-1.5 text-xs outline-none" />
+                    <button onClick={() => setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))} style={{ color: COLORS.danger }} className="shrink-0 px-1"><Trash2 size={13} /></button>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <input type="number" inputMode="decimal" value={li.qty} onChange={(e) => setLine(li.id, "qty", e.target.value)} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                    <input value={li.unit} onChange={(e) => setLine(li.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                    <input type="number" inputMode="decimal" step="0.05" value={li.unitPrice} onChange={(e) => setLine(li.id, "unitPrice", e.target.value)} placeholder={t.unitPriceLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setDocEditor((s) => ({ ...s, lineItems: [...s.lineItems, { id: uid(), description: "", qty: "1", unit: "", unitPrice: "" }] }))} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold mb-3 flex items-center justify-center gap-1">
+              <Plus size={13} /> {t.docAddLine}
+            </button>
+
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.docVat}</div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {VAT_RATES.map((v) => (
+                <button key={v.key} onClick={() => setDocEditor((s) => ({ ...s, vatRate: v.rate }))} style={{ background: docEditor.vatRate === v.rate ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+                  {t[v.labelKey]} {v.rate > 0 ? `${v.rate}%` : ""}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-sm flex flex-col gap-1">
+              <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docNet}</span><span>{totals.net.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docVat} {totals.rate}%</span><span>{totals.vat.toFixed(2)}</span></div>
+              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="flex justify-between pt-1 mt-1 font-bold"><span>{t.docTotal} {cur}</span><span>{totals.gross.toFixed(2)}</span></div>
+            </div>
+
+            <textarea value={docEditor.notes} onChange={(e) => setDocEditor((s) => ({ ...s, notes: e.target.value }))} placeholder={t.notesLabel} rows={2} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none" />
+
+            {isInvoice && validateBillingProfile(billing).length > 0 && (
+              <button onClick={() => { setBillingDraft({ ...billing }); setBillingModalOpen(true); }} style={{ background: `${COLORS.amber}22`, border: `1px solid ${COLORS.amber}66`, color: COLORS.amber }} className="w-full py-2.5 rounded-lg text-xs font-bold mb-3">
+                {t.qrMissingBilling}
+              </button>
+            )}
+
+            <button onClick={saveDocument} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mb-2">{t.saveLabel}</button>
+            {docEditor.id && (
+              <div className="flex gap-2">
+                <button onClick={() => printDocument(docEditor)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1.5">
+                  <Printer size={13} /> {t.savePdfBtn}
+                </button>
+                {!isInvoice && (
+                  <button onClick={() => convertQuoteToInvoice(docEditor)} style={{ background: COLORS.success, color: "#12210A" }} className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase">
+                    {t.convertToInvoice}
+                  </button>
+                )}
+              </div>
+            )}
+            {docEditor.id && (
+              <button onClick={() => deleteDocument(docEditor.id)} style={{ color: COLORS.danger }} className="w-full py-3 text-xs font-bold uppercase">{t.deleteLabel}</button>
+            )}
+          </Modal>
+        );
+      })()}
+
+      {billingModalOpen && billingDraft && (
+        <Modal onClose={() => setBillingModalOpen(false)} title={t.billingTitle}>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.billingHint}</div>
+          {[
+            ["companyName", t.billingCompany],
+            ["street", t.billingStreet],
+            ["buildingNumber", t.billingBuilding],
+            ["postalCode", t.billingPostal],
+            ["town", t.billingTown],
+            ["vatNumber", t.vatNumberLabel],
+          ].map(([f, label]) => (
+            <input key={f} value={billingDraft[f] || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, [f]: e.target.value }))} placeholder={label} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+          ))}
+          <input
+            value={billingDraft.iban || ""}
+            onChange={(e) => setBillingDraft((s) => ({ ...s, iban: e.target.value }))}
+            placeholder="IBAN (CH…)"
+            style={{
+              background: COLORS.shell,
+              border: `1px solid ${billingDraft.iban && !isSwissIban(billingDraft.iban) ? COLORS.danger : COLORS.border}`,
+              color: COLORS.text,
+            }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-1 outline-none"
+          />
+          {billingDraft.iban && !isSwissIban(billingDraft.iban) && (
+            <div style={{ color: COLORS.danger }} className="text-[10px] mb-2">{t.qrErrIban}</div>
+          )}
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.paymentDaysLabel}</div>
+          <input type="number" value={billingDraft.paymentDays || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))} placeholder="30" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" />
+          <button onClick={saveBilling} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+        </Modal>
+      )}
+
       {legacyImport && (
         <Modal onClose={() => setLegacyImport(null)} title={t.legacyImportTitle}>
           <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.legacyImportHint}</div>
@@ -4491,6 +4884,13 @@ export default function SiteManager() {
             </div>
             <div style={{ color: COLORS.muted }} className="text-[10px] mt-1.5 leading-relaxed">{t.labourRateHint}</div>
             <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
+            <button
+              onClick={() => { setProfileModalOpen(false); setBillingDraft({ ...billing }); setBillingModalOpen(true); }}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+              className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+            >
+              <CreditCard size={14} /> {t.billingTitle}
+            </button>
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-4 pt-3">
               <div style={{ color: COLORS.muted }} className="text-[11px] mb-2 break-all">{t.signedInAs} {user?.email}</div>
               <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
@@ -4754,6 +5154,10 @@ export default function SiteManager() {
           onReorderEntries={reorderEntries}
           costing={projectCosting(selectedProject, projects.find((p) => p.id === selectedProject)?.quotedAmount)}
           money={money}
+          documents={documents.filter((d) => d.projectId === selectedProject)}
+          onNewDocument={(type) => newDocumentFor(projects.find((p) => p.id === selectedProject), type)}
+          onOpenDocument={(d) => setDocEditor({ ...d })}
+          onPrintDocument={printDocument}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
             setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS, quotedAmount: p.quotedAmount || "" });
@@ -5462,7 +5866,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -5511,6 +5915,32 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
           <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
         </div>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button onClick={() => onNewDocument("quote")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+            <FileText size={13} color="#D08770" /> {t.newQuote}
+          </button>
+          <button onClick={() => onNewDocument("invoice")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+            <CreditCard size={13} color={COLORS.success} /> {t.newInvoice}
+          </button>
+        </div>
+        {documents && documents.length > 0 && (
+          <div className="mb-4 flex flex-col gap-1.5">
+            {documents.map((d) => {
+              const tot = documentTotals(d);
+              return (
+                <div key={d.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                  <button onClick={() => onOpenDocument(d)} className="flex-1 min-w-0 text-left">
+                    <div className="text-sm font-semibold truncate">
+                      {d.type === "invoice" ? t.invoiceLabel : t.quoteLabel} {d.number}
+                    </div>
+                    <div style={{ color: COLORS.muted }} className="text-[10px]">{d.date} · {tot.gross.toFixed(2)}</div>
+                  </button>
+                  <button onClick={() => onPrintDocument(d)} style={{ color: COLORS.muted }} className="shrink-0"><Printer size={14} /></button>
+                </div>
+              );
+            })}
+          </div>
+        )}
         {costing && (costing.hasRate || costing.materials > 0 || costing.quoted > 0) && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 mb-4">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.costingTitle}</div>
