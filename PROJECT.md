@@ -66,8 +66,11 @@ committing, or the deployed app will not contain your change.
 
 ## 4. Data model
 
-All persistence goes through `window.storage` (defined in `index.html`),
-which reads/writes Firestore documents.
+All persistence goes through `window.storage`, defined in the **bundle**
+(`firebase-client.js`, wired up in `entry.jsx`) — not in `index.html`.
+Every document is scoped to the signed-in account at
+**`users/{uid}/kv/{key}`**, and reads/writes throw while signed out.
+`firestore.rules` enforces that server-side; the client cannot bypass it.
 
 | Key | Contents |
 |---|---|
@@ -109,15 +112,11 @@ saved before statuses existed have no `status` field and must read as
 
 These are real and currently unfixed. Ordered by how much damage they do.
 
-1. **No authentication; the database is world-readable and writable.**
-   Anyone who opens the public URL gets the same documents. Every device
-   also shares one dataset, which contradicts the "share project by code"
-   feature that assumes per-device data. Fix: Firebase Auth + security
-   rules scoped per user/company.
-   **This became more serious once customers landed:** the database now holds
-   clients' names, phone numbers, e-mail and home addresses. Exposed personal
-   data is a Swiss nFADP problem, not just an embarrassment. Treat auth as
-   the blocker before this is used with real client data.
+1. **Rules must be deployed for authentication to mean anything.** The app
+   now requires sign-in and writes only to `users/{uid}/kv/*`, but until
+   `firebase deploy --only firestore:rules` has run, the database still
+   accepts anonymous reads and writes at the old public paths. Verify with a
+   signed-out read of `local/site-data`: it must be denied.
 2. **Whole-document writes.** Every change rewrites all entries, so two
    phones editing concurrently silently clobber each other. Fix: split into
    `projects/{id}` and `entries/{id}` collections.

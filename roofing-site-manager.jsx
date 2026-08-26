@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock } from "lucide-react";
+import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy } from "./firebase-client.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -99,6 +100,8 @@ const T = {
     categoryLabel: "Category", projectCatFlat: "Flat roof", projectCatPitched: "Pitched roof", projectCatFacade: "Facade", projectCatOther: "Other",
     projStatusLabel: "Status", projStatusWaiting: "Waiting", projStatusConstruction: "Under construction", projStatusHold: "On hold", projStatusCompleted: "Completed",
     navCustomers: "Customers", projStatusLead: "Lead", projStatusQuoted: "Quoted", projStatusLost: "Lost", pipelineAll: "All", newCustomer: "New customer", editCustomer: "Edit customer", customerSaved: "Customer saved", customerDeleted: "Customer deleted", searchCustomers: "Search customers…", noCustomersYet: "No customers yet — add your first one above.", jobsLabel: "jobs", openLabel: "open", noJobsForCustomer: "No jobs for this customer yet.", customerNameLabel: "Name", companyLabel: "Company (optional)", phoneLabel: "Phone", callLabel: "Call", emailLabel: "Email", routeLabel: "Route", logContact: "Log contact", contactHistory: "Contact history", noContactsYet: "Nothing logged yet.", contactNotePlaceholder: "What was discussed?", contactLogged: "Contact logged", followUpLabel: "Follow-up", followUpsDue: "Follow-ups due", contactCall: "Call", contactVisit: "Site visit", contactEmail: "Email", contactNote: "Note", customerLabel: "Customer", noCustomerLabel: "— none —",
+    authIntro: "Sign in to reach your site data.", authEmail: "Email", authPassword: "Password", authSignIn: "Sign in", authSignUp: "Create account", authNeedAccount: "Create an account", authHaveAccount: "I already have an account", authForgot: "Forgot password?", authResetSent: "Reset email sent — check your inbox.", authErrMissing: "Enter your email and password.", authErrMissingEmail: "Enter your email address first.", authErrInvalidEmail: "That email address doesn't look right.", authErrWeakPassword: "Use a password of at least 6 characters.", authErrEmailInUse: "An account already exists for that email — sign in instead.", authErrBadLogin: "Wrong email or password.", authErrTooMany: "Too many attempts — wait a moment and try again.", authErrProviderOff: "Email sign-in is not enabled for this project yet.", authErrNetwork: "No connection — check your signal and try again.", authErrGeneric: "That didn't work — try again.", authPrivacyNote: "Your site data and customer details are private to your account.", signedInAs: "Signed in as", signOut: "Sign out",
+    legacyImportTitle: "Existing data found", legacyImportHint: "Data from before accounts existed was found on this project. Import it into your account to keep it — it will then be private to you.", legacyImportCount: "records found", legacyImportBtn: "Import into my account", legacyImportSkip: "Not now",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -206,6 +209,8 @@ const T = {
     categoryLabel: "Kategorie", projectCatFlat: "Flachdach", projectCatPitched: "Steildach", projectCatFacade: "Fassade", projectCatOther: "Sonstiges",
     projStatusLabel: "Status", projStatusWaiting: "Wartend", projStatusConstruction: "In Ausführung", projStatusHold: "Pausiert", projStatusCompleted: "Abgeschlossen",
     navCustomers: "Kunden", projStatusLead: "Anfrage", projStatusQuoted: "Offeriert", projStatusLost: "Verloren", pipelineAll: "Alle", newCustomer: "Neuer Kunde", editCustomer: "Kunde bearbeiten", customerSaved: "Kunde gespeichert", customerDeleted: "Kunde gelöscht", searchCustomers: "Kunden suchen…", noCustomersYet: "Noch keine Kunden — oben den ersten hinzufügen.", jobsLabel: "Aufträge", openLabel: "offen", noJobsForCustomer: "Noch keine Aufträge für diesen Kunden.", customerNameLabel: "Name", companyLabel: "Firma (optional)", phoneLabel: "Telefon", callLabel: "Anrufen", emailLabel: "E-Mail", routeLabel: "Route", logContact: "Kontakt erfassen", contactHistory: "Kontaktverlauf", noContactsYet: "Noch nichts erfasst.", contactNotePlaceholder: "Was wurde besprochen?", contactLogged: "Kontakt erfasst", followUpLabel: "Wiedervorlage", followUpsDue: "Fällige Wiedervorlagen", contactCall: "Anruf", contactVisit: "Besichtigung", contactEmail: "E-Mail", contactNote: "Notiz", customerLabel: "Kunde", noCustomerLabel: "— keiner —",
+    authIntro: "Anmelden, um auf Ihre Baustellendaten zuzugreifen.", authEmail: "E-Mail", authPassword: "Passwort", authSignIn: "Anmelden", authSignUp: "Konto erstellen", authNeedAccount: "Konto erstellen", authHaveAccount: "Ich habe bereits ein Konto", authForgot: "Passwort vergessen?", authResetSent: "E-Mail zum Zurücksetzen gesendet — Posteingang prüfen.", authErrMissing: "E-Mail und Passwort eingeben.", authErrMissingEmail: "Zuerst die E-Mail-Adresse eingeben.", authErrInvalidEmail: "Diese E-Mail-Adresse sieht nicht korrekt aus.", authErrWeakPassword: "Passwort mit mindestens 6 Zeichen verwenden.", authErrEmailInUse: "Für diese E-Mail besteht bereits ein Konto — bitte anmelden.", authErrBadLogin: "Falsche E-Mail oder falsches Passwort.", authErrTooMany: "Zu viele Versuche — kurz warten und erneut versuchen.", authErrProviderOff: "E-Mail-Anmeldung ist für dieses Projekt noch nicht aktiviert.", authErrNetwork: "Keine Verbindung — Empfang prüfen und erneut versuchen.", authErrGeneric: "Das hat nicht geklappt — nochmals versuchen.", authPrivacyNote: "Ihre Baustellendaten und Kundendaten sind nur für Ihr Konto sichtbar.", signedInAs: "Angemeldet als", signOut: "Abmelden",
+    legacyImportTitle: "Bestehende Daten gefunden", legacyImportHint: "Es wurden Daten aus der Zeit vor den Konten gefunden. Importieren Sie sie in Ihr Konto, um sie zu behalten — danach sind sie privat.", legacyImportCount: "Datensätze gefunden", legacyImportBtn: "In mein Konto importieren", legacyImportSkip: "Jetzt nicht",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -313,6 +318,8 @@ const T = {
     categoryLabel: "Catégorie", projectCatFlat: "Toit plat", projectCatPitched: "Toit en pente", projectCatFacade: "Façade", projectCatOther: "Autre",
     projStatusLabel: "Statut", projStatusWaiting: "En attente", projStatusConstruction: "En cours", projStatusHold: "Suspendu", projStatusCompleted: "Terminé",
     navCustomers: "Clients", projStatusLead: "Demande", projStatusQuoted: "Devis envoyé", projStatusLost: "Perdu", pipelineAll: "Tous", newCustomer: "Nouveau client", editCustomer: "Modifier le client", customerSaved: "Client enregistré", customerDeleted: "Client supprimé", searchCustomers: "Rechercher des clients…", noCustomersYet: "Aucun client — ajoutez le premier ci-dessus.", jobsLabel: "chantiers", openLabel: "en cours", noJobsForCustomer: "Aucun chantier pour ce client.", customerNameLabel: "Nom", companyLabel: "Entreprise (facultatif)", phoneLabel: "Téléphone", callLabel: "Appeler", emailLabel: "E-mail", routeLabel: "Itinéraire", logContact: "Enregistrer un contact", contactHistory: "Historique des contacts", noContactsYet: "Rien enregistré.", contactNotePlaceholder: "De quoi avez-vous parlé ?", contactLogged: "Contact enregistré", followUpLabel: "Relance", followUpsDue: "Relances à faire", contactCall: "Appel", contactVisit: "Visite", contactEmail: "E-mail", contactNote: "Note", customerLabel: "Client", noCustomerLabel: "— aucun —",
+    authIntro: "Connectez-vous pour accéder à vos données de chantier.", authEmail: "E-mail", authPassword: "Mot de passe", authSignIn: "Se connecter", authSignUp: "Créer un compte", authNeedAccount: "Créer un compte", authHaveAccount: "J'ai déjà un compte", authForgot: "Mot de passe oublié ?", authResetSent: "E-mail de réinitialisation envoyé — vérifiez votre boîte.", authErrMissing: "Saisissez votre e-mail et votre mot de passe.", authErrMissingEmail: "Saisissez d'abord votre adresse e-mail.", authErrInvalidEmail: "Cette adresse e-mail semble incorrecte.", authErrWeakPassword: "Utilisez un mot de passe d'au moins 6 caractères.", authErrEmailInUse: "Un compte existe déjà pour cet e-mail — connectez-vous.", authErrBadLogin: "E-mail ou mot de passe incorrect.", authErrTooMany: "Trop de tentatives — patientez un instant.", authErrProviderOff: "La connexion par e-mail n'est pas encore activée pour ce projet.", authErrNetwork: "Pas de connexion — vérifiez votre réseau.", authErrGeneric: "Cela n'a pas fonctionné — réessayez.", authPrivacyNote: "Vos données de chantier et vos clients restent privés à votre compte.", signedInAs: "Connecté en tant que", signOut: "Se déconnecter",
+    legacyImportTitle: "Données existantes trouvées", legacyImportHint: "Des données antérieures aux comptes ont été trouvées. Importez-les dans votre compte pour les conserver — elles deviendront privées.", legacyImportCount: "enregistrements trouvés", legacyImportBtn: "Importer dans mon compte", legacyImportSkip: "Pas maintenant",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -420,6 +427,8 @@ const T = {
     categoryLabel: "Categoria", projectCatFlat: "Tetto piano", projectCatPitched: "Tetto a falde", projectCatFacade: "Facciata", projectCatOther: "Altro",
     projStatusLabel: "Stato", projStatusWaiting: "In attesa", projStatusConstruction: "In corso", projStatusHold: "Sospeso", projStatusCompleted: "Completato",
     navCustomers: "Clienti", projStatusLead: "Richiesta", projStatusQuoted: "Preventivo inviato", projStatusLost: "Perso", pipelineAll: "Tutti", newCustomer: "Nuovo cliente", editCustomer: "Modifica cliente", customerSaved: "Cliente salvato", customerDeleted: "Cliente eliminato", searchCustomers: "Cerca clienti…", noCustomersYet: "Nessun cliente — aggiungi il primo qui sopra.", jobsLabel: "lavori", openLabel: "aperti", noJobsForCustomer: "Nessun lavoro per questo cliente.", customerNameLabel: "Nome", companyLabel: "Azienda (facoltativo)", phoneLabel: "Telefono", callLabel: "Chiama", emailLabel: "E-mail", routeLabel: "Percorso", logContact: "Registra contatto", contactHistory: "Storico contatti", noContactsYet: "Niente registrato.", contactNotePlaceholder: "Di cosa avete parlato?", contactLogged: "Contatto registrato", followUpLabel: "Richiamo", followUpsDue: "Richiami da fare", contactCall: "Chiamata", contactVisit: "Sopralluogo", contactEmail: "E-mail", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— nessuno —",
+    authIntro: "Accedi per raggiungere i dati del cantiere.", authEmail: "E-mail", authPassword: "Password", authSignIn: "Accedi", authSignUp: "Crea account", authNeedAccount: "Crea un account", authHaveAccount: "Ho già un account", authForgot: "Password dimenticata?", authResetSent: "E-mail di reimpostazione inviata — controlla la posta.", authErrMissing: "Inserisci e-mail e password.", authErrMissingEmail: "Inserisci prima il tuo indirizzo e-mail.", authErrInvalidEmail: "Questo indirizzo e-mail non sembra corretto.", authErrWeakPassword: "Usa una password di almeno 6 caratteri.", authErrEmailInUse: "Esiste già un account con questa e-mail — accedi.", authErrBadLogin: "E-mail o password errati.", authErrTooMany: "Troppi tentativi — attendi un momento.", authErrProviderOff: "L'accesso via e-mail non è ancora attivo per questo progetto.", authErrNetwork: "Nessuna connessione — controlla il segnale.", authErrGeneric: "Non ha funzionato — riprova.", authPrivacyNote: "I dati di cantiere e dei clienti restano privati del tuo account.", signedInAs: "Connesso come", signOut: "Esci",
+    legacyImportTitle: "Dati esistenti trovati", legacyImportHint: "Sono stati trovati dati precedenti agli account. Importali nel tuo account per conservarli — diventeranno privati.", legacyImportCount: "record trovati", legacyImportBtn: "Importa nel mio account", legacyImportSkip: "Non ora",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -527,6 +536,8 @@ const T = {
     categoryLabel: "Categoría", projectCatFlat: "Cubierta plana", projectCatPitched: "Cubierta inclinada", projectCatFacade: "Fachada", projectCatOther: "Otro",
     projStatusLabel: "Estado", projStatusWaiting: "En espera", projStatusConstruction: "En ejecución", projStatusHold: "En pausa", projStatusCompleted: "Completado",
     navCustomers: "Clientes", projStatusLead: "Consulta", projStatusQuoted: "Presupuestado", projStatusLost: "Perdido", pipelineAll: "Todos", newCustomer: "Nuevo cliente", editCustomer: "Editar cliente", customerSaved: "Cliente guardado", customerDeleted: "Cliente eliminado", searchCustomers: "Buscar clientes…", noCustomersYet: "Aún no hay clientes — añade el primero arriba.", jobsLabel: "obras", openLabel: "abiertas", noJobsForCustomer: "Aún no hay obras para este cliente.", customerNameLabel: "Nombre", companyLabel: "Empresa (opcional)", phoneLabel: "Teléfono", callLabel: "Llamar", emailLabel: "Correo", routeLabel: "Ruta", logContact: "Registrar contacto", contactHistory: "Historial de contactos", noContactsYet: "Nada registrado.", contactNotePlaceholder: "¿Qué se habló?", contactLogged: "Contacto registrado", followUpLabel: "Seguimiento", followUpsDue: "Seguimientos pendientes", contactCall: "Llamada", contactVisit: "Visita", contactEmail: "Correo", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— ninguno —",
+    authIntro: "Inicia sesión para acceder a los datos de obra.", authEmail: "Correo", authPassword: "Contraseña", authSignIn: "Iniciar sesión", authSignUp: "Crear cuenta", authNeedAccount: "Crear una cuenta", authHaveAccount: "Ya tengo una cuenta", authForgot: "¿Olvidaste la contraseña?", authResetSent: "Correo de restablecimiento enviado — revisa tu bandeja.", authErrMissing: "Introduce tu correo y contraseña.", authErrMissingEmail: "Introduce primero tu correo.", authErrInvalidEmail: "Ese correo no parece correcto.", authErrWeakPassword: "Usa una contraseña de al menos 6 caracteres.", authErrEmailInUse: "Ya existe una cuenta con ese correo — inicia sesión.", authErrBadLogin: "Correo o contraseña incorrectos.", authErrTooMany: "Demasiados intentos — espera un momento.", authErrProviderOff: "El inicio de sesión por correo aún no está habilitado.", authErrNetwork: "Sin conexión — comprueba tu señal.", authErrGeneric: "No ha funcionado — inténtalo de nuevo.", authPrivacyNote: "Tus datos de obra y clientes son privados de tu cuenta.", signedInAs: "Sesión iniciada como", signOut: "Cerrar sesión",
+    legacyImportTitle: "Datos existentes encontrados", legacyImportHint: "Se encontraron datos anteriores a las cuentas. Impórtalos a tu cuenta para conservarlos — pasarán a ser privados.", legacyImportCount: "registros encontrados", legacyImportBtn: "Importar a mi cuenta", legacyImportSkip: "Ahora no",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -634,6 +645,8 @@ const T = {
     categoryLabel: "Categoria", projectCatFlat: "Telhado plano", projectCatPitched: "Telhado inclinado", projectCatFacade: "Fachada", projectCatOther: "Outro",
     projStatusLabel: "Estado", projStatusWaiting: "Em espera", projStatusConstruction: "Em execução", projStatusHold: "Suspenso", projStatusCompleted: "Concluído",
     navCustomers: "Clientes", projStatusLead: "Pedido", projStatusQuoted: "Orçamentado", projStatusLost: "Perdido", pipelineAll: "Todos", newCustomer: "Novo cliente", editCustomer: "Editar cliente", customerSaved: "Cliente guardado", customerDeleted: "Cliente eliminado", searchCustomers: "Procurar clientes…", noCustomersYet: "Ainda sem clientes — adicione o primeiro acima.", jobsLabel: "obras", openLabel: "abertas", noJobsForCustomer: "Ainda sem obras para este cliente.", customerNameLabel: "Nome", companyLabel: "Empresa (opcional)", phoneLabel: "Telefone", callLabel: "Ligar", emailLabel: "E-mail", routeLabel: "Rota", logContact: "Registar contacto", contactHistory: "Histórico de contactos", noContactsYet: "Nada registado.", contactNotePlaceholder: "O que foi falado?", contactLogged: "Contacto registado", followUpLabel: "Seguimento", followUpsDue: "Seguimentos pendentes", contactCall: "Chamada", contactVisit: "Visita", contactEmail: "E-mail", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— nenhum —",
+    authIntro: "Inicie sessão para aceder aos dados de obra.", authEmail: "E-mail", authPassword: "Palavra-passe", authSignIn: "Iniciar sessão", authSignUp: "Criar conta", authNeedAccount: "Criar uma conta", authHaveAccount: "Já tenho conta", authForgot: "Esqueceu a palavra-passe?", authResetSent: "E-mail de reposição enviado — verifique a caixa de entrada.", authErrMissing: "Introduza o e-mail e a palavra-passe.", authErrMissingEmail: "Introduza primeiro o seu e-mail.", authErrInvalidEmail: "Esse e-mail não parece correto.", authErrWeakPassword: "Use uma palavra-passe com pelo menos 6 caracteres.", authErrEmailInUse: "Já existe uma conta com esse e-mail — inicie sessão.", authErrBadLogin: "E-mail ou palavra-passe incorretos.", authErrTooMany: "Demasiadas tentativas — aguarde um momento.", authErrProviderOff: "O início de sessão por e-mail ainda não está ativado.", authErrNetwork: "Sem ligação — verifique o sinal.", authErrGeneric: "Não resultou — tente novamente.", authPrivacyNote: "Os seus dados de obra e clientes são privados da sua conta.", signedInAs: "Sessão iniciada como", signOut: "Terminar sessão",
+    legacyImportTitle: "Dados existentes encontrados", legacyImportHint: "Foram encontrados dados anteriores às contas. Importe-os para a sua conta para os manter — passarão a ser privados.", legacyImportCount: "registos encontrados", legacyImportBtn: "Importar para a minha conta", legacyImportSkip: "Agora não",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -741,6 +754,8 @@ const T = {
     categoryLabel: "Kategoria", projectCatFlat: "Dach płaski", projectCatPitched: "Dach skośny", projectCatFacade: "Fasada", projectCatOther: "Inne",
     projStatusLabel: "Status", projStatusWaiting: "Oczekuje", projStatusConstruction: "W trakcie", projStatusHold: "Wstrzymany", projStatusCompleted: "Zakończony",
     navCustomers: "Klienci", projStatusLead: "Zapytanie", projStatusQuoted: "Wyceniony", projStatusLost: "Utracony", pipelineAll: "Wszystkie", newCustomer: "Nowy klient", editCustomer: "Edytuj klienta", customerSaved: "Klient zapisany", customerDeleted: "Klient usunięty", searchCustomers: "Szukaj klientów…", noCustomersYet: "Brak klientów — dodaj pierwszego powyżej.", jobsLabel: "zlecenia", openLabel: "otwarte", noJobsForCustomer: "Brak zleceń dla tego klienta.", customerNameLabel: "Nazwa", companyLabel: "Firma (opcjonalnie)", phoneLabel: "Telefon", callLabel: "Zadzwoń", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zapisz kontakt", contactHistory: "Historia kontaktów", noContactsYet: "Nic nie zapisano.", contactNotePlaceholder: "O czym rozmawiano?", contactLogged: "Kontakt zapisany", followUpLabel: "Przypomnienie", followUpsDue: "Zaległe przypomnienia", contactCall: "Telefon", contactVisit: "Wizyta", contactEmail: "E-mail", contactNote: "Notatka", customerLabel: "Klient", noCustomerLabel: "— brak —",
+    authIntro: "Zaloguj się, aby uzyskać dostęp do danych budowy.", authEmail: "E-mail", authPassword: "Hasło", authSignIn: "Zaloguj się", authSignUp: "Załóż konto", authNeedAccount: "Załóż konto", authHaveAccount: "Mam już konto", authForgot: "Nie pamiętasz hasła?", authResetSent: "Wysłano e-mail resetujący — sprawdź skrzynkę.", authErrMissing: "Podaj e-mail i hasło.", authErrMissingEmail: "Najpierw podaj adres e-mail.", authErrInvalidEmail: "Ten adres e-mail wygląda niepoprawnie.", authErrWeakPassword: "Użyj hasła o długości co najmniej 6 znaków.", authErrEmailInUse: "Konto z tym e-mailem już istnieje — zaloguj się.", authErrBadLogin: "Błędny e-mail lub hasło.", authErrTooMany: "Zbyt wiele prób — odczekaj chwilę.", authErrProviderOff: "Logowanie e-mailem nie jest jeszcze włączone.", authErrNetwork: "Brak połączenia — sprawdź zasięg.", authErrGeneric: "Nie udało się — spróbuj ponownie.", authPrivacyNote: "Twoje dane budowy i klientów są prywatne dla Twojego konta.", signedInAs: "Zalogowano jako", signOut: "Wyloguj",
+    legacyImportTitle: "Znaleziono istniejące dane", legacyImportHint: "Znaleziono dane sprzed wprowadzenia kont. Zaimportuj je na swoje konto, aby je zachować — staną się prywatne.", legacyImportCount: "znalezionych rekordów", legacyImportBtn: "Importuj na moje konto", legacyImportSkip: "Nie teraz",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -848,6 +863,8 @@ const T = {
     categoryLabel: "Kategória", projectCatFlat: "Plochá strecha", projectCatPitched: "Šikmá strecha", projectCatFacade: "Fasáda", projectCatOther: "Iné",
     projStatusLabel: "Stav", projStatusWaiting: "Čaká", projStatusConstruction: "Prebieha", projStatusHold: "Pozastavený", projStatusCompleted: "Dokončený",
     navCustomers: "Zákazníci", projStatusLead: "Dopyt", projStatusQuoted: "Ponuka odoslaná", projStatusLost: "Stratený", pipelineAll: "Všetky", newCustomer: "Nový zákazník", editCustomer: "Upraviť zákazníka", customerSaved: "Zákazník uložený", customerDeleted: "Zákazník odstránený", searchCustomers: "Hľadať zákazníkov…", noCustomersYet: "Zatiaľ žiadni zákazníci — pridajte prvého vyššie.", jobsLabel: "zákazky", openLabel: "otvorené", noJobsForCustomer: "Pre tohto zákazníka zatiaľ žiadne zákazky.", customerNameLabel: "Meno", companyLabel: "Firma (voliteľné)", phoneLabel: "Telefón", callLabel: "Zavolať", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zaznamenať kontakt", contactHistory: "História kontaktov", noContactsYet: "Zatiaľ nič zaznamenané.", contactNotePlaceholder: "O čom ste hovorili?", contactLogged: "Kontakt zaznamenaný", followUpLabel: "Pripomienka", followUpsDue: "Pripomienky na vybavenie", contactCall: "Hovor", contactVisit: "Obhliadka", contactEmail: "E-mail", contactNote: "Poznámka", customerLabel: "Zákazník", noCustomerLabel: "— žiadny —",
+    authIntro: "Prihláste sa pre prístup k údajom zo stavby.", authEmail: "E-mail", authPassword: "Heslo", authSignIn: "Prihlásiť sa", authSignUp: "Vytvoriť účet", authNeedAccount: "Vytvoriť účet", authHaveAccount: "Už mám účet", authForgot: "Zabudli ste heslo?", authResetSent: "E-mail na obnovu odoslaný — skontrolujte schránku.", authErrMissing: "Zadajte e-mail a heslo.", authErrMissingEmail: "Najprv zadajte e-mailovú adresu.", authErrInvalidEmail: "Táto e-mailová adresa nevyzerá správne.", authErrWeakPassword: "Použite heslo s aspoň 6 znakmi.", authErrEmailInUse: "Účet s týmto e-mailom už existuje — prihláste sa.", authErrBadLogin: "Nesprávny e-mail alebo heslo.", authErrTooMany: "Príliš veľa pokusov — chvíľu počkajte.", authErrProviderOff: "Prihlásenie e-mailom zatiaľ nie je povolené.", authErrNetwork: "Žiadne pripojenie — skontrolujte signál.", authErrGeneric: "Nepodarilo sa — skúste znova.", authPrivacyNote: "Vaše údaje zo stavby a o zákazníkoch sú súkromné pre váš účet.", signedInAs: "Prihlásený ako", signOut: "Odhlásiť sa",
+    legacyImportTitle: "Nájdené existujúce údaje", legacyImportHint: "Našli sa údaje spred zavedenia účtov. Importujte ich do svojho účtu, aby ste ich zachovali — potom budú súkromné.", legacyImportCount: "nájdených záznamov", legacyImportBtn: "Importovať do môjho účtu", legacyImportSkip: "Teraz nie",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -955,6 +972,8 @@ const T = {
     categoryLabel: "Kategorie", projectCatFlat: "Plochá střecha", projectCatPitched: "Šikmá střecha", projectCatFacade: "Fasáda", projectCatOther: "Jiné",
     projStatusLabel: "Stav", projStatusWaiting: "Čeká", projStatusConstruction: "Probíhá", projStatusHold: "Pozastaveno", projStatusCompleted: "Dokončeno",
     navCustomers: "Zákazníci", projStatusLead: "Poptávka", projStatusQuoted: "Nabídka odeslána", projStatusLost: "Ztracený", pipelineAll: "Vše", newCustomer: "Nový zákazník", editCustomer: "Upravit zákazníka", customerSaved: "Zákazník uložen", customerDeleted: "Zákazník smazán", searchCustomers: "Hledat zákazníky…", noCustomersYet: "Zatím žádní zákazníci — přidejte prvního výše.", jobsLabel: "zakázky", openLabel: "otevřené", noJobsForCustomer: "Pro tohoto zákazníka zatím žádné zakázky.", customerNameLabel: "Jméno", companyLabel: "Firma (volitelné)", phoneLabel: "Telefon", callLabel: "Zavolat", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zaznamenat kontakt", contactHistory: "Historie kontaktů", noContactsYet: "Zatím nic zaznamenáno.", contactNotePlaceholder: "O čem jste mluvili?", contactLogged: "Kontakt zaznamenán", followUpLabel: "Připomínka", followUpsDue: "Připomínky k vyřízení", contactCall: "Hovor", contactVisit: "Obhlídka", contactEmail: "E-mail", contactNote: "Poznámka", customerLabel: "Zákazník", noCustomerLabel: "— žádný —",
+    authIntro: "Přihlaste se pro přístup k datům ze stavby.", authEmail: "E-mail", authPassword: "Heslo", authSignIn: "Přihlásit se", authSignUp: "Vytvořit účet", authNeedAccount: "Vytvořit účet", authHaveAccount: "Už mám účet", authForgot: "Zapomněli jste heslo?", authResetSent: "E-mail pro obnovu odeslán — zkontrolujte schránku.", authErrMissing: "Zadejte e-mail a heslo.", authErrMissingEmail: "Nejprve zadejte e-mailovou adresu.", authErrInvalidEmail: "Tato e-mailová adresa nevypadá správně.", authErrWeakPassword: "Použijte heslo alespoň o 6 znacích.", authErrEmailInUse: "Účet s tímto e-mailem už existuje — přihlaste se.", authErrBadLogin: "Nesprávný e-mail nebo heslo.", authErrTooMany: "Příliš mnoho pokusů — chvíli počkejte.", authErrProviderOff: "Přihlášení e-mailem zatím není povoleno.", authErrNetwork: "Není připojení — zkontrolujte signál.", authErrGeneric: "Nepovedlo se — zkuste to znovu.", authPrivacyNote: "Vaše data ze stavby a o zákaznících jsou soukromá pro váš účet.", signedInAs: "Přihlášen jako", signOut: "Odhlásit se",
+    legacyImportTitle: "Nalezena existující data", legacyImportHint: "Byla nalezena data z doby před zavedením účtů. Importujte je do svého účtu, abyste je zachovali — poté budou soukromá.", legacyImportCount: "nalezených záznamů", legacyImportBtn: "Importovat do mého účtu", legacyImportSkip: "Teď ne",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -2036,6 +2055,10 @@ function weatherFromCode(code, t) {
 
 export default function SiteManager() {
   const [ready, setReady] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authForm, setAuthForm] = useState({ mode: "signin", email: "", password: "", error: null, busy: false, notice: null });
+  const [legacyImport, setLegacyImport] = useState(null); // { docs, busy } when old public data is found
   const [lang, setLang] = useState("de");
   const [langPickerOpen, setLangPickerOpen] = useState(false);
   const t = T[lang] || T.en;
@@ -2135,7 +2158,24 @@ export default function SiteManager() {
     return () => clearInterval(iv);
   }, []);
 
+  // Auth gate. Nothing is read until Firebase reports a signed-in user, since
+  // every document path is scoped to that account.
   useEffect(() => {
+    let unsub;
+    onAuthChange((u) => {
+      setUser(u || null);
+      setAuthChecked(true);
+      if (!u) {
+        setReady(false);
+        setProjects([]); setEntries([]); setCustomers([]);
+        setLeaveRequests([]); setSentReports([]); setActiveClock(null);
+      }
+    }).then((fn) => { unsub = fn; }).catch(() => setAuthChecked(true));
+    return () => { if (unsub) unsub(); };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
     (async () => {
       try {
         const res = await window.storage.get("site-data");
@@ -2190,8 +2230,31 @@ export default function SiteManager() {
         if (libRes && libRes.value) setTechLibrary(JSON.parse(libRes.value));
       } catch (e) {}
       setReady(true);
+
+      // If this account has nothing yet, look for data left at the old public
+      // paths and offer to bring it across. Never copied automatically.
+      try {
+        const mine = await window.storage.get("site-data");
+        if (!mine || !mine.value) {
+          const docs = await legacyScan();
+          if (docs.length > 0) setLegacyImport({ docs, busy: false });
+        }
+      } catch (e) {}
     })();
-  }, []);
+  }, [user]);
+
+  async function runLegacyImport() {
+    if (!legacyImport) return;
+    setLegacyImport((s) => ({ ...s, busy: true }));
+    try {
+      await importLegacy(legacyImport.docs);
+      setLegacyImport(null);
+      window.location.reload();
+    } catch (err) {
+      setLegacyImport((s) => ({ ...s, busy: false }));
+      showToast(t.couldntSave);
+    }
+  }
 
   useEffect(() => {
     if (ready) fetchWeather(weatherLoc);
@@ -2686,6 +2749,41 @@ export default function SiteManager() {
     persist({ projects: updated });
     setEditProject(null);
     showToast(t.projectUpdated);
+  }
+
+  async function submitAuth() {
+    const { mode, email, password } = authForm;
+    if (!email.trim() || !password) {
+      setAuthForm((s) => ({ ...s, error: "authErrMissing" }));
+      return;
+    }
+    setAuthForm((s) => ({ ...s, busy: true, error: null, notice: null }));
+    try {
+      if (mode === "signup") await signUp(email, password);
+      else await signIn(email, password);
+      setAuthForm({ mode: "signin", email: "", password: "", error: null, busy: false, notice: null });
+    } catch (err) {
+      setAuthForm((s) => ({ ...s, busy: false, error: authErrorKey(err) }));
+    }
+  }
+
+  async function submitReset() {
+    if (!authForm.email.trim()) {
+      setAuthForm((s) => ({ ...s, error: "authErrMissingEmail" }));
+      return;
+    }
+    try {
+      await sendReset(authForm.email);
+      setAuthForm((s) => ({ ...s, notice: "authResetSent", error: null }));
+    } catch (err) {
+      setAuthForm((s) => ({ ...s, error: authErrorKey(err) }));
+    }
+  }
+
+  async function doSignOut() {
+    try { await signOutUser(); } catch {}
+    setProfileModalOpen(false);
+    setTab("today");
   }
 
   function openCustomerForm(existing) {
@@ -3340,6 +3438,73 @@ export default function SiteManager() {
     const tools = list.filter((e) => e.type === "tool");
     const projIds = [...new Set(list.map((e) => e.projectId).filter(Boolean))];
     return { hours, materials, tools, projIds };
+  }
+
+  if (!authChecked) {
+    return (
+      <div style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }} className="w-full h-screen flex items-center justify-center text-sm">
+        …
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
+        <MountainBackground />
+        <div className="relative w-full max-w-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <SwissCross size={18} />
+            <div className="font-black text-xl uppercase tracking-wide">{t.appLabel}</div>
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.authIntro}</div>
+
+          <input
+            type="email" inputMode="email" autoComplete="email"
+            value={authForm.email}
+            onChange={(e) => setAuthForm((s) => ({ ...s, email: e.target.value, error: null }))}
+            placeholder={t.authEmail}
+            style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-3 text-sm mb-2 outline-none"
+          />
+          <input
+            type="password" autoComplete={authForm.mode === "signup" ? "new-password" : "current-password"}
+            value={authForm.password}
+            onChange={(e) => setAuthForm((s) => ({ ...s, password: e.target.value, error: null }))}
+            onKeyDown={(e) => { if (e.key === "Enter") submitAuth(); }}
+            placeholder={t.authPassword}
+            style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-3 text-sm mb-3 outline-none"
+          />
+
+          {authForm.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[authForm.error] || t.authErrGeneric}</div>}
+          {authForm.notice && <div style={{ color: COLORS.success }} className="text-xs mb-3">{t[authForm.notice]}</div>}
+
+          <button
+            onClick={submitAuth}
+            disabled={authForm.busy}
+            style={{ background: COLORS.accent, opacity: authForm.busy ? 0.6 : 1 }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+          >
+            {authForm.busy ? <Loader2 size={16} className="animate-spin" /> : <Lock size={15} />}
+            {authForm.mode === "signup" ? t.authSignUp : t.authSignIn}
+          </button>
+
+          <div className="flex items-center justify-between mt-4">
+            <button
+              onClick={() => setAuthForm((s) => ({ ...s, mode: s.mode === "signup" ? "signin" : "signup", error: null, notice: null }))}
+              style={{ color: COLORS.accent }}
+              className="text-xs font-bold"
+            >
+              {authForm.mode === "signup" ? t.authHaveAccount : t.authNeedAccount}
+            </button>
+            <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">{t.authForgot}</button>
+          </div>
+
+          <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">{t.authPrivacyNote}</div>
+        </div>
+      </div>
+    );
   }
 
   if (!ready) {
@@ -4031,6 +4196,25 @@ export default function SiteManager() {
         })}
       </div>
 
+      {legacyImport && (
+        <Modal onClose={() => setLegacyImport(null)} title={t.legacyImportTitle}>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.legacyImportHint}</div>
+          <div style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 text-sm mb-4">
+            {legacyImport.docs.length} {t.legacyImportCount}
+          </div>
+          <button
+            onClick={runLegacyImport}
+            disabled={legacyImport.busy}
+            style={{ background: COLORS.accent, opacity: legacyImport.busy ? 0.6 : 1 }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+          >
+            {legacyImport.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardPaste size={15} />}
+            {t.legacyImportBtn}
+          </button>
+          <button onClick={() => setLegacyImport(null)} style={{ color: COLORS.muted }} className="w-full py-3 text-xs font-bold uppercase">{t.legacyImportSkip}</button>
+        </Modal>
+      )}
+
       {selectedCustomer && (() => {
         const c = customers.find((x) => x.id === selectedCustomer);
         if (!c) return null;
@@ -4221,6 +4405,12 @@ export default function SiteManager() {
             <input value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div style={{ color: COLORS.muted }} className="text-[10px]">{t.webhookHint}</div>
             <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
+            <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-4 pt-3">
+              <div style={{ color: COLORS.muted }} className="text-[11px] mb-2 break-all">{t.signedInAs} {user?.email}</div>
+              <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
+                <LogOut size={14} /> {t.signOut}
+              </button>
+            </div>
 
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>
             <div className="flex flex-col gap-1.5">

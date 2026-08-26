@@ -13,58 +13,12 @@
 <body>
 <div id="root"></div>
 
-<!-- Firebase-backed storage: replaces the app's save/load calls with real
-     Firestore reads/writes, so every device that opens this page shares the
-     same data (projects, materials, entries, reports, profile, etc). -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw",
-    authDomain: "site-log-ab6a9.firebaseapp.com",
-    projectId: "site-log-ab6a9",
-    storageBucket: "site-log-ab6a9.firebasestorage.app",
-    messagingSenderId: "72854783892",
-    appId: "1:72854783892:web:0fa812d5485b505612f181"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // Claude requests go through a Cloudflare Worker that holds the Anthropic
-  // API key server-side. That call lives in the app bundle (CLAUDE_PROXY_URL
-  // in roofing-site-manager.jsx), not here, so a cached copy of this file
-  // can't leave the app pointing at a stale or missing endpoint.
-
-  function ref(key, shared) {
-    return doc(db, shared ? "shared" : "local", key);
-  }
-
-  window.storage = {
-    async get(key, shared) {
-      const snap = await getDoc(ref(key, !!shared));
-      if (!snap.exists()) return null;
-      return { key, value: snap.data().value, shared: !!shared };
-    },
-    async set(key, value, shared) {
-      await setDoc(ref(key, !!shared), { value });
-      return { key, value, shared: !!shared };
-    },
-    async delete(key, shared) {
-      await deleteDoc(ref(key, !!shared));
-      return { key, deleted: true, shared: !!shared };
-    },
-    async list(prefix, shared) {
-      const snaps = await getDocs(collection(db, shared ? "shared" : "local"));
-      const keys = [];
-      snaps.forEach((d) => { if (!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
-      return { keys, prefix: prefix || "", shared: !!shared };
-    },
-  };
-</script>
+<!-- Everything lives in the bundle: Firebase setup, authentication, storage
+     and the Claude proxy call. This shell deliberately holds no app logic,
+     because it is cached independently of bundle.js and a stale copy used to
+     leave the app wired to globals that no longer matched (PROJECT.md section 6). -->
 
 <!-- Fully self-contained app bundle (React, icons, and all app code). -->
-<script type="module" src="bundle.js?v=6c30e3f1"></script>
+<script type="module" src="bundle.js?v=3032cc56"></script>
 </body>
 </html>

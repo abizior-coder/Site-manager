@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// Security is enforced here, on the server, not in the app. An old cached
+// client, a script, or curl are all subject to these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // A signed-in account may read and write only its own subtree.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Everything else — including the old public `local/*` and `shared/*`
+    // documents this app used before accounts existed — is denied to
+    // everyone. Data that mattered was copied into the owner's account
+    // before these rules were deployed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
