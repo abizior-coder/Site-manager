@@ -209,13 +209,23 @@ export async function loadCollection(name) {
 export function subscribeCollection(name, cb, onError) {
   const unsub = fs().onSnapshot(
     col(name),
+    { includeMetadataChanges: true },
     (snaps) => {
       const out = [];
       snaps.forEach((d) => out.push({ id: d.id, ...d.data() }));
       setBaseline(name, out);
-      cb(out);
+      // fromCache tells the caller this is local data, not the server's. With
+      // offline persistence an unreachable server returns an empty cache and
+      // no error at all, which is indistinguishable from "you have no data"
+      // unless it is reported.
+      cb(out, { fromCache: snaps.metadata.fromCache, pending: snaps.metadata.hasPendingWrites });
     },
-    (err) => { if (onError) onError(err); }
+    (err) => {
+      // Never swallow this. A denied or failed listener otherwise looks
+      // exactly like an empty account.
+      console.error(`subscription failed: ${name}`, err);
+      if (onError) onError(err, name);
+    }
   );
   return unsub;
 }
