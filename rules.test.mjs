@@ -122,9 +122,39 @@ await check("made-up invite code is rejected", () =>
 await check("crew CANNOT create invites", () =>
   assertFails(setDoc(doc(crew, "invites", "MINE"), { companyId: CID, role: "owner", expiresAt: Date.now() + 1000 })));
 
+// --- founding a company --------------------------------------------------
+// The gap that shipped a broken rule: these all happen with no membership
+// yet, so anything asking "are you already an owner?" fails by definition.
+const founderUid = "founder-uid";
+const founder = testEnv.authenticatedContext(founderUid).firestore();
+await check("founder CAN create a company naming themselves owner", () =>
+  assertSucceeds(setDoc(doc(founder, "companies", "newco"), { name: "New AG", ownerUid: founderUid })));
+await check("founder CAN create their own owner membership", () =>
+  assertSucceeds(setDoc(doc(founder, "companies", "newco", "members", founderUid), { role: "owner" })));
+await check("founder CAN write their user record", () =>
+  assertSucceeds(setDoc(doc(founder, "users", founderUid), { companyId: "newco" })));
+await check("founder CAN then read their own company", () =>
+  assertSucceeds(getDoc(doc(founder, "companies", "newco"))));
+await check("founder CAN write finance in their own company", () =>
+  assertSucceeds(setDoc(doc(founder, "companies", "newco", "private", "finance"), { labourRate: 90 })));
+await check("someone else CANNOT create a company claiming a different owner", () =>
+  assertFails(setDoc(doc(crew, "companies", "stolenco"), { name: "X", ownerUid: OWNER })));
+await check("outsider CANNOT attach themselves to a company they do not own", () =>
+  assertFails(setDoc(doc(outsider, "companies", "newco", "members", OUTSIDER), { role: "owner" })));
+
+// --- owner-side invite management ---------------------------------------
+await check("owner CAN create an invite", () =>
+  assertSucceeds(setDoc(doc(owner, "invites", "NEWCODE"), {
+    companyId: CID, role: "crew", expiresAt: Date.now() + 86400000, usedBy: null,
+  })));
+await check("owner CAN delete an invite", () =>
+  assertSucceeds(deleteDoc(doc(owner, "invites", "NEWCODE"))));
+
 // --- legacy paths --------------------------------------------------------
 await check("old public local/* stays denied", () =>
   assertFails(getDoc(doc(anon, "local", "site-data"))));
+await check("owner CAN still read their personal kv (migration source)", () =>
+  assertSucceeds(getDoc(doc(owner, "users", OWNER, "kv", "site-data"))));
 
 await testEnv.cleanup();
 console.log(`\n${passed} passed, ${failed} failed`);

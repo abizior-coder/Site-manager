@@ -39,7 +39,10 @@ service cloud.firestore {
     match /invites/{code} {
       allow get: if signedIn();
       allow list: if signedIn() && isOwner(resource.data.companyId);
-      allow create, delete: if signedIn() && isOwner(request.resource.data.companyId);
+      allow create: if signedIn() && isOwner(request.resource.data.companyId);
+      // Deletes carry no incoming data, so the company must be read from the
+      // existing document rather than request.resource.
+      allow delete: if signedIn() && isOwner(resource.data.companyId);
       // Redeeming marks the code used; nothing else about it may change.
       allow update: if signedIn()
                     && resource.data.usedBy == null
@@ -61,10 +64,16 @@ service cloud.firestore {
         // Joining: a user creates only their own membership, and only against
         // an unexpired invite that names this company. The role comes from the
         // invite, so it cannot be self-assigned.
+        //
+        // The first clause is the founding case: whoever the company record
+        // names as its owner may create their own membership. Without it a new
+        // owner could never be created, because isOwner() reads the very
+        // document being written.
         allow create: if signedIn()
                       && request.auth.uid == uid
                       && (
-                           isOwner(cid)
+                           get(/databases/$(database)/documents/companies/$(cid)).data.ownerUid == request.auth.uid
+                           || isOwner(cid)
                            || (
                                 exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
                                 && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.companyId == cid

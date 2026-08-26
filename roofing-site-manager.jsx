@@ -2404,7 +2404,10 @@ export default function SiteManager() {
         "invite-used": "onbErrCodeUsed",
         "invite-expired": "onbErrCodeExpired",
       }[err.message] || "onbErrGeneric";
-      setOnboarding((s) => ({ ...s, busy: false, error: key }));
+      // Keep the real reason visible: a generic message here once hid a
+      // rules bug that blocked company creation entirely.
+      console.error("onboarding failed:", err);
+      setOnboarding((s) => ({ ...s, busy: false, error: key, detail: String(err && (err.code || err.message) || err) }));
     }
   }
 
@@ -4029,6 +4032,7 @@ export default function SiteManager() {
           )}
 
           {onboarding.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[onboarding.error] || t.onbErrGeneric}</div>}
+          {onboarding.detail && <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 break-all">{onboarding.detail}</div>}
 
           <button
             onClick={() => submitOnboarding(onboarding.mode === "join" ? "join" : "create")}
