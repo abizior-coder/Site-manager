@@ -3004,7 +3004,13 @@ export default function SiteManager() {
     const lightEntries = entries.map(({ photo, ...rest }) => rest);
     const lightInsurance = insuranceCards.map(({ photo, ...rest }) => rest);
     const lightCertificates = certificates.map(({ photo, ...rest }) => rest);
-    const payload = { projects, entries: lightEntries, leaveRequests, sentReports, profile, insurance: lightInsurance, certificates: lightCertificates, lang };
+    // Customers and invoices belong in a backup too — they were missing, so a
+    // restore would have quietly dropped the entire CRM and billing history.
+    const payload = {
+      projects, entries: lightEntries, customers, documents,
+      leaveRequests, sentReports, profile,
+      insurance: lightInsurance, certificates: lightCertificates, lang,
+    };
     const code = encodeBackup(payload);
     setBackupCodeOutput(code);
     setBackupModal("export");
@@ -3022,15 +3028,17 @@ export default function SiteManager() {
       setBackupError(t.invalidBackupCode);
       return;
     }
-    const newProjects = data.projects || [];
-    const newEntries = data.entries || [];
-    const newLeave = data.leaveRequests || [];
-    const newReports = data.sentReports || [];
-    setProjects(newProjects);
-    setEntries(newEntries);
-    setLeaveRequests(newLeave);
-    setSentReports(newReports);
-    try { await window.storage.set("site-data", JSON.stringify({ projects: newProjects, entries: newEntries, activeClock: null, leaveRequests: newLeave, sentReports: newReports })); } catch (e) {}
+    // Must go through persist(): writing the old site-data blob restored the
+    // screen but nothing else, so a "restored" backup vanished on reload.
+    await persist({
+      projects: data.projects || [],
+      entries: data.entries || [],
+      customers: data.customers || [],
+      documents: data.documents || [],
+      leaveRequests: data.leaveRequests || [],
+      sentReports: data.sentReports || [],
+      activeClock: null,
+    });
     if (data.profile) {
       setProfile(data.profile);
       try { await window.storage.set("site-profile", JSON.stringify(data.profile)); } catch (e) {}
@@ -4289,13 +4297,20 @@ export default function SiteManager() {
                   {projects.length === 0 ? (
                     <div style={{ color: COLORS.muted }} className="text-sm">{t.addProjectFirst}</div>
                   ) : (
-                    <div className="flex flex-col gap-2">
-                      {projects.slice(0, 4).map((p) => (
-                        <button key={p.id} onClick={() => clockIn(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-3 px-3 rounded-lg text-sm font-semibold flex items-center justify-between">
-                          <span className="flex items-center gap-2"><Play size={14} color={COLORS.accent} /> {p.name}</span>
-                          <ChevronRight size={16} color={COLORS.muted} />
-                        </button>
-                      ))}
+                    // Every job you could still be working on, not just the
+                    // first few: capping the list at four silently made the
+                    // fifth project impossible to clock into. Finished and
+                    // lost jobs are left out rather than the list being cut
+                    // short, and it scrolls once there are many.
+                    <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+                      {projects
+                        .filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS))
+                        .map((p) => (
+                          <button key={p.id} onClick={() => clockIn(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-3 px-3 rounded-lg text-sm font-semibold flex items-center justify-between">
+                            <span className="flex items-center gap-2 min-w-0"><Play size={14} color={COLORS.accent} className="shrink-0" /> <span className="truncate">{p.name}</span></span>
+                            <ChevronRight size={16} color={COLORS.muted} className="shrink-0" />
+                          </button>
+                        ))}
                     </div>
                   )}
                 </>
