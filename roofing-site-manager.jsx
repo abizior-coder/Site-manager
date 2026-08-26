@@ -2,6 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
+import {
+  loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
+  syncCollection, loadCollection, subscribeCollection, companyStorage, isOwner, getRole,
+  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState,
+} from "./company-store.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -105,6 +110,7 @@ const T = {
     legacyImportTitle: "Existing data found", legacyImportHint: "Data from before accounts existed was found on this project. Import it into your account to keep it — it will then be private to you.", legacyImportCount: "records found", legacyImportBtn: "Import into my account", legacyImportSkip: "Not now",
     costingTitle: "Job costing", labourCost: "Labour", materialCost: "Materials", totalCost: "Total cost", quotedLabel: "Quoted", quotedPlaceholder: "Quoted amount", marginLabel: "Margin", unitPriceLabel: "Unit price", labourRateLabel: "Hourly rate", labourRateHint: "Used to cost logged hours. Stays on your account — never shown in reports sent to a supervisor.", costingNoRate: "Set an hourly rate in your profile to cost labour.", costingUnpriced: "items have no price yet.",
     quoteLabel: "Quote", invoiceLabel: "Invoice", newQuote: "New quote", newInvoice: "New invoice", convertToInvoice: "Make invoice", invoiceCreated: "Invoice created", docSaved: "Saved", docNeedsLine: "Add at least one line.", docLines: "Lines", docAddLine: "Add line", docDescription: "Description", docLineTotal: "Total", docNet: "Subtotal", docVat: "VAT", docTotal: "Total", docDate: "Date", docDue: "Due", vatStandard: "Standard", vatReduced: "Reduced", vatLodging: "Lodging", vatNone: "None", vatNumberLabel: "VAT number", billingTitle: "Billing details", billingHint: "Used on quotes and invoices, and to build the Swiss QR-bill. Needs a Swiss IBAN.", billingCompany: "Company name", billingStreet: "Street", billingBuilding: "No.", billingPostal: "Postcode", billingTown: "Town", paymentDaysLabel: "Payment term (days)", qrPaymentPart: "Payment part", qrReceipt: "Receipt", qrPayableTo: "Account / Payable to", qrPayableBy: "Payable by", qrReference: "Reference", qrAmount: "Amount", qrCurrency: "Currency", qrMissingBilling: "Add your billing details to print a QR-bill.", qrErrName: "Company name is required.", qrErrIban: "That is not a valid Swiss IBAN.", qrErrAddress: "Postcode and town are required.",
+    onbIntro: "Start a company, or join one with the code your boss sent you.", onbCompanyName: "Company name", onbCodePlaceholder: "Invite code", onbCreateBtn: "Create company", onbJoinBtn: "Join company", onbSwitchJoin: "I have an invite code", onbSwitchCreate: "Start a new company instead", onbErrCompanyName: "Enter a company name.", onbErrInvalidCode: "That code was not recognised.", onbErrCodeUsed: "That code has already been used.", onbErrCodeExpired: "That code has expired — ask for a new one.", onbErrGeneric: "That didn't work — try again.", teamTitle: "Team", teamMembers: "Members", teamInvites: "Invite codes", teamInviteHint: "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.", teamNewInvite: "New invite code", teamNoInvites: "No active codes.", teamExpires: "Expires", roleOwner: "Owner", roleCrew: "Crew", migrateTitle: "Bring your data across", migrateHint: "Your existing data is still on your personal account. Copy it into the company so your crew can work with it.", migrateBtn: "Copy into company", migrateDone: "Copied.", migrateKeptOriginal: "The original is untouched, so nothing is lost if something looks wrong.",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -216,6 +222,7 @@ const T = {
     legacyImportTitle: "Bestehende Daten gefunden", legacyImportHint: "Es wurden Daten aus der Zeit vor den Konten gefunden. Importieren Sie sie in Ihr Konto, um sie zu behalten — danach sind sie privat.", legacyImportCount: "Datensätze gefunden", legacyImportBtn: "In mein Konto importieren", legacyImportSkip: "Jetzt nicht",
     costingTitle: "Nachkalkulation", labourCost: "Arbeit", materialCost: "Material", totalCost: "Gesamtkosten", quotedLabel: "Offeriert", quotedPlaceholder: "Offertbetrag", marginLabel: "Marge", unitPriceLabel: "Einzelpreis", labourRateLabel: "Stundensatz", labourRateHint: "Zur Bewertung der erfassten Stunden. Bleibt in Ihrem Konto — erscheint nie in Berichten an Vorgesetzte.", costingNoRate: "Stundensatz im Profil hinterlegen, um die Arbeit zu bewerten.", costingUnpriced: "Positionen haben noch keinen Preis.",
     quoteLabel: "Offerte", invoiceLabel: "Rechnung", newQuote: "Neue Offerte", newInvoice: "Neue Rechnung", convertToInvoice: "Rechnung erstellen", invoiceCreated: "Rechnung erstellt", docSaved: "Gespeichert", docNeedsLine: "Mindestens eine Position erfassen.", docLines: "Positionen", docAddLine: "Position hinzufügen", docDescription: "Bezeichnung", docLineTotal: "Total", docNet: "Zwischentotal", docVat: "MWST", docTotal: "Total", docDate: "Datum", docDue: "Fällig", vatStandard: "Normalsatz", vatReduced: "Reduziert", vatLodging: "Beherbergung", vatNone: "Keine", vatNumberLabel: "MWST-Nummer", billingTitle: "Rechnungsangaben", billingHint: "Für Offerten und Rechnungen sowie den Schweizer QR-Einzahlungsschein. Benötigt eine Schweizer IBAN.", billingCompany: "Firmenname", billingStreet: "Strasse", billingBuilding: "Nr.", billingPostal: "PLZ", billingTown: "Ort", paymentDaysLabel: "Zahlungsfrist (Tage)", qrPaymentPart: "Zahlteil", qrReceipt: "Empfangsschein", qrPayableTo: "Konto / Zahlbar an", qrPayableBy: "Zahlbar durch", qrReference: "Referenz", qrAmount: "Betrag", qrCurrency: "Währung", qrMissingBilling: "Rechnungsangaben erfassen, um einen QR-Einzahlungsschein zu drucken.", qrErrName: "Firmenname ist erforderlich.", qrErrIban: "Das ist keine gültige Schweizer IBAN.", qrErrAddress: "PLZ und Ort sind erforderlich.",
+    onbIntro: "Firma erstellen oder mit dem Code vom Chef beitreten.", onbCompanyName: "Firmenname", onbCodePlaceholder: "Einladungscode", onbCreateBtn: "Firma erstellen", onbJoinBtn: "Firma beitreten", onbSwitchJoin: "Ich habe einen Einladungscode", onbSwitchCreate: "Stattdessen neue Firma erstellen", onbErrCompanyName: "Firmennamen eingeben.", onbErrInvalidCode: "Dieser Code wurde nicht erkannt.", onbErrCodeUsed: "Dieser Code wurde bereits verwendet.", onbErrCodeExpired: "Dieser Code ist abgelaufen — neuen anfordern.", onbErrGeneric: "Das hat nicht geklappt — nochmals versuchen.", teamTitle: "Team", teamMembers: "Mitglieder", teamInvites: "Einladungscodes", teamInviteHint: "Code an einen Mitarbeiter senden. Er erstellt ein Konto, gibt den Code ein und tritt der Firma bei. Codes laufen nach 14 Tagen ab.", teamNewInvite: "Neuer Einladungscode", teamNoInvites: "Keine aktiven Codes.", teamExpires: "Läuft ab", roleOwner: "Inhaber", roleCrew: "Mitarbeiter", migrateTitle: "Daten übernehmen", migrateHint: "Ihre bisherigen Daten liegen noch auf Ihrem persönlichen Konto. Kopieren Sie sie in die Firma, damit das Team damit arbeiten kann.", migrateBtn: "In die Firma kopieren", migrateDone: "Kopiert.", migrateKeptOriginal: "Das Original bleibt unverändert — es geht nichts verloren, falls etwas nicht stimmt.",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -327,6 +334,7 @@ const T = {
     legacyImportTitle: "Données existantes trouvées", legacyImportHint: "Des données antérieures aux comptes ont été trouvées. Importez-les dans votre compte pour les conserver — elles deviendront privées.", legacyImportCount: "enregistrements trouvés", legacyImportBtn: "Importer dans mon compte", legacyImportSkip: "Pas maintenant",
     costingTitle: "Calcul des coûts", labourCost: "Main-d'œuvre", materialCost: "Matériaux", totalCost: "Coût total", quotedLabel: "Devis", quotedPlaceholder: "Montant du devis", marginLabel: "Marge", unitPriceLabel: "Prix unitaire", labourRateLabel: "Taux horaire", labourRateHint: "Sert à valoriser les heures saisies. Reste dans votre compte — jamais dans les rapports envoyés.", costingNoRate: "Définissez un taux horaire dans votre profil.", costingUnpriced: "postes sans prix.",
     quoteLabel: "Devis", invoiceLabel: "Facture", newQuote: "Nouveau devis", newInvoice: "Nouvelle facture", convertToInvoice: "Créer la facture", invoiceCreated: "Facture créée", docSaved: "Enregistré", docNeedsLine: "Ajoutez au moins une ligne.", docLines: "Lignes", docAddLine: "Ajouter une ligne", docDescription: "Désignation", docLineTotal: "Total", docNet: "Sous-total", docVat: "TVA", docTotal: "Total", docDate: "Date", docDue: "Échéance", vatStandard: "Normal", vatReduced: "Réduit", vatLodging: "Hébergement", vatNone: "Aucune", vatNumberLabel: "N° TVA", billingTitle: "Coordonnées de facturation", billingHint: "Utilisées sur les devis et factures et pour le QR-facture suisse. IBAN suisse requis.", billingCompany: "Nom de l'entreprise", billingStreet: "Rue", billingBuilding: "N°", billingPostal: "NPA", billingTown: "Localité", paymentDaysLabel: "Délai de paiement (jours)", qrPaymentPart: "Section paiement", qrReceipt: "Récépissé", qrPayableTo: "Compte / Payable à", qrPayableBy: "Payable par", qrReference: "Référence", qrAmount: "Montant", qrCurrency: "Monnaie", qrMissingBilling: "Complétez vos coordonnées pour imprimer un QR-facture.", qrErrName: "Le nom de l'entreprise est requis.", qrErrIban: "IBAN suisse non valide.", qrErrAddress: "NPA et localité requis.",
+    onbIntro: "Créez une entreprise ou rejoignez-la avec le code reçu.", onbCompanyName: "Nom de l'entreprise", onbCodePlaceholder: "Code d'invitation", onbCreateBtn: "Créer l'entreprise", onbJoinBtn: "Rejoindre", onbSwitchJoin: "J'ai un code d'invitation", onbSwitchCreate: "Créer plutôt une entreprise", onbErrCompanyName: "Saisissez un nom d'entreprise.", onbErrInvalidCode: "Code non reconnu.", onbErrCodeUsed: "Ce code a déjà été utilisé.", onbErrCodeExpired: "Ce code a expiré — demandez-en un nouveau.", onbErrGeneric: "Cela n'a pas fonctionné — réessayez.", teamTitle: "Équipe", teamMembers: "Membres", teamInvites: "Codes d'invitation", teamInviteHint: "Envoyez un code à un collaborateur. Il crée un compte, saisit le code et rejoint l'entreprise. Les codes expirent après 14 jours.", teamNewInvite: "Nouveau code", teamNoInvites: "Aucun code actif.", teamExpires: "Expire le", roleOwner: "Patron", roleCrew: "Collaborateur", migrateTitle: "Reprendre vos données", migrateHint: "Vos données sont encore sur votre compte personnel. Copiez-les dans l'entreprise pour que l'équipe puisse les utiliser.", migrateBtn: "Copier dans l'entreprise", migrateDone: "Copié.", migrateKeptOriginal: "L'original reste intact — rien n'est perdu si quelque chose cloche.",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -438,6 +446,7 @@ const T = {
     legacyImportTitle: "Dati esistenti trovati", legacyImportHint: "Sono stati trovati dati precedenti agli account. Importali nel tuo account per conservarli — diventeranno privati.", legacyImportCount: "record trovati", legacyImportBtn: "Importa nel mio account", legacyImportSkip: "Non ora",
     costingTitle: "Calcolo costi", labourCost: "Manodopera", materialCost: "Materiali", totalCost: "Costo totale", quotedLabel: "Preventivo", quotedPlaceholder: "Importo preventivo", marginLabel: "Margine", unitPriceLabel: "Prezzo unitario", labourRateLabel: "Tariffa oraria", labourRateHint: "Serve a valorizzare le ore registrate. Resta nel tuo account — mai nei rapporti inviati.", costingNoRate: "Imposta una tariffa oraria nel profilo.", costingUnpriced: "voci senza prezzo.",
     quoteLabel: "Preventivo", invoiceLabel: "Fattura", newQuote: "Nuovo preventivo", newInvoice: "Nuova fattura", convertToInvoice: "Crea fattura", invoiceCreated: "Fattura creata", docSaved: "Salvato", docNeedsLine: "Aggiungi almeno una riga.", docLines: "Righe", docAddLine: "Aggiungi riga", docDescription: "Descrizione", docLineTotal: "Totale", docNet: "Subtotale", docVat: "IVA", docTotal: "Totale", docDate: "Data", docDue: "Scadenza", vatStandard: "Normale", vatReduced: "Ridotta", vatLodging: "Alloggio", vatNone: "Nessuna", vatNumberLabel: "N. IVA", billingTitle: "Dati di fatturazione", billingHint: "Usati su preventivi e fatture e per la QR-fattura svizzera. Serve un IBAN svizzero.", billingCompany: "Nome azienda", billingStreet: "Via", billingBuilding: "N.", billingPostal: "NPA", billingTown: "Località", paymentDaysLabel: "Termine di pagamento (giorni)", qrPaymentPart: "Sezione pagamento", qrReceipt: "Ricevuta", qrPayableTo: "Conto / Pagabile a", qrPayableBy: "Pagabile da", qrReference: "Riferimento", qrAmount: "Importo", qrCurrency: "Valuta", qrMissingBilling: "Inserisci i dati di fatturazione per stampare una QR-fattura.", qrErrName: "Il nome dell'azienda è obbligatorio.", qrErrIban: "IBAN svizzero non valido.", qrErrAddress: "NPA e località obbligatori.",
+    onbIntro: "Crea un'azienda o entra con il codice ricevuto.", onbCompanyName: "Nome azienda", onbCodePlaceholder: "Codice invito", onbCreateBtn: "Crea azienda", onbJoinBtn: "Entra", onbSwitchJoin: "Ho un codice invito", onbSwitchCreate: "Crea invece una nuova azienda", onbErrCompanyName: "Inserisci il nome dell'azienda.", onbErrInvalidCode: "Codice non riconosciuto.", onbErrCodeUsed: "Codice già utilizzato.", onbErrCodeExpired: "Codice scaduto — chiedine uno nuovo.", onbErrGeneric: "Non ha funzionato — riprova.", teamTitle: "Squadra", teamMembers: "Membri", teamInvites: "Codici invito", teamInviteHint: "Invia un codice a un collaboratore. Crea un account, inserisce il codice ed entra in azienda. I codici scadono dopo 14 giorni.", teamNewInvite: "Nuovo codice", teamNoInvites: "Nessun codice attivo.", teamExpires: "Scade", roleOwner: "Titolare", roleCrew: "Collaboratore", migrateTitle: "Trasferisci i dati", migrateHint: "I tuoi dati sono ancora sull'account personale. Copiali nell'azienda così la squadra può usarli.", migrateBtn: "Copia nell'azienda", migrateDone: "Copiato.", migrateKeptOriginal: "L'originale resta intatto — non si perde nulla se qualcosa non torna.",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -549,6 +558,7 @@ const T = {
     legacyImportTitle: "Datos existentes encontrados", legacyImportHint: "Se encontraron datos anteriores a las cuentas. Impórtalos a tu cuenta para conservarlos — pasarán a ser privados.", legacyImportCount: "registros encontrados", legacyImportBtn: "Importar a mi cuenta", legacyImportSkip: "Ahora no",
     costingTitle: "Cálculo de costes", labourCost: "Mano de obra", materialCost: "Materiales", totalCost: "Coste total", quotedLabel: "Presupuestado", quotedPlaceholder: "Importe presupuestado", marginLabel: "Margen", unitPriceLabel: "Precio unitario", labourRateLabel: "Tarifa por hora", labourRateHint: "Sirve para valorar las horas registradas. Queda en tu cuenta — nunca en los informes enviados.", costingNoRate: "Define una tarifa por hora en tu perfil.", costingUnpriced: "partidas sin precio.",
     quoteLabel: "Presupuesto", invoiceLabel: "Factura", newQuote: "Nuevo presupuesto", newInvoice: "Nueva factura", convertToInvoice: "Crear factura", invoiceCreated: "Factura creada", docSaved: "Guardado", docNeedsLine: "Añade al menos una línea.", docLines: "Líneas", docAddLine: "Añadir línea", docDescription: "Descripción", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Fecha", docDue: "Vencimiento", vatStandard: "General", vatReduced: "Reducido", vatLodging: "Alojamiento", vatNone: "Ninguno", vatNumberLabel: "N.º de IVA", billingTitle: "Datos de facturación", billingHint: "Se usan en presupuestos y facturas y para la QR-factura suiza. Requiere IBAN suizo.", billingCompany: "Nombre de la empresa", billingStreet: "Calle", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidad", paymentDaysLabel: "Plazo de pago (días)", qrPaymentPart: "Sección de pago", qrReceipt: "Recibo", qrPayableTo: "Cuenta / Pagadero a", qrPayableBy: "Pagado por", qrReference: "Referencia", qrAmount: "Importe", qrCurrency: "Moneda", qrMissingBilling: "Completa tus datos para imprimir una QR-factura.", qrErrName: "El nombre de la empresa es obligatorio.", qrErrIban: "IBAN suizo no válido.", qrErrAddress: "Código postal y localidad obligatorios.",
+    onbIntro: "Crea una empresa o únete con el código recibido.", onbCompanyName: "Nombre de la empresa", onbCodePlaceholder: "Código de invitación", onbCreateBtn: "Crear empresa", onbJoinBtn: "Unirse", onbSwitchJoin: "Tengo un código", onbSwitchCreate: "Crear una empresa nueva", onbErrCompanyName: "Introduce el nombre de la empresa.", onbErrInvalidCode: "Código no reconocido.", onbErrCodeUsed: "Ese código ya se ha usado.", onbErrCodeExpired: "Ese código ha caducado — pide otro.", onbErrGeneric: "No ha funcionado — inténtalo de nuevo.", teamTitle: "Equipo", teamMembers: "Miembros", teamInvites: "Códigos de invitación", teamInviteHint: "Envía un código a un operario. Crea una cuenta, introduce el código y se une a la empresa. Caducan a los 14 días.", teamNewInvite: "Nuevo código", teamNoInvites: "Sin códigos activos.", teamExpires: "Caduca", roleOwner: "Propietario", roleCrew: "Operario", migrateTitle: "Traer tus datos", migrateHint: "Tus datos siguen en tu cuenta personal. Cópialos a la empresa para que el equipo pueda usarlos.", migrateBtn: "Copiar a la empresa", migrateDone: "Copiado.", migrateKeptOriginal: "El original queda intacto — no se pierde nada si algo no cuadra.",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -660,6 +670,7 @@ const T = {
     legacyImportTitle: "Dados existentes encontrados", legacyImportHint: "Foram encontrados dados anteriores às contas. Importe-os para a sua conta para os manter — passarão a ser privados.", legacyImportCount: "registos encontrados", legacyImportBtn: "Importar para a minha conta", legacyImportSkip: "Agora não",
     costingTitle: "Cálculo de custos", labourCost: "Mão de obra", materialCost: "Materiais", totalCost: "Custo total", quotedLabel: "Orçamentado", quotedPlaceholder: "Valor orçamentado", marginLabel: "Margem", unitPriceLabel: "Preço unitário", labourRateLabel: "Valor à hora", labourRateHint: "Usado para valorizar as horas registadas. Fica na sua conta — nunca nos relatórios enviados.", costingNoRate: "Defina um valor à hora no seu perfil.", costingUnpriced: "itens sem preço.",
     quoteLabel: "Orçamento", invoiceLabel: "Fatura", newQuote: "Novo orçamento", newInvoice: "Nova fatura", convertToInvoice: "Criar fatura", invoiceCreated: "Fatura criada", docSaved: "Guardado", docNeedsLine: "Adicione pelo menos uma linha.", docLines: "Linhas", docAddLine: "Adicionar linha", docDescription: "Descrição", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Data", docDue: "Vencimento", vatStandard: "Normal", vatReduced: "Reduzido", vatLodging: "Alojamento", vatNone: "Nenhum", vatNumberLabel: "N.º de IVA", billingTitle: "Dados de faturação", billingHint: "Usados em orçamentos e faturas e para a QR-fatura suíça. Requer IBAN suíço.", billingCompany: "Nome da empresa", billingStreet: "Rua", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidade", paymentDaysLabel: "Prazo de pagamento (dias)", qrPaymentPart: "Secção de pagamento", qrReceipt: "Recibo", qrPayableTo: "Conta / Pagável a", qrPayableBy: "Pago por", qrReference: "Referência", qrAmount: "Montante", qrCurrency: "Moeda", qrMissingBilling: "Preencha os dados de faturação para imprimir uma QR-fatura.", qrErrName: "O nome da empresa é obrigatório.", qrErrIban: "IBAN suíço inválido.", qrErrAddress: "Código postal e localidade obrigatórios.",
+    onbIntro: "Crie uma empresa ou junte-se com o código recebido.", onbCompanyName: "Nome da empresa", onbCodePlaceholder: "Código de convite", onbCreateBtn: "Criar empresa", onbJoinBtn: "Juntar-me", onbSwitchJoin: "Tenho um código", onbSwitchCreate: "Criar antes uma empresa", onbErrCompanyName: "Introduza o nome da empresa.", onbErrInvalidCode: "Código não reconhecido.", onbErrCodeUsed: "Esse código já foi usado.", onbErrCodeExpired: "Esse código expirou — peça outro.", onbErrGeneric: "Não resultou — tente novamente.", teamTitle: "Equipa", teamMembers: "Membros", teamInvites: "Códigos de convite", teamInviteHint: "Envie um código a um colaborador. Cria uma conta, introduz o código e junta-se à empresa. Expiram em 14 dias.", teamNewInvite: "Novo código", teamNoInvites: "Sem códigos ativos.", teamExpires: "Expira", roleOwner: "Proprietário", roleCrew: "Colaborador", migrateTitle: "Trazer os seus dados", migrateHint: "Os seus dados ainda estão na conta pessoal. Copie-os para a empresa para a equipa poder usá-los.", migrateBtn: "Copiar para a empresa", migrateDone: "Copiado.", migrateKeptOriginal: "O original fica intacto — nada se perde se algo parecer errado.",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -771,6 +782,7 @@ const T = {
     legacyImportTitle: "Znaleziono istniejące dane", legacyImportHint: "Znaleziono dane sprzed wprowadzenia kont. Zaimportuj je na swoje konto, aby je zachować — staną się prywatne.", legacyImportCount: "znalezionych rekordów", legacyImportBtn: "Importuj na moje konto", legacyImportSkip: "Nie teraz",
     costingTitle: "Kalkulacja kosztów", labourCost: "Robocizna", materialCost: "Materiały", totalCost: "Koszt całkowity", quotedLabel: "Wyceniono", quotedPlaceholder: "Kwota wyceny", marginLabel: "Marża", unitPriceLabel: "Cena jednostkowa", labourRateLabel: "Stawka godzinowa", labourRateHint: "Służy do wyceny zapisanych godzin. Pozostaje na Twoim koncie — nigdy w wysyłanych raportach.", costingNoRate: "Ustaw stawkę godzinową w profilu.", costingUnpriced: "pozycji bez ceny.",
     quoteLabel: "Oferta", invoiceLabel: "Faktura", newQuote: "Nowa oferta", newInvoice: "Nowa faktura", convertToInvoice: "Utwórz fakturę", invoiceCreated: "Utworzono fakturę", docSaved: "Zapisano", docNeedsLine: "Dodaj co najmniej jedną pozycję.", docLines: "Pozycje", docAddLine: "Dodaj pozycję", docDescription: "Opis", docLineTotal: "Razem", docNet: "Suma częściowa", docVat: "VAT", docTotal: "Razem", docDate: "Data", docDue: "Termin", vatStandard: "Podstawowa", vatReduced: "Obniżona", vatLodging: "Zakwaterowanie", vatNone: "Brak", vatNumberLabel: "Numer VAT", billingTitle: "Dane do faktury", billingHint: "Używane na ofertach i fakturach oraz do szwajcarskiego QR-rachunku. Wymaga szwajcarskiego IBAN.", billingCompany: "Nazwa firmy", billingStreet: "Ulica", billingBuilding: "Nr", billingPostal: "Kod pocztowy", billingTown: "Miejscowość", paymentDaysLabel: "Termin płatności (dni)", qrPaymentPart: "Część płatnicza", qrReceipt: "Potwierdzenie", qrPayableTo: "Konto / Odbiorca", qrPayableBy: "Płatnik", qrReference: "Referencja", qrAmount: "Kwota", qrCurrency: "Waluta", qrMissingBilling: "Uzupełnij dane, aby wydrukować QR-rachunek.", qrErrName: "Nazwa firmy jest wymagana.", qrErrIban: "To nie jest poprawny szwajcarski IBAN.", qrErrAddress: "Kod pocztowy i miejscowość są wymagane.",
+    onbIntro: "Załóż firmę lub dołącz kodem od szefa.", onbCompanyName: "Nazwa firmy", onbCodePlaceholder: "Kod zaproszenia", onbCreateBtn: "Załóż firmę", onbJoinBtn: "Dołącz", onbSwitchJoin: "Mam kod zaproszenia", onbSwitchCreate: "Załóż nową firmę", onbErrCompanyName: "Podaj nazwę firmy.", onbErrInvalidCode: "Nie rozpoznano kodu.", onbErrCodeUsed: "Ten kod został już użyty.", onbErrCodeExpired: "Kod wygasł — poproś o nowy.", onbErrGeneric: "Nie udało się — spróbuj ponownie.", teamTitle: "Zespół", teamMembers: "Członkowie", teamInvites: "Kody zaproszeń", teamInviteHint: "Wyślij kod pracownikowi. Zakłada konto, wpisuje kod i dołącza do firmy. Kody wygasają po 14 dniach.", teamNewInvite: "Nowy kod", teamNoInvites: "Brak aktywnych kodów.", teamExpires: "Wygasa", roleOwner: "Właściciel", roleCrew: "Pracownik", migrateTitle: "Przenieś dane", migrateHint: "Twoje dane są nadal na koncie osobistym. Skopiuj je do firmy, aby zespół mógł z nich korzystać.", migrateBtn: "Kopiuj do firmy", migrateDone: "Skopiowano.", migrateKeptOriginal: "Oryginał pozostaje nietknięty — nic nie ginie, jeśli coś wygląda źle.",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -882,6 +894,7 @@ const T = {
     legacyImportTitle: "Nájdené existujúce údaje", legacyImportHint: "Našli sa údaje spred zavedenia účtov. Importujte ich do svojho účtu, aby ste ich zachovali — potom budú súkromné.", legacyImportCount: "nájdených záznamov", legacyImportBtn: "Importovať do môjho účtu", legacyImportSkip: "Teraz nie",
     costingTitle: "Kalkulácia nákladov", labourCost: "Práca", materialCost: "Materiál", totalCost: "Celkové náklady", quotedLabel: "Ponuka", quotedPlaceholder: "Suma ponuky", marginLabel: "Marža", unitPriceLabel: "Jednotková cena", labourRateLabel: "Hodinová sadzba", labourRateHint: "Slúži na ocenenie zaznamenaných hodín. Zostáva vo vašom účte — nikdy v odoslaných reportoch.", costingNoRate: "Nastavte hodinovú sadzbu v profile.", costingUnpriced: "položiek nemá cenu.",
     quoteLabel: "Ponuka", invoiceLabel: "Faktúra", newQuote: "Nová ponuka", newInvoice: "Nová faktúra", convertToInvoice: "Vytvoriť faktúru", invoiceCreated: "Faktúra vytvorená", docSaved: "Uložené", docNeedsLine: "Pridajte aspoň jednu položku.", docLines: "Položky", docAddLine: "Pridať položku", docDescription: "Popis", docLineTotal: "Spolu", docNet: "Medzisúčet", docVat: "DPH", docTotal: "Spolu", docDate: "Dátum", docDue: "Splatnosť", vatStandard: "Základná", vatReduced: "Znížená", vatLodging: "Ubytovanie", vatNone: "Žiadna", vatNumberLabel: "IČ DPH", billingTitle: "Fakturačné údaje", billingHint: "Použité na ponukách a faktúrach a pre švajčiarsky QR-doklad. Vyžaduje švajčiarsky IBAN.", billingCompany: "Názov firmy", billingStreet: "Ulica", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Mesto", paymentDaysLabel: "Splatnosť (dni)", qrPaymentPart: "Platobná časť", qrReceipt: "Potvrdenie", qrPayableTo: "Účet / Príjemca", qrPayableBy: "Platiteľ", qrReference: "Referencia", qrAmount: "Suma", qrCurrency: "Mena", qrMissingBilling: "Doplňte fakturačné údaje pre tlač QR-dokladu.", qrErrName: "Názov firmy je povinný.", qrErrIban: "Neplatný švajčiarsky IBAN.", qrErrAddress: "PSČ a mesto sú povinné.",
+    onbIntro: "Vytvorte firmu alebo sa pripojte kódom od šéfa.", onbCompanyName: "Názov firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvoriť firmu", onbJoinBtn: "Pripojiť sa", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvoriť radšej novú firmu", onbErrCompanyName: "Zadajte názov firmy.", onbErrInvalidCode: "Kód nebol rozpoznaný.", onbErrCodeUsed: "Tento kód už bol použitý.", onbErrCodeExpired: "Kód vypršal — vyžiadajte si nový.", onbErrGeneric: "Nepodarilo sa — skúste znova.", teamTitle: "Tím", teamMembers: "Členovia", teamInvites: "Kódy pozvánok", teamInviteHint: "Pošlite kód zamestnancovi. Vytvorí si účet, zadá kód a pripojí sa k firme. Kódy vypršia po 14 dňoch.", teamNewInvite: "Nový kód", teamNoInvites: "Žiadne aktívne kódy.", teamExpires: "Vyprší", roleOwner: "Majiteľ", roleCrew: "Zamestnanec", migrateTitle: "Preniesť údaje", migrateHint: "Vaše údaje sú stále na osobnom účte. Skopírujte ich do firmy, aby s nimi mohol tím pracovať.", migrateBtn: "Kopírovať do firmy", migrateDone: "Skopírované.", migrateKeptOriginal: "Originál zostáva nedotknutý — nič sa nestratí, ak niečo nesedí.",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -993,6 +1006,7 @@ const T = {
     legacyImportTitle: "Nalezena existující data", legacyImportHint: "Byla nalezena data z doby před zavedením účtů. Importujte je do svého účtu, abyste je zachovali — poté budou soukromá.", legacyImportCount: "nalezených záznamů", legacyImportBtn: "Importovat do mého účtu", legacyImportSkip: "Teď ne",
     costingTitle: "Kalkulace nákladů", labourCost: "Práce", materialCost: "Materiál", totalCost: "Celkové náklady", quotedLabel: "Nabídka", quotedPlaceholder: "Částka nabídky", marginLabel: "Marže", unitPriceLabel: "Jednotková cena", labourRateLabel: "Hodinová sazba", labourRateHint: "Slouží k ocenění zaznamenaných hodin. Zůstává ve vašem účtu — nikdy v odeslaných reportech.", costingNoRate: "Nastavte hodinovou sazbu v profilu.", costingUnpriced: "položek nemá cenu.",
     quoteLabel: "Nabídka", invoiceLabel: "Faktura", newQuote: "Nová nabídka", newInvoice: "Nová faktura", convertToInvoice: "Vytvořit fakturu", invoiceCreated: "Faktura vytvořena", docSaved: "Uloženo", docNeedsLine: "Přidejte alespoň jednu položku.", docLines: "Položky", docAddLine: "Přidat položku", docDescription: "Popis", docLineTotal: "Celkem", docNet: "Mezisoučet", docVat: "DPH", docTotal: "Celkem", docDate: "Datum", docDue: "Splatnost", vatStandard: "Základní", vatReduced: "Snížená", vatLodging: "Ubytování", vatNone: "Žádná", vatNumberLabel: "DIČ", billingTitle: "Fakturační údaje", billingHint: "Použity na nabídkách a fakturách a pro švýcarský QR-doklad. Vyžaduje švýcarský IBAN.", billingCompany: "Název firmy", billingStreet: "Ulice", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Město", paymentDaysLabel: "Splatnost (dny)", qrPaymentPart: "Platební část", qrReceipt: "Potvrzení", qrPayableTo: "Účet / Příjemce", qrPayableBy: "Plátce", qrReference: "Reference", qrAmount: "Částka", qrCurrency: "Měna", qrMissingBilling: "Doplňte fakturační údaje pro tisk QR-dokladu.", qrErrName: "Název firmy je povinný.", qrErrIban: "Neplatný švýcarský IBAN.", qrErrAddress: "PSČ a město jsou povinné.",
+    onbIntro: "Vytvořte firmu nebo se připojte kódem od šéfa.", onbCompanyName: "Název firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvořit firmu", onbJoinBtn: "Připojit se", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvořit raději novou firmu", onbErrCompanyName: "Zadejte název firmy.", onbErrInvalidCode: "Kód nebyl rozpoznán.", onbErrCodeUsed: "Tento kód už byl použit.", onbErrCodeExpired: "Kód vypršel — vyžádejte si nový.", onbErrGeneric: "Nepovedlo se — zkuste to znovu.", teamTitle: "Tým", teamMembers: "Členové", teamInvites: "Kódy pozvánek", teamInviteHint: "Pošlete kód zaměstnanci. Vytvoří si účet, zadá kód a připojí se k firmě. Kódy vyprší po 14 dnech.", teamNewInvite: "Nový kód", teamNoInvites: "Žádné aktivní kódy.", teamExpires: "Vyprší", roleOwner: "Majitel", roleCrew: "Zaměstnanec", migrateTitle: "Přenést data", migrateHint: "Vaše data jsou stále na osobním účtu. Zkopírujte je do firmy, aby s nimi mohl tým pracovat.", migrateBtn: "Kopírovat do firmy", migrateDone: "Zkopírováno.", migrateKeptOriginal: "Originál zůstává nedotčen — nic se neztratí, pokud něco nesedí.",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -2113,6 +2127,13 @@ export default function SiteManager() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authForm, setAuthForm] = useState({ mode: "signin", email: "", password: "", error: null, busy: false, notice: null });
   const [legacyImport, setLegacyImport] = useState(null); // { docs, busy } when old public data is found
+  const [membership, setMembership] = useState(null);
+  const [membershipChecked, setMembershipChecked] = useState(false);
+  const [onboarding, setOnboarding] = useState({ mode: "choose", companyName: "", displayName: "", code: "", busy: false, error: null });
+  const [companyMigration, setCompanyMigration] = useState(null);
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+  const [team, setTeam] = useState({ members: [], invites: [], busy: false });
+  const customersRef = useRef([]);
   const [lang, setLang] = useState("de");
   const [langPickerOpen, setLangPickerOpen] = useState(false);
   const t = T[lang] || T.en;
@@ -2234,31 +2255,66 @@ export default function SiteManager() {
     return () => { if (unsub) unsub(); };
   }, []);
 
+  // Resolve which company this account belongs to before touching any data:
+  // every document path is company-scoped, and a crew member has no personal
+  // store to fall back on.
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setMembership(null); setMembershipChecked(false); return; }
+    let cancelled = false;
     (async () => {
       try {
-        const res = await window.storage.get("site-data");
-        if (res && res.value) {
-          const data = JSON.parse(res.value);
-          // Projects used to carry the client as a free-text string. Promote
-          // those to real customer records once, so existing work keeps its
-          // client and gains history instead of being left behind.
-          const { projects: migratedProjects, customers: migratedCustomers, changed } =
-            migrateClientsToCustomers(data.projects || [], data.customers || []);
-          setProjects(migratedProjects);
-          setCustomers(migratedCustomers);
-          setEntries(data.entries || []);
-          setDocuments(data.documents || []);
-          setActiveClock(data.activeClock || null);
-          setLeaveRequests(data.leaveRequests || []);
-          setSentReports(data.sentReports || []);
-          if (changed) {
-            try {
-              await window.storage.set("site-data", JSON.stringify({ ...data, projects: migratedProjects, customers: migratedCustomers }));
-            } catch (e) {}
-          }
+        const m = await loadMembership(user.uid);
+        if (cancelled) return;
+        if (m) {
+          window.storage = companyStorage; // company-scoped from here on
+          setMembership(m);
+        } else {
+          setMembership(null);
         }
+      } catch (e) {
+        if (!cancelled) setMembership(null);
+      }
+      if (!cancelled) setMembershipChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Live collection subscriptions. Two devices editing different records now
+  // both keep their work, and the owner sees crew activity without reloading.
+  useEffect(() => {
+    if (!user || !membership) return;
+    const unsubs = [];
+    unsubs.push(subscribeCollection("projects", (rows) => {
+      const { projects: mp, customers: mc, changed } = migrateClientsToCustomers(rows, customersRef.current || []);
+      setProjects(mp);
+      if (changed && isOwner()) {
+        syncCollection("projects", mp).catch(() => {});
+        syncCollection("customers", mc).catch(() => {});
+      }
+    }));
+    unsubs.push(subscribeCollection("entries", setEntries));
+    unsubs.push(subscribeCollection("customers", setCustomers));
+    // Crew have no access to quotes and invoices — subscribing would simply
+    // be denied, so don't ask.
+    if (isOwner()) unsubs.push(subscribeCollection("documents", setDocuments));
+    return () => unsubs.forEach((u) => { try { u(); } catch {} });
+  }, [user, membership]);
+
+  useEffect(() => {
+    if (!user || !membership) return;
+    (async () => {
+      try {
+        const metaRes = await window.storage.get("site-meta");
+        if (metaRes && metaRes.value) {
+          const meta = JSON.parse(metaRes.value);
+          setLeaveRequests(meta.leaveRequests || []);
+          setSentReports(meta.sentReports || []);
+        }
+      } catch (e) {}
+      try {
+        // The clock is personal: each crew member has their own.
+        const clockRes = await window.storage.get(`clock-${user.uid}`);
+        if (clockRes && clockRes.value) setActiveClock(JSON.parse(clockRes.value).activeClock || null);
       } catch (e) {}
       try {
         const langRes = await window.storage.get("site-lang");
@@ -2290,27 +2346,107 @@ export default function SiteManager() {
         const pricesRes = await window.storage.get("site-material-prices");
         if (pricesRes && pricesRes.value) setMaterialPrices(JSON.parse(pricesRes.value));
       } catch (e) {}
-      try {
-        const billRes = await window.storage.get("site-billing");
-        if (billRes && billRes.value) setBilling((b) => ({ ...b, ...JSON.parse(billRes.value) }));
-      } catch (e) {}
+      // Billing, the labour rate and margins live in an owner-only document.
+      // Crew genuinely cannot read it — the rules deny it, not just the UI.
+      if (isOwner()) {
+        try {
+          const fin = await loadFinance();
+          if (fin) setBilling((b) => ({ ...b, ...fin }));
+        } catch (e) {}
+      }
       try {
         const libRes = await window.storage.get("site-tech-library");
         if (libRes && libRes.value) setTechLibrary(JSON.parse(libRes.value));
       } catch (e) {}
       setReady(true);
 
-      // If this account has nothing yet, look for data left at the old public
-      // paths and offer to bring it across. Never copied automatically.
-      try {
-        const mine = await window.storage.get("site-data");
-        if (!mine || !mine.value) {
-          const docs = await legacyScan();
-          if (docs.length > 0) setLegacyImport({ docs, busy: false });
-        }
-      } catch (e) {}
+      // Offer to bring across data from before the company existed. Owner
+      // only, and never automatic.
+      if (isOwner()) {
+        try {
+          const existing = await loadCollection("projects");
+          if (existing.length === 0) {
+            const summary = await personalDataSummary(user.uid);
+            if (summary.hasData) setCompanyMigration({ summary, busy: false, result: null });
+          }
+        } catch (e) {}
+      }
     })();
-  }, [user]);
+  }, [user, membership]);
+
+  useEffect(() => { customersRef.current = customers; }, [customers]);
+
+  async function submitOnboarding(mode) {
+    setOnboarding((s) => ({ ...s, busy: true, error: null }));
+    try {
+      if (mode === "create") {
+        if (!onboarding.companyName.trim()) throw new Error("company-name");
+        await createCompany(user.uid, {
+          companyName: onboarding.companyName.trim(),
+          displayName: onboarding.displayName.trim(),
+          email: user.email,
+        });
+      } else {
+        if (!onboarding.code.trim()) throw new Error("invite-invalid");
+        await joinCompanyWithCode(user.uid, onboarding.code, {
+          displayName: onboarding.displayName.trim(),
+          email: user.email,
+        });
+      }
+      const m = await loadMembership(user.uid);
+      window.storage = companyStorage;
+      setMembership(m);
+      setOnboarding((s) => ({ ...s, busy: false }));
+    } catch (err) {
+      const key = {
+        "company-name": "onbErrCompanyName",
+        "invite-invalid": "onbErrInvalidCode",
+        "invite-used": "onbErrCodeUsed",
+        "invite-expired": "onbErrCodeExpired",
+      }[err.message] || "onbErrGeneric";
+      setOnboarding((s) => ({ ...s, busy: false, error: key }));
+    }
+  }
+
+  async function openTeam() {
+    setTeamModalOpen(true);
+    setTeam((s) => ({ ...s, busy: true }));
+    try {
+      const [members, invites] = await Promise.all([listMembers(), listInvites()]);
+      setTeam({ members, invites, busy: false });
+    } catch (e) {
+      setTeam((s) => ({ ...s, busy: false }));
+    }
+  }
+
+  async function makeInvite() {
+    try {
+      await createInvite("crew");
+      const invites = await listInvites();
+      setTeam((s) => ({ ...s, invites }));
+    } catch (e) { showToast(t.couldntSave); }
+  }
+
+  async function dropInvite(code) {
+    try {
+      await revokeInvite(code);
+      setTeam((s) => ({ ...s, invites: s.invites.filter((i) => i.code !== code) }));
+    } catch (e) { showToast(t.couldntSave); }
+  }
+
+  async function runCompanyMigration() {
+    if (!companyMigration) return;
+    setCompanyMigration((s) => ({ ...s, busy: true }));
+    try {
+      const counts = await migrateFromPersonal(user.uid);
+      // Show what actually landed rather than asserting success: the originals
+      // are untouched, so a mismatch is recoverable.
+      setCompanyMigration((s) => ({ ...s, busy: false, result: counts }));
+    } catch (err) {
+      setCompanyMigration((s) => ({ ...s, busy: false }));
+      showToast(t.couldntSave);
+    }
+  }
 
   async function runLegacyImport() {
     if (!legacyImport) return;
@@ -2637,7 +2773,7 @@ export default function SiteManager() {
     const customer = customers.find((c) => c.id === doc.customerId);
     const project = projects.find((p) => p.id === doc.projectId);
     const totals = documentTotals(doc);
-    const cur = profile.currency || "CHF";
+    const cur = billing.currency || "CHF";
     const isInvoice = doc.type === "invoice";
     const esc = (v) => String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
     const fmt = (n) => n.toLocaleString("de-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -2893,16 +3029,10 @@ export default function SiteManager() {
     try { await window.storage.set("site-lang", code); } catch (e) {}
   }
 
+  // Writes only the records that actually changed, rather than rewriting one
+  // shared blob. That is what lets two people work at once without silently
+  // overwriting each other.
   async function persist(next) {
-    const data = {
-      projects: next.projects ?? projects,
-      entries: next.entries ?? entries,
-      customers: next.customers ?? customers,
-      documents: next.documents ?? documents,
-      activeClock: next.activeClock !== undefined ? next.activeClock : activeClock,
-      leaveRequests: next.leaveRequests ?? leaveRequests,
-      sentReports: next.sentReports ?? sentReports,
-    };
     if (next.customers) setCustomers(next.customers);
     if (next.documents) setDocuments(next.documents);
     if (next.projects) setProjects(next.projects);
@@ -2910,8 +3040,23 @@ export default function SiteManager() {
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
     if (next.leaveRequests) setLeaveRequests(next.leaveRequests);
     if (next.sentReports) setSentReports(next.sentReports);
+
     try {
-      await window.storage.set("site-data", JSON.stringify(data));
+      if (next.projects) await syncCollection("projects", next.projects);
+      if (next.entries) await syncCollection("entries", next.entries);
+      if (next.customers) await syncCollection("customers", next.customers);
+      if (next.documents) await syncCollection("documents", next.documents);
+
+      // The clock is personal — each crew member has their own.
+      if (next.activeClock !== undefined) {
+        await window.storage.set(`clock-${user.uid}`, JSON.stringify({ activeClock: next.activeClock }));
+      }
+      if (next.leaveRequests || next.sentReports) {
+        await window.storage.set("site-meta", JSON.stringify({
+          leaveRequests: next.leaveRequests ?? leaveRequests,
+          sentReports: next.sentReports ?? sentReports,
+        }));
+      }
     } catch (e) {
       showToast(t.couldntSave);
     }
@@ -2923,7 +3068,9 @@ export default function SiteManager() {
   }
 
   function addEntry(entry) {
-    const e = { id: uid(), date: todayKey(), createdAt: Date.now(), ...entry };
+    // Attribution is required by the rules, and is what makes per-person
+    // hours possible.
+    const e = { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...entry };
     persist({ entries: [e, ...entries] });
   }
 
@@ -2980,14 +3127,22 @@ export default function SiteManager() {
 
   async function doSignOut() {
     try { await signOutUser(); } catch {}
+    // Clear company state too, or the next person to sign in on this phone
+    // would briefly see the previous account data.
+    resetCompanyState();
+    setMembership(null);
+    setMembershipChecked(false);
+    setTeamModalOpen(false);
     setProfileModalOpen(false);
     setTab("today");
   }
 
+  // Saved to the owner-only finance document, not the shared key/value store:
+  // this holds the labour rate and IBAN, which crew must not be able to read.
   async function saveBilling() {
     setBilling(billingDraft);
     setBillingModalOpen(false);
-    try { await window.storage.set("site-billing", JSON.stringify(billingDraft)); } catch (e) { showToast(t.couldntSave); }
+    try { await saveFinance(billingDraft); } catch (e) { showToast(t.couldntSave); }
   }
 
   // A quote starts from what was actually logged on site — hours at the
@@ -2996,7 +3151,7 @@ export default function SiteManager() {
   function newDocumentFor(project, type) {
     const list = entries.filter((e) => e.projectId === project.id);
     const hours = list.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
-    const rate = parseFloat(profile.labourRate || 0) || 0;
+    const rate = parseFloat(billing.labourRate || 0) || 0;
     const lineItems = [];
 
     if (hours > 0 && rate > 0) {
@@ -3746,7 +3901,7 @@ export default function SiteManager() {
   function projectCosting(projectId, quotedAmount) {
     const list = entries.filter((e) => e.projectId === projectId);
     const hours = list.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
-    const rate = parseFloat(profile.labourRate || 0) || 0;
+    const rate = parseFloat(billing.labourRate || 0) || 0;
     const labour = hours * rate;
 
     let materials = 0;
@@ -3771,7 +3926,7 @@ export default function SiteManager() {
   }
 
   function money(n) {
-    const cur = profile.currency || "CHF";
+    const cur = billing.currency || "CHF";
     return `${cur} ${(Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
@@ -3845,6 +4000,55 @@ export default function SiteManager() {
           </div>
 
           <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">{t.authPrivacyNote}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Signed in but not yet part of a company: either start one, or join an
+  // existing one with the code the owner sent.
+  if (membershipChecked && !membership) {
+    const inp = "w-full rounded-lg px-3 py-3 text-sm mb-2 outline-none";
+    const inpStyle = { background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text };
+    return (
+      <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
+        <MountainBackground />
+        <div className="relative w-full max-w-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <SwissCross size={18} />
+            <div className="font-black text-xl uppercase tracking-wide">{t.appLabel}</div>
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.onbIntro}</div>
+
+          <input value={onboarding.displayName} onChange={(e) => setOnboarding((s) => ({ ...s, displayName: e.target.value }))} placeholder={t.yourName} style={inpStyle} className={inp} />
+
+          {onboarding.mode === "join" ? (
+            <input value={onboarding.code} onChange={(e) => setOnboarding((s) => ({ ...s, code: e.target.value.toUpperCase() }))} placeholder={t.onbCodePlaceholder} style={inpStyle} className={`${inp} font-mono tracking-widest`} />
+          ) : (
+            <input value={onboarding.companyName} onChange={(e) => setOnboarding((s) => ({ ...s, companyName: e.target.value }))} placeholder={t.onbCompanyName} style={inpStyle} className={inp} />
+          )}
+
+          {onboarding.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[onboarding.error] || t.onbErrGeneric}</div>}
+
+          <button
+            onClick={() => submitOnboarding(onboarding.mode === "join" ? "join" : "create")}
+            disabled={onboarding.busy}
+            style={{ background: COLORS.accent, opacity: onboarding.busy ? 0.6 : 1 }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+          >
+            {onboarding.busy ? <Loader2 size={16} className="animate-spin" /> : null}
+            {onboarding.mode === "join" ? t.onbJoinBtn : t.onbCreateBtn}
+          </button>
+
+          <button
+            onClick={() => setOnboarding((s) => ({ ...s, mode: s.mode === "join" ? "choose" : "join", error: null }))}
+            style={{ color: COLORS.accent }}
+            className="w-full mt-4 text-xs font-bold"
+          >
+            {onboarding.mode === "join" ? t.onbSwitchCreate : t.onbSwitchJoin}
+          </button>
+
+          <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">{t.signOut}</button>
         </div>
       </div>
     );
@@ -4542,7 +4746,7 @@ export default function SiteManager() {
       {docEditor && (() => {
         const totals = documentTotals(docEditor);
         const isInvoice = docEditor.type === "invoice";
-        const cur = profile.currency || "CHF";
+        const cur = billing.currency || "CHF";
         const setLine = (id, field, value) =>
           setDocEditor((s) => ({ ...s, lineItems: s.lineItems.map((li) => (li.id === id ? { ...li, [field]: value } : li)) }));
         return (
@@ -4652,7 +4856,104 @@ export default function SiteManager() {
           )}
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.paymentDaysLabel}</div>
           <input type="number" value={billingDraft.paymentDays || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))} placeholder="30" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" />
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.costingTitle}</div>
+          <div className="flex gap-2 mb-1">
+            <input
+              type="number" inputMode="decimal" step="0.05"
+              value={billingDraft.labourRate || ""}
+              onChange={(e) => setBillingDraft((s) => ({ ...s, labourRate: e.target.value }))}
+              placeholder={t.labourRateLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-2/3 rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              value={billingDraft.currency ?? "CHF"}
+              onChange={(e) => setBillingDraft((s) => ({ ...s, currency: e.target.value }))}
+              placeholder="CHF"
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-1/3 rounded-lg px-3 py-2 text-sm outline-none"
+            />
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.labourRateHint}</div>
           <button onClick={saveBilling} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+        </Modal>
+      )}
+
+      {companyMigration && (
+        <Modal onClose={() => setCompanyMigration(null)} title={t.migrateTitle}>
+          {companyMigration.result ? (
+            <>
+              <div style={{ color: COLORS.success }} className="text-sm mb-3">{t.migrateDone}</div>
+              <div style={{ background: COLORS.card }} className="rounded-lg p-3 text-xs flex flex-col gap-1 mb-3">
+                {Object.entries(companyMigration.result).map(([k, v]) => (
+                  <div key={k} className="flex justify-between"><span style={{ color: COLORS.muted }}>{k}</span><span>{v}</span></div>
+                ))}
+              </div>
+              <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.migrateKeptOriginal}</div>
+              <button onClick={() => window.location.reload()} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.doneLabel}</button>
+            </>
+          ) : (
+            <>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.migrateHint}</div>
+              <div style={{ background: COLORS.card }} className="rounded-lg p-3 text-xs flex flex-col gap-1 mb-4">
+                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.navProjects}</span><span>{companyMigration.summary.projects}</span></div>
+                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.entriesTitle}</span><span>{companyMigration.summary.entries}</span></div>
+                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.navCustomers}</span><span>{companyMigration.summary.customers}</span></div>
+                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docLines}</span><span>{companyMigration.summary.documents}</span></div>
+                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.photoLabel} / {t.libraryTab}</span><span>{companyMigration.summary.otherDocs}</span></div>
+              </div>
+              <button
+                onClick={runCompanyMigration}
+                disabled={companyMigration.busy}
+                style={{ background: COLORS.accent, opacity: companyMigration.busy ? 0.6 : 1 }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+              >
+                {companyMigration.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardPaste size={15} />}
+                {t.migrateBtn}
+              </button>
+              <button onClick={() => setCompanyMigration(null)} style={{ color: COLORS.muted }} className="w-full py-3 text-xs font-bold uppercase">{t.legacyImportSkip}</button>
+            </>
+          )}
+        </Modal>
+      )}
+
+      {teamModalOpen && (
+        <Modal onClose={() => setTeamModalOpen(false)} title={t.teamTitle}>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamMembers} ({team.members.length})</div>
+          <div className="flex flex-col gap-1.5 mb-4">
+            {team.members.map((m) => (
+              <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm truncate">{m.name || m.email || m.uid}</div>
+                  {m.email && m.name && <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{m.email}</div>}
+                </div>
+                <span style={{ background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt, color: m.role === "owner" ? COLORS.accent : COLORS.muted, border: `1px solid ${COLORS.border}` }} className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                  {m.role === "owner" ? t.roleOwner : t.roleCrew}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamInvites}</div>
+          <div style={{ color: COLORS.muted }} className="text-[10px] mb-2 leading-relaxed">{t.teamInviteHint}</div>
+          <div className="flex flex-col gap-1.5 mb-3">
+            {team.invites.map((i) => (
+              <div key={i.code} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm font-mono tracking-widest">{i.code}</div>
+                  <div style={{ color: COLORS.muted }} className="text-[10px]">{t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} style={{ color: COLORS.muted }}><Copy size={14} /></button>
+                  <button onClick={() => dropInvite(i.code)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>
+                </div>
+              </div>
+            ))}
+            {team.invites.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.teamNoInvites}</div>}
+          </div>
+          <button onClick={makeInvite} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+            <Plus size={15} /> {t.teamNewInvite}
+          </button>
         </Modal>
       )}
 
@@ -4864,33 +5165,25 @@ export default function SiteManager() {
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.webhookLabel}</div>
             <input value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div style={{ color: COLORS.muted }} className="text-[10px]">{t.webhookHint}</div>
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.costingTitle}</div>
-            <div className="flex gap-2">
-              <input
-                type="number" inputMode="decimal" step="0.05"
-                value={profileDraft.labourRate || ""}
-                onChange={(e) => setProfileDraft((s) => ({ ...s, labourRate: e.target.value }))}
-                placeholder={t.labourRateLabel}
-                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                className="w-2/3 rounded-lg px-3 py-2 text-sm outline-none"
-              />
-              <input
-                value={profileDraft.currency ?? "CHF"}
-                onChange={(e) => setProfileDraft((s) => ({ ...s, currency: e.target.value }))}
-                placeholder="CHF"
-                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                className="w-1/3 rounded-lg px-3 py-2 text-sm outline-none"
-              />
-            </div>
-            <div style={{ color: COLORS.muted }} className="text-[10px] mt-1.5 leading-relaxed">{t.labourRateHint}</div>
             <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
-            <button
-              onClick={() => { setProfileModalOpen(false); setBillingDraft({ ...billing }); setBillingModalOpen(true); }}
-              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
-              className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
-            >
-              <CreditCard size={14} /> {t.billingTitle}
-            </button>
+            {isOwner() && (
+              <>
+                <button
+                  onClick={() => { setProfileModalOpen(false); setBillingDraft({ ...billing }); setBillingModalOpen(true); }}
+                  style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+                >
+                  <CreditCard size={14} /> {t.billingTitle}
+                </button>
+                <button
+                  onClick={() => { setProfileModalOpen(false); openTeam(); }}
+                  style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+                >
+                  <User size={14} /> {t.teamTitle}
+                </button>
+              </>
+            )}
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-4 pt-3">
               <div style={{ color: COLORS.muted }} className="text-[11px] mb-2 break-all">{t.signedInAs} {user?.email}</div>
               <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
@@ -5158,6 +5451,7 @@ export default function SiteManager() {
           onNewDocument={(type) => newDocumentFor(projects.find((p) => p.id === selectedProject), type)}
           onOpenDocument={(d) => setDocEditor({ ...d })}
           onPrintDocument={printDocument}
+          canBill={isOwner()}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
             setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS, quotedAmount: p.quotedAmount || "" });
@@ -5238,7 +5532,7 @@ export default function SiteManager() {
             type="number" inputMode="decimal" step="0.05"
             value={editProject.quotedAmount || ""}
             onChange={(e) => setEditProject((s) => ({ ...s, quotedAmount: e.target.value }))}
-            placeholder={`${t.quotedPlaceholder} (${profile.currency || "CHF"})`}
+            placeholder={`${t.quotedPlaceholder} (${billing.currency || "CHF"})`}
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none"
           />
@@ -5484,7 +5778,7 @@ export default function SiteManager() {
                 type="number" inputMode="decimal" step="0.01"
                 value={form.unitPrice || ""}
                 onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
-                placeholder={`${t.unitPriceLabel} (${profile.currency || "CHF"})`}
+                placeholder={`${t.unitPriceLabel} (${billing.currency || "CHF"})`}
                 style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                 className="w-full mt-2 rounded-lg px-3 py-2 text-sm outline-none"
               />
@@ -5866,7 +6160,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -5915,15 +6209,17 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
           <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <button onClick={() => onNewDocument("quote")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
-            <FileText size={13} color="#D08770" /> {t.newQuote}
-          </button>
-          <button onClick={() => onNewDocument("invoice")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
-            <CreditCard size={13} color={COLORS.success} /> {t.newInvoice}
-          </button>
-        </div>
-        {documents && documents.length > 0 && (
+        {canBill && (
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <button onClick={() => onNewDocument("quote")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+              <FileText size={13} color="#D08770" /> {t.newQuote}
+            </button>
+            <button onClick={() => onNewDocument("invoice")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
+              <CreditCard size={13} color={COLORS.success} /> {t.newInvoice}
+            </button>
+          </div>
+        )}
+        {canBill && documents && documents.length > 0 && (
           <div className="mb-4 flex flex-col gap-1.5">
             {documents.map((d) => {
               const tot = documentTotals(d);
@@ -5941,7 +6237,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             })}
           </div>
         )}
-        {costing && (costing.hasRate || costing.materials > 0 || costing.quoted > 0) && (
+        {canBill && costing && (costing.hasRate || costing.materials > 0 || costing.quoted > 0) && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 mb-4">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.costingTitle}</div>
             <div className="flex flex-col gap-1 text-sm">
