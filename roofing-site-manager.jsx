@@ -98,6 +98,7 @@ const T = {
     sizePlaceholder: "Size / dimension (e.g. 5x80, optional)",
     categoryLabel: "Category", projectCatFlat: "Flat roof", projectCatPitched: "Pitched roof", projectCatFacade: "Facade", projectCatOther: "Other",
     projStatusLabel: "Status", projStatusWaiting: "Waiting", projStatusConstruction: "Under construction", projStatusHold: "On hold", projStatusCompleted: "Completed",
+    navCustomers: "Customers", projStatusLead: "Lead", projStatusQuoted: "Quoted", projStatusLost: "Lost", pipelineAll: "All", newCustomer: "New customer", editCustomer: "Edit customer", customerSaved: "Customer saved", customerDeleted: "Customer deleted", searchCustomers: "Search customers…", noCustomersYet: "No customers yet — add your first one above.", jobsLabel: "jobs", openLabel: "open", noJobsForCustomer: "No jobs for this customer yet.", customerNameLabel: "Name", companyLabel: "Company (optional)", phoneLabel: "Phone", callLabel: "Call", emailLabel: "Email", routeLabel: "Route", logContact: "Log contact", contactHistory: "Contact history", noContactsYet: "Nothing logged yet.", contactNotePlaceholder: "What was discussed?", contactLogged: "Contact logged", followUpLabel: "Follow-up", followUpsDue: "Follow-ups due", contactCall: "Call", contactVisit: "Site visit", contactEmail: "Email", contactNote: "Note", customerLabel: "Customer", noCustomerLabel: "— none —",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -204,6 +205,7 @@ const T = {
     sizePlaceholder: "Grösse / Mass (z. B. 5x80, optional)",
     categoryLabel: "Kategorie", projectCatFlat: "Flachdach", projectCatPitched: "Steildach", projectCatFacade: "Fassade", projectCatOther: "Sonstiges",
     projStatusLabel: "Status", projStatusWaiting: "Wartend", projStatusConstruction: "In Ausführung", projStatusHold: "Pausiert", projStatusCompleted: "Abgeschlossen",
+    navCustomers: "Kunden", projStatusLead: "Anfrage", projStatusQuoted: "Offeriert", projStatusLost: "Verloren", pipelineAll: "Alle", newCustomer: "Neuer Kunde", editCustomer: "Kunde bearbeiten", customerSaved: "Kunde gespeichert", customerDeleted: "Kunde gelöscht", searchCustomers: "Kunden suchen…", noCustomersYet: "Noch keine Kunden — oben den ersten hinzufügen.", jobsLabel: "Aufträge", openLabel: "offen", noJobsForCustomer: "Noch keine Aufträge für diesen Kunden.", customerNameLabel: "Name", companyLabel: "Firma (optional)", phoneLabel: "Telefon", callLabel: "Anrufen", emailLabel: "E-Mail", routeLabel: "Route", logContact: "Kontakt erfassen", contactHistory: "Kontaktverlauf", noContactsYet: "Noch nichts erfasst.", contactNotePlaceholder: "Was wurde besprochen?", contactLogged: "Kontakt erfasst", followUpLabel: "Wiedervorlage", followUpsDue: "Fällige Wiedervorlagen", contactCall: "Anruf", contactVisit: "Besichtigung", contactEmail: "E-Mail", contactNote: "Notiz", customerLabel: "Kunde", noCustomerLabel: "— keiner —",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -310,6 +312,7 @@ const T = {
     sizePlaceholder: "Taille / dimension (ex. 5x80, facultatif)",
     categoryLabel: "Catégorie", projectCatFlat: "Toit plat", projectCatPitched: "Toit en pente", projectCatFacade: "Façade", projectCatOther: "Autre",
     projStatusLabel: "Statut", projStatusWaiting: "En attente", projStatusConstruction: "En cours", projStatusHold: "Suspendu", projStatusCompleted: "Terminé",
+    navCustomers: "Clients", projStatusLead: "Demande", projStatusQuoted: "Devis envoyé", projStatusLost: "Perdu", pipelineAll: "Tous", newCustomer: "Nouveau client", editCustomer: "Modifier le client", customerSaved: "Client enregistré", customerDeleted: "Client supprimé", searchCustomers: "Rechercher des clients…", noCustomersYet: "Aucun client — ajoutez le premier ci-dessus.", jobsLabel: "chantiers", openLabel: "en cours", noJobsForCustomer: "Aucun chantier pour ce client.", customerNameLabel: "Nom", companyLabel: "Entreprise (facultatif)", phoneLabel: "Téléphone", callLabel: "Appeler", emailLabel: "E-mail", routeLabel: "Itinéraire", logContact: "Enregistrer un contact", contactHistory: "Historique des contacts", noContactsYet: "Rien enregistré.", contactNotePlaceholder: "De quoi avez-vous parlé ?", contactLogged: "Contact enregistré", followUpLabel: "Relance", followUpsDue: "Relances à faire", contactCall: "Appel", contactVisit: "Visite", contactEmail: "E-mail", contactNote: "Note", customerLabel: "Client", noCustomerLabel: "— aucun —",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -416,6 +419,7 @@ const T = {
     sizePlaceholder: "Misura / dimensione (es. 5x80, facoltativo)",
     categoryLabel: "Categoria", projectCatFlat: "Tetto piano", projectCatPitched: "Tetto a falde", projectCatFacade: "Facciata", projectCatOther: "Altro",
     projStatusLabel: "Stato", projStatusWaiting: "In attesa", projStatusConstruction: "In corso", projStatusHold: "Sospeso", projStatusCompleted: "Completato",
+    navCustomers: "Clienti", projStatusLead: "Richiesta", projStatusQuoted: "Preventivo inviato", projStatusLost: "Perso", pipelineAll: "Tutti", newCustomer: "Nuovo cliente", editCustomer: "Modifica cliente", customerSaved: "Cliente salvato", customerDeleted: "Cliente eliminato", searchCustomers: "Cerca clienti…", noCustomersYet: "Nessun cliente — aggiungi il primo qui sopra.", jobsLabel: "lavori", openLabel: "aperti", noJobsForCustomer: "Nessun lavoro per questo cliente.", customerNameLabel: "Nome", companyLabel: "Azienda (facoltativo)", phoneLabel: "Telefono", callLabel: "Chiama", emailLabel: "E-mail", routeLabel: "Percorso", logContact: "Registra contatto", contactHistory: "Storico contatti", noContactsYet: "Niente registrato.", contactNotePlaceholder: "Di cosa avete parlato?", contactLogged: "Contatto registrato", followUpLabel: "Richiamo", followUpsDue: "Richiami da fare", contactCall: "Chiamata", contactVisit: "Sopralluogo", contactEmail: "E-mail", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— nessuno —",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -522,6 +526,7 @@ const T = {
     sizePlaceholder: "Tamaño / medida (ej. 5x80, opcional)",
     categoryLabel: "Categoría", projectCatFlat: "Cubierta plana", projectCatPitched: "Cubierta inclinada", projectCatFacade: "Fachada", projectCatOther: "Otro",
     projStatusLabel: "Estado", projStatusWaiting: "En espera", projStatusConstruction: "En ejecución", projStatusHold: "En pausa", projStatusCompleted: "Completado",
+    navCustomers: "Clientes", projStatusLead: "Consulta", projStatusQuoted: "Presupuestado", projStatusLost: "Perdido", pipelineAll: "Todos", newCustomer: "Nuevo cliente", editCustomer: "Editar cliente", customerSaved: "Cliente guardado", customerDeleted: "Cliente eliminado", searchCustomers: "Buscar clientes…", noCustomersYet: "Aún no hay clientes — añade el primero arriba.", jobsLabel: "obras", openLabel: "abiertas", noJobsForCustomer: "Aún no hay obras para este cliente.", customerNameLabel: "Nombre", companyLabel: "Empresa (opcional)", phoneLabel: "Teléfono", callLabel: "Llamar", emailLabel: "Correo", routeLabel: "Ruta", logContact: "Registrar contacto", contactHistory: "Historial de contactos", noContactsYet: "Nada registrado.", contactNotePlaceholder: "¿Qué se habló?", contactLogged: "Contacto registrado", followUpLabel: "Seguimiento", followUpsDue: "Seguimientos pendientes", contactCall: "Llamada", contactVisit: "Visita", contactEmail: "Correo", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— ninguno —",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -628,6 +633,7 @@ const T = {
     sizePlaceholder: "Tamanho / medida (ex. 5x80, opcional)",
     categoryLabel: "Categoria", projectCatFlat: "Telhado plano", projectCatPitched: "Telhado inclinado", projectCatFacade: "Fachada", projectCatOther: "Outro",
     projStatusLabel: "Estado", projStatusWaiting: "Em espera", projStatusConstruction: "Em execução", projStatusHold: "Suspenso", projStatusCompleted: "Concluído",
+    navCustomers: "Clientes", projStatusLead: "Pedido", projStatusQuoted: "Orçamentado", projStatusLost: "Perdido", pipelineAll: "Todos", newCustomer: "Novo cliente", editCustomer: "Editar cliente", customerSaved: "Cliente guardado", customerDeleted: "Cliente eliminado", searchCustomers: "Procurar clientes…", noCustomersYet: "Ainda sem clientes — adicione o primeiro acima.", jobsLabel: "obras", openLabel: "abertas", noJobsForCustomer: "Ainda sem obras para este cliente.", customerNameLabel: "Nome", companyLabel: "Empresa (opcional)", phoneLabel: "Telefone", callLabel: "Ligar", emailLabel: "E-mail", routeLabel: "Rota", logContact: "Registar contacto", contactHistory: "Histórico de contactos", noContactsYet: "Nada registado.", contactNotePlaceholder: "O que foi falado?", contactLogged: "Contacto registado", followUpLabel: "Seguimento", followUpsDue: "Seguimentos pendentes", contactCall: "Chamada", contactVisit: "Visita", contactEmail: "E-mail", contactNote: "Nota", customerLabel: "Cliente", noCustomerLabel: "— nenhum —",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -734,6 +740,7 @@ const T = {
     sizePlaceholder: "Rozmiar / wymiar (np. 5x80, opcjonalnie)",
     categoryLabel: "Kategoria", projectCatFlat: "Dach płaski", projectCatPitched: "Dach skośny", projectCatFacade: "Fasada", projectCatOther: "Inne",
     projStatusLabel: "Status", projStatusWaiting: "Oczekuje", projStatusConstruction: "W trakcie", projStatusHold: "Wstrzymany", projStatusCompleted: "Zakończony",
+    navCustomers: "Klienci", projStatusLead: "Zapytanie", projStatusQuoted: "Wyceniony", projStatusLost: "Utracony", pipelineAll: "Wszystkie", newCustomer: "Nowy klient", editCustomer: "Edytuj klienta", customerSaved: "Klient zapisany", customerDeleted: "Klient usunięty", searchCustomers: "Szukaj klientów…", noCustomersYet: "Brak klientów — dodaj pierwszego powyżej.", jobsLabel: "zlecenia", openLabel: "otwarte", noJobsForCustomer: "Brak zleceń dla tego klienta.", customerNameLabel: "Nazwa", companyLabel: "Firma (opcjonalnie)", phoneLabel: "Telefon", callLabel: "Zadzwoń", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zapisz kontakt", contactHistory: "Historia kontaktów", noContactsYet: "Nic nie zapisano.", contactNotePlaceholder: "O czym rozmawiano?", contactLogged: "Kontakt zapisany", followUpLabel: "Przypomnienie", followUpsDue: "Zaległe przypomnienia", contactCall: "Telefon", contactVisit: "Wizyta", contactEmail: "E-mail", contactNote: "Notatka", customerLabel: "Klient", noCustomerLabel: "— brak —",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -840,6 +847,7 @@ const T = {
     sizePlaceholder: "Veľkosť / rozmer (napr. 5x80, voliteľné)",
     categoryLabel: "Kategória", projectCatFlat: "Plochá strecha", projectCatPitched: "Šikmá strecha", projectCatFacade: "Fasáda", projectCatOther: "Iné",
     projStatusLabel: "Stav", projStatusWaiting: "Čaká", projStatusConstruction: "Prebieha", projStatusHold: "Pozastavený", projStatusCompleted: "Dokončený",
+    navCustomers: "Zákazníci", projStatusLead: "Dopyt", projStatusQuoted: "Ponuka odoslaná", projStatusLost: "Stratený", pipelineAll: "Všetky", newCustomer: "Nový zákazník", editCustomer: "Upraviť zákazníka", customerSaved: "Zákazník uložený", customerDeleted: "Zákazník odstránený", searchCustomers: "Hľadať zákazníkov…", noCustomersYet: "Zatiaľ žiadni zákazníci — pridajte prvého vyššie.", jobsLabel: "zákazky", openLabel: "otvorené", noJobsForCustomer: "Pre tohto zákazníka zatiaľ žiadne zákazky.", customerNameLabel: "Meno", companyLabel: "Firma (voliteľné)", phoneLabel: "Telefón", callLabel: "Zavolať", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zaznamenať kontakt", contactHistory: "História kontaktov", noContactsYet: "Zatiaľ nič zaznamenané.", contactNotePlaceholder: "O čom ste hovorili?", contactLogged: "Kontakt zaznamenaný", followUpLabel: "Pripomienka", followUpsDue: "Pripomienky na vybavenie", contactCall: "Hovor", contactVisit: "Obhliadka", contactEmail: "E-mail", contactNote: "Poznámka", customerLabel: "Zákazník", noCustomerLabel: "— žiadny —",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -946,6 +954,7 @@ const T = {
     sizePlaceholder: "Velikost / rozměr (např. 5x80, volitelné)",
     categoryLabel: "Kategorie", projectCatFlat: "Plochá střecha", projectCatPitched: "Šikmá střecha", projectCatFacade: "Fasáda", projectCatOther: "Jiné",
     projStatusLabel: "Stav", projStatusWaiting: "Čeká", projStatusConstruction: "Probíhá", projStatusHold: "Pozastaveno", projStatusCompleted: "Dokončeno",
+    navCustomers: "Zákazníci", projStatusLead: "Poptávka", projStatusQuoted: "Nabídka odeslána", projStatusLost: "Ztracený", pipelineAll: "Vše", newCustomer: "Nový zákazník", editCustomer: "Upravit zákazníka", customerSaved: "Zákazník uložen", customerDeleted: "Zákazník smazán", searchCustomers: "Hledat zákazníky…", noCustomersYet: "Zatím žádní zákazníci — přidejte prvního výše.", jobsLabel: "zakázky", openLabel: "otevřené", noJobsForCustomer: "Pro tohoto zákazníka zatím žádné zakázky.", customerNameLabel: "Jméno", companyLabel: "Firma (volitelné)", phoneLabel: "Telefon", callLabel: "Zavolat", emailLabel: "E-mail", routeLabel: "Trasa", logContact: "Zaznamenat kontakt", contactHistory: "Historie kontaktů", noContactsYet: "Zatím nic zaznamenáno.", contactNotePlaceholder: "O čem jste mluvili?", contactLogged: "Kontakt zaznamenán", followUpLabel: "Připomínka", followUpsDue: "Připomínky k vyřízení", contactCall: "Hovor", contactVisit: "Obhlídka", contactEmail: "E-mail", contactNote: "Poznámka", customerLabel: "Zákazník", noCustomerLabel: "— žádný —",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -1832,16 +1841,59 @@ const PROJECT_CATEGORIES = [
   { key: "other", labelKey: "projectCatOther" },
 ];
 
+// Pipeline, in funnel order: an enquiry becomes a quote, a quote becomes work,
+// work finishes — or it is lost. `waiting` predates the pipeline and means
+// "won, not started yet", so it sits between quoted and construction.
 const PROJECT_STATUSES = [
+  { key: "lead", labelKey: "projStatusLead", color: "#B48EAD" },
+  { key: "quoted", labelKey: "projStatusQuoted", color: "#D08770" },
   { key: "waiting", labelKey: "projStatusWaiting", color: "#6B7280" },
   { key: "construction", labelKey: "projStatusConstruction", color: "#6FB3D9" },
   { key: "hold", labelKey: "projStatusHold", color: "#E8B923" },
   { key: "completed", labelKey: "projStatusCompleted", color: "#7FA65C" },
+  { key: "lost", labelKey: "projStatusLost", color: "#E5484D" },
 ];
 const DEFAULT_PROJECT_STATUS = "waiting";
 function statusMeta(status) {
-  return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES[0];
+  return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES.find((s) => s.key === DEFAULT_PROJECT_STATUS);
 }
+
+// Contact history types — what actually happens between a trade business and
+// its customers, in the order they tend to occur.
+const CONTACT_KINDS = [
+  { key: "call", labelKey: "contactCall", icon: Phone, color: "#6FB3D9" },
+  { key: "visit", labelKey: "contactVisit", icon: MapPin, color: "#7FA65C" },
+  { key: "email", labelKey: "contactEmail", icon: Mail, color: "#B48EAD" },
+  { key: "note", labelKey: "contactNote", icon: FileText, color: "#9C9791" },
+];
+function contactKindMeta(kind) {
+  return CONTACT_KINDS.find((k) => k.key === kind) || CONTACT_KINDS[3];
+}
+
+// One-time promotion of `project.client` strings into customer records.
+// Matches case-insensitively on name so two projects for the same client
+// collapse into one customer rather than duplicating them.
+function migrateClientsToCustomers(projects, customers) {
+  const next = customers.slice();
+  const byName = new Map(next.map((c) => [c.name.trim().toLowerCase(), c]));
+  let changed = false;
+  const migrated = projects.map((p) => {
+    if (p.customerId || !p.client || !p.client.trim()) return p;
+    const key = p.client.trim().toLowerCase();
+    let customer = byName.get(key);
+    if (!customer) {
+      customer = { id: uid(), name: p.client.trim(), company: "", phone: "", email: "", address: p.address || "", notes: "", contacts: [], createdAt: Date.now() };
+      next.push(customer);
+      byName.set(key, customer);
+    }
+    changed = true;
+    return { ...p, customerId: customer.id };
+  });
+  return { projects: migrated, customers: next, changed };
+}
+
+function telHref(v) { return `tel:${String(v).replace(/[^\d+]/g, "")}`; }
+function waHref(v) { return `https://wa.me/${String(v).replace(/[^\d]/g, "")}`; }
 
 // Photos live in their own Firestore document (`photo-<id>`), never inside the
 // site-data / site-docs / site-tech-library blobs. Firestore allows 1 MB per
@@ -1990,6 +2042,12 @@ export default function SiteManager() {
 
   const [tab, setTab] = useState("today");
   const [projects, setProjects] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [customerForm, setCustomerForm] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [contactForm, setContactForm] = useState(null);
+  const [pipelineFilter, setPipelineFilter] = useState("all");
   const [entries, setEntries] = useState([]);
   const [activeClock, setActiveClock] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -2013,6 +2071,7 @@ export default function SiteManager() {
   const [newProjectClient, setNewProjectClient] = useState("");
   const [newProjectCat, setNewProjectCat] = useState("flat");
   const [newProjectStatus, setNewProjectStatus] = useState(DEFAULT_PROJECT_STATUS);
+  const [newProjectCustomerId, setNewProjectCustomerId] = useState("");
   const [shareProjectModal, setShareProjectModal] = useState(null); // project object
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importCodeInput, setImportCodeInput] = useState("");
@@ -2082,11 +2141,22 @@ export default function SiteManager() {
         const res = await window.storage.get("site-data");
         if (res && res.value) {
           const data = JSON.parse(res.value);
-          setProjects(data.projects || []);
+          // Projects used to carry the client as a free-text string. Promote
+          // those to real customer records once, so existing work keeps its
+          // client and gains history instead of being left behind.
+          const { projects: migratedProjects, customers: migratedCustomers, changed } =
+            migrateClientsToCustomers(data.projects || [], data.customers || []);
+          setProjects(migratedProjects);
+          setCustomers(migratedCustomers);
           setEntries(data.entries || []);
           setActiveClock(data.activeClock || null);
           setLeaveRequests(data.leaveRequests || []);
           setSentReports(data.sentReports || []);
+          if (changed) {
+            try {
+              await window.storage.set("site-data", JSON.stringify({ ...data, projects: migratedProjects, customers: migratedCustomers }));
+            } catch (e) {}
+          }
         }
       } catch (e) {}
       try {
@@ -2568,10 +2638,12 @@ export default function SiteManager() {
     const data = {
       projects: next.projects ?? projects,
       entries: next.entries ?? entries,
+      customers: next.customers ?? customers,
       activeClock: next.activeClock !== undefined ? next.activeClock : activeClock,
       leaveRequests: next.leaveRequests ?? leaveRequests,
       sentReports: next.sentReports ?? sentReports,
     };
+    if (next.customers) setCustomers(next.customers);
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -2596,8 +2668,9 @@ export default function SiteManager() {
 
   function addProject() {
     if (!newProjectName.trim()) return;
-    const p = { id: uid(), name: newProjectName.trim(), client: newProjectClient.trim(), address: newProjectAddr.trim(), category: newProjectCat, status: newProjectStatus, createdAt: Date.now() };
+    const p = { id: uid(), name: newProjectName.trim(), client: newProjectClient.trim(), customerId: newProjectCustomerId || null, address: newProjectAddr.trim(), category: newProjectCat, status: newProjectStatus, createdAt: Date.now() };
     persist({ projects: [p, ...projects] });
+    setNewProjectCustomerId("");
     setNewProjectName("");
     setNewProjectClient("");
     setNewProjectAddr("");
@@ -2609,15 +2682,93 @@ export default function SiteManager() {
 
   function saveProjectEdit() {
     if (!editProject) return;
-    const updated = projects.map((p) => (p.id === editProject.id ? { ...p, name: editProject.name.trim() || p.name, client: editProject.client.trim(), address: editProject.address.trim(), category: editProject.category, status: editProject.status } : p));
+    const updated = projects.map((p) => (p.id === editProject.id ? { ...p, name: editProject.name.trim() || p.name, client: editProject.client.trim(), customerId: editProject.customerId || null, address: editProject.address.trim(), category: editProject.category, status: editProject.status } : p));
     persist({ projects: updated });
     setEditProject(null);
     showToast(t.projectUpdated);
   }
 
+  function openCustomerForm(existing) {
+    setCustomerForm(existing
+      ? { ...existing }
+      : { id: null, name: "", company: "", phone: "", email: "", address: "", notes: "" });
+  }
+
+  function submitCustomer() {
+    if (!customerForm || !customerForm.name.trim()) return;
+    const record = { ...customerForm, name: customerForm.name.trim() };
+    if (record.id) {
+      persist({ customers: customers.map((c) => (c.id === record.id ? { ...c, ...record } : c)) });
+    } else {
+      persist({ customers: [{ ...record, id: uid(), contacts: [], createdAt: Date.now() }, ...customers] });
+    }
+    setCustomerForm(null);
+    showToast(t.customerSaved);
+  }
+
+  function deleteCustomer(id) {
+    // Keep the customer's projects; just unlink them, so deleting a contact
+    // never destroys job history.
+    persist({
+      customers: customers.filter((c) => c.id !== id),
+      projects: projects.map((p) => (p.customerId === id ? { ...p, customerId: null } : p)),
+    });
+    setSelectedCustomer(null);
+    setCustomerForm(null);
+    showToast(t.customerDeleted);
+  }
+
+  function openContactForm(customerId) {
+    setContactForm({ customerId, kind: "call", note: "", followUp: "" });
+  }
+
+  function submitContact() {
+    if (!contactForm || !contactForm.note.trim()) return;
+    const entry = { id: uid(), kind: contactForm.kind, note: contactForm.note.trim(), followUp: contactForm.followUp || null, at: Date.now() };
+    persist({
+      customers: customers.map((c) => (c.id === contactForm.customerId ? { ...c, contacts: [entry, ...(c.contacts || [])] } : c)),
+    });
+    setContactForm(null);
+    showToast(t.contactLogged);
+  }
+
+  function deleteContact(customerId, contactId) {
+    persist({
+      customers: customers.map((c) => (c.id === customerId ? { ...c, contacts: (c.contacts || []).filter((x) => x.id !== contactId) } : c)),
+    });
+  }
+
+  // A follow-up dated today or earlier is due — surfaced so promised
+  // callbacks don't quietly disappear.
+  function dueFollowUps() {
+    const today = todayKey();
+    const out = [];
+    customers.forEach((c) => {
+      (c.contacts || []).forEach((k) => {
+        if (k.followUp && k.followUp <= today) out.push({ customer: c, contact: k });
+      });
+    });
+    return out.sort((a, b) => (a.contact.followUp < b.contact.followUp ? -1 : 1));
+  }
+
+  function customerFor(project) {
+    return project && project.customerId ? customers.find((c) => c.id === project.customerId) : null;
+  }
+
+  // The list may be filtered by pipeline stage, so write the new order back
+  // into only the slots those projects occupy — mapping the whole array from
+  // the visible ids would silently drop every filtered-out project.
   function reorderProjects(idsInOrder) {
+    const idSet = new Set(idsInOrder);
+    const slots = [];
+    projects.forEach((p, i) => { if (idSet.has(p.id)) slots.push(i); });
     const byId = new Map(projects.map((p) => [p.id, p]));
-    persist({ projects: idsInOrder.map((id) => byId.get(id)).filter(Boolean) });
+    const next = projects.slice();
+    idsInOrder.forEach((id, k) => {
+      const project = byId.get(id);
+      if (project && slots[k] !== undefined) next[slots[k]] = project;
+    });
+    persist({ projects: next });
   }
 
   // Materials and tools are shown as filtered slices of one flat `entries`
@@ -3612,6 +3763,71 @@ export default function SiteManager() {
           );
         })()}
 
+        {tab === "customers" && (() => {
+          const due = dueFollowUps();
+          const q = customerSearch.trim().toLowerCase();
+          const shown = q
+            ? customers.filter((c) => [c.name, c.company, c.phone, c.email, c.address].some((v) => (v || "").toLowerCase().includes(q)))
+            : customers;
+          return (
+            <div className="flex flex-col gap-3">
+              <button onClick={() => openCustomerForm(null)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                <Plus size={16} /> {t.newCustomer}
+              </button>
+
+              {due.length > 0 && (
+                <div style={{ background: `${COLORS.amber}18`, border: `1px solid ${COLORS.amber}66` }} className="rounded-xl p-3">
+                  <div style={{ color: COLORS.amber }} className="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                    <CalendarDays size={13} /> {t.followUpsDue} ({due.length})
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {due.slice(0, 5).map(({ customer, contact }) => (
+                      <button key={contact.id} onClick={() => setSelectedCustomer(customer.id)} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
+                        <div className="text-sm font-semibold">{customer.name}</div>
+                        <div style={{ color: COLORS.muted }} className="text-xs truncate">{contact.followUp} · {contact.note}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {customers.length > 3 && (
+                <input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomers} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              )}
+
+              {customers.length === 0 ? (
+                <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">{t.noCustomersYet}</div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {shown.map((c) => {
+                    const jobs = projects.filter((p) => p.customerId === c.id);
+                    const open = jobs.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS)).length;
+                    return (
+                      <button key={c.id} onClick={() => setSelectedCustomer(c.id)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-xl p-4 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-bold truncate">{c.name}</div>
+                          {c.company && <div style={{ color: COLORS.muted }} className="text-xs truncate">{c.company}</div>}
+                          <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                            {jobs.length} {t.jobsLabel}{open > 0 ? ` · ${open} ${t.openLabel}` : ""}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {c.phone && (
+                            <a href={telHref(c.phone)} onClick={(e) => e.stopPropagation()} style={{ background: COLORS.cardAlt, color: COLORS.success }} className="w-8 h-8 rounded-full flex items-center justify-center">
+                              <Phone size={14} />
+                            </a>
+                          )}
+                          <ChevronRight size={18} color={COLORS.muted} />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {tab === "projects" && (
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-2">
@@ -3625,8 +3841,22 @@ export default function SiteManager() {
             <button onClick={() => { setReportProjectSelection([]); setReportProjectPickerOpen(true); }} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
               <FileText size={16} /> {t.generateReportBtn}
             </button>
+            {projects.length > 0 && (
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+                {[{ key: "all", label: t.pipelineAll, color: COLORS.muted }, ...PROJECT_STATUSES.map((s) => ({ key: s.key, label: t[s.labelKey], color: s.color }))].map((f) => {
+                  const count = f.key === "all" ? projects.length : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === f.key).length;
+                  if (f.key !== "all" && count === 0) return null;
+                  const active = pipelineFilter === f.key;
+                  return (
+                    <button key={f.key} onClick={() => setPipelineFilter(f.key)} style={{ background: active ? `${f.color}33` : COLORS.card, border: `1px solid ${active ? f.color : COLORS.border}`, color: active ? f.color : COLORS.muted }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                      {f.label} {count}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             <ReorderList
-              items={projects}
+              items={pipelineFilter === "all" ? projects : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === pipelineFilter)}
               gapClass="gap-2"
               onReorder={reorderProjects}
               renderItem={(p, handle) => {
@@ -3648,7 +3878,11 @@ export default function SiteManager() {
                             {t[sm.labelKey]}
                           </span>
                         </div>
-                        {p.client && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{p.client}</div>}
+                        {(customerFor(p) || p.client) && (
+                          <div style={{ color: COLORS.muted }} className="text-xs mt-0.5 flex items-center gap-1">
+                            <User size={10} /> {customerFor(p)?.name || p.client}
+                          </div>
+                        )}
                         {p.address && (
                           <a href={mapsUrl(p.address)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5">
                             <MapPin size={11} /> {p.address}
@@ -3780,6 +4014,7 @@ export default function SiteManager() {
         {[
           { id: "today", label: t.navToday, icon: Clock },
           { id: "materials", label: t.navMaterials, icon: Package },
+          { id: "customers", label: t.navCustomers, icon: User },
           { id: "calendar", label: t.navCalendar, icon: CalendarDays },
           { id: "projects", label: t.navProjects, icon: MapPin },
           { id: "reports", label: t.navReports, icon: FileText },
@@ -3795,6 +4030,167 @@ export default function SiteManager() {
           );
         })}
       </div>
+
+      {selectedCustomer && (() => {
+        const c = customers.find((x) => x.id === selectedCustomer);
+        if (!c) return null;
+        const jobs = projects.filter((p) => p.customerId === c.id);
+        const contacts = c.contacts || [];
+        return (
+          <Modal onClose={() => setSelectedCustomer(null)} title={c.name}>
+            {c.company && <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-3">{c.company}</div>}
+
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {c.phone ? (
+                <a href={telHref(c.phone)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
+                  <Phone size={15} color={COLORS.success} /><span className="text-[10px] font-bold">{t.callLabel}</span>
+                </a>
+              ) : <div />}
+              {c.phone ? (
+                <a href={waHref(c.phone)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
+                  <MessageSquare size={15} color="#25D366" /><span className="text-[10px] font-bold">WhatsApp</span>
+                </a>
+              ) : <div />}
+              {c.email ? (
+                <a href={`mailto:${c.email}`} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
+                  <Mail size={15} color="#B48EAD" /><span className="text-[10px] font-bold">{t.emailLabel}</span>
+                </a>
+              ) : <div />}
+              {c.address ? (
+                <a href={mapsUrl(c.address)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
+                  <MapPin size={15} color={COLORS.accent} /><span className="text-[10px] font-bold">{t.routeLabel}</span>
+                </a>
+              ) : <div />}
+            </div>
+
+            {(c.phone || c.email || c.address) && (
+              <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs flex flex-col gap-1">
+                {c.phone && <div style={{ color: COLORS.muted }}>{c.phone}</div>}
+                {c.email && <div style={{ color: COLORS.muted }} className="break-all">{c.email}</div>}
+                {c.address && <div style={{ color: COLORS.muted }}>{c.address}</div>}
+              </div>
+            )}
+            {c.notes && <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs whitespace-pre-wrap">{c.notes}</div>}
+
+            <div className="flex gap-2 mb-4">
+              <button onClick={() => openCustomerForm(c)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.editLabel}</button>
+              <button onClick={() => openContactForm(c.id)} style={{ background: COLORS.accent }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.logContact}</button>
+            </div>
+
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.jobsLabel} ({jobs.length})</div>
+            {jobs.length === 0 ? (
+              <div style={{ color: COLORS.muted }} className="text-xs mb-4">{t.noJobsForCustomer}</div>
+            ) : (
+              <div className="flex flex-col gap-1.5 mb-4">
+                {jobs.map((p) => {
+                  const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
+                  return (
+                    <button key={p.id} onClick={() => { setSelectedCustomer(null); setTab("projects"); setSelectedProject(p.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                      <span className="text-sm truncate">{p.name}</span>
+                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.contactHistory} ({contacts.length})</div>
+            {contacts.length === 0 ? (
+              <div style={{ color: COLORS.muted }} className="text-xs">{t.noContactsYet}</div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {contacts.map((k) => {
+                  const km = contactKindMeta(k.kind);
+                  const KIcon = km.icon;
+                  const overdue = k.followUp && k.followUp <= todayKey();
+                  return (
+                    <div key={k.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start gap-2">
+                      <KIcon size={13} color={km.color} className="mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm break-words">{k.note}</div>
+                        <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">
+                          {new Date(k.at).toLocaleDateString()} · {t[km.labelKey]}
+                          {k.followUp && (
+                            <span style={{ color: overdue ? COLORS.amber : COLORS.muted }} className="font-bold"> · {t.followUpLabel} {k.followUp}</span>
+                          )}
+                        </div>
+                      </div>
+                      <button onClick={() => deleteContact(c.id, k.id)} style={{ color: COLORS.danger }} className="shrink-0"><Trash2 size={12} /></button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Modal>
+        );
+      })()}
+
+      {customerForm && (
+        <Modal onClose={() => setCustomerForm(null)} title={customerForm.id ? t.editCustomer : t.newCustomer}>
+          {[
+            ["name", t.customerNameLabel],
+            ["company", t.companyLabel],
+            ["phone", t.phoneLabel],
+            ["email", t.emailLabel],
+            ["address", t.addressLabel],
+          ].map(([field, label]) => (
+            <input
+              key={field}
+              value={customerForm[field] || ""}
+              onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
+              placeholder={label}
+              type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+            />
+          ))}
+          <textarea
+            value={customerForm.notes || ""}
+            onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
+            placeholder={t.notesLabel}
+            rows={3}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+          />
+          <button onClick={submitCustomer} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          {customerForm.id && (
+            <button onClick={() => deleteCustomer(customerForm.id)} style={{ color: COLORS.danger }} className="w-full py-3 text-xs font-bold uppercase">{t.deleteLabel}</button>
+          )}
+        </Modal>
+      )}
+
+      {contactForm && (
+        <Modal onClose={() => setContactForm(null)} title={t.logContact}>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {CONTACT_KINDS.map((k) => {
+              const active = contactForm.kind === k.key;
+              const KIcon = k.icon;
+              return (
+                <button key={k.key} onClick={() => setContactForm((s) => ({ ...s, kind: k.key }))} style={{ background: active ? `${k.color}33` : COLORS.cardAlt, border: `1px solid ${active ? k.color : COLORS.border}`, color: active ? k.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+                  <KIcon size={12} /> {t[k.labelKey]}
+                </button>
+              );
+            })}
+          </div>
+          <textarea
+            value={contactForm.note}
+            onChange={(e) => setContactForm((s) => ({ ...s, note: e.target.value }))}
+            placeholder={t.contactNotePlaceholder}
+            rows={4}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+          />
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.followUpLabel}</div>
+          <input
+            type="date"
+            value={contactForm.followUp}
+            onChange={(e) => setContactForm((s) => ({ ...s, followUp: e.target.value }))}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none"
+          />
+          <button onClick={submitContact} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+        </Modal>
+      )}
 
       {langPickerOpen && (
         <Modal onClose={() => setLangPickerOpen(false)} title="Language / Sprache / Langue">
@@ -4082,7 +4478,7 @@ export default function SiteManager() {
           onReorderEntries={reorderEntries}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
-            setEditProject({ id: p.id, name: p.name, client: p.client || "", address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS });
+            setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS });
           }}
           t={t}
         />
@@ -4109,6 +4505,15 @@ export default function SiteManager() {
               </button>
             ))}
           </div>
+          {customers.length > 0 && (
+            <>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.customerLabel}</div>
+              <select value={newProjectCustomerId} onChange={(e) => setNewProjectCustomerId(e.target.value)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none">
+                <option value="">{t.noCustomerLabel}</option>
+                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </>
+          )}
           <button onClick={addProject} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.addProjectBtn}</button>
         </Modal>
       )}
@@ -4137,6 +4542,15 @@ export default function SiteManager() {
               );
             })}
           </div>
+          {customers.length > 0 && (
+            <>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.customerLabel}</div>
+              <select value={editProject.customerId || ""} onChange={(e) => setEditProject((s) => ({ ...s, customerId: e.target.value || null }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none">
+                <option value="">{t.noCustomerLabel}</option>
+                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </>
+          )}
           <button onClick={saveProjectEdit} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
         </Modal>
       )}

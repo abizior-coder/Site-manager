@@ -71,7 +71,7 @@ which reads/writes Firestore documents.
 
 | Key | Contents |
 |---|---|
-| `site-data` | `{ projects, entries, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
+| `site-data` | `{ projects, entries, customers, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
 | `photo-<id>` | **One document per photo** (data URL). Referenced by `photoId` |
 | `site-profile` | User + supervisor details, webhook URL |
 | `site-docs` | `{ insurance, certificates }` |
@@ -87,6 +87,19 @@ Materials and tools shown in a project are *filtered slices* of this array.
 > slots that slice occupies** — see `reorderEntries`. Rebuilding the array
 > naively will scramble time entries and other projects.
 
+**Customers** are first-class records holding contact details plus a
+`contacts` history (calls, visits, emails, notes, each with an optional
+`followUp` date). Projects reference one via `customerId`. The legacy
+free-text `project.client` is still written for older code paths, but the
+customer link is the source of truth — `migrateClientsToCustomers` promotes
+any project that still has only a string, once, on load.
+
+> Client strings were migrated by exact (case-insensitive) name match, so
+> spelling variants became separate customers — real data produced both
+> "Susan & Peter" and "Susan&Peter". There is **no merge feature yet**;
+> deliberately not auto-merged, because two similar names can be two
+> different people.
+
 Projects carry `category` (`PROJECT_CATEGORIES`) and `status`
 (`PROJECT_STATUSES`: waiting / construction / hold / completed). Projects
 saved before statuses existed have no `status` field and must read as
@@ -101,6 +114,10 @@ These are real and currently unfixed. Ordered by how much damage they do.
    also shares one dataset, which contradicts the "share project by code"
    feature that assumes per-device data. Fix: Firebase Auth + security
    rules scoped per user/company.
+   **This became more serious once customers landed:** the database now holds
+   clients' names, phone numbers, e-mail and home addresses. Exposed personal
+   data is a Swiss nFADP problem, not just an embarrassment. Treat auth as
+   the blocker before this is used with real client data.
 2. **Whole-document writes.** Every change rewrites all entries, so two
    phones editing concurrently silently clobber each other. Fix: split into
    `projects/{id}` and `entries/{id}` collections.
