@@ -39,8 +39,33 @@ export async function loadMembership(uid) {
   if (!snap.exists()) return null;
   const data = snap.data();
   if (!data.companyId) return null;
-  const member = await fs().getDoc(fs().doc(db(), "companies", data.companyId, "members", uid));
+
+  const memberRef = fs().doc(db(), "companies", data.companyId, "members", uid);
+  let member = await fs().getDoc(memberRef);
+
+  // Repair a half-created company. An earlier rules bug allowed the company
+  // document to be written but denied the owner's own membership, which left
+  // the account pointing at a company it could not join — and no way out from
+  // the UI, since onboarding would just create another orphan.
+  if (!member.exists()) {
+    try {
+      const company = await fs().getDoc(fs().doc(db(), "companies", data.companyId));
+      if (company.exists() && company.data().ownerUid === uid) {
+        await fs().setDoc(memberRef, {
+          role: "owner",
+          name: data.displayName || "",
+          email: "",
+          active: true,
+          joinedAt: Date.now(),
+        });
+        member = await fs().getDoc(memberRef);
+      }
+    } catch (e) {
+      return null;
+    }
+  }
   if (!member.exists()) return null;
+
   companyId = data.companyId;
   role = member.data().role || "crew";
   return { companyId, role, member: member.data() };
@@ -58,6 +83,13 @@ export async function createCompany(uid, { companyName, displayName, email }) {
     role: "owner", name: displayName || "", email: email || "", active: true, joinedAt: now,
   });
   await fs().setDoc(fs().doc(db(), "users", uid), { companyId: id, displayName: displayName || "" }, { merge: true });
+
+  // With offline persistence a write resolves as soon as it is queued locally,
+  // so a server rejection would surface only later as a silent rollback. Read
+  // the membership back from the server before calling this a success.
+  const confirmed = await fs().getDocFromServer(fs().doc(db(), "companies", id, "members", uid));
+  if (!confirmed.exists()) throw new Error("company-not-confirmed");
+
   companyId = id;
   role = "owner";
   return id;
