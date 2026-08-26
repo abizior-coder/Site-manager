@@ -1843,6 +1843,54 @@ function statusMeta(status) {
   return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES[0];
 }
 
+// Photos live in their own Firestore document (`photo-<id>`), never inside the
+// site-data / site-docs / site-tech-library blobs. Firestore allows 1 MB per
+// document and a scaled photo is 200-500 KB, so a couple of inline photos used
+// to push those blobs over the limit and make every later save fail silently.
+// Uses the existing window.storage shim, so index.html needs no change.
+const photoCache = new Map();
+
+async function savePhoto(dataUrl) {
+  const id = uid();
+  await window.storage.set(`photo-${id}`, dataUrl);
+  photoCache.set(id, dataUrl);
+  return id;
+}
+
+async function loadPhoto(id) {
+  if (!id) return null;
+  if (photoCache.has(id)) return photoCache.get(id);
+  try {
+    const res = await window.storage.get(`photo-${id}`);
+    const value = res ? res.value : null;
+    if (value) photoCache.set(id, value);
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+async function deletePhoto(id) {
+  if (!id) return;
+  photoCache.delete(id);
+  try { await window.storage.delete(`photo-${id}`); } catch {}
+}
+
+// Renders either a stored photo (by id) or a legacy inline data URL, so
+// entries saved before photos moved out of the blob still display.
+function StoredImage({ photoId, photo, className, alt = "" }) {
+  const [src, setSrc] = useState(photo || null);
+  useEffect(() => {
+    let alive = true;
+    if (photo) { setSrc(photo); return; }
+    if (!photoId) { setSrc(null); return; }
+    loadPhoto(photoId).then((v) => { if (alive) setSrc(v); });
+    return () => { alive = false; };
+  }, [photoId, photo]);
+  if (!src) return <div className={className} style={{ background: COLORS.cardAlt }} />;
+  return <img src={src} alt={alt} className={className} />;
+}
+
 function todayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
 function monthKey(d = new Date()) { return d.toISOString().slice(0, 7); }
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -1989,6 +2037,7 @@ export default function SiteManager() {
   const [form, setForm] = useState({ description: "", qty: "", unit: "" });
   const fileRef = useRef(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoPreviewId, setPhotoPreviewId] = useState(null);
   const [reportView, setReportView] = useState("daily");
   const [tick, setTick] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
@@ -2102,41 +2151,66 @@ export default function SiteManager() {
     try { await window.storage.set("site-tech-library", JSON.stringify(next)); } catch (e) { showToast(t.couldntSave); }
   }
 
-  function openInsuranceForm(existing) {
-    setInsuranceForm(existing ? { ...existing } : { id: null, label: "", provider: "", policyNumber: "", phone: "", photo: null });
+  // Moves a freshly picked image out of the record and into its own document,
+  // so site-docs / site-tech-library stay far below Firestore's 1 MB limit. On
+  // failure the image is kept inline rather than lost.
+  async function externalizePhoto(record) {
+    if (!record.photo || record.photoId) return record;
+    try {
+      const photoId = await savePhoto(record.photo);
+      return { ...record, photoId, photo: null };
+    } catch {
+      return record;
+    }
   }
 
-  function submitInsurance() {
+  function openInsuranceForm(existing) {
+    setInsuranceForm(existing ? { ...existing } : { id: null, label: "", provider: "", policyNumber: "", phone: "", photo: null, photoId: null });
+    if (existing && !existing.photo && existing.photoId) {
+      loadPhoto(existing.photoId).then((v) => setInsuranceForm((s) => (s ? { ...s, photo: v } : s)));
+    }
+  }
+
+  async function submitInsurance() {
     if (!insuranceForm) return;
-    if (insuranceForm.id) {
-      saveDocs({ insurance: insuranceCards.map((c) => (c.id === insuranceForm.id ? insuranceForm : c)) });
+    const record = await externalizePhoto(insuranceForm);
+    if (record.id) {
+      saveDocs({ insurance: insuranceCards.map((c) => (c.id === record.id ? record : c)) });
     } else {
-      saveDocs({ insurance: [...insuranceCards, { ...insuranceForm, id: uid() }] });
+      saveDocs({ insurance: [...insuranceCards, { ...record, id: uid() }] });
     }
     setInsuranceForm(null);
   }
 
   function deleteInsurance(id) {
+    const card = insuranceCards.find((c) => c.id === id);
     saveDocs({ insurance: insuranceCards.filter((c) => c.id !== id) });
+    if (card && card.photoId) deletePhoto(card.photoId);
     setInsuranceForm(null);
   }
 
   function openCertForm(existing) {
-    setCertForm(existing ? { ...existing } : { id: null, title: "", issuer: "", issueDate: "", expiryDate: "", photo: null });
+    setCertForm(existing ? { ...existing } : { id: null, title: "", issuer: "", issueDate: "", expiryDate: "", photo: null, photoId: null });
+    if (existing && !existing.photo && existing.photoId) {
+      loadPhoto(existing.photoId).then((v) => setCertForm((s) => (s ? { ...s, photo: v } : s)));
+    }
   }
 
-  function submitCert() {
+  async function submitCert() {
     if (!certForm) return;
-    if (certForm.id) {
-      saveDocs({ certificates: certificates.map((c) => (c.id === certForm.id ? certForm : c)) });
+    const record = await externalizePhoto(certForm);
+    if (record.id) {
+      saveDocs({ certificates: certificates.map((c) => (c.id === record.id ? record : c)) });
     } else {
-      saveDocs({ certificates: [...certificates, { ...certForm, id: uid() }] });
+      saveDocs({ certificates: [...certificates, { ...record, id: uid() }] });
     }
     setCertForm(null);
   }
 
   function deleteCert(id) {
+    const cert = certificates.find((c) => c.id === id);
     saveDocs({ certificates: certificates.filter((c) => c.id !== id) });
+    if (cert && cert.photoId) deletePhoto(cert.photoId);
     setCertForm(null);
   }
 
@@ -2703,6 +2777,7 @@ export default function SiteManager() {
   function openAdd(type, projectId) {
     setForm({ description: "", qty: "", unit: "" });
     setPhotoPreview(null);
+    setPhotoPreviewId(null);
     setSuggestCat(null);
     setPendingSuggestion(null);
     setSizeInput("");
@@ -2711,7 +2786,11 @@ export default function SiteManager() {
 
   function openEditEntry(entry) {
     setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "" });
+    // Keep the existing photo's id so re-saving without picking a new image
+    // reuses that document instead of writing a duplicate.
+    setPhotoPreviewId(entry.photoId || null);
     setPhotoPreview(entry.photo || null);
+    if (!entry.photo && entry.photoId) loadPhoto(entry.photoId).then((v) => setPhotoPreview(v));
     setSuggestCat(null);
     setPendingSuggestion(null);
     setSizeInput("");
@@ -2768,6 +2847,7 @@ export default function SiteManager() {
 
   function deleteEntryFn(entry) {
     persist({ entries: entries.filter((e) => e.id !== entry.id) });
+    if (entry.photoId) deletePhoto(entry.photoId); // don't leave orphan photo docs
   }
 
   function setDescriptionWithUnitMemory(name) {
@@ -2775,13 +2855,24 @@ export default function SiteManager() {
     setForm((f) => ({ ...f, description: name, unit: !f.unit && remembered ? remembered : f.unit }));
   }
 
-  function submitAdd() {
+  async function submitAdd() {
     if (addModal.type === "photo") {
       if (!photoPreview) return;
+      // Store the image as its own document and keep only the reference, so
+      // photos can never grow the site-data blob past Firestore's 1 MB limit.
+      let photoId;
+      try {
+        photoId = photoPreviewId || (await savePhoto(photoPreview));
+      } catch {
+        showToast(t.couldntSave);
+        return;
+      }
       if (addModal.editingId) {
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description || t.photoLabel, photo: photoPreview } : e)) });
+        const previous = entries.find((e) => e.id === addModal.editingId);
+        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description || t.photoLabel, photoId, photo: null } : e)) });
+        if (previous && previous.photoId && previous.photoId !== photoId) deletePhoto(previous.photoId);
       } else {
-        addEntry({ type: "photo", projectId: addModal.projectId, description: form.description || t.photoLabel, photo: photoPreview });
+        addEntry({ type: "photo", projectId: addModal.projectId, description: form.description || t.photoLabel, photoId });
       }
     } else {
       if (!form.description.trim()) return;
@@ -2809,6 +2900,7 @@ export default function SiteManager() {
     try {
       const { dataUrl } = await fileToScaledImage(file);
       setPhotoPreview(dataUrl);
+      setPhotoPreviewId(null); // a new image needs its own document
     } catch {
       showToast(t.couldntSave);
     }
@@ -2959,15 +3051,16 @@ export default function SiteManager() {
     }
   }
 
-  function confirmLibraryScan() {
+  async function confirmLibraryScan() {
     if (!libraryScanModal || !libraryScanModal.result) return;
     const r = libraryScanModal.result;
     const entry = {
       id: uid(), createdAt: Date.now(), name: r.name, supplier: r.supplier, articleNumber: r.articleNumber, category: r.category,
       specs: r.specs.filter((s) => s.key.trim() || s.value.trim()),
       photo: libraryScanModal.keepPhoto && libraryScanModal.image ? `data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}` : null,
+      photoId: null,
     };
-    saveTechLibrary([entry, ...techLibrary]);
+    saveTechLibrary([await externalizePhoto(entry), ...techLibrary]);
     showToast(t.addedToLibraryToast);
     setLibraryScanModal(null);
   }
@@ -2975,7 +3068,10 @@ export default function SiteManager() {
   function openLibraryEdit(existing) {
     setLibraryEditModal(existing
       ? { ...existing, specs: existing.specs.map((s) => ({ ...s })) }
-      : { id: null, name: "", supplier: "", articleNumber: "", category: "", specs: [], photo: null });
+      : { id: null, name: "", supplier: "", articleNumber: "", category: "", specs: [], photo: null, photoId: null });
+    if (existing && !existing.photo && existing.photoId) {
+      loadPhoto(existing.photoId).then((v) => setLibraryEditModal((m) => (m ? { ...m, photo: v } : m)));
+    }
   }
 
   function updateLibraryEditField(field, value) {
@@ -2994,20 +3090,23 @@ export default function SiteManager() {
     setLibraryEditModal((m) => ({ ...m, specs: m.specs.filter((s) => s.id !== id) }));
   }
 
-  function submitLibraryEdit() {
+  async function submitLibraryEdit() {
     if (!libraryEditModal || !libraryEditModal.name.trim()) return;
     const cleanSpecs = libraryEditModal.specs.filter((s) => s.key.trim() || s.value.trim());
-    if (libraryEditModal.id) {
-      saveTechLibrary(techLibrary.map((it) => (it.id === libraryEditModal.id ? { ...libraryEditModal, specs: cleanSpecs } : it)));
+    const record = await externalizePhoto({ ...libraryEditModal, specs: cleanSpecs });
+    if (record.id) {
+      saveTechLibrary(techLibrary.map((it) => (it.id === record.id ? record : it)));
     } else {
-      saveTechLibrary([{ ...libraryEditModal, id: uid(), createdAt: Date.now(), specs: cleanSpecs }, ...techLibrary]);
+      saveTechLibrary([{ ...record, id: uid(), createdAt: Date.now() }, ...techLibrary]);
     }
     showToast(t.addedToLibraryToast);
     setLibraryEditModal(null);
   }
 
   function deleteLibraryItem(id) {
+    const item = techLibrary.find((it) => it.id === id);
     saveTechLibrary(techLibrary.filter((it) => it.id !== id));
+    if (item && item.photoId) deletePhoto(item.photoId);
     showToast(t.libraryItemDeleted);
   }
 
@@ -4606,7 +4705,7 @@ function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) 
         <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
           {meta.label}{entry.qty ? ` · ${entry.qty}${entry.unit ? " " + entry.unit : ""}` : ""}{entry.projectId ? ` · ${projectName(entry.projectId)}` : ""}
         </div>
-        {entry.photo && <img src={entry.photo} alt="" className="w-full rounded-md mt-2 max-h-32 object-cover" />}
+        {(entry.photo || entry.photoId) && <StoredImage photo={entry.photo} photoId={entry.photoId} className="w-full rounded-md mt-2 max-h-32 object-cover" />}
       </div>
       <div className="flex items-center gap-2 shrink-0">
         {handleEdit && <button onClick={() => handleEdit(entry)} style={{ color: COLORS.muted }}><Pencil size={14} /></button>}
@@ -4711,7 +4810,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             <div className="grid grid-cols-3 gap-2">
               {photos.map((p) => (
                 <div key={p.id} className="relative">
-                  <img src={p.photo} alt="" className="w-full h-20 object-cover rounded-md" />
+                  <StoredImage photo={p.photo} photoId={p.photoId} className="w-full h-20 object-cover rounded-md" />
                   <button onClick={() => onDeleteEntry(p)} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
                     <X size={12} color="#fff" />
                   </button>

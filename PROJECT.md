@@ -72,6 +72,7 @@ which reads/writes Firestore documents.
 | Key | Contents |
 |---|---|
 | `site-data` | `{ projects, entries, activeClock, leaveRequests, sentReports }` — **as a JSON string** |
+| `photo-<id>` | **One document per photo** (data URL). Referenced by `photoId` |
 | `site-profile` | User + supervisor details, webhook URL |
 | `site-docs` | `{ insurance, certificates }` |
 | `site-tech-library` | Scanned spec-sheet entries |
@@ -95,24 +96,21 @@ saved before statuses existed have no `status` field and must read as
 
 These are real and currently unfixed. Ordered by how much damage they do.
 
-1. **Photos will break saving.** Firestore's limit is **1 MB per document**
-   and everything lives in the single `site-data` doc (36 KB / 46 entries
-   today, no photos). A scaled photo is ~200–500 KB of base64, so **2–4
-   photos exceed the limit and every later save fails.** `persist()` sets
-   React state *before* writing, so the app looks saved until reload —
-   silent data loss. Fix: photos belong in Firebase Storage, with only URLs
-   in Firestore.
-2. **No authentication; the database is world-readable and writable.**
+1. **No authentication; the database is world-readable and writable.**
    Anyone who opens the public URL gets the same documents. Every device
    also shares one dataset, which contradicts the "share project by code"
    feature that assumes per-device data. Fix: Firebase Auth + security
    rules scoped per user/company.
-3. **Whole-document writes.** Every change rewrites all entries, so two
+2. **Whole-document writes.** Every change rewrites all entries, so two
    phones editing concurrently silently clobber each other. Fix: split into
    `projects/{id}` and `entries/{id}` collections.
-4. **The Worker has no rate limit.** It caps images per request
+3. **The Worker has no rate limit.** It caps images per request
    (`MAX_IMAGE_BLOCKS = 4`) but nothing stops repeated calls running up the
    Anthropic bill. It is a public endpoint.
+4. **Backup and share codes do not carry photo contents.** They reference
+   `photoId`s, so a backup restored where those photo documents are not
+   readable will show empty images. Acceptable while everything lives in one
+   Firestore project; revisit alongside auth.
 5. `roofing-site-manager.html` is an unused stale duplicate of the shell.
    It is not the deployed entry point (`index.html` is) and can be deleted.
 
@@ -124,6 +122,13 @@ These are real and currently unfixed. Ordered by how much damage they do.
   `window.callClaude is not a function`. **Therefore: app logic must not
   depend on globals injected by `index.html`.** The Claude call now lives in
   the bundle (`CLAUDE_PROXY_URL`). Keep it that way.
+- **Never store an image inside one of the JSON blobs.** Firestore allows
+  1 MB per document, and a scaled photo is 200–500 KB, so a couple of inline
+  photos used to push `site-data` over the limit and make every later save
+  fail — silently, because `persist()` sets React state before writing.
+  Photos now go through `savePhoto` / `loadPhoto` into their own
+  `photo-<id>` documents; records hold a `photoId`. Legacy inline `photo`
+  fields still render, via `StoredImage`.
 - **Phone photos cannot be sent raw.** The vision API rejects images over
   ~5 MB of base64, and iPhone HEIC is not an accepted format. Every image
   goes through `fileToScaledImage` (canvas re-encode, max 1568 px, JPEG
