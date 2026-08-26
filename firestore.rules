@@ -113,6 +113,14 @@ service cloud.firestore {
         allow read, write: if isOwner(cid);
       }
 
+      // Who is expected where, and when. Everyone needs to see the plan;
+      // only the owner decides it — a crew member reassigning themselves
+      // would make the schedule meaningless.
+      match /assignments/{id} {
+        allow read: if isMember(cid);
+        allow write: if isOwner(cid);
+      }
+
       // Photos, preferences, technical library.
       match /kv/{key} {
         allow read, write: if isMember(cid);

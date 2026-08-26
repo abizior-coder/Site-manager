@@ -112,6 +112,7 @@ const T = {
     quoteLabel: "Quote", invoiceLabel: "Invoice", newQuote: "New quote", newInvoice: "New invoice", convertToInvoice: "Make invoice", invoiceCreated: "Invoice created", docSaved: "Saved", docNeedsLine: "Add at least one line.", docLines: "Lines", docAddLine: "Add line", docDescription: "Description", docLineTotal: "Total", docNet: "Subtotal", docVat: "VAT", docTotal: "Total", docDate: "Date", docDue: "Due", vatStandard: "Standard", vatReduced: "Reduced", vatLodging: "Lodging", vatNone: "None", vatNumberLabel: "VAT number", billingTitle: "Billing details", billingHint: "Used on quotes and invoices, and to build the Swiss QR-bill. Needs a Swiss IBAN.", billingCompany: "Company name", billingStreet: "Street", billingBuilding: "No.", billingPostal: "Postcode", billingTown: "Town", paymentDaysLabel: "Payment term (days)", qrPaymentPart: "Payment part", qrReceipt: "Receipt", qrPayableTo: "Account / Payable to", qrPayableBy: "Payable by", qrReference: "Reference", qrAmount: "Amount", qrCurrency: "Currency", qrMissingBilling: "Add your billing details to print a QR-bill.", qrErrName: "Company name is required.", qrErrIban: "That is not a valid Swiss IBAN.", qrErrAddress: "Postcode and town are required.",
     onbIntro: "Start a company, or join one with the code your boss sent you.", onbCompanyName: "Company name", onbCodePlaceholder: "Invite code", onbCreateBtn: "Create company", onbJoinBtn: "Join company", onbSwitchJoin: "I have an invite code", onbSwitchCreate: "Start a new company instead", onbErrCompanyName: "Enter a company name.", onbErrInvalidCode: "That code was not recognised.", onbErrCodeUsed: "That code has already been used.", onbErrCodeExpired: "That code has expired — ask for a new one.", onbErrGeneric: "That didn't work — try again.", onbErrNotConfirmed: "The server did not accept it — check your connection and try again.", teamTitle: "Team", teamMembers: "Members", teamInvites: "Invite codes", teamInviteHint: "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.", teamNewInvite: "New invite code", teamNoInvites: "No active codes.", teamExpires: "Expires", roleOwner: "Owner", roleCrew: "Crew", migrateTitle: "Bring your data across", migrateHint: "Your existing data is still on your personal account. Copy it into the company so your crew can work with it.", migrateBtn: "Copy into company", migrateDone: "Copied.", migrateKeptOriginal: "The original is untouched, so nothing is lost if something looks wrong.",
     navCockpit: "Overview", docStatusLabel: "Status", docStatusDraft: "Draft", docStatusSent: "Sent", docStatusAccepted: "Accepted", docStatusDeclined: "Declined", docStatusOpen: "Open", docStatusPartial: "Part paid", docStatusPaid: "Paid", paymentTitle: "Payment", paidAmountLabel: "Amount received", markPaidBtn: "Mark fully paid", outstandingLabel: "Outstanding", overdueLabel: "Overdue", ccOutstanding: "Outstanding", ccOverdue: "Overdue", ccPaidThisMonth: "Received this month", ccPipeline: "Pipeline", ccOnSite: "On site now", ccNobodyOnSite: "Nobody clocked in.", ccHoursThisMonth: "Hours this month", ccUnassigned: "Unassigned", ccActiveJobs: "Jobs running", ccAttention: "Needs attention", ccCertExpiring: "Expires", ccFootnote: "Figures come from what your crew logs. Unpriced materials and missing hourly rates are excluded.",
+    schedTitle: "Who works where", schedToday: "Today's job", schedNoTeam: "Invite your crew first, then you can plan their days.", schedHintOwner: "Tap a day to plan who works where.", ccPlannedToday: "Planned today", ccNobodyPlanned: "Nobody planned.",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -225,6 +226,7 @@ const T = {
     quoteLabel: "Offerte", invoiceLabel: "Rechnung", newQuote: "Neue Offerte", newInvoice: "Neue Rechnung", convertToInvoice: "Rechnung erstellen", invoiceCreated: "Rechnung erstellt", docSaved: "Gespeichert", docNeedsLine: "Mindestens eine Position erfassen.", docLines: "Positionen", docAddLine: "Position hinzufügen", docDescription: "Bezeichnung", docLineTotal: "Total", docNet: "Zwischentotal", docVat: "MWST", docTotal: "Total", docDate: "Datum", docDue: "Fällig", vatStandard: "Normalsatz", vatReduced: "Reduziert", vatLodging: "Beherbergung", vatNone: "Keine", vatNumberLabel: "MWST-Nummer", billingTitle: "Rechnungsangaben", billingHint: "Für Offerten und Rechnungen sowie den Schweizer QR-Einzahlungsschein. Benötigt eine Schweizer IBAN.", billingCompany: "Firmenname", billingStreet: "Strasse", billingBuilding: "Nr.", billingPostal: "PLZ", billingTown: "Ort", paymentDaysLabel: "Zahlungsfrist (Tage)", qrPaymentPart: "Zahlteil", qrReceipt: "Empfangsschein", qrPayableTo: "Konto / Zahlbar an", qrPayableBy: "Zahlbar durch", qrReference: "Referenz", qrAmount: "Betrag", qrCurrency: "Währung", qrMissingBilling: "Rechnungsangaben erfassen, um einen QR-Einzahlungsschein zu drucken.", qrErrName: "Firmenname ist erforderlich.", qrErrIban: "Das ist keine gültige Schweizer IBAN.", qrErrAddress: "PLZ und Ort sind erforderlich.",
     onbIntro: "Firma erstellen oder mit dem Code vom Chef beitreten.", onbCompanyName: "Firmenname", onbCodePlaceholder: "Einladungscode", onbCreateBtn: "Firma erstellen", onbJoinBtn: "Firma beitreten", onbSwitchJoin: "Ich habe einen Einladungscode", onbSwitchCreate: "Stattdessen neue Firma erstellen", onbErrCompanyName: "Firmennamen eingeben.", onbErrInvalidCode: "Dieser Code wurde nicht erkannt.", onbErrCodeUsed: "Dieser Code wurde bereits verwendet.", onbErrCodeExpired: "Dieser Code ist abgelaufen — neuen anfordern.", onbErrGeneric: "Das hat nicht geklappt — nochmals versuchen.", onbErrNotConfirmed: "Der Server hat es nicht angenommen — Verbindung prüfen und erneut versuchen.", teamTitle: "Team", teamMembers: "Mitglieder", teamInvites: "Einladungscodes", teamInviteHint: "Code an einen Mitarbeiter senden. Er erstellt ein Konto, gibt den Code ein und tritt der Firma bei. Codes laufen nach 14 Tagen ab.", teamNewInvite: "Neuer Einladungscode", teamNoInvites: "Keine aktiven Codes.", teamExpires: "Läuft ab", roleOwner: "Inhaber", roleCrew: "Mitarbeiter", migrateTitle: "Daten übernehmen", migrateHint: "Ihre bisherigen Daten liegen noch auf Ihrem persönlichen Konto. Kopieren Sie sie in die Firma, damit das Team damit arbeiten kann.", migrateBtn: "In die Firma kopieren", migrateDone: "Kopiert.", migrateKeptOriginal: "Das Original bleibt unverändert — es geht nichts verloren, falls etwas nicht stimmt.",
     navCockpit: "Übersicht", docStatusLabel: "Status", docStatusDraft: "Entwurf", docStatusSent: "Versendet", docStatusAccepted: "Angenommen", docStatusDeclined: "Abgelehnt", docStatusOpen: "Offen", docStatusPartial: "Teilzahlung", docStatusPaid: "Bezahlt", paymentTitle: "Zahlung", paidAmountLabel: "Erhaltener Betrag", markPaidBtn: "Als vollständig bezahlt markieren", outstandingLabel: "Ausstehend", overdueLabel: "Überfällig", ccOutstanding: "Ausstehend", ccOverdue: "Überfällig", ccPaidThisMonth: "Diesen Monat erhalten", ccPipeline: "Pipeline", ccOnSite: "Jetzt auf der Baustelle", ccNobodyOnSite: "Niemand eingestempelt.", ccHoursThisMonth: "Stunden diesen Monat", ccUnassigned: "Nicht zugeordnet", ccActiveJobs: "Laufende Aufträge", ccAttention: "Zu erledigen", ccCertExpiring: "Läuft ab", ccFootnote: "Zahlen stammen aus den Erfassungen des Teams. Material ohne Preis und fehlende Stundensätze sind nicht enthalten.",
+    schedTitle: "Wer arbeitet wo", schedToday: "Heutiger Einsatz", schedNoTeam: "Zuerst Mitarbeiter einladen, dann können Sie deren Tage planen.", schedHintOwner: "Auf einen Tag tippen, um einzuteilen.", ccPlannedToday: "Heute eingeteilt", ccNobodyPlanned: "Niemand eingeteilt.",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -338,6 +340,7 @@ const T = {
     quoteLabel: "Devis", invoiceLabel: "Facture", newQuote: "Nouveau devis", newInvoice: "Nouvelle facture", convertToInvoice: "Créer la facture", invoiceCreated: "Facture créée", docSaved: "Enregistré", docNeedsLine: "Ajoutez au moins une ligne.", docLines: "Lignes", docAddLine: "Ajouter une ligne", docDescription: "Désignation", docLineTotal: "Total", docNet: "Sous-total", docVat: "TVA", docTotal: "Total", docDate: "Date", docDue: "Échéance", vatStandard: "Normal", vatReduced: "Réduit", vatLodging: "Hébergement", vatNone: "Aucune", vatNumberLabel: "N° TVA", billingTitle: "Coordonnées de facturation", billingHint: "Utilisées sur les devis et factures et pour le QR-facture suisse. IBAN suisse requis.", billingCompany: "Nom de l'entreprise", billingStreet: "Rue", billingBuilding: "N°", billingPostal: "NPA", billingTown: "Localité", paymentDaysLabel: "Délai de paiement (jours)", qrPaymentPart: "Section paiement", qrReceipt: "Récépissé", qrPayableTo: "Compte / Payable à", qrPayableBy: "Payable par", qrReference: "Référence", qrAmount: "Montant", qrCurrency: "Monnaie", qrMissingBilling: "Complétez vos coordonnées pour imprimer un QR-facture.", qrErrName: "Le nom de l'entreprise est requis.", qrErrIban: "IBAN suisse non valide.", qrErrAddress: "NPA et localité requis.",
     onbIntro: "Créez une entreprise ou rejoignez-la avec le code reçu.", onbCompanyName: "Nom de l'entreprise", onbCodePlaceholder: "Code d'invitation", onbCreateBtn: "Créer l'entreprise", onbJoinBtn: "Rejoindre", onbSwitchJoin: "J'ai un code d'invitation", onbSwitchCreate: "Créer plutôt une entreprise", onbErrCompanyName: "Saisissez un nom d'entreprise.", onbErrInvalidCode: "Code non reconnu.", onbErrCodeUsed: "Ce code a déjà été utilisé.", onbErrCodeExpired: "Ce code a expiré — demandez-en un nouveau.", onbErrGeneric: "Cela n'a pas fonctionné — réessayez.", onbErrNotConfirmed: "Le serveur ne l'a pas accepté — vérifiez votre connexion et réessayez.", teamTitle: "Équipe", teamMembers: "Membres", teamInvites: "Codes d'invitation", teamInviteHint: "Envoyez un code à un collaborateur. Il crée un compte, saisit le code et rejoint l'entreprise. Les codes expirent après 14 jours.", teamNewInvite: "Nouveau code", teamNoInvites: "Aucun code actif.", teamExpires: "Expire le", roleOwner: "Patron", roleCrew: "Collaborateur", migrateTitle: "Reprendre vos données", migrateHint: "Vos données sont encore sur votre compte personnel. Copiez-les dans l'entreprise pour que l'équipe puisse les utiliser.", migrateBtn: "Copier dans l'entreprise", migrateDone: "Copié.", migrateKeptOriginal: "L'original reste intact — rien n'est perdu si quelque chose cloche.",
     navCockpit: "Vue d'ensemble", docStatusLabel: "Statut", docStatusDraft: "Brouillon", docStatusSent: "Envoyé", docStatusAccepted: "Accepté", docStatusDeclined: "Refusé", docStatusOpen: "Ouvert", docStatusPartial: "Payé en partie", docStatusPaid: "Payé", paymentTitle: "Paiement", paidAmountLabel: "Montant reçu", markPaidBtn: "Marquer comme payé", outstandingLabel: "En attente", overdueLabel: "En retard", ccOutstanding: "En attente", ccOverdue: "En retard", ccPaidThisMonth: "Reçu ce mois", ccPipeline: "Pipeline", ccOnSite: "Sur chantier", ccNobodyOnSite: "Personne pointé.", ccHoursThisMonth: "Heures ce mois", ccUnassigned: "Non attribué", ccActiveJobs: "Chantiers en cours", ccAttention: "À traiter", ccCertExpiring: "Expire", ccFootnote: "Chiffres issus des saisies de l'équipe. Matériaux sans prix et taux horaires manquants exclus.",
+    schedTitle: "Qui travaille où", schedToday: "Chantier du jour", schedNoTeam: "Invitez d'abord votre équipe pour planifier ses journées.", schedHintOwner: "Touchez un jour pour planifier.", ccPlannedToday: "Planifié aujourd'hui", ccNobodyPlanned: "Personne planifié.",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -451,6 +454,7 @@ const T = {
     quoteLabel: "Preventivo", invoiceLabel: "Fattura", newQuote: "Nuovo preventivo", newInvoice: "Nuova fattura", convertToInvoice: "Crea fattura", invoiceCreated: "Fattura creata", docSaved: "Salvato", docNeedsLine: "Aggiungi almeno una riga.", docLines: "Righe", docAddLine: "Aggiungi riga", docDescription: "Descrizione", docLineTotal: "Totale", docNet: "Subtotale", docVat: "IVA", docTotal: "Totale", docDate: "Data", docDue: "Scadenza", vatStandard: "Normale", vatReduced: "Ridotta", vatLodging: "Alloggio", vatNone: "Nessuna", vatNumberLabel: "N. IVA", billingTitle: "Dati di fatturazione", billingHint: "Usati su preventivi e fatture e per la QR-fattura svizzera. Serve un IBAN svizzero.", billingCompany: "Nome azienda", billingStreet: "Via", billingBuilding: "N.", billingPostal: "NPA", billingTown: "Località", paymentDaysLabel: "Termine di pagamento (giorni)", qrPaymentPart: "Sezione pagamento", qrReceipt: "Ricevuta", qrPayableTo: "Conto / Pagabile a", qrPayableBy: "Pagabile da", qrReference: "Riferimento", qrAmount: "Importo", qrCurrency: "Valuta", qrMissingBilling: "Inserisci i dati di fatturazione per stampare una QR-fattura.", qrErrName: "Il nome dell'azienda è obbligatorio.", qrErrIban: "IBAN svizzero non valido.", qrErrAddress: "NPA e località obbligatori.",
     onbIntro: "Crea un'azienda o entra con il codice ricevuto.", onbCompanyName: "Nome azienda", onbCodePlaceholder: "Codice invito", onbCreateBtn: "Crea azienda", onbJoinBtn: "Entra", onbSwitchJoin: "Ho un codice invito", onbSwitchCreate: "Crea invece una nuova azienda", onbErrCompanyName: "Inserisci il nome dell'azienda.", onbErrInvalidCode: "Codice non riconosciuto.", onbErrCodeUsed: "Codice già utilizzato.", onbErrCodeExpired: "Codice scaduto — chiedine uno nuovo.", onbErrGeneric: "Non ha funzionato — riprova.", onbErrNotConfirmed: "Il server non lo ha accettato — controlla la connessione e riprova.", teamTitle: "Squadra", teamMembers: "Membri", teamInvites: "Codici invito", teamInviteHint: "Invia un codice a un collaboratore. Crea un account, inserisce il codice ed entra in azienda. I codici scadono dopo 14 giorni.", teamNewInvite: "Nuovo codice", teamNoInvites: "Nessun codice attivo.", teamExpires: "Scade", roleOwner: "Titolare", roleCrew: "Collaboratore", migrateTitle: "Trasferisci i dati", migrateHint: "I tuoi dati sono ancora sull'account personale. Copiali nell'azienda così la squadra può usarli.", migrateBtn: "Copia nell'azienda", migrateDone: "Copiato.", migrateKeptOriginal: "L'originale resta intatto — non si perde nulla se qualcosa non torna.",
     navCockpit: "Panoramica", docStatusLabel: "Stato", docStatusDraft: "Bozza", docStatusSent: "Inviato", docStatusAccepted: "Accettato", docStatusDeclined: "Rifiutato", docStatusOpen: "Aperto", docStatusPartial: "Pagato in parte", docStatusPaid: "Pagato", paymentTitle: "Pagamento", paidAmountLabel: "Importo ricevuto", markPaidBtn: "Segna come pagato", outstandingLabel: "In sospeso", overdueLabel: "Scaduto", ccOutstanding: "In sospeso", ccOverdue: "Scaduto", ccPaidThisMonth: "Ricevuto questo mese", ccPipeline: "Pipeline", ccOnSite: "In cantiere ora", ccNobodyOnSite: "Nessuno timbrato.", ccHoursThisMonth: "Ore questo mese", ccUnassigned: "Non assegnato", ccActiveJobs: "Lavori in corso", ccAttention: "Da gestire", ccCertExpiring: "Scade", ccFootnote: "Cifre dalle registrazioni della squadra. Materiali senza prezzo e tariffe orarie mancanti esclusi.",
+    schedTitle: "Chi lavora dove", schedToday: "Lavoro di oggi", schedNoTeam: "Invita prima la squadra, poi potrai pianificare le giornate.", schedHintOwner: "Tocca un giorno per pianificare.", ccPlannedToday: "Pianificato oggi", ccNobodyPlanned: "Nessuno pianificato.",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -564,6 +568,7 @@ const T = {
     quoteLabel: "Presupuesto", invoiceLabel: "Factura", newQuote: "Nuevo presupuesto", newInvoice: "Nueva factura", convertToInvoice: "Crear factura", invoiceCreated: "Factura creada", docSaved: "Guardado", docNeedsLine: "Añade al menos una línea.", docLines: "Líneas", docAddLine: "Añadir línea", docDescription: "Descripción", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Fecha", docDue: "Vencimiento", vatStandard: "General", vatReduced: "Reducido", vatLodging: "Alojamiento", vatNone: "Ninguno", vatNumberLabel: "N.º de IVA", billingTitle: "Datos de facturación", billingHint: "Se usan en presupuestos y facturas y para la QR-factura suiza. Requiere IBAN suizo.", billingCompany: "Nombre de la empresa", billingStreet: "Calle", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidad", paymentDaysLabel: "Plazo de pago (días)", qrPaymentPart: "Sección de pago", qrReceipt: "Recibo", qrPayableTo: "Cuenta / Pagadero a", qrPayableBy: "Pagado por", qrReference: "Referencia", qrAmount: "Importe", qrCurrency: "Moneda", qrMissingBilling: "Completa tus datos para imprimir una QR-factura.", qrErrName: "El nombre de la empresa es obligatorio.", qrErrIban: "IBAN suizo no válido.", qrErrAddress: "Código postal y localidad obligatorios.",
     onbIntro: "Crea una empresa o únete con el código recibido.", onbCompanyName: "Nombre de la empresa", onbCodePlaceholder: "Código de invitación", onbCreateBtn: "Crear empresa", onbJoinBtn: "Unirse", onbSwitchJoin: "Tengo un código", onbSwitchCreate: "Crear una empresa nueva", onbErrCompanyName: "Introduce el nombre de la empresa.", onbErrInvalidCode: "Código no reconocido.", onbErrCodeUsed: "Ese código ya se ha usado.", onbErrCodeExpired: "Ese código ha caducado — pide otro.", onbErrGeneric: "No ha funcionado — inténtalo de nuevo.", onbErrNotConfirmed: "El servidor no lo aceptó — revisa tu conexión e inténtalo de nuevo.", teamTitle: "Equipo", teamMembers: "Miembros", teamInvites: "Códigos de invitación", teamInviteHint: "Envía un código a un operario. Crea una cuenta, introduce el código y se une a la empresa. Caducan a los 14 días.", teamNewInvite: "Nuevo código", teamNoInvites: "Sin códigos activos.", teamExpires: "Caduca", roleOwner: "Propietario", roleCrew: "Operario", migrateTitle: "Traer tus datos", migrateHint: "Tus datos siguen en tu cuenta personal. Cópialos a la empresa para que el equipo pueda usarlos.", migrateBtn: "Copiar a la empresa", migrateDone: "Copiado.", migrateKeptOriginal: "El original queda intacto — no se pierde nada si algo no cuadra.",
     navCockpit: "Resumen", docStatusLabel: "Estado", docStatusDraft: "Borrador", docStatusSent: "Enviado", docStatusAccepted: "Aceptado", docStatusDeclined: "Rechazado", docStatusOpen: "Abierta", docStatusPartial: "Pago parcial", docStatusPaid: "Pagada", paymentTitle: "Pago", paidAmountLabel: "Importe recibido", markPaidBtn: "Marcar como pagada", outstandingLabel: "Pendiente", overdueLabel: "Vencida", ccOutstanding: "Pendiente", ccOverdue: "Vencido", ccPaidThisMonth: "Cobrado este mes", ccPipeline: "Cartera", ccOnSite: "En obra ahora", ccNobodyOnSite: "Nadie fichado.", ccHoursThisMonth: "Horas este mes", ccUnassigned: "Sin asignar", ccActiveJobs: "Obras en curso", ccAttention: "Requiere atención", ccCertExpiring: "Caduca", ccFootnote: "Cifras a partir de lo registrado por el equipo. Se excluyen materiales sin precio y tarifas ausentes.",
+    schedTitle: "Quién trabaja dónde", schedToday: "Obra de hoy", schedNoTeam: "Invita primero a tu equipo para poder planificar sus días.", schedHintOwner: "Toca un día para planificar.", ccPlannedToday: "Planificado hoy", ccNobodyPlanned: "Nadie planificado.",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -677,6 +682,7 @@ const T = {
     quoteLabel: "Orçamento", invoiceLabel: "Fatura", newQuote: "Novo orçamento", newInvoice: "Nova fatura", convertToInvoice: "Criar fatura", invoiceCreated: "Fatura criada", docSaved: "Guardado", docNeedsLine: "Adicione pelo menos uma linha.", docLines: "Linhas", docAddLine: "Adicionar linha", docDescription: "Descrição", docLineTotal: "Total", docNet: "Subtotal", docVat: "IVA", docTotal: "Total", docDate: "Data", docDue: "Vencimento", vatStandard: "Normal", vatReduced: "Reduzido", vatLodging: "Alojamento", vatNone: "Nenhum", vatNumberLabel: "N.º de IVA", billingTitle: "Dados de faturação", billingHint: "Usados em orçamentos e faturas e para a QR-fatura suíça. Requer IBAN suíço.", billingCompany: "Nome da empresa", billingStreet: "Rua", billingBuilding: "N.º", billingPostal: "Código postal", billingTown: "Localidade", paymentDaysLabel: "Prazo de pagamento (dias)", qrPaymentPart: "Secção de pagamento", qrReceipt: "Recibo", qrPayableTo: "Conta / Pagável a", qrPayableBy: "Pago por", qrReference: "Referência", qrAmount: "Montante", qrCurrency: "Moeda", qrMissingBilling: "Preencha os dados de faturação para imprimir uma QR-fatura.", qrErrName: "O nome da empresa é obrigatório.", qrErrIban: "IBAN suíço inválido.", qrErrAddress: "Código postal e localidade obrigatórios.",
     onbIntro: "Crie uma empresa ou junte-se com o código recebido.", onbCompanyName: "Nome da empresa", onbCodePlaceholder: "Código de convite", onbCreateBtn: "Criar empresa", onbJoinBtn: "Juntar-me", onbSwitchJoin: "Tenho um código", onbSwitchCreate: "Criar antes uma empresa", onbErrCompanyName: "Introduza o nome da empresa.", onbErrInvalidCode: "Código não reconhecido.", onbErrCodeUsed: "Esse código já foi usado.", onbErrCodeExpired: "Esse código expirou — peça outro.", onbErrGeneric: "Não resultou — tente novamente.", onbErrNotConfirmed: "O servidor não aceitou — verifique a ligação e tente novamente.", teamTitle: "Equipa", teamMembers: "Membros", teamInvites: "Códigos de convite", teamInviteHint: "Envie um código a um colaborador. Cria uma conta, introduz o código e junta-se à empresa. Expiram em 14 dias.", teamNewInvite: "Novo código", teamNoInvites: "Sem códigos ativos.", teamExpires: "Expira", roleOwner: "Proprietário", roleCrew: "Colaborador", migrateTitle: "Trazer os seus dados", migrateHint: "Os seus dados ainda estão na conta pessoal. Copie-os para a empresa para a equipa poder usá-los.", migrateBtn: "Copiar para a empresa", migrateDone: "Copiado.", migrateKeptOriginal: "O original fica intacto — nada se perde se algo parecer errado.",
     navCockpit: "Resumo", docStatusLabel: "Estado", docStatusDraft: "Rascunho", docStatusSent: "Enviado", docStatusAccepted: "Aceite", docStatusDeclined: "Recusado", docStatusOpen: "Em aberto", docStatusPartial: "Pago em parte", docStatusPaid: "Pago", paymentTitle: "Pagamento", paidAmountLabel: "Valor recebido", markPaidBtn: "Marcar como pago", outstandingLabel: "Em dívida", overdueLabel: "Vencido", ccOutstanding: "Em dívida", ccOverdue: "Vencido", ccPaidThisMonth: "Recebido este mês", ccPipeline: "Pipeline", ccOnSite: "Em obra agora", ccNobodyOnSite: "Ninguém a picar o ponto.", ccHoursThisMonth: "Horas este mês", ccUnassigned: "Sem atribuição", ccActiveJobs: "Obras a decorrer", ccAttention: "A tratar", ccCertExpiring: "Expira", ccFootnote: "Valores a partir do que a equipa regista. Materiais sem preço e valores/hora em falta ficam de fora.",
+    schedTitle: "Quem trabalha onde", schedToday: "Obra de hoje", schedNoTeam: "Convide primeiro a sua equipa para poder planear os dias.", schedHintOwner: "Toque num dia para planear.", ccPlannedToday: "Planeado hoje", ccNobodyPlanned: "Ninguém planeado.",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -790,6 +796,7 @@ const T = {
     quoteLabel: "Oferta", invoiceLabel: "Faktura", newQuote: "Nowa oferta", newInvoice: "Nowa faktura", convertToInvoice: "Utwórz fakturę", invoiceCreated: "Utworzono fakturę", docSaved: "Zapisano", docNeedsLine: "Dodaj co najmniej jedną pozycję.", docLines: "Pozycje", docAddLine: "Dodaj pozycję", docDescription: "Opis", docLineTotal: "Razem", docNet: "Suma częściowa", docVat: "VAT", docTotal: "Razem", docDate: "Data", docDue: "Termin", vatStandard: "Podstawowa", vatReduced: "Obniżona", vatLodging: "Zakwaterowanie", vatNone: "Brak", vatNumberLabel: "Numer VAT", billingTitle: "Dane do faktury", billingHint: "Używane na ofertach i fakturach oraz do szwajcarskiego QR-rachunku. Wymaga szwajcarskiego IBAN.", billingCompany: "Nazwa firmy", billingStreet: "Ulica", billingBuilding: "Nr", billingPostal: "Kod pocztowy", billingTown: "Miejscowość", paymentDaysLabel: "Termin płatności (dni)", qrPaymentPart: "Część płatnicza", qrReceipt: "Potwierdzenie", qrPayableTo: "Konto / Odbiorca", qrPayableBy: "Płatnik", qrReference: "Referencja", qrAmount: "Kwota", qrCurrency: "Waluta", qrMissingBilling: "Uzupełnij dane, aby wydrukować QR-rachunek.", qrErrName: "Nazwa firmy jest wymagana.", qrErrIban: "To nie jest poprawny szwajcarski IBAN.", qrErrAddress: "Kod pocztowy i miejscowość są wymagane.",
     onbIntro: "Załóż firmę lub dołącz kodem od szefa.", onbCompanyName: "Nazwa firmy", onbCodePlaceholder: "Kod zaproszenia", onbCreateBtn: "Załóż firmę", onbJoinBtn: "Dołącz", onbSwitchJoin: "Mam kod zaproszenia", onbSwitchCreate: "Załóż nową firmę", onbErrCompanyName: "Podaj nazwę firmy.", onbErrInvalidCode: "Nie rozpoznano kodu.", onbErrCodeUsed: "Ten kod został już użyty.", onbErrCodeExpired: "Kod wygasł — poproś o nowy.", onbErrGeneric: "Nie udało się — spróbuj ponownie.", onbErrNotConfirmed: "Serwer nie przyjął zgłoszenia — sprawdź połączenie i spróbuj ponownie.", teamTitle: "Zespół", teamMembers: "Członkowie", teamInvites: "Kody zaproszeń", teamInviteHint: "Wyślij kod pracownikowi. Zakłada konto, wpisuje kod i dołącza do firmy. Kody wygasają po 14 dniach.", teamNewInvite: "Nowy kod", teamNoInvites: "Brak aktywnych kodów.", teamExpires: "Wygasa", roleOwner: "Właściciel", roleCrew: "Pracownik", migrateTitle: "Przenieś dane", migrateHint: "Twoje dane są nadal na koncie osobistym. Skopiuj je do firmy, aby zespół mógł z nich korzystać.", migrateBtn: "Kopiuj do firmy", migrateDone: "Skopiowano.", migrateKeptOriginal: "Oryginał pozostaje nietknięty — nic nie ginie, jeśli coś wygląda źle.",
     navCockpit: "Przegląd", docStatusLabel: "Status", docStatusDraft: "Szkic", docStatusSent: "Wysłana", docStatusAccepted: "Zaakceptowana", docStatusDeclined: "Odrzucona", docStatusOpen: "Otwarta", docStatusPartial: "Częściowo opłacona", docStatusPaid: "Opłacona", paymentTitle: "Płatność", paidAmountLabel: "Otrzymana kwota", markPaidBtn: "Oznacz jako opłaconą", outstandingLabel: "Do zapłaty", overdueLabel: "Po terminie", ccOutstanding: "Do zapłaty", ccOverdue: "Po terminie", ccPaidThisMonth: "Wpłynęło w tym miesiącu", ccPipeline: "Pipeline", ccOnSite: "Teraz na budowie", ccNobodyOnSite: "Nikt nie jest zalogowany.", ccHoursThisMonth: "Godziny w tym miesiącu", ccUnassigned: "Nieprzypisane", ccActiveJobs: "Zlecenia w toku", ccAttention: "Do załatwienia", ccCertExpiring: "Wygasa", ccFootnote: "Dane pochodzą z wpisów ekipy. Materiały bez ceny i brakujące stawki nie są wliczone.",
+    schedTitle: "Kto gdzie pracuje", schedToday: "Dzisiejsze zlecenie", schedNoTeam: "Najpierw zaproś ekipę, wtedy zaplanujesz jej dni.", schedHintOwner: "Dotknij dnia, aby zaplanować.", ccPlannedToday: "Zaplanowani dziś", ccNobodyPlanned: "Nikt nie zaplanowany.",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -903,6 +910,7 @@ const T = {
     quoteLabel: "Ponuka", invoiceLabel: "Faktúra", newQuote: "Nová ponuka", newInvoice: "Nová faktúra", convertToInvoice: "Vytvoriť faktúru", invoiceCreated: "Faktúra vytvorená", docSaved: "Uložené", docNeedsLine: "Pridajte aspoň jednu položku.", docLines: "Položky", docAddLine: "Pridať položku", docDescription: "Popis", docLineTotal: "Spolu", docNet: "Medzisúčet", docVat: "DPH", docTotal: "Spolu", docDate: "Dátum", docDue: "Splatnosť", vatStandard: "Základná", vatReduced: "Znížená", vatLodging: "Ubytovanie", vatNone: "Žiadna", vatNumberLabel: "IČ DPH", billingTitle: "Fakturačné údaje", billingHint: "Použité na ponukách a faktúrach a pre švajčiarsky QR-doklad. Vyžaduje švajčiarsky IBAN.", billingCompany: "Názov firmy", billingStreet: "Ulica", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Mesto", paymentDaysLabel: "Splatnosť (dni)", qrPaymentPart: "Platobná časť", qrReceipt: "Potvrdenie", qrPayableTo: "Účet / Príjemca", qrPayableBy: "Platiteľ", qrReference: "Referencia", qrAmount: "Suma", qrCurrency: "Mena", qrMissingBilling: "Doplňte fakturačné údaje pre tlač QR-dokladu.", qrErrName: "Názov firmy je povinný.", qrErrIban: "Neplatný švajčiarsky IBAN.", qrErrAddress: "PSČ a mesto sú povinné.",
     onbIntro: "Vytvorte firmu alebo sa pripojte kódom od šéfa.", onbCompanyName: "Názov firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvoriť firmu", onbJoinBtn: "Pripojiť sa", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvoriť radšej novú firmu", onbErrCompanyName: "Zadajte názov firmy.", onbErrInvalidCode: "Kód nebol rozpoznaný.", onbErrCodeUsed: "Tento kód už bol použitý.", onbErrCodeExpired: "Kód vypršal — vyžiadajte si nový.", onbErrGeneric: "Nepodarilo sa — skúste znova.", onbErrNotConfirmed: "Server to neprijal — skontrolujte pripojenie a skúste znova.", teamTitle: "Tím", teamMembers: "Členovia", teamInvites: "Kódy pozvánok", teamInviteHint: "Pošlite kód zamestnancovi. Vytvorí si účet, zadá kód a pripojí sa k firme. Kódy vypršia po 14 dňoch.", teamNewInvite: "Nový kód", teamNoInvites: "Žiadne aktívne kódy.", teamExpires: "Vyprší", roleOwner: "Majiteľ", roleCrew: "Zamestnanec", migrateTitle: "Preniesť údaje", migrateHint: "Vaše údaje sú stále na osobnom účte. Skopírujte ich do firmy, aby s nimi mohol tím pracovať.", migrateBtn: "Kopírovať do firmy", migrateDone: "Skopírované.", migrateKeptOriginal: "Originál zostáva nedotknutý — nič sa nestratí, ak niečo nesedí.",
     navCockpit: "Prehľad", docStatusLabel: "Stav", docStatusDraft: "Návrh", docStatusSent: "Odoslaná", docStatusAccepted: "Prijatá", docStatusDeclined: "Zamietnutá", docStatusOpen: "Otvorená", docStatusPartial: "Čiastočne uhradená", docStatusPaid: "Uhradená", paymentTitle: "Platba", paidAmountLabel: "Prijatá suma", markPaidBtn: "Označiť ako uhradenú", outstandingLabel: "Neuhradené", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhradené", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Prijaté tento mesiac", ccPipeline: "Pipeline", ccOnSite: "Teraz na stavbe", ccNobodyOnSite: "Nikto nie je zapichnutý.", ccHoursThisMonth: "Hodiny tento mesiac", ccUnassigned: "Nepriradené", ccActiveJobs: "Prebiehajúce zákazky", ccAttention: "Na vybavenie", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vychádzajú zo záznamov tímu. Materiál bez ceny a chýbajúce sadzby nie sú zahrnuté.",
+    schedTitle: "Kto kde pracuje", schedToday: "Dnešná zákazka", schedNoTeam: "Najprv pozvite tím, potom môžete plánovať jeho dni.", schedHintOwner: "Ťuknite na deň pre naplánovanie.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikto nie je naplánovaný.",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -1016,6 +1024,7 @@ const T = {
     quoteLabel: "Nabídka", invoiceLabel: "Faktura", newQuote: "Nová nabídka", newInvoice: "Nová faktura", convertToInvoice: "Vytvořit fakturu", invoiceCreated: "Faktura vytvořena", docSaved: "Uloženo", docNeedsLine: "Přidejte alespoň jednu položku.", docLines: "Položky", docAddLine: "Přidat položku", docDescription: "Popis", docLineTotal: "Celkem", docNet: "Mezisoučet", docVat: "DPH", docTotal: "Celkem", docDate: "Datum", docDue: "Splatnost", vatStandard: "Základní", vatReduced: "Snížená", vatLodging: "Ubytování", vatNone: "Žádná", vatNumberLabel: "DIČ", billingTitle: "Fakturační údaje", billingHint: "Použity na nabídkách a fakturách a pro švýcarský QR-doklad. Vyžaduje švýcarský IBAN.", billingCompany: "Název firmy", billingStreet: "Ulice", billingBuilding: "Č.", billingPostal: "PSČ", billingTown: "Město", paymentDaysLabel: "Splatnost (dny)", qrPaymentPart: "Platební část", qrReceipt: "Potvrzení", qrPayableTo: "Účet / Příjemce", qrPayableBy: "Plátce", qrReference: "Reference", qrAmount: "Částka", qrCurrency: "Měna", qrMissingBilling: "Doplňte fakturační údaje pro tisk QR-dokladu.", qrErrName: "Název firmy je povinný.", qrErrIban: "Neplatný švýcarský IBAN.", qrErrAddress: "PSČ a město jsou povinné.",
     onbIntro: "Vytvořte firmu nebo se připojte kódem od šéfa.", onbCompanyName: "Název firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvořit firmu", onbJoinBtn: "Připojit se", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvořit raději novou firmu", onbErrCompanyName: "Zadejte název firmy.", onbErrInvalidCode: "Kód nebyl rozpoznán.", onbErrCodeUsed: "Tento kód už byl použit.", onbErrCodeExpired: "Kód vypršel — vyžádejte si nový.", onbErrGeneric: "Nepovedlo se — zkuste to znovu.", onbErrNotConfirmed: "Server to nepřijal — zkontrolujte připojení a zkuste to znovu.", teamTitle: "Tým", teamMembers: "Členové", teamInvites: "Kódy pozvánek", teamInviteHint: "Pošlete kód zaměstnanci. Vytvoří si účet, zadá kód a připojí se k firmě. Kódy vyprší po 14 dnech.", teamNewInvite: "Nový kód", teamNoInvites: "Žádné aktivní kódy.", teamExpires: "Vyprší", roleOwner: "Majitel", roleCrew: "Zaměstnanec", migrateTitle: "Přenést data", migrateHint: "Vaše data jsou stále na osobním účtu. Zkopírujte je do firmy, aby s nimi mohl tým pracovat.", migrateBtn: "Kopírovat do firmy", migrateDone: "Zkopírováno.", migrateKeptOriginal: "Originál zůstává nedotčen — nic se neztratí, pokud něco nesedí.",
     navCockpit: "Přehled", docStatusLabel: "Stav", docStatusDraft: "Koncept", docStatusSent: "Odeslána", docStatusAccepted: "Přijata", docStatusDeclined: "Zamítnuta", docStatusOpen: "Otevřená", docStatusPartial: "Částečně uhrazena", docStatusPaid: "Uhrazena", paymentTitle: "Platba", paidAmountLabel: "Přijatá částka", markPaidBtn: "Označit jako uhrazenou", outstandingLabel: "Neuhrazeno", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhrazeno", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Přijato tento měsíc", ccPipeline: "Pipeline", ccOnSite: "Teď na stavbě", ccNobodyOnSite: "Nikdo není napíchnutý.", ccHoursThisMonth: "Hodiny tento měsíc", ccUnassigned: "Nepřiřazeno", ccActiveJobs: "Probíhající zakázky", ccAttention: "K vyřízení", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vycházejí ze záznamů týmu. Materiál bez ceny a chybějící sazby nejsou zahrnuty.",
+    schedTitle: "Kdo kde pracuje", schedToday: "Dnešní zakázka", schedNoTeam: "Nejprve pozvěte tým, pak můžete plánovat jeho dny.", schedHintOwner: "Klepněte na den pro naplánování.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikdo není naplánován.",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -2202,6 +2211,8 @@ export default function SiteManager() {
   const [projects, setProjects] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [assignModal, setAssignModal] = useState(null); // { date } while planning a day
   const [docEditor, setDocEditor] = useState(null);
   const [billingModalOpen, setBillingModalOpen] = useState(false);
   const [billingDraft, setBillingDraft] = useState(null);
@@ -2354,6 +2365,7 @@ export default function SiteManager() {
     }));
     unsubs.push(subscribeCollection("entries", setEntries));
     unsubs.push(subscribeCollection("customers", setCustomers));
+    unsubs.push(subscribeCollection("assignments", setAssignments));
     // Crew have no access to quotes and invoices — subscribing would simply
     // be denied, so don't ask.
     if (isOwner()) unsubs.push(subscribeCollection("documents", setDocuments));
@@ -2439,7 +2451,8 @@ export default function SiteManager() {
   // The dashboard needs names and each person's clock. Refreshed on entry and
   // then periodically, since "who is on site right now" goes stale quickly.
   useEffect(() => {
-    if (tab !== "cockpit" || !membership || !isOwner()) return;
+    // The calendar planner needs the member list too, not just the dashboard.
+    if (!["cockpit", "calendar"].includes(tab) || !membership || !isOwner()) return;
     let alive = true;
     async function refresh() {
       try {
@@ -3135,6 +3148,7 @@ export default function SiteManager() {
   async function persist(next) {
     if (next.customers) setCustomers(next.customers);
     if (next.documents) setDocuments(next.documents);
+    if (next.assignments) setAssignments(next.assignments);
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -3146,6 +3160,7 @@ export default function SiteManager() {
       if (next.entries) await syncCollection("entries", next.entries);
       if (next.customers) await syncCollection("customers", next.customers);
       if (next.documents) await syncCollection("documents", next.documents);
+      if (next.assignments) await syncCollection("assignments", next.assignments);
 
       // The clock is personal — each crew member has their own.
       if (next.activeClock !== undefined) {
@@ -3170,6 +3185,29 @@ export default function SiteManager() {
   // Every entry must be stamped with who created it: the security rules reject
   // a create whose userId is not the signed-in user, so any code path building
   // an entry by hand would be silently refused. Build them all through here.
+  function assignmentsFor(date) {
+    return assignments.filter((a) => a.date === date);
+  }
+
+  function myAssignments(date) {
+    return assignments.filter((a) => a.date === date && a.userId === user?.uid);
+  }
+
+  // One person is planned onto one job per day. Tapping the same job again
+  // clears the plan rather than needing a separate delete.
+  function toggleAssignment(date, userId, projectId) {
+    const existing = assignments.find((a) => a.date === date && a.userId === userId);
+    if (existing && existing.projectId === projectId) {
+      persist({ assignments: assignments.filter((a) => a.id !== existing.id) });
+      return;
+    }
+    if (existing) {
+      persist({ assignments: assignments.map((a) => (a.id === existing.id ? { ...a, projectId } : a)) });
+      return;
+    }
+    persist({ assignments: [{ id: uid(), date, userId, projectId, createdAt: Date.now() }, ...assignments] });
+  }
+
   function newEntry(partial) {
     return { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...partial };
   }
@@ -4085,6 +4123,7 @@ export default function SiteManager() {
     return {
       outstanding, overdue, overdueCount, overdueList, paidThisMonth, pipelineValue,
       onSite, hoursByUser, activeJobs, leads, dueFollow, expiringCerts,
+      plannedToday: assignments.filter((a) => a.date === today),
       unpaidCount: invoices.filter((i) => { const s = documentState(i, today); return s.key !== "paid" && s.key !== "draft"; }).length,
     };
   }
@@ -4269,6 +4308,31 @@ export default function SiteManager() {
       <div className="relative flex-1 overflow-y-auto px-5 pb-28 pt-4" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {tab === "today" && (
           <div className="flex flex-col gap-4">
+            {(() => {
+              // What am I meant to be doing today? The first thing a crew
+              // member opens the app to find out.
+              const mine = myAssignments(todayKey());
+              if (mine.length === 0) return null;
+              return (
+                <div style={{ background: "#6FB3D914", border: "1px solid #6FB3D955" }} className="rounded-xl p-4">
+                  <div style={{ color: "#6FB3D9" }} className="text-xs uppercase tracking-wide mb-2 font-bold flex items-center gap-1.5">
+                    <CalendarDays size={13} /> {t.schedToday}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {mine.map((a) => {
+                      const pr = projects.find((x) => x.id === a.projectId);
+                      if (!pr) return null;
+                      return (
+                        <button key={a.id} onClick={() => { setTab("projects"); setSelectedProject(pr.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
+                          <div className="text-sm font-semibold">{pr.name}</div>
+                          {pr.address && <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{pr.address}</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
             <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
               <div className="flex items-center justify-between mb-1">
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.weatherTitle} · {weatherLoc.name}</div>
@@ -4617,11 +4681,14 @@ export default function SiteManager() {
                     const hasEntries = entries.some((e) => e.date === dateStr);
                     const leave = leaveRequests.find((r) => r.date === dateStr);
                     const isToday = dateStr === todayKey();
+                    // The owner plans for everyone; a crew member only needs to
+                    // see the days they are themselves expected somewhere.
+                    const planned = isOwner() ? assignmentsFor(dateStr) : myAssignments(dateStr);
                     const leaveColor = leave ? (leave.status === "approved" ? COLORS.success : leave.status === "declined" ? COLORS.danger : COLORS.amber) : null;
                     return (
                       <button
                         key={i}
-                        onClick={() => openDay(dateStr)}
+                        onClick={() => (isOwner() ? setAssignModal({ date: dateStr }) : openDay(dateStr))}
                         style={{
                           background: leaveColor ? `${leaveColor}22` : COLORS.cardAlt,
                           border: `1px solid ${isToday ? COLORS.accent : leaveColor || COLORS.border}`,
@@ -4629,6 +4696,9 @@ export default function SiteManager() {
                         className="aspect-square rounded-lg flex flex-col items-center justify-center relative"
                       >
                         <span style={{ color: isToday ? COLORS.accent : COLORS.text }} className="text-xs font-semibold">{d}</span>
+                        {planned.length > 0 && (
+                          <span style={{ color: "#6FB3D9" }} className="text-[9px] font-bold leading-none absolute top-0.5 right-1">{planned.length}</span>
+                        )}
                         {hasEntries && <div style={{ background: COLORS.success }} className="w-1 h-1 rounded-full absolute bottom-1" />}
                       </button>
                     );
@@ -4640,6 +4710,9 @@ export default function SiteManager() {
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" /> {t.statusPending}</div>
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.statusApproved}</div>
               </div>
+              {isOwner() && (
+                <div style={{ color: COLORS.muted }} className="text-[10px] px-1 -mt-2">{t.schedHintOwner}</div>
+              )}
               <button onClick={() => setRangeLeaveModalOpen(true)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
                 <CalendarDays size={16} /> {t.rangeLeaveBtn}
               </button>
@@ -4680,6 +4753,26 @@ export default function SiteManager() {
                         <span style={{ color: COLORS.success }} className="text-xs font-bold shrink-0">{fmtHM(Date.now() - p.since)}</span>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
+                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccPlannedToday}</div>
+                {c.plannedToday.length === 0 ? (
+                  <div style={{ color: COLORS.muted }} className="text-xs">{t.ccNobodyPlanned}</div>
+                ) : (
+                  <div className="flex flex-col gap-1.5">
+                    {c.plannedToday.map((a) => {
+                      const m = team.members.find((x) => x.uid === a.userId);
+                      const pr = projects.find((x) => x.id === a.projectId);
+                      return (
+                        <div key={a.id} className="flex items-center justify-between gap-2 text-sm">
+                          <span className="truncate">{m ? (m.name || m.email || a.userId) : a.userId}</span>
+                          <span style={{ color: COLORS.muted }} className="shrink-0 truncate max-w-[55%] text-right">{pr ? pr.name : "\u2014"}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -5237,6 +5330,63 @@ export default function SiteManager() {
           )}
         </Modal>
       )}
+
+      {assignModal && isOwner() && (() => {
+        const date = assignModal.date;
+        const openProjects = projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
+        const dayLeave = leaveRequests.filter((r) => r.date === date);
+        return (
+          <Modal onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
+            {team.members.length === 0 ? (
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3">{t.schedNoTeam}</div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {team.members.map((m) => {
+                  const current = assignments.find((a) => a.date === date && a.userId === m.uid);
+                  const away = dayLeave.find((r) => r.userId === m.uid);
+                  return (
+                    <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-semibold truncate">{m.name || m.email || m.uid}</div>
+                        {away && (
+                          <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            {t[`leave${(away.type || "other").charAt(0).toUpperCase()}${(away.type || "other").slice(1)}`] || t.leaveOther}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {openProjects.map((pr) => {
+                          const active = current && current.projectId === pr.id;
+                          return (
+                            <button
+                              key={pr.id}
+                              onClick={() => toggleAssignment(date, m.uid, pr.id)}
+                              style={{
+                                background: active ? "#6FB3D933" : COLORS.cardAlt,
+                                border: `1px solid ${active ? "#6FB3D9" : COLORS.border}`,
+                                color: active ? "#6FB3D9" : COLORS.text,
+                              }}
+                              className="px-2.5 py-1.5 rounded-full text-xs font-bold"
+                            >
+                              {pr.name}
+                            </button>
+                          );
+                        })}
+                        {openProjects.length === 0 && (
+                          <div style={{ color: COLORS.muted }} className="text-xs">{t.noProjectsYet}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <button onClick={() => { setAssignModal(null); openDay(date); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full mt-4 py-2.5 rounded-lg text-xs font-bold uppercase">
+              {t.dayJournalHeading}
+            </button>
+          </Modal>
+        );
+      })()}
 
       {teamModalOpen && (
         <Modal onClose={() => setTeamModalOpen(false)} title={t.teamTitle}>

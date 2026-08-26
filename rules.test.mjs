@@ -122,6 +122,27 @@ await check("made-up invite code is rejected", () =>
 await check("crew CANNOT create invites", () =>
   assertFails(setDoc(doc(crew, "invites", "MINE"), { companyId: CID, role: "owner", expiresAt: Date.now() + 1000 })));
 
+// --- scheduling ----------------------------------------------------------
+await check("owner CAN create an assignment", () =>
+  assertSucceeds(setDoc(doc(owner, "companies", CID, "assignments", "a1"), {
+    date: "2026-09-01", projectId: "p1", userId: CREW,
+  })));
+await check("crew CAN read the schedule", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "assignments", "a1"))));
+await check("crew CANNOT reassign themselves", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "assignments", "a1"), {
+    date: "2026-09-01", projectId: "p-nicer", userId: CREW,
+  })));
+await check("crew CANNOT delete an assignment", () =>
+  assertFails(deleteDoc(doc(crew, "companies", CID, "assignments", "a1"))));
+// A fresh identity: `outsider` legitimately joined the company earlier in
+// this suite, so reusing it here would prove nothing.
+await check("a non-member CANNOT read the schedule", () =>
+  assertFails(getDoc(doc(
+    testEnv.authenticatedContext("stranger-uid").firestore(),
+    "companies", CID, "assignments", "a1"
+  ))));
+
 // --- founding a company --------------------------------------------------
 // The gap that shipped a broken rule: these all happen with no membership
 // yet, so anything asking "are you already an owner?" fails by definition.

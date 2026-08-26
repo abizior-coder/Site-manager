@@ -80,6 +80,7 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/entries/{id}` | One per entry, each carrying `userId` |
 | `companies/{cid}/customers/{id}` | One per customer, with `contacts` history |
 | `companies/{cid}/documents/{id}` | Quotes and invoices — **owner only** |
+| `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, owner writes |
 | `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
 | `companies/{cid}/members/{uid}` | `role: owner \| crew` |
 | `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>` |
