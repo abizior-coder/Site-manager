@@ -2,10 +2,13 @@
   "name": "site-manager",
   "private": true,
   "scripts": {
-    "build": "esbuild entry.jsx --bundle --format=esm --minify --jsx=automatic --outfile=bundle.js && node scripts/stamp.mjs"
+    "build": "esbuild entry.jsx --bundle --format=esm --minify --jsx=automatic --outfile=bundle.js && node scripts/stamp.mjs",
+    "test:rules": "firebase emulators:exec --only firestore \"node rules.test.mjs\""
   },
   "devDependencies": {
-    "esbuild": "^0.23.0"
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "esbuild": "^0.23.0",
+    "firebase": "^12.18.0"
   },
   "dependencies": {
     "lucide-react": "^0.436.0",

@@ -1,19 +1,116 @@
 rules_version = '2';
 
-// Security is enforced here, on the server, not in the app. An old cached
-// client, a script, or curl are all subject to these rules.
+// Security is enforced here, on the server, not in the app. Hiding a panel in
+// the UI is not access control — a crew member with the browser console must
+// still be unable to read what the labour rate is.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // A signed-in account may read and write only its own subtree.
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // Everything else — including the old public `local/*` and `shared/*`
-    // documents this app used before accounts existed — is denied to
-    // everyone. Data that mattered was copied into the owner's account
-    // before these rules were deployed.
+    function memberPath(cid) {
+      return /databases/$(database)/documents/companies/$(cid)/members/$(request.auth.uid);
+    }
+
+    function isMember(cid) {
+      return signedIn() && exists(memberPath(cid));
+    }
+
+    function isOwner(cid) {
+      return isMember(cid) && get(memberPath(cid)).data.role == 'owner';
+    }
+
+    // A user record points at the company the account belongs to.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+      // The old personal key/value store. Still readable by its owner so the
+      // migration can copy it, and so it remains a rollback path.
+      match /kv/{key} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // Invite codes. Any signed-in user may read one — they have to, to redeem
+    // it before being a member — but only the issuing company's owner creates
+    // or deletes them. Codes carry an expiry so a leaked code is not
+    // permanent access.
+    match /invites/{code} {
+      allow get: if signedIn();
+      allow list: if signedIn() && isOwner(resource.data.companyId);
+      allow create, delete: if signedIn() && isOwner(request.resource.data.companyId);
+      // Redeeming marks the code used; nothing else about it may change.
+      allow update: if signedIn()
+                    && resource.data.usedBy == null
+                    && request.resource.data.usedBy == request.auth.uid
+                    && request.resource.data.companyId == resource.data.companyId
+                    && request.resource.data.role == resource.data.role;
+    }
+
+    match /companies/{cid} {
+      allow read: if isMember(cid);
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isOwner(cid);
+
+      // Members may see who else is on the team. Only the owner changes roles
+      // — otherwise a crew member could simply promote themselves.
+      match /members/{uid} {
+        allow read: if isMember(cid);
+        allow update, delete: if isOwner(cid);
+        // Joining: a user creates only their own membership, and only against
+        // an unexpired invite that names this company. The role comes from the
+        // invite, so it cannot be self-assigned.
+        allow create: if signedIn()
+                      && request.auth.uid == uid
+                      && (
+                           isOwner(cid)
+                           || (
+                                exists(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode))
+                                && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.companyId == cid
+                                && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time.toMillis()
+                                && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedBy == null
+                                && request.resource.data.role == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.role
+                              )
+                         );
+      }
+
+      // What the crew costs the company is not the crew's business.
+      match /private/{doc} {
+        allow read, write: if isOwner(cid);
+      }
+
+      match /projects/{id} {
+        allow read: if isMember(cid);
+        allow write: if isOwner(cid);
+      }
+
+      match /customers/{id} {
+        allow read: if isMember(cid);
+        allow write: if isOwner(cid);
+      }
+
+      // A site log is a record of what happened. Crew add their own entries
+      // and correct their own mistakes, but cannot quietly rewrite someone
+      // else's hours.
+      match /entries/{id} {
+        allow read: if isMember(cid);
+        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isOwner(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+      }
+
+      // Quotes, invoices and anything priced.
+      match /documents/{id} {
+        allow read, write: if isOwner(cid);
+      }
+
+      // Photos, preferences, technical library.
+      match /kv/{key} {
+        allow read, write: if isMember(cid);
+      }
+    }
+
+    // Everything else, including the pre-account public paths, stays denied.
     match /{document=**} {
       allow read, write: if false;
     }

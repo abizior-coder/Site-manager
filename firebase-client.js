@@ -25,7 +25,20 @@ async function boot() {
     import(CDN + "firebase-auth.js"),
   ]);
   const app = appMod.initializeApp(firebaseConfig);
-  const db = fsMod.getFirestore(app);
+
+  // Offline persistence, enabled at creation. Crews work on roofs with poor
+  // signal; without a local cache every read simply fails when the connection
+  // drops. Falls back to a plain instance where the browser refuses (private
+  // windows, or a second tab holding the lock).
+  let db;
+  try {
+    db = fsMod.initializeFirestore(app, {
+      localCache: fsMod.persistentLocalCache({ tabManager: fsMod.persistentMultipleTabManager() }),
+    });
+  } catch {
+    db = fsMod.getFirestore(app);
+  }
+
   const auth = authMod.getAuth(app);
   // Survive app restarts on a phone without asking for the password again.
   try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch {}
@@ -36,6 +49,17 @@ async function boot() {
 export function initFirebase() {
   if (!ready) ready = boot();
   return ready;
+}
+
+// Exposed so company-store.js can use the same initialised instance rather
+// than creating a second app.
+export function getSdk() {
+  if (!sdk) throw new Error("firebase not initialised");
+  return sdk;
+}
+
+export function currentUser() {
+  return sdk && sdk.auth.currentUser ? sdk.auth.currentUser : null;
 }
 
 function currentUid() {

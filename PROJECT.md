@@ -133,17 +133,29 @@ These are real and currently unfixed. Ordered by how much damage they do.
 
 ### Changing security rules
 
-`firestore.rules` is the real access control — the app UI is not. After any
-change:
+`firestore.rules` is the real access control — the app UI is not. Hiding a
+panel is not permission; a crew member with the browser console must still be
+unable to read the labour rate.
+
+There is a test suite. **Run it after any rules change:**
+
+```text
+npm run test:rules
+```
+
+It asserts what the server allows: crew cannot read invoices or finance,
+cannot edit another person's hours, cannot promote themselves, and expired or
+forged invite codes are rejected. Requires Java (Temurin JRE) for the
+Firestore emulator.
+
+Then deploy and re-check from a real browser:
 
 ```text
 firebase deploy --only firestore:rules
 ```
 
-Then **verify from a signed-out browser** that a read of `local/site-data`,
-an anonymous write, and a read of another uid's subtree are all denied. A
-rules file that deploys cleanly but does not deny is worse than none, because
-it creates false confidence.
+A rules file that deploys cleanly but does not deny is worse than none,
+because it creates false confidence.
 
 ### Swiss QR-bill
 
