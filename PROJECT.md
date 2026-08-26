@@ -112,11 +112,10 @@ saved before statuses existed have no `status` field and must read as
 
 These are real and currently unfixed. Ordered by how much damage they do.
 
-1. **Rules must be deployed for authentication to mean anything.** The app
-   now requires sign-in and writes only to `users/{uid}/kv/*`, but until
-   `firebase deploy --only firestore:rules` has run, the database still
-   accepts anonymous reads and writes at the old public paths. Verify with a
-   signed-out read of `local/site-data`: it must be denied.
+1. **Old public data still sits in `local/*`.** Rules now deny it to
+   everyone, so it is unreachable rather than exposed, but it has not been
+   deleted. Remove it from the Firebase console once you are satisfied the
+   imported copy under your account is complete.
 2. **Whole-document writes.** Every change rewrites all entries, so two
    phones editing concurrently silently clobber each other. Fix: split into
    `projects/{id}` and `entries/{id}` collections.
@@ -129,6 +128,20 @@ These are real and currently unfixed. Ordered by how much damage they do.
    Firestore project; revisit alongside auth.
 5. `roofing-site-manager.html` is an unused stale duplicate of the shell.
    It is not the deployed entry point (`index.html` is) and can be deleted.
+
+### Changing security rules
+
+`firestore.rules` is the real access control — the app UI is not. After any
+change:
+
+```text
+firebase deploy --only firestore:rules
+```
+
+Then **verify from a signed-out browser** that a read of `local/site-data`,
+an anonymous write, and a read of another uid's subtree are all denied. A
+rules file that deploys cleanly but does not deny is worse than none, because
+it creates false confidence.
 
 ## 6. Gotchas that have already cost time
 
