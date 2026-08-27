@@ -168,6 +168,12 @@ npm test
 `test:logic` covers share and backup codes, document numbering, the client
 migration and note classification.
 
+`test:render` renders the **signed-in** app against stubbed auth and data and
+walks every tab as both owner and crew. Every crash so far has been in the
+authenticated path, which a signed-out browser cannot reach — so it reached
+the user instead of a test. It also asserts that no invoice number appears in
+the crew view.
+
 `test:rules` asserts what the server allows: crew cannot read invoices or
 finance, cannot edit another person's hours, cannot promote themselves, and
 expired or forged invite codes are rejected. It also covers founding a company,

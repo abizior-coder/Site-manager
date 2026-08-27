@@ -2212,6 +2212,7 @@ export default function SiteManager() {
   const [customers, setCustomers] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [syncState, setSyncState] = useState({ error: null, fromCache: false });
   const [assignModal, setAssignModal] = useState(null); // { date } while planning a day
   const [docEditor, setDocEditor] = useState(null);
   const [billingModalOpen, setBillingModalOpen] = useState(false);
