@@ -2406,21 +2406,21 @@ export default function SiteManager() {
         if (clockRes && clockRes.value) setActiveClock(JSON.parse(clockRes.value).activeClock || null);
       } catch (e) {}
       try {
-        const langRes = await window.storage.get("site-lang");
+        const langRes = await getPersonal("site-lang");
         if (langRes && langRes.value && T[langRes.value]) setLang(langRes.value);
       } catch (e) {}
       try {
-        const profRes = await window.storage.get("site-profile");
+        const profRes = await getPersonal("site-profile");
         if (profRes && profRes.value) setProfile(JSON.parse(profRes.value));
       } catch (e) {}
       let loc = { name: "Zürich", lat: 47.3769, lon: 8.5417 };
       try {
-        const locRes = await window.storage.get("site-weather-loc");
+        const locRes = await getPersonal("site-weather-loc");
         if (locRes && locRes.value) loc = JSON.parse(locRes.value);
       } catch (e) {}
       setWeatherLoc(loc);
       try {
-        const docsRes = await window.storage.get("site-docs");
+        const docsRes = await getPersonal("site-docs");
         if (docsRes && docsRes.value) {
           const docs = JSON.parse(docsRes.value);
           setInsuranceCards(docs.insurance || []);
@@ -2594,14 +2594,14 @@ export default function SiteManager() {
   async function saveProfileInfo() {
     setProfile(profileDraft);
     setProfileModalOpen(false);
-    try { await window.storage.set("site-profile", JSON.stringify(profileDraft)); } catch (e) {}
+    try { await window.storage.set(personalKey("site-profile"), JSON.stringify(profileDraft)); } catch (e) {}
   }
 
   async function saveDocs(next) {
     const data = { insurance: next.insurance ?? insuranceCards, certificates: next.certificates ?? certificates };
     if (next.insurance) setInsuranceCards(next.insurance);
     if (next.certificates) setCertificates(next.certificates);
-    try { await window.storage.set("site-docs", JSON.stringify(data)); } catch (e) {}
+    try { await window.storage.set(personalKey("site-docs"), JSON.stringify(data)); } catch (e) {}
   }
 
   async function saveTechLibrary(next) {
@@ -3104,14 +3104,14 @@ export default function SiteManager() {
     });
     if (data.profile) {
       setProfile(data.profile);
-      try { await window.storage.set("site-profile", JSON.stringify(data.profile)); } catch (e) {}
+      try { await window.storage.set(personalKey("site-profile"), JSON.stringify(data.profile)); } catch (e) {}
     }
     if (data.insurance || data.certificates) {
       const newInsurance = data.insurance || [];
       const newCerts = data.certificates || [];
       setInsuranceCards(newInsurance);
       setCertificates(newCerts);
-      try { await window.storage.set("site-docs", JSON.stringify({ insurance: newInsurance, certificates: newCerts })); } catch (e) {}
+      try { await window.storage.set(personalKey("site-docs"), JSON.stringify({ insurance: newInsurance, certificates: newCerts })); } catch (e) {}
     }
     setBackupModal(null);
     showToast(t.backupRestored);
@@ -3164,7 +3164,7 @@ export default function SiteManager() {
       setWeatherLoc(loc);
       setWeatherEditOpen(false);
       setWeatherCityInput("");
-      try { await window.storage.set("site-weather-loc", JSON.stringify(loc)); } catch (e) {}
+      try { await window.storage.set(personalKey("site-weather-loc"), JSON.stringify(loc)); } catch (e) {}
     } catch (e) {
       setWeather({ loading: false, error: t.locationNotFound, data: null });
     }
@@ -3173,7 +3173,7 @@ export default function SiteManager() {
   async function changeLang(code) {
     setLang(code);
     setLangPickerOpen(false);
-    try { await window.storage.set("site-lang", code); } catch (e) {}
+    try { await window.storage.set(personalKey("site-lang"), code); } catch (e) {}
   }
 
   // Writes only the records that actually changed, rather than rewriting one
@@ -3258,6 +3258,30 @@ export default function SiteManager() {
       return;
     }
     persist({ assignments: [{ id: uid(), date, userId, projectId, createdAt: Date.now() }, ...assignments] });
+  }
+
+  // These are personal, not the company's: a name, a private phone, an
+  // emergency contact, insurance cards, certificates. The move to company
+  // storage put them all under one shared key, so every crew member
+  // overwrote the previous one's — and could read their colleagues'
+  // insurance details. Key them by account instead.
+  function personalKey(base) {
+    return user ? `${base}-${user.uid}` : base;
+  }
+
+  // Falls back to the shared key once, so values written before this fix are
+  // not lost. Only the owner inherits them: they are the only person whose
+  // data can have been in there before crew accounts existed.
+  async function getPersonal(base) {
+    try {
+      const own = await window.storage.get(personalKey(base));
+      if (own && own.value) return own;
+      if (isOwner()) {
+        const legacy = await window.storage.get(base);
+        if (legacy && legacy.value) return legacy;
+      }
+    } catch (e) {}
+    return null;
   }
 
   function newEntry(partial) {
