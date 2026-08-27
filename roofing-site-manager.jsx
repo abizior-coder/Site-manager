@@ -113,6 +113,7 @@ const T = {
     onbIntro: "Start a company, or join one with the code your boss sent you.", onbCompanyName: "Company name", onbCodePlaceholder: "Invite code", onbCreateBtn: "Create company", onbJoinBtn: "Join company", onbSwitchJoin: "I have an invite code", onbSwitchCreate: "Start a new company instead", onbErrCompanyName: "Enter a company name.", onbErrInvalidCode: "That code was not recognised.", onbErrCodeUsed: "That code has already been used.", onbErrCodeExpired: "That code has expired — ask for a new one.", onbErrGeneric: "That didn't work — try again.", onbErrNotConfirmed: "The server did not accept it — check your connection and try again.", teamTitle: "Team", teamMembers: "Members", teamInvites: "Invite codes", teamInviteHint: "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.", teamNewInvite: "New invite code", teamNoInvites: "No active codes.", teamExpires: "Expires", roleOwner: "Owner", roleCrew: "Crew", roleSupervisor: "Supervisor", ccHoursToApprove: "Hours to approve", ccLeaveToDecide: "Absences to decide", approveBtn: "Approve", approvedLabel: "Approved", inviteRoleLabel: "Joins as", migrateTitle: "Bring your data across", migrateHint: "Your existing data is still on your personal account. Copy it into the company so your crew can work with it.", migrateBtn: "Copy into company", migrateDone: "Copied.", migrateKeptOriginal: "The original is untouched, so nothing is lost if something looks wrong.",
     navCockpit: "Overview", docStatusLabel: "Status", docStatusDraft: "Draft", docStatusSent: "Sent", docStatusAccepted: "Accepted", docStatusDeclined: "Declined", docStatusOpen: "Open", docStatusPartial: "Part paid", docStatusPaid: "Paid", paymentTitle: "Payment", paidAmountLabel: "Amount received", markPaidBtn: "Mark fully paid", outstandingLabel: "Outstanding", overdueLabel: "Overdue", ccOutstanding: "Outstanding", ccOverdue: "Overdue", ccPaidThisMonth: "Received this month", ccPipeline: "Pipeline", ccOnSite: "On site now", ccNobodyOnSite: "Nobody clocked in.", ccHoursThisMonth: "Hours this month", ccUnassigned: "Unassigned", ccActiveJobs: "Jobs running", ccAttention: "Needs attention", ccCertExpiring: "Expires", ccFootnote: "Figures come from what your crew logs. Unpriced materials and missing hourly rates are excluded.",
     schedTitle: "Who works where", schedToday: "Today's job", schedNoTeam: "Invite your crew first, then you can plan their days.", schedHintOwner: "Tap a day to plan who works where.", syncFailed: "Sync problem —", syncOffline: "Offline — showing your last synced data.", ccPlannedToday: "Planned today", ccNobodyPlanned: "Nobody planned.",
+    rapportTitle: "Work report", rapportBtn: "Get customer signature", rapportNotePlaceholder: "Anything the customer should confirm (extra work, agreed changes)…", sigNameLabel: "Signed by (name)", sigHere: "Signature", sigClear: "Clear", sigSaveBtn: "Save signed report", sigNeeded: "Enter a name and sign first.", sigSaved: "Report signed", sigSignedAt: "Signed", sigLockNote: "Once signed, this report can no longer be changed by anyone — that is what makes it worth something later.",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -227,6 +228,7 @@ const T = {
     onbIntro: "Firma erstellen oder mit dem Code vom Chef beitreten.", onbCompanyName: "Firmenname", onbCodePlaceholder: "Einladungscode", onbCreateBtn: "Firma erstellen", onbJoinBtn: "Firma beitreten", onbSwitchJoin: "Ich habe einen Einladungscode", onbSwitchCreate: "Stattdessen neue Firma erstellen", onbErrCompanyName: "Firmennamen eingeben.", onbErrInvalidCode: "Dieser Code wurde nicht erkannt.", onbErrCodeUsed: "Dieser Code wurde bereits verwendet.", onbErrCodeExpired: "Dieser Code ist abgelaufen — neuen anfordern.", onbErrGeneric: "Das hat nicht geklappt — nochmals versuchen.", onbErrNotConfirmed: "Der Server hat es nicht angenommen — Verbindung prüfen und erneut versuchen.", teamTitle: "Team", teamMembers: "Mitglieder", teamInvites: "Einladungscodes", teamInviteHint: "Code an einen Mitarbeiter senden. Er erstellt ein Konto, gibt den Code ein und tritt der Firma bei. Codes laufen nach 14 Tagen ab.", teamNewInvite: "Neuer Einladungscode", teamNoInvites: "Keine aktiven Codes.", teamExpires: "Läuft ab", roleOwner: "Inhaber", roleCrew: "Mitarbeiter", roleSupervisor: "Polier", ccHoursToApprove: "Stunden zu prüfen", ccLeaveToDecide: "Abwesenheiten entscheiden", approveBtn: "Freigeben", approvedLabel: "Freigegeben", inviteRoleLabel: "Tritt bei als", migrateTitle: "Daten übernehmen", migrateHint: "Ihre bisherigen Daten liegen noch auf Ihrem persönlichen Konto. Kopieren Sie sie in die Firma, damit das Team damit arbeiten kann.", migrateBtn: "In die Firma kopieren", migrateDone: "Kopiert.", migrateKeptOriginal: "Das Original bleibt unverändert — es geht nichts verloren, falls etwas nicht stimmt.",
     navCockpit: "Übersicht", docStatusLabel: "Status", docStatusDraft: "Entwurf", docStatusSent: "Versendet", docStatusAccepted: "Angenommen", docStatusDeclined: "Abgelehnt", docStatusOpen: "Offen", docStatusPartial: "Teilzahlung", docStatusPaid: "Bezahlt", paymentTitle: "Zahlung", paidAmountLabel: "Erhaltener Betrag", markPaidBtn: "Als vollständig bezahlt markieren", outstandingLabel: "Ausstehend", overdueLabel: "Überfällig", ccOutstanding: "Ausstehend", ccOverdue: "Überfällig", ccPaidThisMonth: "Diesen Monat erhalten", ccPipeline: "Pipeline", ccOnSite: "Jetzt auf der Baustelle", ccNobodyOnSite: "Niemand eingestempelt.", ccHoursThisMonth: "Stunden diesen Monat", ccUnassigned: "Nicht zugeordnet", ccActiveJobs: "Laufende Aufträge", ccAttention: "Zu erledigen", ccCertExpiring: "Läuft ab", ccFootnote: "Zahlen stammen aus den Erfassungen des Teams. Material ohne Preis und fehlende Stundensätze sind nicht enthalten.",
     schedTitle: "Wer arbeitet wo", schedToday: "Heutiger Einsatz", schedNoTeam: "Zuerst Mitarbeiter einladen, dann können Sie deren Tage planen.", schedHintOwner: "Auf einen Tag tippen, um einzuteilen.", syncFailed: "Synchronisierungsproblem —", syncOffline: "Offline — zeigt zuletzt synchronisierte Daten.", ccPlannedToday: "Heute eingeteilt", ccNobodyPlanned: "Niemand eingeteilt.",
+    rapportTitle: "Rapport", rapportBtn: "Kunde unterschreiben lassen", rapportNotePlaceholder: "Was der Kunde bestätigen soll (Regiearbeit, abgemachte Änderungen)…", sigNameLabel: "Unterschrieben von (Name)", sigHere: "Unterschrift", sigClear: "Löschen", sigSaveBtn: "Rapport speichern", sigNeeded: "Zuerst Name eingeben und unterschreiben.", sigSaved: "Rapport unterschrieben", sigSignedAt: "Unterschrieben", sigLockNote: "Einmal unterschrieben, kann dieser Rapport von niemandem mehr geändert werden — genau das macht ihn später wertvoll.",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -341,6 +343,7 @@ const T = {
     onbIntro: "Créez une entreprise ou rejoignez-la avec le code reçu.", onbCompanyName: "Nom de l'entreprise", onbCodePlaceholder: "Code d'invitation", onbCreateBtn: "Créer l'entreprise", onbJoinBtn: "Rejoindre", onbSwitchJoin: "J'ai un code d'invitation", onbSwitchCreate: "Créer plutôt une entreprise", onbErrCompanyName: "Saisissez un nom d'entreprise.", onbErrInvalidCode: "Code non reconnu.", onbErrCodeUsed: "Ce code a déjà été utilisé.", onbErrCodeExpired: "Ce code a expiré — demandez-en un nouveau.", onbErrGeneric: "Cela n'a pas fonctionné — réessayez.", onbErrNotConfirmed: "Le serveur ne l'a pas accepté — vérifiez votre connexion et réessayez.", teamTitle: "Équipe", teamMembers: "Membres", teamInvites: "Codes d'invitation", teamInviteHint: "Envoyez un code à un collaborateur. Il crée un compte, saisit le code et rejoint l'entreprise. Les codes expirent après 14 jours.", teamNewInvite: "Nouveau code", teamNoInvites: "Aucun code actif.", teamExpires: "Expire le", roleOwner: "Patron", roleCrew: "Collaborateur", roleSupervisor: "Chef d'équipe", ccHoursToApprove: "Heures à valider", ccLeaveToDecide: "Absences à décider", approveBtn: "Valider", approvedLabel: "Validé", inviteRoleLabel: "Rejoint comme", migrateTitle: "Reprendre vos données", migrateHint: "Vos données sont encore sur votre compte personnel. Copiez-les dans l'entreprise pour que l'équipe puisse les utiliser.", migrateBtn: "Copier dans l'entreprise", migrateDone: "Copié.", migrateKeptOriginal: "L'original reste intact — rien n'est perdu si quelque chose cloche.",
     navCockpit: "Vue d'ensemble", docStatusLabel: "Statut", docStatusDraft: "Brouillon", docStatusSent: "Envoyé", docStatusAccepted: "Accepté", docStatusDeclined: "Refusé", docStatusOpen: "Ouvert", docStatusPartial: "Payé en partie", docStatusPaid: "Payé", paymentTitle: "Paiement", paidAmountLabel: "Montant reçu", markPaidBtn: "Marquer comme payé", outstandingLabel: "En attente", overdueLabel: "En retard", ccOutstanding: "En attente", ccOverdue: "En retard", ccPaidThisMonth: "Reçu ce mois", ccPipeline: "Pipeline", ccOnSite: "Sur chantier", ccNobodyOnSite: "Personne pointé.", ccHoursThisMonth: "Heures ce mois", ccUnassigned: "Non attribué", ccActiveJobs: "Chantiers en cours", ccAttention: "À traiter", ccCertExpiring: "Expire", ccFootnote: "Chiffres issus des saisies de l'équipe. Matériaux sans prix et taux horaires manquants exclus.",
     schedTitle: "Qui travaille où", schedToday: "Chantier du jour", schedNoTeam: "Invitez d'abord votre équipe pour planifier ses journées.", schedHintOwner: "Touchez un jour pour planifier.", syncFailed: "Problème de synchronisation —", syncOffline: "Hors ligne — dernières données synchronisées.", ccPlannedToday: "Planifié aujourd'hui", ccNobodyPlanned: "Personne planifié.",
+    rapportTitle: "Rapport", rapportBtn: "Faire signer le client", rapportNotePlaceholder: "Ce que le client doit confirmer (travaux en régie, modifications convenues)…", sigNameLabel: "Signé par (nom)", sigHere: "Signature", sigClear: "Effacer", sigSaveBtn: "Enregistrer le rapport", sigNeeded: "Saisissez un nom et signez d'abord.", sigSaved: "Rapport signé", sigSignedAt: "Signé le", sigLockNote: "Une fois signé, ce rapport ne peut plus être modifié par personne — c'est ce qui lui donne sa valeur.",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -455,6 +458,7 @@ const T = {
     onbIntro: "Crea un'azienda o entra con il codice ricevuto.", onbCompanyName: "Nome azienda", onbCodePlaceholder: "Codice invito", onbCreateBtn: "Crea azienda", onbJoinBtn: "Entra", onbSwitchJoin: "Ho un codice invito", onbSwitchCreate: "Crea invece una nuova azienda", onbErrCompanyName: "Inserisci il nome dell'azienda.", onbErrInvalidCode: "Codice non riconosciuto.", onbErrCodeUsed: "Codice già utilizzato.", onbErrCodeExpired: "Codice scaduto — chiedine uno nuovo.", onbErrGeneric: "Non ha funzionato — riprova.", onbErrNotConfirmed: "Il server non lo ha accettato — controlla la connessione e riprova.", teamTitle: "Squadra", teamMembers: "Membri", teamInvites: "Codici invito", teamInviteHint: "Invia un codice a un collaboratore. Crea un account, inserisce il codice ed entra in azienda. I codici scadono dopo 14 giorni.", teamNewInvite: "Nuovo codice", teamNoInvites: "Nessun codice attivo.", teamExpires: "Scade", roleOwner: "Titolare", roleCrew: "Collaboratore", roleSupervisor: "Capo squadra", ccHoursToApprove: "Ore da approvare", ccLeaveToDecide: "Assenze da decidere", approveBtn: "Approva", approvedLabel: "Approvato", inviteRoleLabel: "Entra come", migrateTitle: "Trasferisci i dati", migrateHint: "I tuoi dati sono ancora sull'account personale. Copiali nell'azienda così la squadra può usarli.", migrateBtn: "Copia nell'azienda", migrateDone: "Copiato.", migrateKeptOriginal: "L'originale resta intatto — non si perde nulla se qualcosa non torna.",
     navCockpit: "Panoramica", docStatusLabel: "Stato", docStatusDraft: "Bozza", docStatusSent: "Inviato", docStatusAccepted: "Accettato", docStatusDeclined: "Rifiutato", docStatusOpen: "Aperto", docStatusPartial: "Pagato in parte", docStatusPaid: "Pagato", paymentTitle: "Pagamento", paidAmountLabel: "Importo ricevuto", markPaidBtn: "Segna come pagato", outstandingLabel: "In sospeso", overdueLabel: "Scaduto", ccOutstanding: "In sospeso", ccOverdue: "Scaduto", ccPaidThisMonth: "Ricevuto questo mese", ccPipeline: "Pipeline", ccOnSite: "In cantiere ora", ccNobodyOnSite: "Nessuno timbrato.", ccHoursThisMonth: "Ore questo mese", ccUnassigned: "Non assegnato", ccActiveJobs: "Lavori in corso", ccAttention: "Da gestire", ccCertExpiring: "Scade", ccFootnote: "Cifre dalle registrazioni della squadra. Materiali senza prezzo e tariffe orarie mancanti esclusi.",
     schedTitle: "Chi lavora dove", schedToday: "Lavoro di oggi", schedNoTeam: "Invita prima la squadra, poi potrai pianificare le giornate.", schedHintOwner: "Tocca un giorno per pianificare.", syncFailed: "Problema di sincronizzazione —", syncOffline: "Offline — ultimi dati sincronizzati.", ccPlannedToday: "Pianificato oggi", ccNobodyPlanned: "Nessuno pianificato.",
+    rapportTitle: "Rapporto", rapportBtn: "Far firmare al cliente", rapportNotePlaceholder: "Cosa deve confermare il cliente (lavori in economia, modifiche concordate)…", sigNameLabel: "Firmato da (nome)", sigHere: "Firma", sigClear: "Cancella", sigSaveBtn: "Salva rapporto", sigNeeded: "Inserisci un nome e firma prima.", sigSaved: "Rapporto firmato", sigSignedAt: "Firmato il", sigLockNote: "Una volta firmato, questo rapporto non può più essere modificato da nessuno — è ciò che gli dà valore.",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -569,6 +573,7 @@ const T = {
     onbIntro: "Crea una empresa o únete con el código recibido.", onbCompanyName: "Nombre de la empresa", onbCodePlaceholder: "Código de invitación", onbCreateBtn: "Crear empresa", onbJoinBtn: "Unirse", onbSwitchJoin: "Tengo un código", onbSwitchCreate: "Crear una empresa nueva", onbErrCompanyName: "Introduce el nombre de la empresa.", onbErrInvalidCode: "Código no reconocido.", onbErrCodeUsed: "Ese código ya se ha usado.", onbErrCodeExpired: "Ese código ha caducado — pide otro.", onbErrGeneric: "No ha funcionado — inténtalo de nuevo.", onbErrNotConfirmed: "El servidor no lo aceptó — revisa tu conexión e inténtalo de nuevo.", teamTitle: "Equipo", teamMembers: "Miembros", teamInvites: "Códigos de invitación", teamInviteHint: "Envía un código a un operario. Crea una cuenta, introduce el código y se une a la empresa. Caducan a los 14 días.", teamNewInvite: "Nuevo código", teamNoInvites: "Sin códigos activos.", teamExpires: "Caduca", roleOwner: "Propietario", roleCrew: "Operario", roleSupervisor: "Encargado", ccHoursToApprove: "Horas por aprobar", ccLeaveToDecide: "Ausencias por decidir", approveBtn: "Aprobar", approvedLabel: "Aprobado", inviteRoleLabel: "Se une como", migrateTitle: "Traer tus datos", migrateHint: "Tus datos siguen en tu cuenta personal. Cópialos a la empresa para que el equipo pueda usarlos.", migrateBtn: "Copiar a la empresa", migrateDone: "Copiado.", migrateKeptOriginal: "El original queda intacto — no se pierde nada si algo no cuadra.",
     navCockpit: "Resumen", docStatusLabel: "Estado", docStatusDraft: "Borrador", docStatusSent: "Enviado", docStatusAccepted: "Aceptado", docStatusDeclined: "Rechazado", docStatusOpen: "Abierta", docStatusPartial: "Pago parcial", docStatusPaid: "Pagada", paymentTitle: "Pago", paidAmountLabel: "Importe recibido", markPaidBtn: "Marcar como pagada", outstandingLabel: "Pendiente", overdueLabel: "Vencida", ccOutstanding: "Pendiente", ccOverdue: "Vencido", ccPaidThisMonth: "Cobrado este mes", ccPipeline: "Cartera", ccOnSite: "En obra ahora", ccNobodyOnSite: "Nadie fichado.", ccHoursThisMonth: "Horas este mes", ccUnassigned: "Sin asignar", ccActiveJobs: "Obras en curso", ccAttention: "Requiere atención", ccCertExpiring: "Caduca", ccFootnote: "Cifras a partir de lo registrado por el equipo. Se excluyen materiales sin precio y tarifas ausentes.",
     schedTitle: "Quién trabaja dónde", schedToday: "Obra de hoy", schedNoTeam: "Invita primero a tu equipo para poder planificar sus días.", schedHintOwner: "Toca un día para planificar.", syncFailed: "Problema de sincronización —", syncOffline: "Sin conexión — últimos datos sincronizados.", ccPlannedToday: "Planificado hoy", ccNobodyPlanned: "Nadie planificado.",
+    rapportTitle: "Parte de trabajo", rapportBtn: "Que firme el cliente", rapportNotePlaceholder: "Lo que el cliente debe confirmar (trabajos extra, cambios acordados)…", sigNameLabel: "Firmado por (nombre)", sigHere: "Firma", sigClear: "Borrar", sigSaveBtn: "Guardar parte firmado", sigNeeded: "Introduce un nombre y firma primero.", sigSaved: "Parte firmado", sigSignedAt: "Firmado el", sigLockNote: "Una vez firmado, nadie puede modificar este parte — eso es lo que le da valor después.",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -683,6 +688,7 @@ const T = {
     onbIntro: "Crie uma empresa ou junte-se com o código recebido.", onbCompanyName: "Nome da empresa", onbCodePlaceholder: "Código de convite", onbCreateBtn: "Criar empresa", onbJoinBtn: "Juntar-me", onbSwitchJoin: "Tenho um código", onbSwitchCreate: "Criar antes uma empresa", onbErrCompanyName: "Introduza o nome da empresa.", onbErrInvalidCode: "Código não reconhecido.", onbErrCodeUsed: "Esse código já foi usado.", onbErrCodeExpired: "Esse código expirou — peça outro.", onbErrGeneric: "Não resultou — tente novamente.", onbErrNotConfirmed: "O servidor não aceitou — verifique a ligação e tente novamente.", teamTitle: "Equipa", teamMembers: "Membros", teamInvites: "Códigos de convite", teamInviteHint: "Envie um código a um colaborador. Cria uma conta, introduz o código e junta-se à empresa. Expiram em 14 dias.", teamNewInvite: "Novo código", teamNoInvites: "Sem códigos ativos.", teamExpires: "Expira", roleOwner: "Proprietário", roleCrew: "Colaborador", roleSupervisor: "Encarregado", ccHoursToApprove: "Horas por aprovar", ccLeaveToDecide: "Ausências por decidir", approveBtn: "Aprovar", approvedLabel: "Aprovado", inviteRoleLabel: "Entra como", migrateTitle: "Trazer os seus dados", migrateHint: "Os seus dados ainda estão na conta pessoal. Copie-os para a empresa para a equipa poder usá-los.", migrateBtn: "Copiar para a empresa", migrateDone: "Copiado.", migrateKeptOriginal: "O original fica intacto — nada se perde se algo parecer errado.",
     navCockpit: "Resumo", docStatusLabel: "Estado", docStatusDraft: "Rascunho", docStatusSent: "Enviado", docStatusAccepted: "Aceite", docStatusDeclined: "Recusado", docStatusOpen: "Em aberto", docStatusPartial: "Pago em parte", docStatusPaid: "Pago", paymentTitle: "Pagamento", paidAmountLabel: "Valor recebido", markPaidBtn: "Marcar como pago", outstandingLabel: "Em dívida", overdueLabel: "Vencido", ccOutstanding: "Em dívida", ccOverdue: "Vencido", ccPaidThisMonth: "Recebido este mês", ccPipeline: "Pipeline", ccOnSite: "Em obra agora", ccNobodyOnSite: "Ninguém a picar o ponto.", ccHoursThisMonth: "Horas este mês", ccUnassigned: "Sem atribuição", ccActiveJobs: "Obras a decorrer", ccAttention: "A tratar", ccCertExpiring: "Expira", ccFootnote: "Valores a partir do que a equipa regista. Materiais sem preço e valores/hora em falta ficam de fora.",
     schedTitle: "Quem trabalha onde", schedToday: "Obra de hoje", schedNoTeam: "Convide primeiro a sua equipa para poder planear os dias.", schedHintOwner: "Toque num dia para planear.", syncFailed: "Problema de sincronização —", syncOffline: "Offline — últimos dados sincronizados.", ccPlannedToday: "Planeado hoje", ccNobodyPlanned: "Ninguém planeado.",
+    rapportTitle: "Relatório de obra", rapportBtn: "Pedir assinatura do cliente", rapportNotePlaceholder: "O que o cliente deve confirmar (trabalhos extra, alterações acordadas)…", sigNameLabel: "Assinado por (nome)", sigHere: "Assinatura", sigClear: "Limpar", sigSaveBtn: "Guardar relatório assinado", sigNeeded: "Introduza um nome e assine primeiro.", sigSaved: "Relatório assinado", sigSignedAt: "Assinado em", sigLockNote: "Depois de assinado, ninguém pode alterar este relatório — é isso que lhe dá valor.",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -797,6 +803,7 @@ const T = {
     onbIntro: "Załóż firmę lub dołącz kodem od szefa.", onbCompanyName: "Nazwa firmy", onbCodePlaceholder: "Kod zaproszenia", onbCreateBtn: "Załóż firmę", onbJoinBtn: "Dołącz", onbSwitchJoin: "Mam kod zaproszenia", onbSwitchCreate: "Załóż nową firmę", onbErrCompanyName: "Podaj nazwę firmy.", onbErrInvalidCode: "Nie rozpoznano kodu.", onbErrCodeUsed: "Ten kod został już użyty.", onbErrCodeExpired: "Kod wygasł — poproś o nowy.", onbErrGeneric: "Nie udało się — spróbuj ponownie.", onbErrNotConfirmed: "Serwer nie przyjął zgłoszenia — sprawdź połączenie i spróbuj ponownie.", teamTitle: "Zespół", teamMembers: "Członkowie", teamInvites: "Kody zaproszeń", teamInviteHint: "Wyślij kod pracownikowi. Zakłada konto, wpisuje kod i dołącza do firmy. Kody wygasają po 14 dniach.", teamNewInvite: "Nowy kod", teamNoInvites: "Brak aktywnych kodów.", teamExpires: "Wygasa", roleOwner: "Właściciel", roleCrew: "Pracownik", roleSupervisor: "Brygadzista", ccHoursToApprove: "Godziny do zatwierdzenia", ccLeaveToDecide: "Nieobecności do decyzji", approveBtn: "Zatwierdź", approvedLabel: "Zatwierdzone", inviteRoleLabel: "Dołącza jako", migrateTitle: "Przenieś dane", migrateHint: "Twoje dane są nadal na koncie osobistym. Skopiuj je do firmy, aby zespół mógł z nich korzystać.", migrateBtn: "Kopiuj do firmy", migrateDone: "Skopiowano.", migrateKeptOriginal: "Oryginał pozostaje nietknięty — nic nie ginie, jeśli coś wygląda źle.",
     navCockpit: "Przegląd", docStatusLabel: "Status", docStatusDraft: "Szkic", docStatusSent: "Wysłana", docStatusAccepted: "Zaakceptowana", docStatusDeclined: "Odrzucona", docStatusOpen: "Otwarta", docStatusPartial: "Częściowo opłacona", docStatusPaid: "Opłacona", paymentTitle: "Płatność", paidAmountLabel: "Otrzymana kwota", markPaidBtn: "Oznacz jako opłaconą", outstandingLabel: "Do zapłaty", overdueLabel: "Po terminie", ccOutstanding: "Do zapłaty", ccOverdue: "Po terminie", ccPaidThisMonth: "Wpłynęło w tym miesiącu", ccPipeline: "Pipeline", ccOnSite: "Teraz na budowie", ccNobodyOnSite: "Nikt nie jest zalogowany.", ccHoursThisMonth: "Godziny w tym miesiącu", ccUnassigned: "Nieprzypisane", ccActiveJobs: "Zlecenia w toku", ccAttention: "Do załatwienia", ccCertExpiring: "Wygasa", ccFootnote: "Dane pochodzą z wpisów ekipy. Materiały bez ceny i brakujące stawki nie są wliczone.",
     schedTitle: "Kto gdzie pracuje", schedToday: "Dzisiejsze zlecenie", schedNoTeam: "Najpierw zaproś ekipę, wtedy zaplanujesz jej dni.", schedHintOwner: "Dotknij dnia, aby zaplanować.", syncFailed: "Problem z synchronizacją —", syncOffline: "Offline — pokazuję ostatnio zsynchronizowane dane.", ccPlannedToday: "Zaplanowani dziś", ccNobodyPlanned: "Nikt nie zaplanowany.",
+    rapportTitle: "Raport z budowy", rapportBtn: "Poproś klienta o podpis", rapportNotePlaceholder: "Co klient ma potwierdzić (prace dodatkowe, uzgodnione zmiany)…", sigNameLabel: "Podpisano przez (imię)", sigHere: "Podpis", sigClear: "Wyczyść", sigSaveBtn: "Zapisz podpisany raport", sigNeeded: "Najpierw podaj imię i podpisz.", sigSaved: "Raport podpisany", sigSignedAt: "Podpisano", sigLockNote: "Po podpisaniu nikt nie może już zmienić tego raportu — właśnie to nadaje mu wartość.",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -911,6 +918,7 @@ const T = {
     onbIntro: "Vytvorte firmu alebo sa pripojte kódom od šéfa.", onbCompanyName: "Názov firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvoriť firmu", onbJoinBtn: "Pripojiť sa", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvoriť radšej novú firmu", onbErrCompanyName: "Zadajte názov firmy.", onbErrInvalidCode: "Kód nebol rozpoznaný.", onbErrCodeUsed: "Tento kód už bol použitý.", onbErrCodeExpired: "Kód vypršal — vyžiadajte si nový.", onbErrGeneric: "Nepodarilo sa — skúste znova.", onbErrNotConfirmed: "Server to neprijal — skontrolujte pripojenie a skúste znova.", teamTitle: "Tím", teamMembers: "Členovia", teamInvites: "Kódy pozvánok", teamInviteHint: "Pošlite kód zamestnancovi. Vytvorí si účet, zadá kód a pripojí sa k firme. Kódy vypršia po 14 dňoch.", teamNewInvite: "Nový kód", teamNoInvites: "Žiadne aktívne kódy.", teamExpires: "Vyprší", roleOwner: "Majiteľ", roleCrew: "Zamestnanec", roleSupervisor: "Majster", ccHoursToApprove: "Hodiny na schválenie", ccLeaveToDecide: "Neprítomnosti na rozhodnutie", approveBtn: "Schváliť", approvedLabel: "Schválené", inviteRoleLabel: "Pripojí sa ako", migrateTitle: "Preniesť údaje", migrateHint: "Vaše údaje sú stále na osobnom účte. Skopírujte ich do firmy, aby s nimi mohol tím pracovať.", migrateBtn: "Kopírovať do firmy", migrateDone: "Skopírované.", migrateKeptOriginal: "Originál zostáva nedotknutý — nič sa nestratí, ak niečo nesedí.",
     navCockpit: "Prehľad", docStatusLabel: "Stav", docStatusDraft: "Návrh", docStatusSent: "Odoslaná", docStatusAccepted: "Prijatá", docStatusDeclined: "Zamietnutá", docStatusOpen: "Otvorená", docStatusPartial: "Čiastočne uhradená", docStatusPaid: "Uhradená", paymentTitle: "Platba", paidAmountLabel: "Prijatá suma", markPaidBtn: "Označiť ako uhradenú", outstandingLabel: "Neuhradené", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhradené", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Prijaté tento mesiac", ccPipeline: "Pipeline", ccOnSite: "Teraz na stavbe", ccNobodyOnSite: "Nikto nie je zapichnutý.", ccHoursThisMonth: "Hodiny tento mesiac", ccUnassigned: "Nepriradené", ccActiveJobs: "Prebiehajúce zákazky", ccAttention: "Na vybavenie", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vychádzajú zo záznamov tímu. Materiál bez ceny a chýbajúce sadzby nie sú zahrnuté.",
     schedTitle: "Kto kde pracuje", schedToday: "Dnešná zákazka", schedNoTeam: "Najprv pozvite tím, potom môžete plánovať jeho dni.", schedHintOwner: "Ťuknite na deň pre naplánovanie.", syncFailed: "Problém so synchronizáciou —", syncOffline: "Offline — posledné synchronizované údaje.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikto nie je naplánovaný.",
+    rapportTitle: "Rapport", rapportBtn: "Dať zákazníkovi podpísať", rapportNotePlaceholder: "Čo má zákazník potvrdiť (práce navyše, dohodnuté zmeny)…", sigNameLabel: "Podpísal (meno)", sigHere: "Podpis", sigClear: "Vymazať", sigSaveBtn: "Uložiť podpísaný rapport", sigNeeded: "Najprv zadajte meno a podpíšte.", sigSaved: "Rapport podpísaný", sigSignedAt: "Podpísané", sigLockNote: "Po podpísaní už rapport nikto nemôže zmeniť — práve to mu dáva hodnotu.",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -1025,6 +1033,7 @@ const T = {
     onbIntro: "Vytvořte firmu nebo se připojte kódem od šéfa.", onbCompanyName: "Název firmy", onbCodePlaceholder: "Kód pozvánky", onbCreateBtn: "Vytvořit firmu", onbJoinBtn: "Připojit se", onbSwitchJoin: "Mám kód pozvánky", onbSwitchCreate: "Vytvořit raději novou firmu", onbErrCompanyName: "Zadejte název firmy.", onbErrInvalidCode: "Kód nebyl rozpoznán.", onbErrCodeUsed: "Tento kód už byl použit.", onbErrCodeExpired: "Kód vypršel — vyžádejte si nový.", onbErrGeneric: "Nepovedlo se — zkuste to znovu.", onbErrNotConfirmed: "Server to nepřijal — zkontrolujte připojení a zkuste to znovu.", teamTitle: "Tým", teamMembers: "Členové", teamInvites: "Kódy pozvánek", teamInviteHint: "Pošlete kód zaměstnanci. Vytvoří si účet, zadá kód a připojí se k firmě. Kódy vyprší po 14 dnech.", teamNewInvite: "Nový kód", teamNoInvites: "Žádné aktivní kódy.", teamExpires: "Vyprší", roleOwner: "Majitel", roleCrew: "Zaměstnanec", roleSupervisor: "Mistr", ccHoursToApprove: "Hodiny ke schválení", ccLeaveToDecide: "Nepřítomnosti k rozhodnutí", approveBtn: "Schválit", approvedLabel: "Schváleno", inviteRoleLabel: "Připojí se jako", migrateTitle: "Přenést data", migrateHint: "Vaše data jsou stále na osobním účtu. Zkopírujte je do firmy, aby s nimi mohl tým pracovat.", migrateBtn: "Kopírovat do firmy", migrateDone: "Zkopírováno.", migrateKeptOriginal: "Originál zůstává nedotčen — nic se neztratí, pokud něco nesedí.",
     navCockpit: "Přehled", docStatusLabel: "Stav", docStatusDraft: "Koncept", docStatusSent: "Odeslána", docStatusAccepted: "Přijata", docStatusDeclined: "Zamítnuta", docStatusOpen: "Otevřená", docStatusPartial: "Částečně uhrazena", docStatusPaid: "Uhrazena", paymentTitle: "Platba", paidAmountLabel: "Přijatá částka", markPaidBtn: "Označit jako uhrazenou", outstandingLabel: "Neuhrazeno", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhrazeno", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Přijato tento měsíc", ccPipeline: "Pipeline", ccOnSite: "Teď na stavbě", ccNobodyOnSite: "Nikdo není napíchnutý.", ccHoursThisMonth: "Hodiny tento měsíc", ccUnassigned: "Nepřiřazeno", ccActiveJobs: "Probíhající zakázky", ccAttention: "K vyřízení", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vycházejí ze záznamů týmu. Materiál bez ceny a chybějící sazby nejsou zahrnuty.",
     schedTitle: "Kdo kde pracuje", schedToday: "Dnešní zakázka", schedNoTeam: "Nejprve pozvěte tým, pak můžete plánovat jeho dny.", schedHintOwner: "Klepněte na den pro naplánování.", syncFailed: "Problém se synchronizací —", syncOffline: "Offline — poslední synchronizovaná data.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikdo není naplánován.",
+    rapportTitle: "Rapport", rapportBtn: "Nechat zákazníka podepsat", rapportNotePlaceholder: "Co má zákazník potvrdit (práce navíc, dohodnuté změny)…", sigNameLabel: "Podepsal (jméno)", sigHere: "Podpis", sigClear: "Vymazat", sigSaveBtn: "Uložit podepsaný rapport", sigNeeded: "Nejprve zadejte jméno a podepište.", sigSaved: "Rapport podepsán", sigSignedAt: "Podepsáno", sigLockNote: "Po podpisu už rapport nikdo nemůže změnit — právě to mu dává hodnotu.",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -2212,6 +2221,8 @@ export default function SiteManager() {
   const [customers, setCustomers] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [siteReports, setSiteReports] = useState([]);
+  const [rapportModal, setRapportModal] = useState(null); // { projectId, date, ... } while signing
   const [syncState, setSyncState] = useState({ error: null, fromCache: false });
   const [assignModal, setAssignModal] = useState(null); // { date } while planning a day
   const [docEditor, setDocEditor] = useState(null);
@@ -2326,7 +2337,7 @@ export default function SiteManager() {
         // on screen for a role that must never see them.
         setProjects([]); setEntries([]); setCustomers([]);
         setLeaveRequests([]); setSentReports([]); setActiveClock(null);
-        setDocuments([]); setAssignments([]); setClocks([]);
+        setDocuments([]); setAssignments([]); setClocks([]); setSiteReports([]);
         setBilling({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
         setProfile({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
         setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
@@ -2384,6 +2395,7 @@ export default function SiteManager() {
     unsubs.push(subscribeCollection("customers", setCustomers, onErr));
     unsubs.push(subscribeCollection("assignments", setAssignments, onErr));
     unsubs.push(subscribeCollection("leave", setLeaveRequests, onErr));
+    unsubs.push(subscribeCollection("reports", setSiteReports, onErr));
     // Crew have no access to quotes and invoices — subscribing would simply
     // be denied, so don't ask.
     if (isOwner()) unsubs.push(subscribeCollection("documents", setDocuments, onErr));
@@ -3044,6 +3056,62 @@ export default function SiteManager() {
     }
   }
 
+  // The signed Rapport as a printable document. Shows what was signed, by
+  // whom and when — that combination is the whole point, so it is rendered
+  // from the snapshot stored on the report rather than from live records.
+  async function printRapport(report) {
+    const pr = projects.find((x) => x.id === report.projectId);
+    const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    let signature = "";
+    try { signature = (await loadPhoto(report.signatureId)) || ""; } catch (e) {}
+
+    const rows = (report.lines || []).map((li) =>
+      `<tr><td>${esc(li.description)}</td><td class="r">${esc(li.qty)} ${esc(li.unit)}</td></tr>`).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(t.rapportTitle)} ${esc(report.date)}</title>
+    <style>
+      @page { size: A4; margin: 18mm; }
+      body { font-family: Helvetica, Arial, sans-serif; color:#111; font-size:11pt; }
+      .head { display:flex; justify-content:space-between; margin-bottom:10mm; }
+      .from { font-size:9pt; line-height:1.45; }
+      h1 { font-size:15pt; margin:0 0 2mm; }
+      .meta { font-size:9pt; color:#444; margin-bottom:8mm; }
+      table { width:100%; border-collapse:collapse; margin-bottom:6mm; }
+      th { text-align:left; font-size:8.5pt; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #333; padding:2mm 1mm; }
+      td { padding:2mm 1mm; border-bottom:1px solid #e5e5e5; font-size:10pt; }
+      td.r, th.r { text-align:right; }
+      .hours { font-size:12pt; font-weight:bold; margin-bottom:6mm; }
+      .note { font-size:9pt; white-space:pre-wrap; margin-bottom:10mm; }
+      .sig { margin-top:14mm; border-top:1px solid #333; padding-top:3mm; width:80mm; }
+      .sig img { max-width:70mm; max-height:28mm; display:block; margin-bottom:2mm; }
+      .sig .who { font-size:9pt; }
+      .sig .when { font-size:8pt; color:#555; }
+    </style></head><body>
+      <div class="head">
+        <div class="from"><strong>${esc(billing.companyName || profile.name)}</strong><br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}</div>
+        <div class="from">${cust ? esc(cust.name) + "<br>" + esc(cust.address || "") : ""}</div>
+      </div>
+      <h1>${esc(t.rapportTitle)}</h1>
+      <div class="meta">${esc(report.date)}${pr ? " &nbsp;·&nbsp; " + esc(pr.name) : ""}${pr && pr.address ? ", " + esc(pr.address) : ""}</div>
+      <div class="hours">${esc(t.hoursWorked)}: ${esc(report.hours)} h</div>
+      ${rows ? `<table><thead><tr><th>${esc(t.docDescription)}</th><th class="r">${esc(t.qtyPlaceholder)}</th></tr></thead><tbody>${rows}</tbody></table>` : ""}
+      ${report.note ? `<div class="note">${esc(report.note)}</div>` : ""}
+      <div class="sig">
+        ${signature ? `<img src="${signature}" alt="">` : ""}
+        <div class="who">${esc(report.signerName)}</div>
+        <div class="when">${esc(t.sigSignedAt)} ${new Date(report.signedAt).toLocaleString()}</div>
+      </div>
+    </body></html>`;
+
+    try {
+      const blob = new Blob([html], { type: "text/html" });
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch (e) {
+      showToast(t.couldntSave);
+    }
+  }
+
   function toggleReportProject(id) {
     setReportProjectSelection((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
   }
@@ -3191,9 +3259,13 @@ export default function SiteManager() {
   // shared blob. That is what lets two people work at once without silently
   // overwriting each other.
   async function persist(next) {
+    // Never write before the first load has landed: the arrays would be
+    // empty or partial, and a diff against a populated baseline deletes.
+    if (!membership || !ready) return;
     if (next.customers) setCustomers(next.customers);
     if (next.documents) setDocuments(next.documents);
     if (next.assignments) setAssignments(next.assignments);
+    if (next.siteReports) setSiteReports(next.siteReports);
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -3206,6 +3278,7 @@ export default function SiteManager() {
       if (next.customers) await syncCollection("customers", next.customers);
       if (next.documents) await syncCollection("documents", next.documents);
       if (next.assignments) await syncCollection("assignments", next.assignments);
+      if (next.siteReports) await syncCollection("reports", next.siteReports);
 
       // The clock is personal — each crew member has their own.
       if (next.activeClock !== undefined) {
@@ -3246,6 +3319,61 @@ export default function SiteManager() {
 
   function pendingApproval() {
     return entries.filter((e) => e.type === "time" && !e.approvedBy);
+  }
+
+  // A Rapport turns a day's logged work into something the customer signs for.
+  // It is the piece that stops "we never agreed to that" arguments later, so
+  // it snapshots the hours and materials rather than referring to records that
+  // could change afterwards.
+  function openRapport(projectId, date) {
+    const d = date || todayKey();
+    const list = entries.filter((e) => e.projectId === projectId && e.date === d);
+    const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
+    setRapportModal({
+      projectId,
+      date: d,
+      hours,
+      lines: list
+        .filter((e) => e.type === "material" || e.type === "tool")
+        .map((e) => ({ description: e.description, qty: e.qty || "", unit: e.unit || "" })),
+      note: "",
+      signerName: "",
+      signature: null,
+      busy: false,
+    });
+  }
+
+  async function saveRapport() {
+    if (!rapportModal) return;
+    if (!rapportModal.signature || !rapportModal.signerName.trim()) {
+      showToast(t.sigNeeded);
+      return;
+    }
+    setRapportModal((r) => ({ ...r, busy: true }));
+    try {
+      // The signature is stored like any other photo: its own document, so a
+      // report never bloats the record it belongs to.
+      const signatureId = await savePhoto(rapportModal.signature);
+      const record = {
+        id: uid(),
+        projectId: rapportModal.projectId,
+        date: rapportModal.date,
+        userId: user?.uid || null,
+        hours: String(Math.round(rapportModal.hours * 100) / 100),
+        lines: rapportModal.lines,
+        note: rapportModal.note.trim(),
+        signerName: rapportModal.signerName.trim(),
+        signatureId,
+        signedAt: Date.now(),
+        createdAt: Date.now(),
+      };
+      await persist({ siteReports: [record, ...siteReports] });
+      setRapportModal(null);
+      showToast(t.sigSaved);
+    } catch (err) {
+      setRapportModal((r) => ({ ...r, busy: false }));
+      showToast(t.couldntSave);
+    }
   }
 
   function assignmentsFor(date) {
@@ -5488,6 +5616,67 @@ export default function SiteManager() {
         </Modal>
       )}
 
+      {rapportModal && (() => {
+        const pr = projects.find((x) => x.id === rapportModal.projectId);
+        const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
+        return (
+          <Modal onClose={() => setRapportModal(null)} title={t.rapportTitle}>
+            <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3">
+              <div className="text-sm font-bold">{pr ? pr.name : ""}</div>
+              <div style={{ color: COLORS.muted }} className="text-[11px]">
+                {rapportModal.date}{cust ? " · " + cust.name : ""}
+              </div>
+              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-2 pt-2 flex justify-between text-sm">
+                <span style={{ color: COLORS.muted }}>{t.hoursWorked}</span>
+                <span className="font-bold">{rapportModal.hours.toFixed(1)} h</span>
+              </div>
+              {rapportModal.lines.length > 0 && (
+                <div className="mt-2 flex flex-col gap-1">
+                  {rapportModal.lines.map((li, i) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span className="truncate">{li.description}</span>
+                      <span style={{ color: COLORS.muted }} className="shrink-0">{li.qty} {li.unit}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <textarea
+              value={rapportModal.note}
+              onChange={(e) => setRapportModal((r) => ({ ...r, note: e.target.value }))}
+              placeholder={t.rapportNotePlaceholder}
+              rows={2}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+            />
+
+            <input
+              value={rapportModal.signerName}
+              onChange={(e) => setRapportModal((r) => ({ ...r, signerName: e.target.value }))}
+              placeholder={t.sigNameLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+            />
+
+            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.sigHere}</div>
+            <SignaturePad onChange={(sig) => setRapportModal((r) => ({ ...r, signature: sig }))} t={t} />
+
+            <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.sigLockNote}</div>
+
+            <button
+              onClick={saveRapport}
+              disabled={rapportModal.busy}
+              style={{ background: COLORS.accent, opacity: rapportModal.busy ? 0.6 : 1 }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+            >
+              {rapportModal.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardCheck size={15} />}
+              {t.sigSaveBtn}
+            </button>
+          </Modal>
+        );
+      })()}
+
       {assignModal && canManage() && (() => {
         const date = assignModal.date;
         const openProjects = projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
@@ -6086,6 +6275,9 @@ export default function SiteManager() {
           onOpenDocument={(d) => setDocEditor({ ...d })}
           onPrintDocument={printDocument}
           canBill={isOwner()}
+          reports={siteReports.filter((r) => r.projectId === selectedProject)}
+          onOpenRapport={(pid) => openRapport(pid)}
+          onPrintRapport={printRapport}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
             setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS, quotedAmount: p.quotedAmount || "" });
@@ -6794,7 +6986,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -6843,6 +7035,28 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
           <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
         </div>
+        <button
+          onClick={() => onOpenRapport(project.id)}
+          style={{ background: COLORS.card, border: `1px dashed #6FB3D9`, color: "#6FB3D9" }}
+          className="w-full py-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 mb-3"
+        >
+          <ClipboardCheck size={14} /> {t.rapportBtn}
+        </button>
+
+        {reports && reports.length > 0 && (
+          <div className="mb-4 flex flex-col gap-1.5">
+            {reports.map((r) => (
+              <button key={r.id} onClick={() => onPrintRapport(r)} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-sm truncate">{t.rapportTitle} · {r.date}</div>
+                  <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{r.signerName} · {r.hours} h</div>
+                </div>
+                <Printer size={14} color={COLORS.muted} className="shrink-0" />
+              </button>
+            ))}
+          </div>
+        )}
+
         {canBill && (
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button onClick={() => onNewDocument("quote")} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1">
@@ -7042,6 +7256,92 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
           ))}
         </div>
       ))}
+    </div>
+  );
+}
+
+// Signature pad. Pointer events rather than mouse or touch handlers, so the
+// same code works with a finger on a phone, a stylus on a tablet, and a mouse
+// on a desk — the customer signs on whatever the roofer is holding.
+function SignaturePad({ onChange, t }) {
+  const canvasRef = useRef(null);
+  const drawing = useRef(false);
+  const dirty = useRef(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    // Backing store at device resolution, or the line looks furry on a phone.
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#111";
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, rect.width, rect.height);
+  }, []);
+
+  function pos(e) {
+    const r = canvasRef.current.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function start(e) {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const ctx = canvasRef.current.getContext("2d");
+    const { x, y } = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    drawing.current = true;
+  }
+
+  function move(e) {
+    if (!drawing.current) return;
+    e.preventDefault();
+    const ctx = canvasRef.current.getContext("2d");
+    const { x, y } = pos(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    dirty.current = true;
+  }
+
+  function end() {
+    if (!drawing.current) return;
+    drawing.current = false;
+    if (dirty.current) onChange(canvasRef.current.toDataURL("image/png"));
+  }
+
+  function clear() {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    dirty.current = false;
+    onChange(null);
+  }
+
+  return (
+    <div>
+      <canvas
+        ref={canvasRef}
+        onPointerDown={start}
+        onPointerMove={move}
+        onPointerUp={end}
+        onPointerLeave={end}
+        onPointerCancel={end}
+        style={{ background: "#fff", border: `1px solid ${COLORS.border}`, touchAction: "none" }}
+        className="w-full h-40 rounded-lg"
+      />
+      <button onClick={clear} style={{ color: COLORS.muted }} className="w-full py-2 text-[11px] font-bold uppercase">
+        {t.sigClear}
+      </button>
     </div>
   );
 }

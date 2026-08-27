@@ -3,7 +3,7 @@
 // customerId but no client string, an entry with a photoId, an invoice, an
 // assignment and a leave request.
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave"];
+export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports"];
 
 export const SAMPLE = {
   projects: [
@@ -29,6 +29,11 @@ export const SAMPLE = {
   ],
   assignments: [
     { id: "a1", date: new Date().toISOString().slice(0, 10), projectId: "p1", userId: "u1" },
+  ],
+  reports: [
+    { id: "r1", projectId: "p1", date: "2026-08-26", userId: "u2", hours: "7.5",
+      lines: [{ description: "Siga Risan", qty: "8", unit: "m" }], note: "",
+      signerName: "Frau Sutter", signatureId: "sig1", signedAt: Date.now(), createdAt: Date.now() },
   ],
   leave: [
     { id: "l1", date: "2026-08-27", userId: "u2", type: "vacation", note: "", status: "pending" },

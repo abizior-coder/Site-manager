@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "esbuild entry.jsx --bundle --format=esm --minify --jsx=automatic --outfile=bundle.js && node scripts/stamp.mjs",
-    "test:rules": "firebase emulators:exec --only firestore \"node rules.test.mjs\"",
+    "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore \"node rules.test.mjs\"",
     "test:logic": "node logic.test.mjs",
     "test": "npm run test:logic && npm run test:render && npm run test:rules",
     "test:render": "node render.test.mjs",

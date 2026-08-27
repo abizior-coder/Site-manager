@@ -145,6 +145,17 @@ service cloud.firestore {
                                   && request.resource.data.status == resource.data.status);
       }
 
+      // Signed site reports (Rapporte). The crew member on site captures the
+      // customer's signature, so they must be able to create one. A report
+      // that carries a signature can no longer be edited: its whole value is
+      // being evidence of what the customer agreed to.
+      match /reports/{id} {
+        allow read: if isMember(cid);
+        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        allow update: if canManage(cid) && resource.data.signedAt == null;
+        allow delete: if canManage(cid);
+      }
+
       // Photos, preferences, technical library.
       match /kv/{key} {
         allow read, write: if isMember(cid);

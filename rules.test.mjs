@@ -24,7 +24,7 @@ async function check(name, fn) {
 
 const testEnv = await initializeTestEnvironment({
   projectId: "rules-test",
-  firestore: { rules: fs.readFileSync("firestore.rules", "utf8"), host: "127.0.0.1", port: 8080 },
+  firestore: { rules: fs.readFileSync("firestore.rules", "utf8"), host: "127.0.0.1", port: 8085 },
 });
 
 // Seed with rules disabled.
@@ -158,6 +158,26 @@ await check("supervisor CAN approve crew leave", () =>
   assertSucceeds(setDoc(doc(sup, "companies", CID, "leave", "lv-crew"), { userId: CREW, date: "2026-09-02", status: "approved", type: "sick" })));
 await check("crew CAN see the team's absences", () =>
   assertSucceeds(getDoc(doc(crew, "companies", CID, "leave", "lv-own"))));
+
+// --- signed site reports -------------------------------------------------
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  const d = ctx.firestore();
+  await setDoc(doc(d, "companies", CID, "reports", "r-open"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: null });
+  await setDoc(doc(d, "companies", CID, "reports", "r-signed"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: Date.now(), signerName: "Kunde" });
+});
+await check("crew CAN create a report on site", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "reports", "r-new"), { userId: CREW, projectId: "p1", date: "2026-09-02", signedAt: null })));
+await check("crew CANNOT create a report as someone else", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "reports", "r-fake"), { userId: SUP, projectId: "p1", date: "2026-09-02", signedAt: null })));
+await check("manager CAN edit an unsigned report", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "reports", "r-open"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: null, note: "korrigiert" })));
+// The point of a signature is that what was signed cannot change afterwards.
+await check("a SIGNED report cannot be altered, even by the owner", () =>
+  assertFails(setDoc(doc(owner, "companies", CID, "reports", "r-signed"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: Date.now(), signerName: "Jemand anders" })));
+await check("crew CAN read reports", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "reports", "r-signed"))));
+await check("crew CANNOT delete a report", () =>
+  assertFails(deleteDoc(doc(crew, "companies", CID, "reports", "r-signed"))));
 
 // --- scheduling ----------------------------------------------------------
 await check("owner CAN create an assignment", () =>

@@ -190,6 +190,22 @@ export async function syncCollection(name, nextArr) {
     if (!nextMap.has(id)) deletes.push(id);
   }
 
+  // Diffing is what stops two phones overwriting each other, but it means a
+  // stale in-memory array deletes real records. Anything the app does removes
+  // one or two things at a time; a jump beyond that is a bug — a half-loaded
+  // list, or a snapshot arriving mid-write — not an intention. Refuse it and
+  // say so, rather than quietly destroying data that cannot be recovered.
+  const MAX_REASONABLE_DELETES = 5;
+  const wipes = deletes.length > MAX_REASONABLE_DELETES || (nextArr || []).length === 0 && prev.size > 1;
+  if (wipes) {
+    const message = `refused to delete ${deletes.length} of ${prev.size} ${name}: looks like stale state, not an intentional delete`;
+    console.error(message);
+    // Still write the changes; only the deletions are withheld.
+    for (const rec of writes) await fs().setDoc(docRef(name, rec.id), rec);
+    baseline.set(name, new Map([...prev, ...nextMap]));
+    throw new Error(message);
+  }
+
   // Sequential rather than batched: a batch caps at 500 operations and, more
   // importantly, one bad record would roll back the rest.
   for (const rec of writes) await fs().setDoc(docRef(name, rec.id), rec);
