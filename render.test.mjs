@@ -97,6 +97,36 @@ async function renderAs(role) {
     check(`owner: tab ${label} renders`, errors.length === before && (window.document.body.textContent || "").length > 50,
       errors.slice(before, before + 1).join(" | "));
   }
+  // The job view is the busiest screen in the app and nothing was opening it,
+  // so a crash in the crew drop zone or the material composer would have gone
+  // out unnoticed.
+  {
+    const projTab = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "PROJEKTE");
+    projTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const jobBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").includes("Trockenbau"));
+    check("owner: a job can be opened", !!jobBtn, "no project button found");
+    if (jobBtn) {
+      const before = errors.length;
+      jobBtn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 250));
+      check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
+      check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
+
+      const matBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Material");
+      if (matBtn) {
+        const b2 = errors.length;
+        matBtn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 250));
+        check("owner: material composer opens", errors.length === b2, errors.slice(b2, b2 + 1).join(" | "));
+        check("owner: composer asks for a supplier", text().includes("Lieferant"), "no supplier field");
+        check("owner: composer asks for a trade", text().includes("Spengler"), "no trade picker");
+      } else {
+        check("owner: material button exists in the job view", false, "not found");
+      }
+    }
+  }
+
   // The team roster is a sidebar tab, so the mobile-label walk above never
   // reaches it. It is also where crew get attached to jobs, so a crash here
   // silently costs the Polier the feature.

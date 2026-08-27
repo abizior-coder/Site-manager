@@ -63,7 +63,7 @@
   "pickupTitle": "Recolha no grossista",
   "pickupHint": "Introduza o número de encomenda ou referência da fatura do seu chefe — o balcão digitaliza-o para libertar a entrega.",
   "orderPlaceholder": "Número de encomenda / referência",
-  "supplierPlaceholder": "Fornecedor / grossista (opcional)",
+  "supplierPlaceholder": "Fornecedor",
   "qrLabel": "Código QR",
   "barcodeLabel": "Código de barras",
   "generateCode": "Gerar código",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Outros"
+  "tradeOther": "Outros",
+  "supplierLabel": "Fornecedor",
+  "artNoPlaceholder": "N.º artigo",
+  "artNoShort": "Art.",
+  "sortSupplier": "Fornecedor"
 }

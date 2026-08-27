@@ -63,7 +63,7 @@
   "pickupTitle": "Odbiór u hurtownika",
   "pickupHint": "Wpisz numer zamówienia lub referencji z faktury od przełożonego — na ladzie zeskanują go, aby wydać dostawę.",
   "orderPlaceholder": "Numer zamówienia / referencji",
-  "supplierPlaceholder": "Dostawca / hurtownik (opcjonalnie)",
+  "supplierPlaceholder": "Dostawca",
   "qrLabel": "Kod QR",
   "barcodeLabel": "Kod kreskowy",
   "generateCode": "Wygeneruj kod",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Inne"
+  "tradeOther": "Inne",
+  "supplierLabel": "Dostawca",
+  "artNoPlaceholder": "Nr artykułu",
+  "artNoShort": "Art.",
+  "sortSupplier": "Dostawca"
 }

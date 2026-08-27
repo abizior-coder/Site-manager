@@ -63,7 +63,7 @@
   "pickupTitle": "Ritiro dal grossista",
   "pickupHint": "Inserisci il numero d'ordine o di riferimento della fattura del tuo responsabile — il banco lo scansiona per rilasciare la consegna.",
   "orderPlaceholder": "Numero d'ordine / riferimento",
-  "supplierPlaceholder": "Fornitore / grossista (facoltativo)",
+  "supplierPlaceholder": "Fornitore",
   "qrLabel": "Codice QR",
   "barcodeLabel": "Codice a barre",
   "generateCode": "Genera codice",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Altro"
+  "tradeOther": "Altro",
+  "supplierLabel": "Fornitore",
+  "artNoPlaceholder": "N. articolo",
+  "artNoShort": "Art.",
+  "sortSupplier": "Fornitore"
 }

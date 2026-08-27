@@ -63,7 +63,7 @@
   "pickupTitle": "Recogida en el mayorista",
   "pickupHint": "Introduce el número de pedido o referencia de la factura de tu jefe — en el mostrador lo escanean para liberar la entrega.",
   "orderPlaceholder": "Número de pedido / referencia",
-  "supplierPlaceholder": "Proveedor / mayorista (opcional)",
+  "supplierPlaceholder": "Proveedor",
   "qrLabel": "Código QR",
   "barcodeLabel": "Código de barras",
   "generateCode": "Generar código",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Otros"
+  "tradeOther": "Otros",
+  "supplierLabel": "Proveedor",
+  "artNoPlaceholder": "N.º artículo",
+  "artNoShort": "Art.",
+  "sortSupplier": "Proveedor"
 }

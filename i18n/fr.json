@@ -63,7 +63,7 @@
   "pickupTitle": "Retrait chez le grossiste",
   "pickupHint": "Saisissez le numéro de commande ou de référence de la facture de votre responsable — le comptoir le scanne pour libérer la livraison.",
   "orderPlaceholder": "Numéro de commande / référence",
-  "supplierPlaceholder": "Fournisseur / grossiste (facultatif)",
+  "supplierPlaceholder": "Fournisseur",
   "qrLabel": "Code QR",
   "barcodeLabel": "Code-barres",
   "generateCode": "Générer le code",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Autre"
+  "tradeOther": "Autre",
+  "supplierLabel": "Fournisseur",
+  "artNoPlaceholder": "N° article",
+  "artNoShort": "Art.",
+  "sortSupplier": "Fournisseur"
 }

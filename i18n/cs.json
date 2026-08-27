@@ -63,7 +63,7 @@
   "pickupTitle": "Vyzvednutí u velkoobchodu",
   "pickupHint": "Zadejte číslo objednávky nebo reference z faktury od nadřízeného — na pultu ho naskenují a uvolní dodávku.",
   "orderPlaceholder": "Číslo objednávky / reference",
-  "supplierPlaceholder": "Dodavatel / velkoobchod (volitelné)",
+  "supplierPlaceholder": "Dodavatel",
   "qrLabel": "QR kód",
   "barcodeLabel": "Čárový kód",
   "generateCode": "Vygenerovat kód",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Jiné"
+  "tradeOther": "Jiné",
+  "supplierLabel": "Dodavatel",
+  "artNoPlaceholder": "Č. artiklu",
+  "artNoShort": "Art.",
+  "sortSupplier": "Dodavatel"
 }

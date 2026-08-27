@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment } from "react";
+import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
@@ -880,6 +880,10 @@ const TRADES = [
 ];
 const DEFAULT_TRADE = "other";
 
+// The merchants this trade actually buys from in this region. One tap covers
+// most deliveries; the field stays free text for everyone else.
+const KNOWN_SUPPLIERS = ["HGC", "GABS", "Soprema", "Velux", "Glaromat", "Gyso", "SFS", "Hasler"];
+
 function tradeMeta(key) {
   return TRADES.find((x) => x.key === key) || TRADES[TRADES.length - 1];
 }
@@ -1257,7 +1261,11 @@ export default function SiteManager() {
   const [editHoursInput, setEditHoursInput] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
-  const [materialUnits, setMaterialUnits] = useState({});
+  // The article master. Units and prices used to live in two separate maps;
+  // suppliers and article numbers would have made four. Everything a material
+  // name knows about itself now lives in one record, keyed by the lowercased
+  // name, which is also what a price-list import will write into.
+  const [catalog, setCatalog] = useState({});
   const [unitSuggestFocused, setUnitSuggestFocused] = useState(false);
   const [backupModal, setBackupModal] = useState(null); // 'export' | 'import' | null
   const [backupCodeOutput, setBackupCodeOutput] = useState("");
@@ -1290,7 +1298,17 @@ export default function SiteManager() {
   const [weatherCityInput, setWeatherCityInput] = useState("");
   const [safetyCat, setSafetyCat] = useState("roof");
   const [profile, setProfile] = useState({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "", labourRate: "", currency: "CHF" });
-  const [materialPrices, setMaterialPrices] = useState({});
+  // Kept as derived views so the costing call sites read the same as before.
+  const materialUnits = useMemo(() => {
+    const out = {};
+    for (const [k, v] of Object.entries(catalog)) if (v.unit) out[k] = v.unit;
+    return out;
+  }, [catalog]);
+  const materialPrices = useMemo(() => {
+    const out = {};
+    for (const [k, v] of Object.entries(catalog)) if (v.price) out[k] = v.price;
+    return out;
+  }, [catalog]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [selectedDay, setSelectedDay] = useState(null);
@@ -1452,12 +1470,25 @@ export default function SiteManager() {
         }
       } catch (e) {}
       try {
-        const unitsRes = await window.storage.get("site-material-units");
-        if (unitsRes && unitsRes.value) setMaterialUnits(JSON.parse(unitsRes.value));
-      } catch (e) {}
-      try {
-        const pricesRes = await window.storage.get("site-material-prices");
-        if (pricesRes && pricesRes.value) setMaterialPrices(JSON.parse(pricesRes.value));
+        const catRes = await window.storage.get("site-material-catalog");
+        if (catRes && catRes.value) {
+          setCatalog(JSON.parse(catRes.value));
+        } else {
+          // First run after the split: fold the two old maps into one record
+          // each, so nobody loses the units and prices the app already learnt.
+          const merged = {};
+          const unitsRes = await window.storage.get("site-material-units");
+          const pricesRes = await window.storage.get("site-material-prices");
+          const units = unitsRes && unitsRes.value ? JSON.parse(unitsRes.value) : {};
+          const prices = pricesRes && pricesRes.value ? JSON.parse(pricesRes.value) : {};
+          for (const k of new Set([...Object.keys(units), ...Object.keys(prices)])) {
+            merged[k] = { name: k, unit: units[k] || "", price: prices[k] || "", supplier: "", artNo: "" };
+          }
+          if (Object.keys(merged).length) {
+            setCatalog(merged);
+            window.storage.set("site-material-catalog", JSON.stringify(merged)).catch(() => {});
+          }
+        }
       } catch (e) {}
       // Billing, the labour rate and margins live in an owner-only document.
       // Crew genuinely cannot read it — the rules deny it, not just the UI.
@@ -3055,7 +3086,7 @@ export default function SiteManager() {
     // The trade sticks between entries: someone logging Spengler work logs
     // several pieces in a row, and re-picking it each time is how it ends up
     // filed wrong.
-    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false, trade: lastTrade });
+    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false, trade: lastTrade, supplier: "", artNo: "" });
     setPhotoPreview(null);
     setPhotoPreviewId(null);
     setSuggestCat(null);
@@ -3065,7 +3096,7 @@ export default function SiteManager() {
   }
 
   function openEditEntry(entry) {
-    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie, trade: entry.trade || DEFAULT_TRADE });
+    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie, trade: entry.trade || DEFAULT_TRADE, supplier: entry.supplier || "", artNo: entry.artNo || "" });
     // Keep the existing photo's id so re-saving without picking a new image
     // reuses that document instead of writing a duplicate.
     setPhotoPreviewId(entry.photoId || null);
@@ -3130,16 +3161,29 @@ export default function SiteManager() {
     if (entry.photoId) deletePhoto(entry.photoId); // don't leave orphan photo docs
   }
 
+  // Only ever fills blanks. Overwriting what somebody typed on site to match
+  // an older record is how the wrong price ends up on an invoice.
   function setDescriptionWithUnitMemory(name) {
-    const key = name.trim().toLowerCase();
-    const remembered = materialUnits[key];
-    const rememberedPrice = materialPrices[key];
+    const known = catalog[name.trim().toLowerCase()] || {};
     setForm((f) => ({
       ...f,
       description: name,
-      unit: !f.unit && remembered ? remembered : f.unit,
-      unitPrice: !f.unitPrice && rememberedPrice ? rememberedPrice : f.unitPrice,
+      unit: !f.unit && known.unit ? known.unit : f.unit,
+      unitPrice: !f.unitPrice && known.price ? known.price : f.unitPrice,
+      supplier: !f.supplier && known.supplier ? known.supplier : f.supplier,
+      artNo: !f.artNo && known.artNo ? known.artNo : f.artNo,
     }));
+  }
+
+  function rememberMaterial(name, patch) {
+    const key = (name || "").trim().toLowerCase();
+    if (!key) return;
+    // A blank field means "I did not say", not "clear what you knew".
+    const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== "" && v != null));
+    if (!Object.keys(clean).length && catalog[key]) return;
+    const next = { ...catalog, [key]: { name: name.trim(), ...(catalog[key] || {}), ...clean } };
+    setCatalog(next);
+    window.storage.set("site-material-catalog", JSON.stringify(next)).catch(() => {});
   }
 
   async function submitAdd() {
@@ -3165,25 +3209,21 @@ export default function SiteManager() {
       if (!form.description.trim()) return;
       const unitPrice = form.unitPrice === "" || form.unitPrice === undefined ? undefined : form.unitPrice;
       if (addModal.editingId) {
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE } : e)) });
+        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() } : e)) });
       } else {
-        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE });
+        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() });
         setLastTrade(form.trade || DEFAULT_TRADE);
       }
-      if ((addModal.type === "material" || addModal.type === "tool") && form.unit.trim()) {
-        const key = form.description.trim().toLowerCase();
-        const updatedUnits = { ...materialUnits, [key]: form.unit.trim() };
-        setMaterialUnits(updatedUnits);
-        window.storage.set("site-material-units", JSON.stringify(updatedUnits)).catch(() => {});
-      }
-      // Remember the price per material name, the same way units are
-      // remembered, so costing fills itself in over time instead of asking
-      // for a price on every single entry.
-      if ((addModal.type === "material" || addModal.type === "tool") && unitPrice) {
-        const key = form.description.trim().toLowerCase();
-        const updatedPrices = { ...materialPrices, [key]: unitPrice };
-        setMaterialPrices(updatedPrices);
-        window.storage.set("site-material-prices", JSON.stringify(updatedPrices)).catch(() => {});
+      // Everything the entry taught us about this article goes back into the
+      // master, so the next person to log it gets the unit, the price, the
+      // supplier and the article number filled in for them.
+      if (addModal.type === "material" || addModal.type === "tool") {
+        rememberMaterial(form.description, {
+          unit: form.unit.trim(),
+          price: unitPrice,
+          supplier: (form.supplier || "").trim(),
+          artNo: (form.artNo || "").trim(),
+        });
       }
     }
     setAddModal(null);
@@ -6453,6 +6493,49 @@ export default function SiteManager() {
               <div style={{ color: COLORS.muted }} className="text-[10px] mt-1 leading-relaxed">{t.regieHint}</div>
             </div>
           )}
+          {addModal.type !== "photo" && (
+            <div className="mt-3">
+              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              {/* The known wholesalers as one tap, but the field stays free
+                  text: half the material on a Swiss roof comes from a merchant
+                  nobody put in a list. */}
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {KNOWN_SUPPLIERS.map((sup) => {
+                  const on = (form.supplier || "").trim().toLowerCase() === sup.toLowerCase();
+                  return (
+                    <button
+                      key={sup}
+                      onClick={() => setForm((f) => ({ ...f, supplier: on ? "" : sup }))}
+                      style={{
+                        background: on ? `${COLORS.success}22` : COLORS.cardAlt,
+                        border: `1px solid ${on ? COLORS.success : COLORS.border}`,
+                        color: on ? COLORS.success : COLORS.muted,
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                    >
+                      {sup}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={form.supplier || ""}
+                  onChange={(e) => setForm({ ...form, supplier: e.target.value })}
+                  placeholder={t.supplierPlaceholder}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  value={form.artNo || ""}
+                  onChange={(e) => setForm({ ...form, artNo: e.target.value })}
+                  placeholder={t.artNoPlaceholder}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="rounded-lg px-3 py-2 text-sm outline-none"
+                />
+              </div>
+            </div>
+          )}
           <div className="mt-4">
             <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.tradeLabel}</div>
             <div className="flex flex-wrap gap-1.5">
@@ -7240,6 +7323,9 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder
     if (sort === "name") return copy.sort((a, b) => String(a.description || "").localeCompare(String(b.description || ""), undefined, { sensitivity: "base" }));
     if (sort === "qty") return copy.sort((a, b) => (parseFloat(b.qty || 0) || 0) - (parseFloat(a.qty || 0) || 0));
     if (sort === "unit") return copy.sort((a, b) => String(a.unit || "").localeCompare(String(b.unit || "")) || String(a.description || "").localeCompare(String(b.description || "")));
+    // Grouping by merchant is how a purchase order gets written, so it earns
+    // a sort of its own.
+    if (sort === "supplier") return copy.sort((a, b) => String(a.supplier || "￿").localeCompare(String(b.supplier || "￿")) || String(a.description || "").localeCompare(String(b.description || "")));
     if (sort === "date") return copy.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
     return copy; // manual
   })();
@@ -7256,6 +7342,11 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder
           )}
           <span className="truncate">{i.description}</span>
         </div>
+        {(i.supplier || i.artNo) && (
+          <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+            {[i.supplier, i.artNo && `${t.artNoShort} ${i.artNo}`].filter(Boolean).join(" · ")}
+          </div>
+        )}
       </div>
       <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}</span>
       <div className="flex items-center gap-2 shrink-0">
@@ -7275,6 +7366,7 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder
             ["name", t.sortName],
             ["qty", t.sortQty],
             ["unit", t.sortUnit],
+            ["supplier", t.sortSupplier],
             ["date", t.sortDate],
             ["manual", t.sortManual],
           ].map(([key, label]) => (

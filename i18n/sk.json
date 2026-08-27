@@ -63,7 +63,7 @@
   "pickupTitle": "Vyzdvihnutie u veľkoobchodníka",
   "pickupHint": "Zadajte číslo objednávky alebo referenčné číslo z faktúry od nadriadeného — na pulte ho naskenujú a uvoľnia dodávku.",
   "orderPlaceholder": "Číslo objednávky / referencie",
-  "supplierPlaceholder": "Dodávateľ / veľkoobchodník (voliteľné)",
+  "supplierPlaceholder": "Dodávateľ",
   "qrLabel": "QR kód",
   "barcodeLabel": "Čiarový kód",
   "generateCode": "Vygenerovať kód",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Iné"
+  "tradeOther": "Iné",
+  "supplierLabel": "Dodávateľ",
+  "artNoPlaceholder": "Č. artikla",
+  "artNoShort": "Art.",
+  "sortSupplier": "Dodávateľ"
 }

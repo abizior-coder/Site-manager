@@ -63,7 +63,7 @@
   "pickupTitle": "Abholung beim Grossisten",
   "pickupHint": "Bestell- oder Referenznummer von der Rechnung Ihres Vorgesetzten eingeben — der Schalter scannt diese, um die Lieferung freizugeben.",
   "orderPlaceholder": "Bestell- / Referenznummer",
-  "supplierPlaceholder": "Lieferant / Grossist (optional)",
+  "supplierPlaceholder": "Liferant",
   "qrLabel": "QR-Code",
   "barcodeLabel": "Strichcode",
   "generateCode": "Code erstellen",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Anders"
+  "tradeOther": "Anders",
+  "supplierLabel": "Liferant",
+  "artNoPlaceholder": "Artikel-Nr.",
+  "artNoShort": "Art.",
+  "sortSupplier": "Liferant"
 }

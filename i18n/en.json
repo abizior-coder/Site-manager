@@ -63,7 +63,7 @@
   "pickupTitle": "Wholesaler pickup",
   "pickupHint": "Enter the order or reference number from your manager's invoice — the counter scans this to release the delivery.",
   "orderPlaceholder": "Order / reference number",
-  "supplierPlaceholder": "Supplier / wholesaler (optional)",
+  "supplierPlaceholder": "Supplier",
   "qrLabel": "QR code",
   "barcodeLabel": "Barcode",
   "generateCode": "Generate code",
@@ -535,5 +535,9 @@
   "tradeHolz": "Holzbau",
   "tradeGeruest": "Gerüst",
   "tradeUnterhalt": "Unterhalt",
-  "tradeOther": "Other"
+  "tradeOther": "Other",
+  "supplierLabel": "Supplier",
+  "artNoPlaceholder": "Article no.",
+  "artNoShort": "Art.",
+  "sortSupplier": "Supplier"
 }
