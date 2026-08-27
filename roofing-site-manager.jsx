@@ -4728,7 +4728,7 @@ export default function SiteManager() {
   const wCond = weather.data ? weatherFromCode(weather.data.weather_code, t) : null;
 
   return (
-    <div style={{ background: COLORS.shell, color: COLORS.text, fontFamily: "system-ui, -apple-system, sans-serif", height: "100dvh" }} className="w-full h-screen max-w-md lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden">
+    <div style={{ background: COLORS.shell, color: COLORS.text, fontFamily: "system-ui, -apple-system, sans-serif", height: "100dvh" }} className="w-full h-screen max-w-md md:max-w-2xl lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden">
       <MountainBackground />
 
       {/* Office sidebar. The phone layout is right for a roof and wrong for a
@@ -4783,7 +4783,10 @@ export default function SiteManager() {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 relative">
+      {/* min-h-0 is load-bearing: a flex item will not shrink below its
+          content without it, so the scrolling area never gets a bounded
+          height, the page grows past the viewport and scrolling breaks. */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
       <div style={{ borderBottom: `1px solid ${COLORS.border}` }} className="relative px-5 pt-6 pb-4 flex items-center justify-between">
         <div className="relative">
           <div className="flex items-center gap-1.5">
@@ -6009,7 +6012,7 @@ export default function SiteManager() {
 
       </div>
 
-      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex lg:hidden">
+      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-2xl mx-auto flex lg:hidden">
         {[
           { id: "today", label: t.navToday, icon: Clock },
           { id: "materials", label: t.navMaterials, icon: Package },
