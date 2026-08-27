@@ -114,6 +114,7 @@ const T = {
     navCockpit: "Overview", docStatusLabel: "Status", docStatusDraft: "Draft", docStatusSent: "Sent", docStatusAccepted: "Accepted", docStatusDeclined: "Declined", docStatusOpen: "Open", docStatusPartial: "Part paid", docStatusPaid: "Paid", paymentTitle: "Payment", paidAmountLabel: "Amount received", markPaidBtn: "Mark fully paid", outstandingLabel: "Outstanding", overdueLabel: "Overdue", ccOutstanding: "Outstanding", ccOverdue: "Overdue", ccPaidThisMonth: "Received this month", ccPipeline: "Pipeline", ccOnSite: "On site now", ccNobodyOnSite: "Nobody clocked in.", ccHoursThisMonth: "Hours this month", ccUnassigned: "Unassigned", ccActiveJobs: "Jobs running", ccAttention: "Needs attention", ccCertExpiring: "Expires", ccFootnote: "Figures come from what your crew logs. Unpriced materials and missing hourly rates are excluded.",
     schedTitle: "Who works where", schedToday: "Today's job", schedNoTeam: "Invite your crew first, then you can plan their days.", schedHintOwner: "Tap a day to plan who works where.", syncFailed: "Sync problem —", syncOffline: "Offline — showing your last synced data.", ccPlannedToday: "Planned today", ccNobodyPlanned: "Nobody planned.",
     rapportTitle: "Work report", rapportBtn: "Get customer signature", rapportNotePlaceholder: "Anything the customer should confirm (extra work, agreed changes)…", sigNameLabel: "Signed by (name)", sigHere: "Signature", sigClear: "Clear", sigSaveBtn: "Save signed report", sigNeeded: "Enter a name and sign first.", sigSaved: "Report signed", sigSignedAt: "Signed", backupFullBtn: "Download full backup", backupFullHint: "A file containing everything, photos and signatures included. The code below is smaller and easier to paste, but leaves photos out.", backupBuilding: "Preparing backup…", backupSaved: "Backup saved", backupRestoreFileBtn: "Restore from file", backupRestoreFileHint: "Choose a backup file you downloaded earlier. This replaces what is in the app now.", sigLockNote: "Once signed, this report can no longer be changed by anyone — that is what makes it worth something later.",
+    regieToggle: "Extra work (not quoted)", regieShort: "Extra", regieHint: "Mark work that goes beyond the agreed scope. It is listed separately, shown on the signed report, and billed on its own.", regieTitle: "Extra work", regieLabour: "Extra labour", regieUnbilled: "Not yet billed", regieAsQuote: "As quote", regieAsInvoice: "As invoice", regieNothing: "No unbilled extra work.", regieNoPrices: "Add prices or an hourly rate first.", regieCreated: "Created from extra work", regieDocNote: "Extra work beyond the agreed scope.",
     navCalendar: "Calendar", requestLeave: "Request leave", leaveVacation: "Vacation", leaveSick: "Sick leave", leaveOther: "Other",
     leaveNotePlaceholder: "Note (optional)", statusPending: "Pending", statusApproved: "Approved", statusDeclined: "Declined",
     markApproved: "Mark approved", markDeclined: "Mark declined", supervisorContactHeading: "Supervisor contact",
@@ -229,6 +230,7 @@ const T = {
     navCockpit: "Übersicht", docStatusLabel: "Status", docStatusDraft: "Entwurf", docStatusSent: "Versendet", docStatusAccepted: "Angenommen", docStatusDeclined: "Abgelehnt", docStatusOpen: "Offen", docStatusPartial: "Teilzahlung", docStatusPaid: "Bezahlt", paymentTitle: "Zahlung", paidAmountLabel: "Erhaltener Betrag", markPaidBtn: "Als vollständig bezahlt markieren", outstandingLabel: "Ausstehend", overdueLabel: "Überfällig", ccOutstanding: "Ausstehend", ccOverdue: "Überfällig", ccPaidThisMonth: "Diesen Monat erhalten", ccPipeline: "Pipeline", ccOnSite: "Jetzt auf der Baustelle", ccNobodyOnSite: "Niemand eingestempelt.", ccHoursThisMonth: "Stunden diesen Monat", ccUnassigned: "Nicht zugeordnet", ccActiveJobs: "Laufende Aufträge", ccAttention: "Zu erledigen", ccCertExpiring: "Läuft ab", ccFootnote: "Zahlen stammen aus den Erfassungen des Teams. Material ohne Preis und fehlende Stundensätze sind nicht enthalten.",
     schedTitle: "Wer arbeitet wo", schedToday: "Heutiger Einsatz", schedNoTeam: "Zuerst Mitarbeiter einladen, dann können Sie deren Tage planen.", schedHintOwner: "Auf einen Tag tippen, um einzuteilen.", syncFailed: "Synchronisierungsproblem —", syncOffline: "Offline — zeigt zuletzt synchronisierte Daten.", ccPlannedToday: "Heute eingeteilt", ccNobodyPlanned: "Niemand eingeteilt.",
     rapportTitle: "Rapport", rapportBtn: "Kunde unterschreiben lassen", rapportNotePlaceholder: "Was der Kunde bestätigen soll (Regiearbeit, abgemachte Änderungen)…", sigNameLabel: "Unterschrieben von (Name)", sigHere: "Unterschrift", sigClear: "Löschen", sigSaveBtn: "Rapport speichern", sigNeeded: "Zuerst Name eingeben und unterschreiben.", sigSaved: "Rapport unterschrieben", sigSignedAt: "Unterschrieben", backupFullBtn: "Vollständige Sicherung herunterladen", backupFullHint: "Eine Datei mit allem, inklusive Fotos und Unterschriften. Der Code unten ist kleiner und einfacher einzufügen, enthält aber keine Fotos.", backupBuilding: "Sicherung wird erstellt…", backupSaved: "Sicherung gespeichert", backupRestoreFileBtn: "Aus Datei wiederherstellen", backupRestoreFileHint: "Eine zuvor heruntergeladene Sicherungsdatei wählen. Ersetzt den aktuellen Stand in der App.", sigLockNote: "Einmal unterschrieben, kann dieser Rapport von niemandem mehr geändert werden — genau das macht ihn später wertvoll.",
+    regieToggle: "Regiearbeit (nicht offeriert)", regieShort: "Regie", regieHint: "Arbeit kennzeichnen, die über den vereinbarten Umfang hinausgeht. Sie wird separat ausgewiesen, erscheint auf dem unterschriebenen Rapport und wird eigenständig verrechnet.", regieTitle: "Regiearbeit", regieLabour: "Regiestunden", regieUnbilled: "Noch nicht verrechnet", regieAsQuote: "Als Offerte", regieAsInvoice: "Als Rechnung", regieNothing: "Keine offene Regiearbeit.", regieNoPrices: "Zuerst Preise oder Stundensatz erfassen.", regieCreated: "Aus Regiearbeit erstellt", regieDocNote: "Regiearbeit ausserhalb des vereinbarten Umfangs.",
     navCalendar: "Kalender", requestLeave: "Abwesenheit beantragen", leaveVacation: "Ferien", leaveSick: "Krankheit", leaveOther: "Sonstiges",
     leaveNotePlaceholder: "Notiz (optional)", statusPending: "Ausstehend", statusApproved: "Genehmigt", statusDeclined: "Abgelehnt",
     markApproved: "Als genehmigt markieren", markDeclined: "Als abgelehnt markieren", supervisorContactHeading: "Vorgesetzten-Kontakt",
@@ -344,6 +346,7 @@ const T = {
     navCockpit: "Vue d'ensemble", docStatusLabel: "Statut", docStatusDraft: "Brouillon", docStatusSent: "Envoyé", docStatusAccepted: "Accepté", docStatusDeclined: "Refusé", docStatusOpen: "Ouvert", docStatusPartial: "Payé en partie", docStatusPaid: "Payé", paymentTitle: "Paiement", paidAmountLabel: "Montant reçu", markPaidBtn: "Marquer comme payé", outstandingLabel: "En attente", overdueLabel: "En retard", ccOutstanding: "En attente", ccOverdue: "En retard", ccPaidThisMonth: "Reçu ce mois", ccPipeline: "Pipeline", ccOnSite: "Sur chantier", ccNobodyOnSite: "Personne pointé.", ccHoursThisMonth: "Heures ce mois", ccUnassigned: "Non attribué", ccActiveJobs: "Chantiers en cours", ccAttention: "À traiter", ccCertExpiring: "Expire", ccFootnote: "Chiffres issus des saisies de l'équipe. Matériaux sans prix et taux horaires manquants exclus.",
     schedTitle: "Qui travaille où", schedToday: "Chantier du jour", schedNoTeam: "Invitez d'abord votre équipe pour planifier ses journées.", schedHintOwner: "Touchez un jour pour planifier.", syncFailed: "Problème de synchronisation —", syncOffline: "Hors ligne — dernières données synchronisées.", ccPlannedToday: "Planifié aujourd'hui", ccNobodyPlanned: "Personne planifié.",
     rapportTitle: "Rapport", rapportBtn: "Faire signer le client", rapportNotePlaceholder: "Ce que le client doit confirmer (travaux en régie, modifications convenues)…", sigNameLabel: "Signé par (nom)", sigHere: "Signature", sigClear: "Effacer", sigSaveBtn: "Enregistrer le rapport", sigNeeded: "Saisissez un nom et signez d'abord.", sigSaved: "Rapport signé", sigSignedAt: "Signé le", backupFullBtn: "Télécharger la sauvegarde complète", backupFullHint: "Un fichier contenant tout, photos et signatures comprises. Le code ci-dessous est plus petit mais sans les photos.", backupBuilding: "Préparation de la sauvegarde…", backupSaved: "Sauvegarde enregistrée", backupRestoreFileBtn: "Restaurer depuis un fichier", backupRestoreFileHint: "Choisissez un fichier de sauvegarde téléchargé précédemment. Cela remplace le contenu actuel.", sigLockNote: "Une fois signé, ce rapport ne peut plus être modifié par personne — c'est ce qui lui donne sa valeur.",
+    regieToggle: "Travaux en régie (hors devis)", regieShort: "Régie", regieHint: "Marquez les travaux qui dépassent le devis. Ils sont listés séparément, figurent sur le rapport signé et sont facturés à part.", regieTitle: "Travaux en régie", regieLabour: "Heures en régie", regieUnbilled: "Pas encore facturé", regieAsQuote: "En devis", regieAsInvoice: "En facture", regieNothing: "Aucun travail en régie non facturé.", regieNoPrices: "Saisissez d'abord des prix ou un taux horaire.", regieCreated: "Créé depuis les travaux en régie", regieDocNote: "Travaux en régie hors du périmètre convenu.",
     navCalendar: "Calendrier", requestLeave: "Demander un congé", leaveVacation: "Vacances", leaveSick: "Congé maladie", leaveOther: "Autre",
     leaveNotePlaceholder: "Note (facultatif)", statusPending: "En attente", statusApproved: "Approuvé", statusDeclined: "Refusé",
     markApproved: "Marquer comme approuvé", markDeclined: "Marquer comme refusé", supervisorContactHeading: "Contact du responsable",
@@ -459,6 +462,7 @@ const T = {
     navCockpit: "Panoramica", docStatusLabel: "Stato", docStatusDraft: "Bozza", docStatusSent: "Inviato", docStatusAccepted: "Accettato", docStatusDeclined: "Rifiutato", docStatusOpen: "Aperto", docStatusPartial: "Pagato in parte", docStatusPaid: "Pagato", paymentTitle: "Pagamento", paidAmountLabel: "Importo ricevuto", markPaidBtn: "Segna come pagato", outstandingLabel: "In sospeso", overdueLabel: "Scaduto", ccOutstanding: "In sospeso", ccOverdue: "Scaduto", ccPaidThisMonth: "Ricevuto questo mese", ccPipeline: "Pipeline", ccOnSite: "In cantiere ora", ccNobodyOnSite: "Nessuno timbrato.", ccHoursThisMonth: "Ore questo mese", ccUnassigned: "Non assegnato", ccActiveJobs: "Lavori in corso", ccAttention: "Da gestire", ccCertExpiring: "Scade", ccFootnote: "Cifre dalle registrazioni della squadra. Materiali senza prezzo e tariffe orarie mancanti esclusi.",
     schedTitle: "Chi lavora dove", schedToday: "Lavoro di oggi", schedNoTeam: "Invita prima la squadra, poi potrai pianificare le giornate.", schedHintOwner: "Tocca un giorno per pianificare.", syncFailed: "Problema di sincronizzazione —", syncOffline: "Offline — ultimi dati sincronizzati.", ccPlannedToday: "Pianificato oggi", ccNobodyPlanned: "Nessuno pianificato.",
     rapportTitle: "Rapporto", rapportBtn: "Far firmare al cliente", rapportNotePlaceholder: "Cosa deve confermare il cliente (lavori in economia, modifiche concordate)…", sigNameLabel: "Firmato da (nome)", sigHere: "Firma", sigClear: "Cancella", sigSaveBtn: "Salva rapporto", sigNeeded: "Inserisci un nome e firma prima.", sigSaved: "Rapporto firmato", sigSignedAt: "Firmato il", backupFullBtn: "Scarica backup completo", backupFullHint: "Un file con tutto, foto e firme incluse. Il codice qui sotto è più piccolo ma senza foto.", backupBuilding: "Preparazione del backup…", backupSaved: "Backup salvato", backupRestoreFileBtn: "Ripristina da file", backupRestoreFileHint: "Scegli un file di backup scaricato in precedenza. Sostituisce quanto presente ora.", sigLockNote: "Una volta firmato, questo rapporto non può più essere modificato da nessuno — è ciò che gli dà valore.",
+    regieToggle: "Lavoro in economia (non preventivato)", regieShort: "Economia", regieHint: "Segna il lavoro che va oltre quanto concordato. Viene elencato a parte, compare sul rapporto firmato e si fattura separatamente.", regieTitle: "Lavoro in economia", regieLabour: "Ore in economia", regieUnbilled: "Non ancora fatturato", regieAsQuote: "Come preventivo", regieAsInvoice: "Come fattura", regieNothing: "Nessun lavoro in economia da fatturare.", regieNoPrices: "Inserisci prima prezzi o una tariffa oraria.", regieCreated: "Creato dal lavoro in economia", regieDocNote: "Lavoro oltre quanto concordato.",
     navCalendar: "Calendario", requestLeave: "Richiedi permesso", leaveVacation: "Ferie", leaveSick: "Malattia", leaveOther: "Altro",
     leaveNotePlaceholder: "Nota (facoltativo)", statusPending: "In attesa", statusApproved: "Approvato", statusDeclined: "Rifiutato",
     markApproved: "Segna come approvato", markDeclined: "Segna come rifiutato", supervisorContactHeading: "Contatto del responsabile",
@@ -574,6 +578,7 @@ const T = {
     navCockpit: "Resumen", docStatusLabel: "Estado", docStatusDraft: "Borrador", docStatusSent: "Enviado", docStatusAccepted: "Aceptado", docStatusDeclined: "Rechazado", docStatusOpen: "Abierta", docStatusPartial: "Pago parcial", docStatusPaid: "Pagada", paymentTitle: "Pago", paidAmountLabel: "Importe recibido", markPaidBtn: "Marcar como pagada", outstandingLabel: "Pendiente", overdueLabel: "Vencida", ccOutstanding: "Pendiente", ccOverdue: "Vencido", ccPaidThisMonth: "Cobrado este mes", ccPipeline: "Cartera", ccOnSite: "En obra ahora", ccNobodyOnSite: "Nadie fichado.", ccHoursThisMonth: "Horas este mes", ccUnassigned: "Sin asignar", ccActiveJobs: "Obras en curso", ccAttention: "Requiere atención", ccCertExpiring: "Caduca", ccFootnote: "Cifras a partir de lo registrado por el equipo. Se excluyen materiales sin precio y tarifas ausentes.",
     schedTitle: "Quién trabaja dónde", schedToday: "Obra de hoy", schedNoTeam: "Invita primero a tu equipo para poder planificar sus días.", schedHintOwner: "Toca un día para planificar.", syncFailed: "Problema de sincronización —", syncOffline: "Sin conexión — últimos datos sincronizados.", ccPlannedToday: "Planificado hoy", ccNobodyPlanned: "Nadie planificado.",
     rapportTitle: "Parte de trabajo", rapportBtn: "Que firme el cliente", rapportNotePlaceholder: "Lo que el cliente debe confirmar (trabajos extra, cambios acordados)…", sigNameLabel: "Firmado por (nombre)", sigHere: "Firma", sigClear: "Borrar", sigSaveBtn: "Guardar parte firmado", sigNeeded: "Introduce un nombre y firma primero.", sigSaved: "Parte firmado", sigSignedAt: "Firmado el", backupFullBtn: "Descargar copia completa", backupFullHint: "Un archivo con todo, fotos y firmas incluidas. El código de abajo es más pequeño pero sin fotos.", backupBuilding: "Preparando la copia…", backupSaved: "Copia guardada", backupRestoreFileBtn: "Restaurar desde archivo", backupRestoreFileHint: "Elige un archivo de copia descargado antes. Reemplaza lo que hay ahora.", sigLockNote: "Una vez firmado, nadie puede modificar este parte — eso es lo que le da valor después.",
+    regieToggle: "Trabajo extra (no presupuestado)", regieShort: "Extra", regieHint: "Marca el trabajo que excede lo acordado. Se lista aparte, aparece en el parte firmado y se factura por separado.", regieTitle: "Trabajo extra", regieLabour: "Horas extra", regieUnbilled: "Aún sin facturar", regieAsQuote: "Como presupuesto", regieAsInvoice: "Como factura", regieNothing: "No hay trabajo extra sin facturar.", regieNoPrices: "Añade precios o una tarifa por hora primero.", regieCreated: "Creado desde el trabajo extra", regieDocNote: "Trabajo fuera de lo acordado.",
     navCalendar: "Calendario", requestLeave: "Solicitar permiso", leaveVacation: "Vacaciones", leaveSick: "Baja por enfermedad", leaveOther: "Otro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendiente", statusApproved: "Aprobado", statusDeclined: "Rechazado",
     markApproved: "Marcar como aprobado", markDeclined: "Marcar como rechazado", supervisorContactHeading: "Contacto del supervisor",
@@ -689,6 +694,7 @@ const T = {
     navCockpit: "Resumo", docStatusLabel: "Estado", docStatusDraft: "Rascunho", docStatusSent: "Enviado", docStatusAccepted: "Aceite", docStatusDeclined: "Recusado", docStatusOpen: "Em aberto", docStatusPartial: "Pago em parte", docStatusPaid: "Pago", paymentTitle: "Pagamento", paidAmountLabel: "Valor recebido", markPaidBtn: "Marcar como pago", outstandingLabel: "Em dívida", overdueLabel: "Vencido", ccOutstanding: "Em dívida", ccOverdue: "Vencido", ccPaidThisMonth: "Recebido este mês", ccPipeline: "Pipeline", ccOnSite: "Em obra agora", ccNobodyOnSite: "Ninguém a picar o ponto.", ccHoursThisMonth: "Horas este mês", ccUnassigned: "Sem atribuição", ccActiveJobs: "Obras a decorrer", ccAttention: "A tratar", ccCertExpiring: "Expira", ccFootnote: "Valores a partir do que a equipa regista. Materiais sem preço e valores/hora em falta ficam de fora.",
     schedTitle: "Quem trabalha onde", schedToday: "Obra de hoje", schedNoTeam: "Convide primeiro a sua equipa para poder planear os dias.", schedHintOwner: "Toque num dia para planear.", syncFailed: "Problema de sincronização —", syncOffline: "Offline — últimos dados sincronizados.", ccPlannedToday: "Planeado hoje", ccNobodyPlanned: "Ninguém planeado.",
     rapportTitle: "Relatório de obra", rapportBtn: "Pedir assinatura do cliente", rapportNotePlaceholder: "O que o cliente deve confirmar (trabalhos extra, alterações acordadas)…", sigNameLabel: "Assinado por (nome)", sigHere: "Assinatura", sigClear: "Limpar", sigSaveBtn: "Guardar relatório assinado", sigNeeded: "Introduza um nome e assine primeiro.", sigSaved: "Relatório assinado", sigSignedAt: "Assinado em", backupFullBtn: "Descarregar cópia completa", backupFullHint: "Um ficheiro com tudo, fotos e assinaturas incluídas. O código abaixo é menor mas sem fotos.", backupBuilding: "A preparar a cópia…", backupSaved: "Cópia guardada", backupRestoreFileBtn: "Restaurar a partir de ficheiro", backupRestoreFileHint: "Escolha um ficheiro de cópia descarregado antes. Substitui o que existe agora.", sigLockNote: "Depois de assinado, ninguém pode alterar este relatório — é isso que lhe dá valor.",
+    regieToggle: "Trabalho extra (não orçamentado)", regieShort: "Extra", regieHint: "Marque o trabalho que ultrapassa o acordado. É listado à parte, consta do relatório assinado e é faturado separadamente.", regieTitle: "Trabalho extra", regieLabour: "Horas extra", regieUnbilled: "Ainda não faturado", regieAsQuote: "Como orçamento", regieAsInvoice: "Como fatura", regieNothing: "Sem trabalho extra por faturar.", regieNoPrices: "Adicione preços ou um valor à hora primeiro.", regieCreated: "Criado a partir do trabalho extra", regieDocNote: "Trabalho fora do âmbito acordado.",
     navCalendar: "Calendário", requestLeave: "Solicitar folga", leaveVacation: "Férias", leaveSick: "Baixa médica", leaveOther: "Outro",
     leaveNotePlaceholder: "Nota (opcional)", statusPending: "Pendente", statusApproved: "Aprovado", statusDeclined: "Recusado",
     markApproved: "Marcar como aprovado", markDeclined: "Marcar como recusado", supervisorContactHeading: "Contacto do supervisor",
@@ -804,6 +810,7 @@ const T = {
     navCockpit: "Przegląd", docStatusLabel: "Status", docStatusDraft: "Szkic", docStatusSent: "Wysłana", docStatusAccepted: "Zaakceptowana", docStatusDeclined: "Odrzucona", docStatusOpen: "Otwarta", docStatusPartial: "Częściowo opłacona", docStatusPaid: "Opłacona", paymentTitle: "Płatność", paidAmountLabel: "Otrzymana kwota", markPaidBtn: "Oznacz jako opłaconą", outstandingLabel: "Do zapłaty", overdueLabel: "Po terminie", ccOutstanding: "Do zapłaty", ccOverdue: "Po terminie", ccPaidThisMonth: "Wpłynęło w tym miesiącu", ccPipeline: "Pipeline", ccOnSite: "Teraz na budowie", ccNobodyOnSite: "Nikt nie jest zalogowany.", ccHoursThisMonth: "Godziny w tym miesiącu", ccUnassigned: "Nieprzypisane", ccActiveJobs: "Zlecenia w toku", ccAttention: "Do załatwienia", ccCertExpiring: "Wygasa", ccFootnote: "Dane pochodzą z wpisów ekipy. Materiały bez ceny i brakujące stawki nie są wliczone.",
     schedTitle: "Kto gdzie pracuje", schedToday: "Dzisiejsze zlecenie", schedNoTeam: "Najpierw zaproś ekipę, wtedy zaplanujesz jej dni.", schedHintOwner: "Dotknij dnia, aby zaplanować.", syncFailed: "Problem z synchronizacją —", syncOffline: "Offline — pokazuję ostatnio zsynchronizowane dane.", ccPlannedToday: "Zaplanowani dziś", ccNobodyPlanned: "Nikt nie zaplanowany.",
     rapportTitle: "Raport z budowy", rapportBtn: "Poproś klienta o podpis", rapportNotePlaceholder: "Co klient ma potwierdzić (prace dodatkowe, uzgodnione zmiany)…", sigNameLabel: "Podpisano przez (imię)", sigHere: "Podpis", sigClear: "Wyczyść", sigSaveBtn: "Zapisz podpisany raport", sigNeeded: "Najpierw podaj imię i podpisz.", sigSaved: "Raport podpisany", sigSignedAt: "Podpisano", backupFullBtn: "Pobierz pełną kopię", backupFullHint: "Plik ze wszystkim, ze zdjęciami i podpisami. Kod poniżej jest mniejszy, ale bez zdjęć.", backupBuilding: "Przygotowywanie kopii…", backupSaved: "Kopia zapisana", backupRestoreFileBtn: "Przywróć z pliku", backupRestoreFileHint: "Wybierz wcześniej pobrany plik kopii. Zastąpi obecną zawartość.", sigLockNote: "Po podpisaniu nikt nie może już zmienić tego raportu — właśnie to nadaje mu wartość.",
+    regieToggle: "Prace dodatkowe (poza wyceną)", regieShort: "Dodatk.", regieHint: "Oznacz prace wykraczające poza uzgodniony zakres. Są ujmowane osobno, widnieją na podpisanym raporcie i fakturowane oddzielnie.", regieTitle: "Prace dodatkowe", regieLabour: "Godziny dodatkowe", regieUnbilled: "Jeszcze nie zafakturowane", regieAsQuote: "Jako oferta", regieAsInvoice: "Jako faktura", regieNothing: "Brak niezafakturowanych prac dodatkowych.", regieNoPrices: "Najpierw dodaj ceny lub stawkę godzinową.", regieCreated: "Utworzono z prac dodatkowych", regieDocNote: "Prace poza uzgodnionym zakresem.",
     navCalendar: "Kalendarz", requestLeave: "Złóż wniosek urlopowy", leaveVacation: "Urlop", leaveSick: "Zwolnienie chorobowe", leaveOther: "Inne",
     leaveNotePlaceholder: "Notatka (opcjonalnie)", statusPending: "Oczekuje", statusApproved: "Zaakceptowany", statusDeclined: "Odrzucony",
     markApproved: "Oznacz jako zaakceptowany", markDeclined: "Oznacz jako odrzucony", supervisorContactHeading: "Kontakt do przełożonego",
@@ -919,6 +926,7 @@ const T = {
     navCockpit: "Prehľad", docStatusLabel: "Stav", docStatusDraft: "Návrh", docStatusSent: "Odoslaná", docStatusAccepted: "Prijatá", docStatusDeclined: "Zamietnutá", docStatusOpen: "Otvorená", docStatusPartial: "Čiastočne uhradená", docStatusPaid: "Uhradená", paymentTitle: "Platba", paidAmountLabel: "Prijatá suma", markPaidBtn: "Označiť ako uhradenú", outstandingLabel: "Neuhradené", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhradené", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Prijaté tento mesiac", ccPipeline: "Pipeline", ccOnSite: "Teraz na stavbe", ccNobodyOnSite: "Nikto nie je zapichnutý.", ccHoursThisMonth: "Hodiny tento mesiac", ccUnassigned: "Nepriradené", ccActiveJobs: "Prebiehajúce zákazky", ccAttention: "Na vybavenie", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vychádzajú zo záznamov tímu. Materiál bez ceny a chýbajúce sadzby nie sú zahrnuté.",
     schedTitle: "Kto kde pracuje", schedToday: "Dnešná zákazka", schedNoTeam: "Najprv pozvite tím, potom môžete plánovať jeho dni.", schedHintOwner: "Ťuknite na deň pre naplánovanie.", syncFailed: "Problém so synchronizáciou —", syncOffline: "Offline — posledné synchronizované údaje.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikto nie je naplánovaný.",
     rapportTitle: "Rapport", rapportBtn: "Dať zákazníkovi podpísať", rapportNotePlaceholder: "Čo má zákazník potvrdiť (práce navyše, dohodnuté zmeny)…", sigNameLabel: "Podpísal (meno)", sigHere: "Podpis", sigClear: "Vymazať", sigSaveBtn: "Uložiť podpísaný rapport", sigNeeded: "Najprv zadajte meno a podpíšte.", sigSaved: "Rapport podpísaný", sigSignedAt: "Podpísané", backupFullBtn: "Stiahnuť úplnú zálohu", backupFullHint: "Súbor so všetkým vrátane fotiek a podpisov. Kód nižšie je menší, ale bez fotiek.", backupBuilding: "Príprava zálohy…", backupSaved: "Záloha uložená", backupRestoreFileBtn: "Obnoviť zo súboru", backupRestoreFileHint: "Vyberte skôr stiahnutý súbor zálohy. Nahradí súčasný obsah.", sigLockNote: "Po podpísaní už rapport nikto nemôže zmeniť — práve to mu dáva hodnotu.",
+    regieToggle: "Práce navyše (mimo ponuky)", regieShort: "Navyše", regieHint: "Označte prácu nad rámec dohodnutého rozsahu. Vykazuje sa zvlášť, objaví sa na podpísanom rapporte a fakturuje sa samostatne.", regieTitle: "Práce navyše", regieLabour: "Hodiny navyše", regieUnbilled: "Zatiaľ nefakturované", regieAsQuote: "Ako ponuka", regieAsInvoice: "Ako faktúra", regieNothing: "Žiadne nefakturované práce navyše.", regieNoPrices: "Najprv zadajte ceny alebo hodinovú sadzbu.", regieCreated: "Vytvorené z prác navyše", regieDocNote: "Práce nad rámec dohodnutého rozsahu.",
     navCalendar: "Kalendár", requestLeave: "Požiadať o voľno", leaveVacation: "Dovolenka", leaveSick: "PN (choroba)", leaveOther: "Iné",
     leaveNotePlaceholder: "Poznámka (voliteľné)", statusPending: "Čaká sa", statusApproved: "Schválené", statusDeclined: "Zamietnuté",
     markApproved: "Označiť ako schválené", markDeclined: "Označiť ako zamietnuté", supervisorContactHeading: "Kontakt na nadriadeného",
@@ -1034,6 +1042,7 @@ const T = {
     navCockpit: "Přehled", docStatusLabel: "Stav", docStatusDraft: "Koncept", docStatusSent: "Odeslána", docStatusAccepted: "Přijata", docStatusDeclined: "Zamítnuta", docStatusOpen: "Otevřená", docStatusPartial: "Částečně uhrazena", docStatusPaid: "Uhrazena", paymentTitle: "Platba", paidAmountLabel: "Přijatá částka", markPaidBtn: "Označit jako uhrazenou", outstandingLabel: "Neuhrazeno", overdueLabel: "Po splatnosti", ccOutstanding: "Neuhrazeno", ccOverdue: "Po splatnosti", ccPaidThisMonth: "Přijato tento měsíc", ccPipeline: "Pipeline", ccOnSite: "Teď na stavbě", ccNobodyOnSite: "Nikdo není napíchnutý.", ccHoursThisMonth: "Hodiny tento měsíc", ccUnassigned: "Nepřiřazeno", ccActiveJobs: "Probíhající zakázky", ccAttention: "K vyřízení", ccCertExpiring: "Vyprší", ccFootnote: "Čísla vycházejí ze záznamů týmu. Materiál bez ceny a chybějící sazby nejsou zahrnuty.",
     schedTitle: "Kdo kde pracuje", schedToday: "Dnešní zakázka", schedNoTeam: "Nejprve pozvěte tým, pak můžete plánovat jeho dny.", schedHintOwner: "Klepněte na den pro naplánování.", syncFailed: "Problém se synchronizací —", syncOffline: "Offline — poslední synchronizovaná data.", ccPlannedToday: "Dnes naplánovaní", ccNobodyPlanned: "Nikdo není naplánován.",
     rapportTitle: "Rapport", rapportBtn: "Nechat zákazníka podepsat", rapportNotePlaceholder: "Co má zákazník potvrdit (práce navíc, dohodnuté změny)…", sigNameLabel: "Podepsal (jméno)", sigHere: "Podpis", sigClear: "Vymazat", sigSaveBtn: "Uložit podepsaný rapport", sigNeeded: "Nejprve zadejte jméno a podepište.", sigSaved: "Rapport podepsán", sigSignedAt: "Podepsáno", backupFullBtn: "Stáhnout úplnou zálohu", backupFullHint: "Soubor se vším včetně fotek a podpisů. Kód níže je menší, ale bez fotek.", backupBuilding: "Příprava zálohy…", backupSaved: "Záloha uložena", backupRestoreFileBtn: "Obnovit ze souboru", backupRestoreFileHint: "Vyberte dříve stažený soubor zálohy. Nahradí současný obsah.", sigLockNote: "Po podpisu už rapport nikdo nemůže změnit — právě to mu dává hodnotu.",
+    regieToggle: "Práce navíc (mimo nabídku)", regieShort: "Navíc", regieHint: "Označte práci nad rámec dohodnutého rozsahu. Vykazuje se zvlášť, objeví se na podepsaném rapportu a fakturuje se samostatně.", regieTitle: "Práce navíc", regieLabour: "Hodiny navíc", regieUnbilled: "Zatím nefakturováno", regieAsQuote: "Jako nabídka", regieAsInvoice: "Jako faktura", regieNothing: "Žádné nefakturované práce navíc.", regieNoPrices: "Nejprve zadejte ceny nebo hodinovou sazbu.", regieCreated: "Vytvořeno z prací navíc", regieDocNote: "Práce nad rámec dohodnutého rozsahu.",
     navCalendar: "Kalendář", requestLeave: "Požádat o volno", leaveVacation: "Dovolená", leaveSick: "Nemocenská", leaveOther: "Jiné",
     leaveNotePlaceholder: "Poznámka (volitelné)", statusPending: "Čeká se", statusApproved: "Schváleno", statusDeclined: "Zamítnuto",
     markApproved: "Označit jako schváleno", markDeclined: "Označit jako zamítnuto", supervisorContactHeading: "Kontakt na nadřízeného",
@@ -3078,7 +3087,7 @@ export default function SiteManager() {
     try { signature = (await loadPhoto(report.signatureId)) || ""; } catch (e) {}
 
     const rows = (report.lines || []).map((li) =>
-      `<tr><td>${esc(li.description)}</td><td class="r">${esc(li.qty)} ${esc(li.unit)}</td></tr>`).join("");
+      `<tr><td>${li.regie ? `<span class="reg">${esc(t.regieShort)}</span> ` : ""}${esc(li.description)}</td><td class="r">${esc(li.qty)} ${esc(li.unit)}</td></tr>`).join("");
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(t.rapportTitle)} ${esc(report.date)}</title>
     <style>
@@ -3092,7 +3101,9 @@ export default function SiteManager() {
       th { text-align:left; font-size:8.5pt; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #333; padding:2mm 1mm; }
       td { padding:2mm 1mm; border-bottom:1px solid #e5e5e5; font-size:10pt; }
       td.r, th.r { text-align:right; }
-      .hours { font-size:12pt; font-weight:bold; margin-bottom:6mm; }
+      .hours { font-size:12pt; font-weight:bold; margin-bottom:2mm; }
+      .regie { font-size:11pt; font-weight:bold; color:#8a5a00; margin-bottom:6mm; }
+      .reg { font-size:7.5pt; font-weight:bold; color:#8a5a00; border:1px solid #8a5a00; padding:0 1mm; border-radius:1mm; }
       .note { font-size:9pt; white-space:pre-wrap; margin-bottom:10mm; }
       .sig { margin-top:14mm; border-top:1px solid #333; padding-top:3mm; width:80mm; }
       .sig img { max-width:70mm; max-height:28mm; display:block; margin-bottom:2mm; }
@@ -3106,6 +3117,7 @@ export default function SiteManager() {
       <h1>${esc(t.rapportTitle)}</h1>
       <div class="meta">${esc(report.date)}${pr ? " &nbsp;·&nbsp; " + esc(pr.name) : ""}${pr && pr.address ? ", " + esc(pr.address) : ""}</div>
       <div class="hours">${esc(t.hoursWorked)}: ${esc(report.hours)} h</div>
+      ${Number(report.regieHours) > 0 ? `<div class="regie">${esc(t.regieTitle)}: ${esc(report.regieHours)} h</div>` : ""}
       ${rows ? `<table><thead><tr><th>${esc(t.docDescription)}</th><th class="r">${esc(t.qtyPlaceholder)}</th></tr></thead><tbody>${rows}</tbody></table>` : ""}
       ${report.note ? `<div class="note">${esc(report.note)}</div>` : ""}
       <div class="sig">
@@ -3426,7 +3438,8 @@ export default function SiteManager() {
       hours,
       lines: list
         .filter((e) => e.type === "material" || e.type === "tool")
-        .map((e) => ({ description: e.description, qty: e.qty || "", unit: e.unit || "" })),
+        .map((e) => ({ description: e.description, qty: e.qty || "", unit: e.unit || "", regie: !!e.regie })),
+      regieHours: list.filter((e) => e.type === "time" && e.regie).reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0),
       note: "",
       signerName: "",
       signature: null,
@@ -3465,6 +3478,75 @@ export default function SiteManager() {
       setRapportModal((r) => ({ ...r, busy: false }));
       showToast(t.couldntSave);
     }
+  }
+
+  // Regie is work beyond what was quoted — the rot found under the tiles, the
+  // extra day nobody agreed to in writing. It is the most commonly lost money
+  // in this trade, so it is tracked separately and billed on its own.
+  function regieEntries(projectId, { unbilledOnly = false } = {}) {
+    return entries.filter((e) =>
+      e.projectId === projectId && e.regie && (!unbilledOnly || !e.billedIn));
+  }
+
+  function regieSummary(projectId, opts) {
+    const list = regieEntries(projectId, opts);
+    const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
+    const rate = parseFloat(billing.labourRate || 0) || 0;
+    let materials = 0;
+    let unpriced = 0;
+    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
+      const price = parseFloat(e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()] ?? "");
+      const qty = parseFloat(e.qty || 0) || 0;
+      if (!isNaN(price) && price > 0) materials += price * (qty || 1);
+      else unpriced++;
+    });
+    return { list, count: list.length, hours, labour: hours * rate, materials, total: hours * rate + materials, unpriced };
+  }
+
+  // Turns unbilled Regie into its own document, and marks those entries as
+  // billed so the same extra work cannot be charged twice.
+  function createRegieDocument(project, type) {
+    const { list } = regieSummary(project.id, { unbilledOnly: true });
+    if (list.length === 0) { showToast(t.regieNothing); return; }
+
+    const rate = parseFloat(billing.labourRate || 0) || 0;
+    const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
+    const lineItems = [];
+    if (hours > 0 && rate > 0) {
+      lineItems.push({ id: uid(), description: t.regieLabour, qty: String(Math.round(hours * 100) / 100), unit: "h", unitPrice: String(rate) });
+    }
+    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
+      const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
+      if (price) lineItems.push({ id: uid(), description: e.description, qty: String(e.qty || 1), unit: e.unit || "", unitPrice: String(price) });
+    });
+    if (lineItems.length === 0) { showToast(t.regieNoPrices); return; }
+
+    const vatKey = billing.defaultVatKey || "standard";
+    const due = new Date();
+    due.setDate(due.getDate() + (parseInt(billing.paymentDays, 10) || 30));
+    const docId = uid();
+    const record = {
+      id: docId,
+      type,
+      projectId: project.id,
+      customerId: project.customerId || null,
+      number: nextDocNumber(documents, type, new Date().getFullYear()),
+      date: todayKey(),
+      dueDate: due.toISOString().slice(0, 10),
+      lineItems,
+      vatRate: (VAT_RATES.find((v) => v.key === vatKey) || VAT_RATES[0]).rate,
+      notes: t.regieDocNote,
+      status: "draft",
+      isRegie: true,
+      createdAt: Date.now(),
+    };
+    const billedIds = new Set(list.map((e) => e.id));
+    persist({
+      documents: [record, ...documents],
+      entries: entries.map((e) => (billedIds.has(e.id) ? { ...e, billedIn: docId } : e)),
+    });
+    setDocEditor(record);
+    showToast(t.regieCreated);
   }
 
   function assignmentsFor(date) {
@@ -3914,7 +3996,7 @@ export default function SiteManager() {
   }
 
   function openAdd(type, projectId) {
-    setForm({ description: "", qty: "", unit: "", unitPrice: "" });
+    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false });
     setPhotoPreview(null);
     setPhotoPreviewId(null);
     setSuggestCat(null);
@@ -3924,7 +4006,7 @@ export default function SiteManager() {
   }
 
   function openEditEntry(entry) {
-    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "" });
+    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie });
     // Keep the existing photo's id so re-saving without picking a new image
     // reuses that document instead of writing a duplicate.
     setPhotoPreviewId(entry.photoId || null);
@@ -4024,9 +4106,9 @@ export default function SiteManager() {
       if (!form.description.trim()) return;
       const unitPrice = form.unitPrice === "" || form.unitPrice === undefined ? undefined : form.unitPrice;
       if (addModal.editingId) {
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice } : e)) });
+        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie } : e)) });
       } else {
-        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice });
+        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie });
       }
       if ((addModal.type === "material" || addModal.type === "tool") && form.unit.trim()) {
         const key = form.description.trim().toLowerCase();
@@ -6380,6 +6462,8 @@ export default function SiteManager() {
           reports={siteReports.filter((r) => r.projectId === selectedProject)}
           onOpenRapport={(pid) => openRapport(pid)}
           onPrintRapport={printRapport}
+          regie={regieSummary(selectedProject, { unbilledOnly: true })}
+          onRegieDocument={(type) => createRegieDocument(projects.find((p) => p.id === selectedProject), type)}
           onEdit={() => {
             const p = projects.find((pr) => pr.id === selectedProject);
             setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS, quotedAmount: p.quotedAmount || "" });
@@ -6710,6 +6794,20 @@ export default function SiteManager() {
                 style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                 className="w-full mt-2 rounded-lg px-3 py-2 text-sm outline-none"
               />
+              {/* Flagging extra work at the moment it happens is the only time
+                  anyone reliably remembers to. */}
+              <button
+                onClick={() => setForm((f) => ({ ...f, regie: !f.regie }))}
+                style={{
+                  background: form.regie ? `${COLORS.amber}22` : COLORS.cardAlt,
+                  border: `1px solid ${form.regie ? COLORS.amber : COLORS.border}`,
+                  color: form.regie ? COLORS.amber : COLORS.muted,
+                }}
+                className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+              >
+                {form.regie ? <Check size={14} /> : <Plus size={14} />} {t.regieToggle}
+              </button>
+              <div style={{ color: COLORS.muted }} className="text-[10px] mt-1 leading-relaxed">{t.regieHint}</div>
             </div>
           )}
           <button onClick={submitAdd} style={{ background: COLORS.accent }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{addModal.editingId ? t.saveLabel : t.logItBtn}</button>
@@ -7088,7 +7186,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -7190,6 +7288,41 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             })}
           </div>
         )}
+        {regie && regie.count > 0 && (
+          <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55` }} className="rounded-xl p-3 mb-4">
+            <div style={{ color: COLORS.amber }} className="text-xs uppercase tracking-wide mb-2 font-bold">
+              {t.regieTitle} ({regie.count})
+            </div>
+            <div className="flex flex-col gap-1 text-sm">
+              {regie.hours > 0 && (
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.regieLabour}</span>
+                  <span>{regie.hours.toFixed(1)} h</span>
+                </div>
+              )}
+              {canBill && (
+                <div style={{ borderTop: `1px solid ${COLORS.amber}33` }} className="flex justify-between pt-1 mt-1 font-bold">
+                  <span>{t.regieUnbilled}</span>
+                  <span style={{ color: COLORS.amber }}>{money(regie.total)}</span>
+                </div>
+              )}
+            </div>
+            {canBill && regie.unpriced > 0 && (
+              <div style={{ color: COLORS.amber }} className="text-[10px] mt-1.5">{regie.unpriced} {t.costingUnpriced}</div>
+            )}
+            {canBill && (
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <button onClick={() => onRegieDocument("quote")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-[11px] font-bold uppercase">
+                  {t.regieAsQuote}
+                </button>
+                <button onClick={() => onRegieDocument("invoice")} style={{ background: COLORS.amber, color: "#241C00" }} className="py-2 rounded-lg text-[11px] font-bold uppercase">
+                  {t.regieAsInvoice}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {canBill && costing && (costing.hasRate || costing.materials > 0 || costing.quoted > 0) && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 mb-4">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.costingTitle}</div>
@@ -7263,7 +7396,14 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder
           <div style={{ background: COLORS.card }} className="rounded-lg pl-1 pr-3 py-2 text-sm flex items-center justify-between gap-2">
             {handle}
             <div className="flex-1 min-w-0">
-              <div className="truncate">{i.description}</div>
+              <div className="truncate flex items-center gap-1.5">
+                {i.regie && (
+                  <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-[9px] font-bold px-1 py-0.5 rounded uppercase">
+                    {t.regieShort}
+                  </span>
+                )}
+                <span className="truncate">{i.description}</span>
+              </div>
             </div>
             <span style={{ color: COLORS.muted }} className="shrink-0">{i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}</span>
             <div className="flex items-center gap-2 shrink-0">
