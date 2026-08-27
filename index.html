@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Site Log</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // The desktop layout is keyed on `lg`, which Tailwind puts at 1024px. That
+  // is measured in CSS pixels, and Windows laptops commonly run 125–150%
+  // display scaling: a 1366px screen at 150% reports 910px, so a perfectly
+  // ordinary office laptop would get the phone layout. Starting `lg` at 900px
+  // covers those machines while still keeping a tablet in portrait on the
+  // phone layout, where it belongs.
+  tailwind.config = {
+    theme: { screens: { sm: "640px", md: "768px", lg: "900px", xl: "1280px", "2xl": "1536px" } },
+  };
+</script>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon.svg" />
