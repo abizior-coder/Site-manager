@@ -49,6 +49,18 @@ git push origin main   # GitHub Pages deploys from main
 There is no CI. Pushing `main` publishes. Always run `npm run build` before
 committing, or the deployed app will not contain your change.
 
+> **A successful push does not mean the site deployed.** GitHub Pages builds
+> separately and can fail while the repository looks perfectly healthy — it
+> did, silently, for two commits, and the live site served a 404 the whole
+> time while the code was correct. `.nojekyll` removes the step that was
+> failing (this is a plain static site; Jekyll only adds a way to break).
+> After pushing anything beyond app code, check the build rather than
+> assuming propagation delay:
+>
+> ```text
+> gh api repos/abizior-coder/Site-manager/pages/builds --jq ".[0].status"
+> ```
+
 ### Services
 
 | Service | Identifier | Notes |
