@@ -5,6 +5,7 @@
 // had exercised since they were written.
 
 import { build } from "esbuild";
+import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -99,6 +100,62 @@ t("a known status is returned", M.statusMeta("construction").key, "construction"
 // --- duration formatting -------------------------------------------------
 t("formats hours and minutes", M.fmtHM(3600000 * 7.5), "7h 30m");
 t("formats under an hour", M.fmtHM(60000 * 45), "0h 45m");
+
+// --- supplier price lists ------------------------------------------------
+// These numbers become invoice lines, so the number formats merchants actually
+// export are pinned down here rather than trusted to parseFloat.
+t("swiss thousands apostrophe", parsePrice("1'234.50"), "1234.5");
+t("german decimal comma", parsePrice("2,75"), "2.75");
+t("german thousands dot with decimal comma", parsePrice("1.234,50"), "1234.5");
+t("english thousands comma", parsePrice("1,234.50"), "1234.5");
+t("bare thousands comma is not a decimal", parsePrice("1,234"), "1234");
+t("currency symbols are ignored", parsePrice("CHF 89.90"), "89.9");
+t("empty price stays empty", parsePrice(""), "");
+t("a dash stays empty", parsePrice("-"), "");
+
+{
+  const r = parsePriceList("Artikelbezeichnung;Artikel-Nr;Einheit;Preis\nLattung 40/60;12345;m;1'234.50");
+  t("csv row is parsed", r.rows, [{ name: "Lattung 40/60", artNo: "12345", unit: "m", price: "1234.5", supplier: "" }]);
+  t("csv format is detected", r.format, "csv");
+}
+{
+  const r = parsePriceList("name,sku,uom,price\nRidge tile,R-1,Stk,4.20");
+  t("comma delimiter with english headers", r.rows.length, 1);
+  t("english header maps the article number", r.rows[0].artNo, "R-1");
+}
+{
+  const r = parsePriceList("Menge;Datum\n5;2026-01-01");
+  t("a file with no name column imports nothing", r.rows.length, 0);
+  t("and says why", r.warnings, ["noNameColumn"]);
+}
+{
+  const r = parsePriceList("Bezeichnung;Artikel-Nr\nDachziegel;9");
+  t("a missing price column is flagged, not fatal", r.warnings.includes("noPriceColumn"), true);
+  t("rows still import without prices", r.rows.length, 1);
+}
+{
+  const r = parsePriceList("V;irrelevant header\nA;N;4711;;Dachziegel;rot;;;Stk;2,75;;;");
+  t("datanorm records are recognised", r.format, "datanorm");
+  t("datanorm article number", r.rows[0].artNo, "4711");
+  t("datanorm joins both short texts", r.rows[0].name, "Dachziegel rot");
+  t("datanorm field order is flagged for review", r.warnings.includes("datanormFieldOrder"), true);
+}
+{
+  const before = { dachziegel: { name: "Dachziegel", unit: "Stk", price: "2.00", artNo: "", supplier: "" } };
+  const m = mergeIntoCatalog(before, [
+    { name: "Dachziegel", artNo: "4711", unit: "Stk", price: "2.75", supplier: "" },
+    { name: "Lattung", artNo: "12", unit: "m", price: "1.10", supplier: "" },
+  ], "HGC");
+  t("new articles are counted", m.added, 1);
+  t("existing articles are counted", m.updated, 1);
+  t("a changed price is called out", m.repriced, 1);
+  t("the import fills in the article number", m.catalog.dachziegel.artNo, "4711");
+  t("the default supplier is applied", m.catalog.lattung.supplier, "HGC");
+}
+{
+  const m = mergeIntoCatalog({}, [{ name: "Blech", artNo: "", unit: "", price: "", supplier: "" }], "");
+  t("a row with no price does not invent one", m.catalog.blech.price, "");
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

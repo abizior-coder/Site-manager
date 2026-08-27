@@ -97,6 +97,16 @@ async function renderAs(role) {
     check(`owner: tab ${label} renders`, errors.length === before && (window.document.body.textContent || "").length > 50,
       errors.slice(before, before + 1).join(" | "));
   }
+  // The price-list import is owner-only and writes the prices that end up on
+  // invoices, so at minimum it has to be reachable.
+  {
+    const matTab = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "MATERIAL");
+    matTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: article master card is offered", text().includes("Unsere Artikel"), "no article master card");
+    check("owner: price list can be imported", text().includes("Preisliste importieren"), "no import button");
+  }
+
   // The job view is the busiest screen in the app and nothing was opening it,
   // so a crash in the crew drop zone or the material composer would have gone
   // out unnoticed.

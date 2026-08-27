@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
+import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
@@ -1265,7 +1266,7 @@ export default function SiteManager() {
   // suppliers and article numbers would have made four. Everything a material
   // name knows about itself now lives in one record, keyed by the lowercased
   // name, which is also what a price-list import will write into.
-  const [catalog, setCatalog] = useState({});
+  const [articleMaster, setArticleMaster] = useState({});
   const [unitSuggestFocused, setUnitSuggestFocused] = useState(false);
   const [backupModal, setBackupModal] = useState(null); // 'export' | 'import' | null
   const [backupCodeOutput, setBackupCodeOutput] = useState("");
@@ -1274,6 +1275,8 @@ export default function SiteManager() {
   const [newProjectAddr, setNewProjectAddr] = useState("");
   const [addModal, setAddModal] = useState(null);
   const [lastTrade, setLastTrade] = useState(DEFAULT_TRADE);
+  const [priceImport, setPriceImport] = useState(null);
+  const priceFileRef = useRef(null);
   const [suggestCat, setSuggestCat] = useState(null);
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
   const [sizeInput, setSizeInput] = useState("");
@@ -1301,14 +1304,14 @@ export default function SiteManager() {
   // Kept as derived views so the costing call sites read the same as before.
   const materialUnits = useMemo(() => {
     const out = {};
-    for (const [k, v] of Object.entries(catalog)) if (v.unit) out[k] = v.unit;
+    for (const [k, v] of Object.entries(articleMaster)) if (v.unit) out[k] = v.unit;
     return out;
-  }, [catalog]);
+  }, [articleMaster]);
   const materialPrices = useMemo(() => {
     const out = {};
-    for (const [k, v] of Object.entries(catalog)) if (v.price) out[k] = v.price;
+    for (const [k, v] of Object.entries(articleMaster)) if (v.price) out[k] = v.price;
     return out;
-  }, [catalog]);
+  }, [articleMaster]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [selectedDay, setSelectedDay] = useState(null);
@@ -1472,7 +1475,7 @@ export default function SiteManager() {
       try {
         const catRes = await window.storage.get("site-material-catalog");
         if (catRes && catRes.value) {
-          setCatalog(JSON.parse(catRes.value));
+          setArticleMaster(JSON.parse(catRes.value));
         } else {
           // First run after the split: fold the two old maps into one record
           // each, so nobody loses the units and prices the app already learnt.
@@ -1485,7 +1488,7 @@ export default function SiteManager() {
             merged[k] = { name: k, unit: units[k] || "", price: prices[k] || "", supplier: "", artNo: "" };
           }
           if (Object.keys(merged).length) {
-            setCatalog(merged);
+            setArticleMaster(merged);
             window.storage.set("site-material-catalog", JSON.stringify(merged)).catch(() => {});
           }
         }
@@ -3164,7 +3167,7 @@ export default function SiteManager() {
   // Only ever fills blanks. Overwriting what somebody typed on site to match
   // an older record is how the wrong price ends up on an invoice.
   function setDescriptionWithUnitMemory(name) {
-    const known = catalog[name.trim().toLowerCase()] || {};
+    const known = articleMaster[name.trim().toLowerCase()] || {};
     setForm((f) => ({
       ...f,
       description: name,
@@ -3175,14 +3178,46 @@ export default function SiteManager() {
     }));
   }
 
+  // A price list rewrites numbers that end up on invoices, so it is staged
+  // and shown first. Nothing is written until the boss looks at the counts.
+  async function stagePriceList(file, supplier) {
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parsePriceList(text);
+      const preview = mergeIntoCatalog(articleMaster, parsed.rows, supplier || "");
+      setPriceImport({
+        fileName: file.name,
+        supplier: supplier || "",
+        rows: parsed.rows,
+        format: parsed.format,
+        warnings: parsed.warnings,
+        added: preview.added,
+        updated: preview.updated,
+        repriced: preview.repriced,
+      });
+    } catch (err) {
+      showToast(t.importFailed);
+    }
+  }
+
+  function applyPriceList() {
+    if (!priceImport || !priceImport.rows.length) return;
+    const merged = mergeIntoCatalog(articleMaster, priceImport.rows, priceImport.supplier);
+    setArticleMaster(merged.catalog);
+    window.storage.set("site-material-catalog", JSON.stringify(merged.catalog)).catch(() => {});
+    setPriceImport(null);
+    showToast(`${merged.added + merged.updated} ${t.articlesImported}`);
+  }
+
   function rememberMaterial(name, patch) {
     const key = (name || "").trim().toLowerCase();
     if (!key) return;
     // A blank field means "I did not say", not "clear what you knew".
     const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== "" && v != null));
-    if (!Object.keys(clean).length && catalog[key]) return;
-    const next = { ...catalog, [key]: { name: name.trim(), ...(catalog[key] || {}), ...clean } };
-    setCatalog(next);
+    if (!Object.keys(clean).length && articleMaster[key]) return;
+    const next = { ...articleMaster, [key]: { name: name.trim(), ...(articleMaster[key] || {}), ...clean } };
+    setArticleMaster(next);
     window.storage.set("site-material-catalog", JSON.stringify(next)).catch(() => {});
   }
 
@@ -4005,8 +4040,38 @@ export default function SiteManager() {
             </div>
           );
 
+          const known = Object.keys(articleMaster).length;
           return (
             <div className="flex flex-col gap-3">
+              {/* The catalog below is a fixed shopping list. This is the firm's
+                  own article master: what it actually buys, at what price,
+                  under which article number. */}
+              {isOwner() && (
+                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold flex items-center gap-1.5"><BookOpen size={14} color={COLORS.accent} /> {t.articleMasterTitle}</div>
+                      <div style={{ color: COLORS.muted }} className="text-[11px] mt-0.5">
+                        {known > 0 ? `${known} ${t.articlesKnown}` : t.articleMasterEmpty}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => priceFileRef.current?.click()}
+                      style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.accent }}
+                      className="shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold uppercase"
+                    >
+                      {t.importPriceList}
+                    </button>
+                  </div>
+                  <input
+                    ref={priceFileRef}
+                    type="file"
+                    accept=".csv,.txt,.tsv,text/csv,text/plain"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; stagePriceList(f, ""); }}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-4 gap-2">
                 <button onClick={() => { setMaterialsSubTab("shop"); setShopCat(null); }} style={{ background: materialsSubTab === "shop" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><ShoppingCart size={14} /> {t.shopTab}</button>
                 <button onClick={() => { setMaterialsSubTab("tools"); setShopCat(null); }} style={{ background: materialsSubTab === "tools" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Wrench size={14} /> {t.toolsTab}</button>
@@ -6357,6 +6422,82 @@ export default function SiteManager() {
               <button onClick={() => sendReportVia(reportViewModal)} style={{ background: COLORS.accentDim }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Send size={14} /> {t.resendBtn}</button>
             </div>
           </div>
+        </Modal>
+      )}
+
+      {priceImport && (
+        <Modal onClose={() => setPriceImport(null)} title={t.importPriceList}>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{priceImport.fileName}</div>
+          {priceImport.rows.length === 0 ? (
+            <div>
+              <div style={{ color: COLORS.danger }} className="text-sm font-semibold mb-2">{t.importNothingFound}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">{t.importNeedsHeaders}</div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {[
+                  [priceImport.added, t.importNew, COLORS.success],
+                  [priceImport.updated, t.importUpdated, COLORS.accent],
+                  [priceImport.repriced, t.importRepriced, COLORS.amber],
+                ].map(([n, label, colour]) => (
+                  <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2 text-center">
+                    <div style={{ color: colour }} className="text-lg font-black tabular-nums">{n}</div>
+                    <div style={{ color: COLORS.muted }} className="text-[10px] uppercase">{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Naming the merchant on import is what makes the purchase-order
+                  grouping work later, and most exports do not carry it. */}
+              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {KNOWN_SUPPLIERS.map((sup) => {
+                  const on = priceImport.supplier === sup;
+                  return (
+                    <button
+                      key={sup}
+                      onClick={() => setPriceImport((s2) => ({ ...s2, supplier: on ? "" : sup }))}
+                      style={{
+                        background: on ? `${COLORS.success}22` : COLORS.cardAlt,
+                        border: `1px solid ${on ? COLORS.success : COLORS.border}`,
+                        color: on ? COLORS.success : COLORS.muted,
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                    >
+                      {sup}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {priceImport.warnings.length > 0 && (
+                <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55`, color: COLORS.amber }} className="rounded-lg p-2.5 mb-3 text-[11px] leading-relaxed">
+                  {priceImport.warnings.map((w) => (
+                    <div key={w}>{t[`importWarn_${w}`] || w}</div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.importPreview}</div>
+              <div style={{ border: `1px solid ${COLORS.border}` }} className="rounded-lg overflow-hidden mb-3">
+                {priceImport.rows.slice(0, 8).map((r, i) => (
+                  <div key={i} style={{ background: i % 2 ? COLORS.cardAlt : COLORS.card }} className="px-2.5 py-1.5 flex items-center justify-between gap-2 text-[11px]">
+                    <span className="truncate flex-1 min-w-0">{r.name}</span>
+                    {r.artNo && <span style={{ color: COLORS.muted }} className="shrink-0">{r.artNo}</span>}
+                    <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{r.price ? `${r.price}${r.unit ? "/" + r.unit : ""}` : ""}</span>
+                  </div>
+                ))}
+              </div>
+              {priceImport.rows.length > 8 && (
+                <div style={{ color: COLORS.muted }} className="text-[10px] mb-3">+{priceImport.rows.length - 8} {t.importMoreRows}</div>
+              )}
+
+              <button onClick={applyPriceList} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">
+                {t.importApply}
+              </button>
+            </>
+          )}
         </Modal>
       )}
 
