@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Kei Prisspalte gfunde — Artikel chömed ohni Pris.",
   "importWarn_noArtNoColumn": "Kei Artikelnummere-Spalte gfunde.",
   "importWarn_datanormFieldOrder": "DATANORM-Datei: D Feldreihefolg variiert je Händler. Vorschau vor em Import prüefe.",
-  "importWarn_emptyFile": "D Datei isch leer."
+  "importWarn_emptyFile": "D Datei isch leer.",
+  "typeOrder": "Bstellmaterial",
+  "requestOrderBtn": "Aafordere",
+  "orderRequestedToast": "Aagforderet",
+  "orderDeliveredToast": "Als Material verbuecht",
+  "orderListTitle": "Materialaaforderige",
+  "orderRequested": "Aagforderet",
+  "orderOrdered": "Bstellt",
+  "orderDelivered": "Gliferet",
+  "markOrdered": "Bstellt",
+  "markDelivered": "Gliferet",
+  "supplierUnknown": "Kein Liferant"
 }

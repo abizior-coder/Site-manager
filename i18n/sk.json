@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Žiadny stĺpec s cenou — artikle sa importujú bez cien.",
   "importWarn_noArtNoColumn": "Žiadny stĺpec s číslom artikla.",
   "importWarn_datanormFieldOrder": "Súbor DATANORM: poradie polí sa líši podľa veľkoobchodu. Skontrolujte náhľad.",
-  "importWarn_emptyFile": "Súbor je prázdny."
+  "importWarn_emptyFile": "Súbor je prázdny.",
+  "typeOrder": "Objednaný materiál",
+  "requestOrderBtn": "Požiadať",
+  "orderRequestedToast": "Požiadané",
+  "orderDeliveredToast": "Zaúčtované ako materiál",
+  "orderListTitle": "Požiadavky na materiál",
+  "orderRequested": "Požiadané",
+  "orderOrdered": "Objednané",
+  "orderDelivered": "Dodané",
+  "markOrdered": "Objednané",
+  "markDelivered": "Dodané",
+  "supplierUnknown": "Bez dodávateľa"
 }

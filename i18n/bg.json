@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Няма колона с цена — артикулите ще се импортират без цени.",
   "importWarn_noArtNoColumn": "Няма колона с артикулен номер.",
   "importWarn_datanormFieldOrder": "Файл DATANORM: редът на полетата се различава при отделните доставчици. Проверете прегледа.",
-  "importWarn_emptyFile": "Файлът е празен."
+  "importWarn_emptyFile": "Файлът е празен.",
+  "typeOrder": "Поръчан материал",
+  "requestOrderBtn": "Заяви",
+  "orderRequestedToast": "Заявено",
+  "orderDeliveredToast": "Записано като материал",
+  "orderListTitle": "Заявки за материал",
+  "orderRequested": "Заявено",
+  "orderOrdered": "Поръчано",
+  "orderDelivered": "Доставено",
+  "markOrdered": "Поръчано",
+  "markDelivered": "Доставено",
+  "supplierUnknown": "Без доставчик"
 }

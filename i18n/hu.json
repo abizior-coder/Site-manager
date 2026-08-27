@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Nincs ár oszlop — a cikkek ár nélkül kerülnek be.",
   "importWarn_noArtNoColumn": "Nincs cikkszám oszlop.",
   "importWarn_datanormFieldOrder": "DATANORM fájl: a mezősorrend kereskedőnként eltér. Ellenőrizze az előnézetet.",
-  "importWarn_emptyFile": "A fájl üres."
+  "importWarn_emptyFile": "A fájl üres.",
+  "typeOrder": "Rendelt anyag",
+  "requestOrderBtn": "Igénylés",
+  "orderRequestedToast": "Igényelve",
+  "orderDeliveredToast": "Anyagként könyvelve",
+  "orderListTitle": "Anyagigénylések",
+  "orderRequested": "Igényelve",
+  "orderOrdered": "Megrendelve",
+  "orderDelivered": "Leszállítva",
+  "markOrdered": "Megrendelve",
+  "markDelivered": "Leszállítva",
+  "supplierUnknown": "Nincs szállító"
 }

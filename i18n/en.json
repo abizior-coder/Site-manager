@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "No price column found — articles will import without prices.",
   "importWarn_noArtNoColumn": "No article-number column found.",
   "importWarn_datanormFieldOrder": "DATANORM file: field order varies between merchants. Check the preview before importing.",
-  "importWarn_emptyFile": "The file is empty."
+  "importWarn_emptyFile": "The file is empty.",
+  "typeOrder": "Ordered material",
+  "requestOrderBtn": "Request",
+  "orderRequestedToast": "Requested",
+  "orderDeliveredToast": "Booked as material",
+  "orderListTitle": "Material requests",
+  "orderRequested": "Requested",
+  "orderOrdered": "Ordered",
+  "orderDelivered": "Delivered",
+  "markOrdered": "Ordered",
+  "markDelivered": "Delivered",
+  "supplierUnknown": "No supplier"
 }

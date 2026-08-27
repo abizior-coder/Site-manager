@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Nessuna colonna prezzo — gli articoli saranno importati senza prezzo.",
   "importWarn_noArtNoColumn": "Nessuna colonna numero articolo.",
   "importWarn_datanormFieldOrder": "File DATANORM: l'ordine dei campi varia tra grossisti. Controlla l'anteprima.",
-  "importWarn_emptyFile": "Il file è vuoto."
+  "importWarn_emptyFile": "Il file è vuoto.",
+  "typeOrder": "Materiale ordinato",
+  "requestOrderBtn": "Richiedi",
+  "orderRequestedToast": "Richiesto",
+  "orderDeliveredToast": "Registrato come materiale",
+  "orderListTitle": "Richieste di materiale",
+  "orderRequested": "Richiesto",
+  "orderOrdered": "Ordinato",
+  "orderDelivered": "Consegnato",
+  "markOrdered": "Ordinato",
+  "markDelivered": "Consegnato",
+  "supplierUnknown": "Nessun fornitore"
 }

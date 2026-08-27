@@ -881,6 +881,15 @@ const TRADES = [
 ];
 const DEFAULT_TRADE = "other";
 
+// A material request is not a delivery. It is asked for on the roof, ordered
+// in the office, and only becomes consumed material when it actually turns up
+// -- which is the point where it may count towards the job's cost.
+const ORDER_STATES = [
+  { key: "requested", labelKey: "orderRequested", color: "#E0B341" },
+  { key: "ordered", labelKey: "orderOrdered", color: "#6FB3D9" },
+  { key: "delivered", labelKey: "orderDelivered", color: "#8FBF7F" },
+];
+
 // The merchants this trade actually buys from in this region. One tap covers
 // most deliveries; the field stays free text for everyone else.
 const KNOWN_SUPPLIERS = ["HGC", "GABS", "Soprema", "Velux", "Glaromat", "Gyso", "SFS", "Hasler"];
@@ -1168,6 +1177,7 @@ function typeMeta(type, t) {
     photo: { label: t.typePhoto, icon: Camera, color: "#7FA0C7" },
     pickup: { label: t.typePickup, icon: QrCode, color: "#C9A6F5" },
     inspection: { label: t.typeInspection, icon: ClipboardCheck, color: "#6FB3D9" },
+    order: { label: t.typeOrder, icon: Truck, color: "#C68B4F" },
   };
   return map[type];
 }
@@ -1243,6 +1253,7 @@ export default function SiteManager() {
   const [shopCat, setShopCat] = useState(null);
   const [basket, setBasket] = useState([]);
   const [basketProjectModalOpen, setBasketProjectModalOpen] = useState(false);
+  const [basketMode, setBasketMode] = useState("use");
   const [reportProjectPickerOpen, setReportProjectPickerOpen] = useState(false);
   const [reportProjectSelection, setReportProjectSelection] = useState([]);
   const [toast, setToast] = useState(null);
@@ -3085,6 +3096,43 @@ export default function SiteManager() {
     showToast(t.projectAdded);
   }
 
+  // The same basket that books material onto a job can ask for it instead.
+  // On site those are the same gesture; what differs is whether the stuff is
+  // already on the roof.
+  function requestBasketForProject(projectId) {
+    const requests = basket.map((i) => newEntry({
+      type: "order",
+      projectId,
+      description: i.name,
+      qty: i.qty,
+      unit: i.unit,
+      trade: lastTrade,
+      supplier: (articleMaster[i.name.trim().toLowerCase()] || {}).supplier || "",
+      artNo: (articleMaster[i.name.trim().toLowerCase()] || {}).artNo || "",
+      orderStatus: "requested",
+    }));
+    persist({ entries: [...requests, ...entries] });
+    setBasket([]);
+    setBasketProjectModalOpen(false);
+    showToast(t.orderRequestedToast);
+  }
+
+  function setOrderStatus(entry, status) {
+    if (status === "delivered") {
+      // Delivered material is just material. Turning it into a normal entry
+      // here is what puts it into costing instead of leaving it in a list
+      // nobody reconciles.
+      persist({
+        entries: entries.map((e) => (e.id === entry.id
+          ? { ...e, type: "material", orderStatus: "delivered", deliveredAt: Date.now(), date: todayKey() }
+          : e)),
+      });
+      showToast(t.orderDeliveredToast);
+      return;
+    }
+    persist({ entries: entries.map((e) => (e.id === entry.id ? { ...e, orderStatus: status } : e)) });
+  }
+
   function openAdd(type, projectId) {
     // The trade sticks between entries: someone logging Spengler work logs
     // several pieces in a row, and re-picking it each time is how it ends up
@@ -4072,6 +4120,64 @@ export default function SiteManager() {
                   />
                 </div>
               )}
+              {(() => {
+                // Requests from every job in one place, grouped by merchant,
+                // because one order goes to one merchant and covers several
+                // roofs. Crew see what they asked for; the office sees the lot.
+                const open = entries.filter((e) => e.type === "order" && e.orderStatus !== "delivered");
+                const mine = canManage() ? open : open.filter((e) => e.userId === user?.uid);
+                if (mine.length === 0) return null;
+                const bySupplier = {};
+                mine.forEach((e) => { (bySupplier[e.supplier || t.supplierUnknown] = bySupplier[e.supplier || t.supplierUnknown] || []).push(e); });
+                return (
+                  <div style={{ background: COLORS.card, border: `1px solid #C68B4F55` }} className="rounded-xl p-3">
+                    <div style={{ color: "#C68B4F" }} className="text-xs uppercase tracking-wide mb-2 font-bold flex items-center gap-1.5">
+                      <Truck size={13} /> {t.orderListTitle} ({mine.length})
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {Object.entries(bySupplier).map(([sup, items]) => (
+                        <div key={sup}>
+                          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{sup}</div>
+                          <div className="flex flex-col gap-1.5">
+                            {items.map((e) => {
+                              const st = ORDER_STATES.find((x) => x.key === (e.orderStatus || "requested")) || ORDER_STATES[0];
+                              return (
+                                <div key={e.id} style={{ background: COLORS.cardAlt }} className="rounded-lg px-2.5 py-2">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <div className="text-sm truncate">{e.description}</div>
+                                      <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                                        {[projectName(e.projectId), e.artNo && `${t.artNoShort} ${e.artNo}`].filter(Boolean).join(" · ")}
+                                      </div>
+                                    </div>
+                                    <span style={{ color: COLORS.muted }} className="shrink-0 text-xs tabular-nums">{e.qty}{e.unit ? " " + e.unit : ""}</span>
+                                    <span style={{ background: `${st.color}22`, color: st.color, border: `1px solid ${st.color}66` }} className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase">
+                                      {t[st.labelKey]}
+                                    </span>
+                                  </div>
+                                  {canManage() && (
+                                    <div className="flex gap-1.5 mt-1.5">
+                                      {e.orderStatus !== "ordered" && (
+                                        <button onClick={() => setOrderStatus(e, "ordered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: "#6FB3D9" }} className="flex-1 py-1.5 rounded text-[10px] font-bold uppercase">
+                                          {t.markOrdered}
+                                        </button>
+                                      )}
+                                      <button onClick={() => setOrderStatus(e, "delivered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.success }} className="flex-1 py-1.5 rounded text-[10px] font-bold uppercase">
+                                        {t.markDelivered}
+                                      </button>
+                                      <button onClick={() => deleteEntryFn(e)} style={{ color: COLORS.danger }} className="px-2"><Trash2 size={13} /></button>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="grid grid-cols-4 gap-2">
                 <button onClick={() => { setMaterialsSubTab("shop"); setShopCat(null); }} style={{ background: materialsSubTab === "shop" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><ShoppingCart size={14} /> {t.shopTab}</button>
                 <button onClick={() => { setMaterialsSubTab("tools"); setShopCat(null); }} style={{ background: materialsSubTab === "tools" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Wrench size={14} /> {t.toolsTab}</button>
@@ -4269,7 +4375,10 @@ export default function SiteManager() {
                       </div>
                     ))}
                   </div>
-                  <button onClick={() => setBasketProjectModalOpen(true)} style={{ background: COLORS.accent }} className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase">{t.transferToProjectBtn}</button>
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    <button onClick={() => { setBasketMode("use"); setBasketProjectModalOpen(true); }} style={{ background: COLORS.accent }} className="py-2.5 rounded-lg text-xs font-bold uppercase">{t.transferToProjectBtn}</button>
+                    <button onClick={() => { setBasketMode("order"); setBasketProjectModalOpen(true); }} style={{ background: COLORS.cardAlt, border: `1px solid #C68B4F`, color: "#C68B4F" }} className="py-2.5 rounded-lg text-xs font-bold uppercase">{t.requestOrderBtn}</button>
+                  </div>
                 </div>
               )}
             </div>
@@ -6053,7 +6162,7 @@ export default function SiteManager() {
           <div className="flex flex-col gap-2">
             {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
             {projects.map((p) => (
-              <button key={p.id} onClick={() => transferBasketToProject(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2.5 text-sm font-semibold">
+              <button key={p.id} onClick={() => (basketMode === "order" ? requestBasketForProject(p.id) : transferBasketToProject(p.id))} style={{ background: COLORS.cardAlt, border: `1px solid ${basketMode === "order" ? "#C68B4F" : COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2.5 text-sm font-semibold">
                 {p.name}
               </button>
             ))}
@@ -7037,7 +7146,7 @@ function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) 
   );
 }
 
-const ENTRY_TYPE_ORDER = ["time", "material", "tool", "photo", "pickup", "inspection", "note"];
+const ENTRY_TYPE_ORDER = ["time", "material", "tool", "order", "photo", "pickup", "inspection", "note"];
 
 function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEntry, onDelete }) {
   const [expanded, setExpanded] = useState({});

@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Keine Preisspalte gefunden — Artikel werden ohne Preis importiert.",
   "importWarn_noArtNoColumn": "Keine Artikelnummer-Spalte gefunden.",
   "importWarn_datanormFieldOrder": "DATANORM-Datei: Die Feldreihenfolge variiert je Händler. Vorschau vor dem Import prüfen.",
-  "importWarn_emptyFile": "Die Datei ist leer."
+  "importWarn_emptyFile": "Die Datei ist leer.",
+  "typeOrder": "Bestellmaterial",
+  "requestOrderBtn": "Anfordern",
+  "orderRequestedToast": "Angefordert",
+  "orderDeliveredToast": "Als Material verbucht",
+  "orderListTitle": "Materialanforderungen",
+  "orderRequested": "Angefordert",
+  "orderOrdered": "Bestellt",
+  "orderDelivered": "Geliefert",
+  "markOrdered": "Bestellt",
+  "markDelivered": "Geliefert",
+  "supplierUnknown": "Kein Lieferant"
 }

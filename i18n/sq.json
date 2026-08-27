@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Nuk u gjet kolonë çmimi — artikujt do të importohen pa çmim.",
   "importWarn_noArtNoColumn": "Nuk u gjet kolonë me numër artikulli.",
   "importWarn_datanormFieldOrder": "Skedar DATANORM: rendi i fushave ndryshon sipas tregtarit. Kontrollo parapamjen.",
-  "importWarn_emptyFile": "Skedari është bosh."
+  "importWarn_emptyFile": "Skedari është bosh.",
+  "typeOrder": "Material i porositur",
+  "requestOrderBtn": "Kërko",
+  "orderRequestedToast": "U kërkua",
+  "orderDeliveredToast": "U regjistrua si material",
+  "orderListTitle": "Kërkesat për material",
+  "orderRequested": "E kërkuar",
+  "orderOrdered": "E porositur",
+  "orderDelivered": "E dorëzuar",
+  "markOrdered": "E porositur",
+  "markDelivered": "E dorëzuar",
+  "supplierUnknown": "Pa furnitor"
 }

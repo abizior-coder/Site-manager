@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Brak kolumny z ceną — artykuły zostaną zaimportowane bez cen.",
   "importWarn_noArtNoColumn": "Brak kolumny z numerem artykułu.",
   "importWarn_datanormFieldOrder": "Plik DATANORM: kolejność pól różni się między hurtowniami. Sprawdź podgląd przed importem.",
-  "importWarn_emptyFile": "Plik jest pusty."
+  "importWarn_emptyFile": "Plik jest pusty.",
+  "typeOrder": "Materiał zamówiony",
+  "requestOrderBtn": "Zamów",
+  "orderRequestedToast": "Zgłoszono",
+  "orderDeliveredToast": "Zaksięgowano jako materiał",
+  "orderListTitle": "Zapotrzebowanie na materiał",
+  "orderRequested": "Zgłoszone",
+  "orderOrdered": "Zamówione",
+  "orderDelivered": "Dostarczone",
+  "markOrdered": "Zamówione",
+  "markDelivered": "Dostarczone",
+  "supplierUnknown": "Brak dostawcy"
 }

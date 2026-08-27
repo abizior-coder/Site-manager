@@ -557,5 +557,16 @@
   "importWarn_noPriceColumn": "Nicio coloană de preț — articolele se importă fără preț.",
   "importWarn_noArtNoColumn": "Nicio coloană cu număr de articol.",
   "importWarn_datanormFieldOrder": "Fișier DATANORM: ordinea câmpurilor diferă între furnizori. Verifică previzualizarea.",
-  "importWarn_emptyFile": "Fișierul este gol."
+  "importWarn_emptyFile": "Fișierul este gol.",
+  "typeOrder": "Material comandat",
+  "requestOrderBtn": "Solicită",
+  "orderRequestedToast": "Solicitat",
+  "orderDeliveredToast": "Înregistrat ca material",
+  "orderListTitle": "Cereri de material",
+  "orderRequested": "Solicitat",
+  "orderOrdered": "Comandat",
+  "orderDelivered": "Livrat",
+  "markOrdered": "Comandat",
+  "markDelivered": "Livrat",
+  "supplierUnknown": "Fără furnizor"
 }
