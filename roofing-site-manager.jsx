@@ -2669,20 +2669,28 @@ export default function SiteManager() {
     } catch (err) {}
   }
 
+  // Leave used to be matched on date alone, which was fine for one person and
+  // wrong the moment a crew existed: opening a day would edit whichever
+  // request happened to fall on it, including someone else’s. Requests made
+  // before crew accounts have no userId and are treated as the owner’s.
+  function myLeaveFor(date) {
+    return leaveRequests.find((r) => r.date === date && (r.userId ? r.userId === user?.uid : isOwner()));
+  }
+
   function openDay(dateStr) {
     setSelectedDay(dateStr);
-    const existing = leaveRequests.find((r) => r.date === dateStr);
+    const existing = myLeaveFor(dateStr);
     setLeaveForm({ type: existing?.type || "vacation", note: existing?.note || "" });
   }
 
   function submitLeaveRequest() {
     if (!selectedDay) return;
-    const existing = leaveRequests.find((r) => r.date === selectedDay);
+    const existing = myLeaveFor(selectedDay);
     let updated;
     if (existing) {
       updated = leaveRequests.map((r) => (r.id === existing.id ? { ...r, type: leaveForm.type, note: leaveForm.note } : r));
     } else {
-      updated = [...leaveRequests, { id: uid(), date: selectedDay, type: leaveForm.type, note: leaveForm.note, status: "pending", createdAt: Date.now() }];
+      updated = [...leaveRequests, { id: uid(), date: selectedDay, userId: user?.uid || null, type: leaveForm.type, note: leaveForm.note, status: "pending", createdAt: Date.now() }];
     }
     persist({ leaveRequests: updated });
   }
@@ -2699,11 +2707,11 @@ export default function SiteManager() {
     }
     let updated = [...leaveRequests];
     dates.forEach((dateStr) => {
-      const existing = updated.find((r) => r.date === dateStr);
+      const existing = updated.find((r) => r.date === dateStr && (r.userId ? r.userId === user?.uid : isOwner()));
       if (existing) {
         updated = updated.map((r) => (r.id === existing.id ? { ...r, type: rangeLeaveForm.type, note: rangeLeaveForm.note } : r));
       } else {
-        updated.push({ id: uid(), date: dateStr, type: rangeLeaveForm.type, note: rangeLeaveForm.note, status: "pending", createdAt: Date.now() });
+        updated.push({ id: uid(), date: dateStr, userId: user?.uid || null, type: rangeLeaveForm.type, note: rangeLeaveForm.note, status: "pending", createdAt: Date.now() });
       }
     });
     persist({ leaveRequests: updated });
@@ -2844,6 +2852,15 @@ export default function SiteManager() {
       </body></html>`;
   }
 
+  // Projects created since customers became records carry a customerId and an
+  // empty client string, so reading project.client alone left the client blank
+  // on their reports.
+  function clientNameFor(project) {
+    if (!project) return "";
+    const c = project.customerId ? customers.find((x) => x.id === project.customerId) : null;
+    return (c && c.name) || project.client || "";
+  }
+
   function buildReportHtml(report) {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const bySite = {};
@@ -2856,7 +2873,7 @@ export default function SiteManager() {
       const hours = ents.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
       const materials = ents.filter((e) => e.type === "material");
       const machines = ents.filter((e) => e.type === "tool");
-      return { title: siteName, client: proj?.client || "", address: proj?.address || "", hours, materials, machines };
+      return { title: siteName, client: clientNameFor(proj), address: proj?.address || "", hours, materials, machines };
     });
     const subtitle = `${periodLabel} · ${report.periodLabel}${profile.name ? " · " + profile.name : ""}`;
     return renderReportDocument(subtitle, sections);
@@ -2870,7 +2887,7 @@ export default function SiteManager() {
         const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
         const materials = pEntries.filter((e) => e.type === "material");
         const machines = pEntries.filter((e) => e.type === "tool");
-        return { title: p.name, client: p.client || "", address: p.address || "", hours, materials, machines };
+        return { title: p.name, client: clientNameFor(p), address: p.address || "", hours, materials, machines };
       })
       .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0);
     const subtitle = `${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}`;
@@ -4697,7 +4714,7 @@ export default function SiteManager() {
                     if (d === null) return <div key={i} />;
                     const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
                     const hasEntries = entries.some((e) => e.date === dateStr);
-                    const leave = leaveRequests.find((r) => r.date === dateStr);
+                    const leave = isOwner() ? leaveRequests.find((r) => r.date === dateStr) : myLeaveFor(dateStr);
                     const isToday = dateStr === todayKey();
                     // The owner plans for everyone; a crew member only needs to
                     // see the days they are themselves expected somewhere.
@@ -5873,7 +5890,7 @@ export default function SiteManager() {
 
       {selectedDay && (() => {
         const dayEntries = entries.filter((e) => e.date === selectedDay);
-        const leave = leaveRequests.find((r) => r.date === selectedDay);
+        const leave = myLeaveFor(selectedDay);
         return (
           <Modal onClose={() => setSelectedDay(null)} title={selectedDay}>
             <div className="flex flex-col gap-4">
