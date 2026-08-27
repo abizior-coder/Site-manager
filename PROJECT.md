@@ -80,9 +80,10 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/entries/{id}` | One per entry, each carrying `userId` |
 | `companies/{cid}/customers/{id}` | One per customer, with `contacts` history |
 | `companies/{cid}/documents/{id}` | Quotes and invoices — **owner only** |
-| `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, owner writes |
+| `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, managers write |
+| `companies/{cid}/leave/{id}` | Absences — anyone raises their own, only a manager decides |
 | `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
-| `companies/{cid}/members/{uid}` | `role: owner \| crew` |
+| `companies/{cid}/members/{uid}` | `role: owner \| supervisor \| crew` |
 | `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>` |
 | `users/{uid}` | Which company the account belongs to |
 | `invites/{code}` | Short-lived join codes |
