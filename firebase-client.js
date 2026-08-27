@@ -26,20 +26,38 @@ async function boot() {
   ]);
   const app = appMod.initializeApp(firebaseConfig);
 
+  const isLocal = typeof location !== "undefined" && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const useEmulator = isLocal && typeof location !== "undefined" && location.search.includes("emulator=1");
+
   // Offline persistence, enabled at creation. Crews work on roofs with poor
   // signal; without a local cache every read simply fails when the connection
   // drops. Falls back to a plain instance where the browser refuses (private
   // windows, or a second tab holding the lock).
+  //
+  // Skipped against the emulator: a cache surviving between runs would make
+  // test results depend on what a previous run left behind.
   let db;
   try {
-    db = fsMod.initializeFirestore(app, {
-      localCache: fsMod.persistentLocalCache({ tabManager: fsMod.persistentMultipleTabManager() }),
-    });
+    db = useEmulator
+      ? fsMod.initializeFirestore(app, {})
+      : fsMod.initializeFirestore(app, {
+          localCache: fsMod.persistentLocalCache({ tabManager: fsMod.persistentMultipleTabManager() }),
+        });
   } catch {
     db = fsMod.getFirestore(app);
   }
 
   const auth = authMod.getAuth(app);
+
+  // Local emulator mode, opt-in via ?emulator=1 on localhost only. Lets the
+  // real UI be driven end-to-end as every role against disposable data,
+  // without touching production or anyone's real account. The hostname check
+  // means a deployed page can never be pointed at a local emulator.
+  if (useEmulator) {
+    authMod.connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    fsMod.connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    console.info("Firebase: using local emulators");
+  }
   // Survive app restarts on a phone without asking for the password again.
   try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch {}
   sdk = { app, db, auth, fs: fsMod, authApi: authMod };

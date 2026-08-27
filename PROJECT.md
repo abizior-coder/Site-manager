@@ -135,12 +135,11 @@ These are real and currently unfixed. Ordered by how much damage they do.
    everyone, so it is unreachable rather than exposed, but it has not been
    deleted. Remove it from the Firebase console once you are satisfied the
    imported copy under your account is complete.
-2. **Large parts of the app have never been exercised by a person.** A
-   verification pass over untested features found the clock-in list silently
-   capped at four projects, backup restore writing to a key nothing reads, and
-   six entry-creation paths missing `userId`. Reports, the calendar and leave
-   flow, safety/SOS, the materials shop and the technical library are **still
-   unverified**. Assume nothing there works until it has been tried.
+2. **Some flows are still unverified by a person.** Driving the real app
+   against the emulator confirmed the overview, materials shop, technical
+   library, reports and the role split. Still untried: the AI scan and
+   inspection flows (they need a real photo and cost real API credit),
+   printing a QR-bill, the supervisor webhook, and project share/import.
 3. **The Worker's rate limit is optional.** Requests now require a signed-in
    account, but the per-account daily cap only applies when a KV namespace is
    bound, and none is. Sign-up is open, so a determined abuser could still
@@ -189,6 +188,31 @@ firebase deploy --only firestore:rules
 
 A rules file that deploys cleanly but does not deny is worse than none,
 because it creates false confidence.
+
+### Running the app locally as every role
+
+The authenticated app cannot be reached from a signed-out browser, which is
+why several bugs reached users instead of tests. To drive it for real:
+
+```text
+npm run emulators     # auth + firestore, needs Java
+npm run seed          # wipes and seeds a company, chef, Polier, two crew
+python -m http.server 5566
+# then open http://localhost:5566/index.html?emulator=1
+```
+
+Accounts are `chef@test.local`, `polier@test.local`, `crew1@test.local`,
+`crew2@test.local`, password `test1234`. All disposable localhost fixtures;
+nothing touches production.
+
+Emulator mode is opt-in via `?emulator=1` **and** only on localhost, so a
+deployed page can never be pointed at a local emulator. Offline persistence
+is disabled there, or a cache surviving between runs would make results
+depend on the previous run.
+
+> The seed deliberately goes through the real flows — invites are redeemed by
+> the invitee, entries and leave are written by their own author — because the
+> rules reject every shortcut. If seeding fails, the rules changed.
 
 ### Swiss QR-bill
 

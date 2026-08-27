@@ -2320,8 +2320,19 @@ export default function SiteManager() {
       setAuthChecked(true);
       if (!u) {
         setReady(false);
+        // Clear everything the previous account had loaded. Site phones are
+        // shared: signing out and back in as someone else left the last
+        // person's invoices, labour rate and IBAN in memory, and they appeared
+        // on screen for a role that must never see them.
         setProjects([]); setEntries([]); setCustomers([]);
         setLeaveRequests([]); setSentReports([]); setActiveClock(null);
+        setDocuments([]); setAssignments([]); setClocks([]);
+        setBilling({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
+        setProfile({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
+        setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
+        setTeam({ members: [], invites: [], busy: false });
+        setMaterialPrices({}); setMaterialUnits({});
+        setSyncState({ error: null, fromCache: false });
       }
     }).then((fn) => { unsub = fn; }).catch(() => setAuthChecked(true));
     return () => { if (unsub) unsub(); };
@@ -4949,7 +4960,7 @@ export default function SiteManager() {
                 <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55` }} className="rounded-xl p-3">
                   <div style={{ color: COLORS.amber }} className="text-[10px] uppercase tracking-wide mb-2 font-bold">{t.ccAttention}</div>
                   <div className="flex flex-col gap-1.5">
-                    {c.overdueList.slice(0, 5).map(({ doc, st }) => (
+                    {isOwner() && c.overdueList.slice(0, 5).map(({ doc, st }) => (
                       <button key={doc.id} onClick={() => { setTab("projects"); setDocEditor({ ...doc }); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
                         <div className="text-sm">{t.invoiceLabel} {doc.number} · {money(st.outstanding)}</div>
                         <div style={{ color: COLORS.danger }} className="text-[10px]">{t.overdueLabel} — {doc.dueDate}</div>
