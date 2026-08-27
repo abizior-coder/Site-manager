@@ -4750,7 +4750,7 @@ export default function SiteManager() {
         </div>
         <nav className="flex-1 flex flex-col gap-0.5 px-3">
           {[
-            ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Mountain }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
+            ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Ruler }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
             { id: "today", label: t.navToday, icon: Clock },
             { id: "projects", label: t.navProjects, icon: MapPin },
             { id: "customers", label: t.navCustomers, icon: User },
@@ -7791,8 +7791,8 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             <button onClick={onClose}><X size={20} color={COLORS.muted} /></button>
           </div>
         </div>
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
-        <div className="lg:col-span-1">
+        <div className="lg:max-w-4xl lg:mx-auto">
+        <div>
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button onClick={() => onAdd("material")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Package size={13} color={COLORS.success} /> {t.materials}</button>
           <button onClick={() => onAdd("tool")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Wrench size={13} color={COLORS.amber} /> {t.tools}</button>
@@ -7951,12 +7951,12 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
         )}
         </div>
 
-        <div className="lg:col-span-1">
+        <div>
         <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
         <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
         </div>
 
-        <div className="lg:col-span-1">
+        <div>
         {notes.length > 0 && (
           <div className="mb-3">
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.typeNote} ({notes.length})</div>
