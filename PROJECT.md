@@ -147,9 +147,9 @@ These are real and currently unfixed. Ordered by how much damage they do.
 4. **Backup and share codes do not carry photo contents**, and a shared
    project's photos are unreadable to the recipient's company. Fixing that
    properly needs cross-company sharing, which does not exist.
-5. **Leave requests and sent reports still share one `site-meta` document**,
-   so concurrent edits to those can still clobber. Low frequency, but the last
-   remnant of the old blob model.
+5. **Sent reports still share one `site-meta` document**, so concurrent edits
+   to those can clobber. Low frequency, and the last remnant of the old blob
+   model. Leave has been moved out into its own collection.
 6. `roofing-site-manager.html` is an unused stale duplicate of the shell.
    It is not the deployed entry point (`index.html` is) and can be deleted.
 

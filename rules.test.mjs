@@ -122,6 +122,43 @@ await check("made-up invite code is rejected", () =>
 await check("crew CANNOT create invites", () =>
   assertFails(setDoc(doc(crew, "invites", "MINE"), { companyId: CID, role: "owner", expiresAt: Date.now() + 1000 })));
 
+// --- supervisor: runs the work, never sees the money ---------------------
+const SUP = "supervisor-uid";
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  const d = ctx.firestore();
+  await setDoc(doc(d, "companies", CID, "members", SUP), { role: "supervisor" });
+  await setDoc(doc(d, "companies", CID, "leave", "lv-crew"), { userId: CREW, date: "2026-09-02", status: "pending", type: "vacation" });
+  await setDoc(doc(d, "companies", CID, "leave", "lv-own"), { userId: SUP, date: "2026-09-03", status: "pending", type: "vacation" });
+});
+const sup = testEnv.authenticatedContext(SUP).firestore();
+
+await check("supervisor CANNOT read finance", () =>
+  assertFails(getDoc(doc(sup, "companies", CID, "private", "finance"))));
+await check("supervisor CANNOT read invoices", () =>
+  assertFails(getDoc(doc(sup, "companies", CID, "documents", "inv1"))));
+await check("supervisor CAN edit projects", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "projects", "p1"), { name: "Roof (updated)" })));
+await check("supervisor CAN plan assignments", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "assignments", "a-sup"), { date: "2026-09-02", projectId: "p1", userId: CREW })));
+await check("supervisor CAN correct a crew member's hours", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "entries", "e-own"), { userId: CREW, qty: "8.5" })));
+await check("supervisor CANNOT promote themselves", () =>
+  assertFails(setDoc(doc(sup, "companies", CID, "members", SUP), { role: "owner" })));
+
+// --- absences ------------------------------------------------------------
+await check("crew CAN request their own leave", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "leave", "lv-new"), { userId: CREW, date: "2026-09-05", status: "pending", type: "sick" })));
+await check("crew CANNOT file leave for someone else", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "leave", "lv-fake"), { userId: SUP, date: "2026-09-05", status: "pending", type: "sick" })));
+await check("crew CANNOT approve their own leave", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "leave", "lv-crew"), { userId: CREW, date: "2026-09-02", status: "approved", type: "vacation" })));
+await check("crew CAN amend their own pending request", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "leave", "lv-crew"), { userId: CREW, date: "2026-09-02", status: "pending", type: "sick" })));
+await check("supervisor CAN approve crew leave", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "leave", "lv-crew"), { userId: CREW, date: "2026-09-02", status: "approved", type: "sick" })));
+await check("crew CAN see the team's absences", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "leave", "lv-own"))));
+
 // --- scheduling ----------------------------------------------------------
 await check("owner CAN create an assignment", () =>
   assertSucceeds(setDoc(doc(owner, "companies", CID, "assignments", "a1"), {

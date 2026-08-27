@@ -100,12 +100,32 @@ async function renderAs(role) {
   if (errors.length) problems.push(...errors);
 }
 
+// --- supervisor ----------------------------------------------------------
+{
+  const { window, errors, text } = await renderAs("supervisor");
+  check("supervisor: app renders something", text().length > 50, `only ${text().length} chars — blank screen`);
+  check("supervisor: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
+
+  // The overview must open for them, and must not carry the money.
+  const btn = [...window.document.querySelectorAll("button")].find((b) => b.getAttribute("title"));
+  if (btn) {
+    btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  const t = text();
+  check("supervisor: no invoice numbers", !t.includes("R-2026-001"), "invoice number visible");
+  check("supervisor: no labour rate", !t.includes("85.00") && !t.includes("CHF 85"), "labour rate visible");
+  check("supervisor: no margin figures", !t.includes("Marge") && !t.includes("Margin"), "margin visible");
+  if (errors.length) problems.push(...errors);
+}
+
 // --- crew ----------------------------------------------------------------
 {
   const { window, errors, text } = await renderAs("crew");
   check("crew: app renders something", text().length > 50, `only ${text().length} chars — blank screen`);
   check("crew: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("crew: money is not shown", !text().includes("R-2026-001"), "an invoice number leaked into the crew view");
+  check("crew: no overview button", ![...window.document.querySelectorAll("button")].some((b) => (b.getAttribute("title") || "").match(/Übersicht|Overview/)), "crew can reach the overview");
   if (errors.length) problems.push(...errors);
 }
 

@@ -18,8 +18,19 @@ service cloud.firestore {
       return signedIn() && exists(memberPath(cid));
     }
 
+    function roleOf(cid) {
+      return get(memberPath(cid)).data.role;
+    }
+
     function isOwner(cid) {
-      return isMember(cid) && get(memberPath(cid)).data.role == 'owner';
+      return isMember(cid) && roleOf(cid) == 'owner';
+    }
+
+    // A supervisor (Polier) runs the work: plans the days, approves hours and
+    // absences, keeps projects up to date. Deliberately NOT the money — what
+    // the company charges and earns stays with the owner.
+    function canManage(cid) {
+      return isMember(cid) && (roleOf(cid) == 'owner' || roleOf(cid) == 'supervisor');
     }
 
     // A user record points at the company the account belongs to.
@@ -91,12 +102,12 @@ service cloud.firestore {
 
       match /projects/{id} {
         allow read: if isMember(cid);
-        allow write: if isOwner(cid);
+        allow write: if canManage(cid);
       }
 
       match /customers/{id} {
         allow read: if isMember(cid);
-        allow write: if isOwner(cid);
+        allow write: if canManage(cid);
       }
 
       // A site log is a record of what happened. Crew add their own entries
@@ -105,7 +116,7 @@ service cloud.firestore {
       match /entries/{id} {
         allow read: if isMember(cid);
         allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
-        allow update, delete: if isOwner(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+        allow update, delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
       }
 
       // Quotes, invoices and anything priced.
@@ -118,7 +129,20 @@ service cloud.firestore {
       // would make the schedule meaningless.
       match /assignments/{id} {
         allow read: if isMember(cid);
-        allow write: if isOwner(cid);
+        allow write: if canManage(cid);
+      }
+
+      // Absences. Their own documents rather than fields in a shared blob,
+      // because approval is a permission and permissions follow documents:
+      // anyone may raise and amend their own request, only a manager decides it.
+      match /leave/{id} {
+        allow read: if isMember(cid);
+        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if canManage(cid)
+                              || (isMember(cid)
+                                  && resource.data.userId == request.auth.uid
+                                  && request.resource.data.userId == request.auth.uid
+                                  && request.resource.data.status == resource.data.status);
       }
 
       // Photos, preferences, technical library.

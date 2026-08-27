@@ -3,7 +3,7 @@
 // customerId but no client string, an entry with a photoId, an invoice, an
 // assignment and a leave request.
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments"];
+export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave"];
 
 export const SAMPLE = {
   projects: [
@@ -30,6 +30,9 @@ export const SAMPLE = {
   assignments: [
     { id: "a1", date: new Date().toISOString().slice(0, 10), projectId: "p1", userId: "u1" },
   ],
+  leave: [
+    { id: "l1", date: "2026-08-27", userId: "u2", type: "vacation", note: "", status: "pending" },
+  ],
 };
 
 let roleValue = "owner";
@@ -37,6 +40,8 @@ export function setStubRole(r) { roleValue = r; }
 export function getCompanyId() { return "c1"; }
 export function getRole() { return roleValue; }
 export function isOwner() { return roleValue === "owner"; }
+export function isSupervisor() { return roleValue === "supervisor"; }
+export function canManage() { return roleValue === "owner" || roleValue === "supervisor"; }
 
 export async function loadMembership() { return { companyId: "c1", role: roleValue, member: { role: roleValue } }; }
 export async function createCompany() { return "c1"; }

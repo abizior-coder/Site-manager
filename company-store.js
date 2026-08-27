@@ -10,7 +10,7 @@
 
 import { initFirebase, getSdk } from "./firebase-client.js";
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments"];
+export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave"];
 
 let companyId = null;
 let role = null;
@@ -20,6 +20,10 @@ const baseline = new Map();
 export function getCompanyId() { return companyId; }
 export function getRole() { return role; }
 export function isOwner() { return role === "owner"; }
+export function isSupervisor() { return role === "supervisor"; }
+// Runs the work: plans days, approves hours and absences, maintains projects.
+// Deliberately not the money — see firestore.rules.
+export function canManage() { return role === "owner" || role === "supervisor"; }
 
 function db() { return getSdk().db; }
 function fs() { return getSdk().fs; }
