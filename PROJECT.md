@@ -139,11 +139,10 @@ These are real and currently unfixed. Ordered by how much damage they do.
    carry `photoId` references, and those documents belong to the sending
    company. Fixing it needs cross-company sharing, which does not exist. The
    downloadable backup does include photos.
-3. **Some flows are still unverified by a person.** Driving the real app
-   against the emulator confirmed the overview, materials shop, technical
-   library, reports, scheduling, signed Rapporte and the role split. Still
-   untried: the AI scan and inspection flows (they need a real photo and cost
-   real API credit), printing a QR-bill, and the supervisor webhook.
+3. **Real jobs already run through this app.** Treat it as production, not
+   a prototype: a careless migration loses someone's working week. Still
+   untried by anyone: the AI scan and inspection flows (they need a real photo
+   and cost real API credit), printing a QR-bill, and the supervisor webhook.
 4. **No merge for duplicate customers.** Migrated client strings produced
    spelling variants as separate records. Deliberately not auto-merged,
    because two similar names can be two different people.
@@ -163,6 +162,19 @@ array deletes real records**. Two guards exist and should stay:
 
 If either guard fires it means something upstream is wrong. Do not raise the
 threshold to make the message go away.
+
+## The desktop layout
+
+The phone layout is right for a roof and wrong for a desk. Above 1024px the
+same app rearranges: a sidebar replaces the bottom nav, dialogs centre instead
+of rising from the bottom edge, and the overview becomes a three-column grid.
+One codebase, Tailwind `lg:` breakpoints — **do not fork a desktop build**.
+
+`board` is the desktop command centre for managers: the month with each day
+carrying the colour of what is planned on it, and beneath it the jobs as a
+tree that opens into hours, material, tools, photos, Regie and Rapporte.
+Projects keep a stable colour derived from their id (`projectColour`), so the
+same job looks the same everywhere.
 
 ### Running the app locally as every role
 
