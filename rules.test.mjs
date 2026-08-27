@@ -179,6 +179,14 @@ await check("crew CAN read reports", () =>
 await check("crew CANNOT delete a report", () =>
   assertFails(deleteDoc(doc(crew, "companies", CID, "reports", "r-signed"))));
 
+// --- sent reports --------------------------------------------------------
+await check("crew CAN send their own report", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "sentReports", "sr1"), { userId: CREW, period: "daily" })));
+await check("crew CANNOT send a report as someone else", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "sentReports", "sr2"), { userId: SUP, period: "daily" })));
+await check("manager CAN correct a sent report", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "sentReports", "sr1"), { userId: CREW, period: "daily", note: "korrigiert" })));
+
 // --- scheduling ----------------------------------------------------------
 await check("owner CAN create an assignment", () =>
   assertSucceeds(setDoc(doc(owner, "companies", CID, "assignments", "a1"), {

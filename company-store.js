@@ -10,7 +10,7 @@
 
 import { initFirebase, getSdk } from "./firebase-client.js";
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave"];
+export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports", "sentReports"];
 
 let companyId = null;
 let role = null;

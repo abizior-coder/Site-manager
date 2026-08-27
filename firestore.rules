@@ -156,6 +156,15 @@ service cloud.firestore {
         allow delete: if canManage(cid);
       }
 
+      // Reports sent to a supervisor. Their own documents rather than a field
+      // in a shared blob, which was the last place two people saving at once
+      // could still overwrite each other.
+      match /sentReports/{id} {
+        allow read: if isMember(cid);
+        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+      }
+
       // Photos, preferences, technical library.
       match /kv/{key} {
         allow read, write: if isMember(cid);

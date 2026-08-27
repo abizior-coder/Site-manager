@@ -131,63 +131,38 @@ saved before statuses existed have no `status` field and must read as
 
 These are real and currently unfixed. Ordered by how much damage they do.
 
-1. **Old public data still sits in `local/*`.** Rules now deny it to
-   everyone, so it is unreachable rather than exposed, but it has not been
-   deleted. Remove it from the Firebase console once you are satisfied the
-   imported copy under your account is complete.
-2. **Some flows are still unverified by a person.** Driving the real app
+1. **Old public data still sits in `local/*`.** Rules deny it to everyone, so
+   it is unreachable rather than exposed, but it has not been deleted. Remove
+   the `local` collection in the Firebase console once you are satisfied the
+   company copy is complete.
+2. **A shared project's photos are unreadable to the recipient.** Share codes
+   carry `photoId` references, and those documents belong to the sending
+   company. Fixing it needs cross-company sharing, which does not exist. The
+   downloadable backup does include photos.
+3. **Some flows are still unverified by a person.** Driving the real app
    against the emulator confirmed the overview, materials shop, technical
-   library, reports and the role split. Still untried: the AI scan and
-   inspection flows (they need a real photo and cost real API credit),
-   printing a QR-bill, the supervisor webhook, and project share/import.
-3. **The Worker's rate limit is optional.** Requests now require a signed-in
-   account, but the per-account daily cap only applies when a KV namespace is
-   bound, and none is. Sign-up is open, so a determined abuser could still
-   register and spend the Anthropic balance.
-4. **Backup and share codes do not carry photo contents**, and a shared
-   project's photos are unreadable to the recipient's company. Fixing that
-   properly needs cross-company sharing, which does not exist.
-5. **Sent reports still share one `site-meta` document**, so concurrent edits
-   to those can clobber. Low frequency, and the last remnant of the old blob
-   model. Leave has been moved out into its own collection.
-6. `roofing-site-manager.html` is an unused stale duplicate of the shell.
-   It is not the deployed entry point (`index.html` is) and can be deleted.
+   library, reports, scheduling, signed Rapporte and the role split. Still
+   untried: the AI scan and inspection flows (they need a real photo and cost
+   real API credit), printing a QR-bill, and the supervisor webhook.
+4. **No merge for duplicate customers.** Migrated client strings produced
+   spelling variants as separate records. Deliberately not auto-merged,
+   because two similar names can be two different people.
+5. `roofing-site-manager.html` was an unused stale duplicate and has been
+   deleted.
 
-### Changing security rules
+### Data safety
 
-`firestore.rules` is the real access control — the app UI is not. Hiding a
-panel is not permission; a crew member with the browser console must still be
-unable to read the labour rate.
+`syncCollection` diffs the app's arrays against the last known state, which
+is what stops two phones overwriting each other — and also means **a stale
+array deletes real records**. Two guards exist and should stay:
 
-There are two test suites. **Run them after any change:**
+- `persist()` refuses to run before the first load has landed, when the
+  arrays are empty or partial.
+- `syncCollection` refuses to delete more than a handful at once, or to act
+  on an empty array against populated data, and reports instead.
 
-```text
-npm test
-```
-
-`test:logic` covers share and backup codes, document numbering, the client
-migration and note classification.
-
-`test:render` renders the **signed-in** app against stubbed auth and data and
-walks every tab as both owner and crew. Every crash so far has been in the
-authenticated path, which a signed-out browser cannot reach — so it reached
-the user instead of a test. It also asserts that no invoice number appears in
-the crew view.
-
-`test:rules` asserts what the server allows: crew cannot read invoices or
-finance, cannot edit another person's hours, cannot promote themselves, and
-expired or forged invite codes are rejected. It also covers founding a company,
-where nothing exists yet. Requires Java (Temurin JRE) for the Firestore
-emulator.
-
-Then deploy and re-check from a real browser:
-
-```text
-firebase deploy --only firestore:rules
-```
-
-A rules file that deploys cleanly but does not deny is worse than none,
-because it creates false confidence.
+If either guard fires it means something upstream is wrong. Do not raise the
+threshold to make the message go away.
 
 ### Running the app locally as every role
 
