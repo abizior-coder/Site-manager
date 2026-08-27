@@ -1,0 +1,50 @@
+# Deploys the site with GitHub Actions instead of the legacy Pages builder.
+#
+# The legacy builder failed repeatedly with nothing but "Page build failed." —
+# once for a commit that touched only a markdown file — and left the live site
+# serving a 404 while the repository looked healthy. This publishes the files
+# as they are and, when something does go wrong, says what.
+
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the committed bundle matches the source
+        run: |
+          npm ci
+          cp bundle.js /tmp/committed-bundle.js
+          npm run build
+          if ! diff -q /tmp/committed-bundle.js bundle.js > /dev/null; then
+            echo "::error::bundle.js is stale — run 'npm run build' and commit the result."
+            exit 1
+          fi
+          echo "bundle.js matches the source."
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
