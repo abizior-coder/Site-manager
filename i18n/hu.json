@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "New technical entry",
   "addedToLibraryToast": "Saved to technical library",
   "libraryItemDeleted": "Entry deleted",
-  "scanNewSpec": "Scan new spec sheet"
+  "scanNewSpec": "Scan new spec sheet",
+  "navTeam": "Csapat",
+  "teamInviteBtn": "Meghívás",
+  "teamNoMembers": "Még nincs csapattag.",
+  "crewOnJob": "Csapat ezen a munkán",
+  "crewDropHint": "Húzz ide egy nevet, vagy koppints lentebb.",
+  "crewNobody": "Még senki nincs beosztva.",
+  "crewNoJobs": "Nincs beosztott munka",
+  "crewAddToJob": "Hozzáadás munkához…",
+  "tradeLabel": "Szakma",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Egyéb"
 }

@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "New technical entry",
   "addedToLibraryToast": "Saved to technical library",
   "libraryItemDeleted": "Entry deleted",
-  "scanNewSpec": "Scan new spec sheet"
+  "scanNewSpec": "Scan new spec sheet",
+  "navTeam": "Team",
+  "teamInviteBtn": "Invite",
+  "teamNoMembers": "No team members yet.",
+  "crewOnJob": "Crew on this job",
+  "crewDropHint": "Drag a name here, or tap one below.",
+  "crewNobody": "Nobody assigned yet.",
+  "crewNoJobs": "No jobs assigned",
+  "crewAddToJob": "Add to a job…",
+  "tradeLabel": "Trade",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Other"
 }

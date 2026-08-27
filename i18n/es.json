@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "Nueva entrada técnica",
   "addedToLibraryToast": "Guardado en la biblioteca técnica",
   "libraryItemDeleted": "Entrada eliminada",
-  "scanNewSpec": "Escanear nueva ficha"
+  "scanNewSpec": "Escanear nueva ficha",
+  "navTeam": "Equipo",
+  "teamInviteBtn": "Invitar",
+  "teamNoMembers": "Aún no hay miembros.",
+  "crewOnJob": "Equipo en esta obra",
+  "crewDropHint": "Arrastra un nombre aquí, o toca uno abajo.",
+  "crewNobody": "Nadie asignado.",
+  "crewNoJobs": "Sin obra asignada",
+  "crewAddToJob": "Añadir a una obra…",
+  "tradeLabel": "Oficio",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Otros"
 }

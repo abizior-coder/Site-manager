@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "Nový technický záznam",
   "addedToLibraryToast": "Uložené do technickej knižnice",
   "libraryItemDeleted": "Záznam vymazaný",
-  "scanNewSpec": "Naskenovať nový list"
+  "scanNewSpec": "Naskenovať nový list",
+  "navTeam": "Tím",
+  "teamInviteBtn": "Pozvať",
+  "teamNoMembers": "Zatiaľ žiadni členovia.",
+  "crewOnJob": "Partia na tejto stavbe",
+  "crewDropHint": "Presuňte sem meno alebo ťuknite nižšie.",
+  "crewNobody": "Nikto nie je pridelený.",
+  "crewNoJobs": "Žiadna pridelená stavba",
+  "crewAddToJob": "Pridať na stavbu…",
+  "tradeLabel": "Remeslo",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Iné"
 }

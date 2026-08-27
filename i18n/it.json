@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "Nuova voce tecnica",
   "addedToLibraryToast": "Salvato nella libreria tecnica",
   "libraryItemDeleted": "Voce eliminata",
-  "scanNewSpec": "Scansiona nuova scheda"
+  "scanNewSpec": "Scansiona nuova scheda",
+  "navTeam": "Squadra",
+  "teamInviteBtn": "Invita",
+  "teamNoMembers": "Nessun membro finora.",
+  "crewOnJob": "Squadra su questo cantiere",
+  "crewDropHint": "Trascina qui un nome, o toccane uno sotto.",
+  "crewNobody": "Nessuno assegnato.",
+  "crewNoJobs": "Nessun cantiere assegnato",
+  "crewAddToJob": "Aggiungi a un cantiere…",
+  "tradeLabel": "Mestiere",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Altro"
 }

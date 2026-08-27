@@ -97,6 +97,22 @@ async function renderAs(role) {
     check(`owner: tab ${label} renders`, errors.length === before && (window.document.body.textContent || "").length > 50,
       errors.slice(before, before + 1).join(" | "));
   }
+  // The team roster is a sidebar tab, so the mobile-label walk above never
+  // reaches it. It is also where crew get attached to jobs, so a crash here
+  // silently costs the Polier the feature.
+  {
+    const teamBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Team");
+    check("owner: team tab exists in the menu", !!teamBtn, "no Team button in the sidebar");
+    if (teamBtn) {
+      const before = errors.length;
+      teamBtn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 250));
+      check("owner: team tab renders the roster", errors.length === before && text().includes("Mitarbeiter"),
+        errors.slice(before, before + 1).join(" | ") || text().slice(0, 150));
+      check("owner: roster offers a job to assign to", text().includes("Trockenbau"), "no project offered in the add-to-job picker");
+    }
+  }
+
   if (errors.length) problems.push(...errors);
 }
 

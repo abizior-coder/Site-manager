@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "New technical entry",
   "addedToLibraryToast": "Saved to technical library",
   "libraryItemDeleted": "Entry deleted",
-  "scanNewSpec": "Scan new spec sheet"
+  "scanNewSpec": "Scan new spec sheet",
+  "navTeam": "Екип",
+  "teamInviteBtn": "Покани",
+  "teamNoMembers": "Все още няма членове.",
+  "crewOnJob": "Екип на този обект",
+  "crewDropHint": "Плъзнете име тук или докоснете едно по-долу.",
+  "crewNobody": "Никой не е назначен.",
+  "crewNoJobs": "Няма назначен обект",
+  "crewAddToJob": "Добави към обект…",
+  "tradeLabel": "Занаят",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Друго"
 }

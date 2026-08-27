@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "Neuer technischer Eintrag",
   "addedToLibraryToast": "In technischer Bibliothek gespeichert",
   "libraryItemDeleted": "Eintrag gelöscht",
-  "scanNewSpec": "Neues Datenblatt scannen"
+  "scanNewSpec": "Neues Datenblatt scannen",
+  "navTeam": "Team",
+  "teamInviteBtn": "Iilade",
+  "teamNoMembers": "Nonig Lüt im Team.",
+  "crewOnJob": "Mannschaft uf dere Baustell",
+  "crewDropHint": "Name da ane zieh oder unde aatippe.",
+  "crewNobody": "Nonig öpper iiteilt.",
+  "crewNoJobs": "Kei Baustell iiteilt",
+  "crewAddToJob": "Zu ere Baustell zuefüege…",
+  "tradeLabel": "Gwärch",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Anders"
 }

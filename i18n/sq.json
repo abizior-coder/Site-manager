@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "New technical entry",
   "addedToLibraryToast": "Saved to technical library",
   "libraryItemDeleted": "Entry deleted",
-  "scanNewSpec": "Scan new spec sheet"
+  "scanNewSpec": "Scan new spec sheet",
+  "navTeam": "Ekipi",
+  "teamInviteBtn": "Fto",
+  "teamNoMembers": "Ende asnjë anëtar.",
+  "crewOnJob": "Ekipi në këtë punishte",
+  "crewDropHint": "Tërhiq një emër këtu, ose prek një më poshtë.",
+  "crewNobody": "Askush i caktuar.",
+  "crewNoJobs": "Asnjë punishte e caktuar",
+  "crewAddToJob": "Shto në një punishte…",
+  "tradeLabel": "Zanati",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Tjetër"
 }

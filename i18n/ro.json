@@ -519,5 +519,21 @@
   "newLibraryItemTitle": "New technical entry",
   "addedToLibraryToast": "Saved to technical library",
   "libraryItemDeleted": "Entry deleted",
-  "scanNewSpec": "Scan new spec sheet"
+  "scanNewSpec": "Scan new spec sheet",
+  "navTeam": "Echipa",
+  "teamInviteBtn": "Invită",
+  "teamNoMembers": "Încă niciun membru.",
+  "crewOnJob": "Echipa pe acest șantier",
+  "crewDropHint": "Trage un nume aici sau atinge unul mai jos.",
+  "crewNobody": "Nimeni repartizat.",
+  "crewNoJobs": "Niciun șantier repartizat",
+  "crewAddToJob": "Adaugă la un șantier…",
+  "tradeLabel": "Meseria",
+  "tradeSteildach": "Steildach",
+  "tradeFlachdach": "Flachdach",
+  "tradeSpengler": "Spengler",
+  "tradeHolz": "Holzbau",
+  "tradeGeruest": "Gerüst",
+  "tradeUnterhalt": "Unterhalt",
+  "tradeOther": "Altele"
 }

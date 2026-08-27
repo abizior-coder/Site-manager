@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
@@ -865,6 +865,25 @@ const SWISS_EMERGENCY_NUMS = ["144", "117", "118", "112"];
 const UNIT_SUGGESTIONS = ["pcs", "bags", "m", "m²", "m³", "kg", "l", "rolls", "pallets", "boxes", "pairs", "sets", "tubes"];
 const COMPANY_LOGO_DATA_URI = "data:image/png;base64,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";
 
+// A Swiss roofing job is really several trades sharing one address. The
+// Spengler's sheet metal and the carpenter's timber land on the same site but
+// they are costed, ordered and argued about separately, so every material,
+// tool and hour carries the trade it belongs to.
+const TRADES = [
+  { key: "steildach", labelKey: "tradeSteildach", color: "#DA291C" },
+  { key: "flachdach", labelKey: "tradeFlachdach", color: "#6FB3D9" },
+  { key: "spengler", labelKey: "tradeSpengler", color: "#B0B7BE" },
+  { key: "holz", labelKey: "tradeHolz", color: "#C68B4F" },
+  { key: "geruest", labelKey: "tradeGeruest", color: "#E0B341" },
+  { key: "unterhalt", labelKey: "tradeUnterhalt", color: "#8FBF7F" },
+  { key: "other", labelKey: "tradeOther", color: "#8A8F98" },
+];
+const DEFAULT_TRADE = "other";
+
+function tradeMeta(key) {
+  return TRADES.find((x) => x.key === key) || TRADES[TRADES.length - 1];
+}
+
 const PROJECT_CATEGORIES = [
   { key: "flat", labelKey: "projectCatFlat" },
   { key: "pitched", labelKey: "projectCatPitched" },
@@ -1246,6 +1265,7 @@ export default function SiteManager() {
   const [backupError, setBackupError] = useState(null);
   const [newProjectAddr, setNewProjectAddr] = useState("");
   const [addModal, setAddModal] = useState(null);
+  const [lastTrade, setLastTrade] = useState(DEFAULT_TRADE);
   const [suggestCat, setSuggestCat] = useState(null);
   const [pendingSuggestion, setPendingSuggestion] = useState(null);
   const [sizeInput, setSizeInput] = useState("");
@@ -2557,6 +2577,27 @@ export default function SiteManager() {
     });
   }
 
+  // A day assignment says where someone is on Tuesday. A project crew says
+  // who is on the job at all — which is what decides who sees its photos,
+  // notes and materials. The two are deliberately separate.
+  function projectCrew(project) {
+    return Array.isArray(project?.crew) ? project.crew : [];
+  }
+
+  function toggleProjectCrew(projectId, memberUid) {
+    if (!canManage()) return;
+    const pr = projects.find((x) => x.id === projectId);
+    if (!pr) return;
+    const crew = projectCrew(pr);
+    const next = crew.includes(memberUid) ? crew.filter((u) => u !== memberUid) : [...crew, memberUid];
+    persist({ projects: projects.map((x) => (x.id === projectId ? { ...x, crew: next } : x)) });
+  }
+
+  function memberName(memberUid) {
+    const m = team.members.find((x) => x.uid === memberUid);
+    return m?.name || m?.email || memberUid;
+  }
+
   function assignmentsFor(date) {
     return assignments.filter((a) => a.date === date);
   }
@@ -3011,7 +3052,10 @@ export default function SiteManager() {
   }
 
   function openAdd(type, projectId) {
-    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false });
+    // The trade sticks between entries: someone logging Spengler work logs
+    // several pieces in a row, and re-picking it each time is how it ends up
+    // filed wrong.
+    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false, trade: lastTrade });
     setPhotoPreview(null);
     setPhotoPreviewId(null);
     setSuggestCat(null);
@@ -3021,7 +3065,7 @@ export default function SiteManager() {
   }
 
   function openEditEntry(entry) {
-    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie });
+    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie, trade: entry.trade || DEFAULT_TRADE });
     // Keep the existing photo's id so re-saving without picking a new image
     // reuses that document instead of writing a duplicate.
     setPhotoPreviewId(entry.photoId || null);
@@ -3121,9 +3165,10 @@ export default function SiteManager() {
       if (!form.description.trim()) return;
       const unitPrice = form.unitPrice === "" || form.unitPrice === undefined ? undefined : form.unitPrice;
       if (addModal.editingId) {
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie } : e)) });
+        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE } : e)) });
       } else {
-        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie });
+        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE });
+        setLastTrade(form.trade || DEFAULT_TRADE);
       }
       if ((addModal.type === "material" || addModal.type === "tool") && form.unit.trim()) {
         const key = form.description.trim().toLowerCase();
@@ -3699,6 +3744,7 @@ export default function SiteManager() {
             { id: "customers", label: t.navCustomers, icon: User },
             { id: "calendar", label: t.navCalendar, icon: CalendarDays },
             { id: "materials", label: t.navMaterials, icon: Package },
+            { id: "team", label: t.navTeam, icon: Users },
             { id: "reports", label: t.navReports, icon: FileText },
             { id: "safety", label: t.navSafety, icon: ShieldAlert },
           ].map((it) => {
@@ -4916,6 +4962,87 @@ export default function SiteManager() {
           </div>
         )}
 
+        {tab === "team" && (() => {
+          const roster = team.members;
+          const openJobs = projects.filter((pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS));
+          return (
+            <div className="px-4 pb-24">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="font-black text-lg">{t.navTeam}</div>
+                {isOwner() && (
+                  <button onClick={() => openTeam()} style={{ background: COLORS.accent }} className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase">
+                    {t.teamInviteBtn}
+                  </button>
+                )}
+              </div>
+              {roster.length === 0 && (
+                <div style={{ color: COLORS.muted }} className="text-xs">{t.teamNoMembers}</div>
+              )}
+              <div className="flex flex-col gap-2">
+                {roster.map((m) => {
+                  const jobs = openJobs.filter((pr) => projectCrew(pr).includes(m.uid));
+                  const todayPlan = assignments.find((a) => a.date === todayKey() && a.userId === m.uid);
+                  const todayProject = todayPlan && projects.find((pr) => pr.id === todayPlan.projectId);
+                  return (
+                    <div
+                      key={m.uid}
+                      draggable={canManage()}
+                      onDragStart={(e) => e.dataTransfer.setData("text/member-uid", m.uid)}
+                      style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                      className="rounded-xl p-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold truncate">{m.name || m.email || m.uid}</div>
+                          <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                            {m.role === "owner" ? t.roleOwner : m.role === "supervisor" ? t.roleSupervisor : t.roleCrew}
+                            {m.email && m.name ? ` · ${m.email}` : ""}
+                          </div>
+                        </div>
+                        {todayProject && (
+                          <span style={{ background: `${projectColour(todayProject.id)}22`, color: projectColour(todayProject.id), border: `1px solid ${projectColour(todayProject.id)}66` }} className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full max-w-[45%] truncate">
+                            {todayProject.name}
+                          </span>
+                        )}
+                      </div>
+                      {/* Which jobs this person is attached to, and a one-tap
+                          way to attach them to another without opening it. */}
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {jobs.map((pr) => (
+                          <button
+                            key={pr.id}
+                            onClick={() => { setTab("projects"); setSelectedProject(pr.id); }}
+                            style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(pr.id)}66`, color: COLORS.text }}
+                            className="px-2 py-1 rounded-full text-[11px] font-semibold"
+                          >
+                            {pr.name}
+                          </button>
+                        ))}
+                        {jobs.length === 0 && (
+                          <span style={{ color: COLORS.muted }} className="text-[11px]">{t.crewNoJobs}</span>
+                        )}
+                      </div>
+                      {canManage() && (
+                        <select
+                          value=""
+                          onChange={(e) => { if (e.target.value) toggleProjectCrew(e.target.value, m.uid); e.target.value = ""; }}
+                          style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}
+                          className="w-full mt-2 rounded-lg px-2 py-1.5 text-[11px] outline-none"
+                        >
+                          <option value="">{t.crewAddToJob}</option>
+                          {openJobs.filter((pr) => !projectCrew(pr).includes(m.uid)).map((pr) => (
+                            <option key={pr.id} value={pr.id}>{pr.name}</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {tab === "safety" && (
           <div className="flex flex-col gap-4">
             <button onClick={() => { setSosOpen(true); setCprStep(0); }} style={{ background: COLORS.danger }} className="w-full py-5 rounded-xl font-black uppercase text-lg flex items-center justify-center gap-2">
@@ -5966,6 +6093,10 @@ export default function SiteManager() {
           onRegieDocument={(type) => createRegieDocument(projects.find((p) => p.id === selectedProject), type)}
           customer={customerFor(projects.find((p) => p.id === selectedProject))}
           onEditCustomer={(c) => openCustomerForm(c)}
+          crew={projectCrew(projects.find((x) => x.id === selectedProject))}
+          roster={team.members}
+          canManageCrew={canManage()}
+          onToggleCrew={(memberUid) => toggleProjectCrew(selectedProject, memberUid)}
           noteDraft={projectNote}
           onNoteDraftChange={setProjectNote}
           onVoiceNote={() => toggleVoiceInput(setProjectNote, "projectNote")}
@@ -6322,6 +6453,28 @@ export default function SiteManager() {
               <div style={{ color: COLORS.muted }} className="text-[10px] mt-1 leading-relaxed">{t.regieHint}</div>
             </div>
           )}
+          <div className="mt-4">
+            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.tradeLabel}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {TRADES.map((tr) => {
+                const on = (form.trade || DEFAULT_TRADE) === tr.key;
+                return (
+                  <button
+                    key={tr.key}
+                    onClick={() => setForm((f) => ({ ...f, trade: tr.key }))}
+                    style={{
+                      background: on ? `${tr.color}26` : COLORS.cardAlt,
+                      border: `1px solid ${on ? tr.color : COLORS.border}`,
+                      color: on ? tr.color : COLORS.muted,
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                  >
+                    {t[tr.labelKey]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <button onClick={submitAdd} style={{ background: COLORS.accent }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{addModal.editingId ? t.saveLabel : t.logItBtn}</button>
           {addModal.editingId && (
             <button
@@ -6698,11 +6851,14 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
   const notes = entries.filter((e) => e.type === "note");
+  const [dragOver, setDragOver] = useState(false);
+  const onCrew = (roster || []).filter((m) => (crew || []).includes(m.uid));
+  const offCrew = (roster || []).filter((m) => !(crew || []).includes(m.uid));
   return (
     <div className="fixed inset-0 z-40 flex items-end lg:items-stretch justify-center">
       <div onClick={onClose} className="absolute inset-0 bg-black/60" />
@@ -6776,6 +6932,56 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             </div>
           </div>
         )}
+
+        {/* Drag a name onto the job on a desktop; tap it on a phone, where
+            HTML5 drag does not exist. Both do the same thing. */}
+        <div
+          onDragOver={(e) => { if (canManageCrew) { e.preventDefault(); setDragOver(true); } }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const memberUid = e.dataTransfer.getData("text/member-uid");
+            if (memberUid && !(crew || []).includes(memberUid)) onToggleCrew(memberUid);
+          }}
+          style={{
+            background: dragOver ? `${COLORS.accent}1A` : COLORS.card,
+            border: `1px ${dragOver ? "solid" : "solid"} ${dragOver ? COLORS.accent : COLORS.border}`,
+          }}
+          className="rounded-xl p-3 mb-3"
+        >
+          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.crewOnJob} ({onCrew.length})</div>
+          {onCrew.length === 0 ? (
+            <div style={{ color: COLORS.muted }} className="text-xs mb-2">{canManageCrew ? t.crewDropHint : t.crewNobody}</div>
+          ) : (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {onCrew.map((m) => (
+                <span key={m.uid} style={{ background: `${COLORS.accent}1F`, border: `1px solid ${COLORS.accent}66`, color: COLORS.accent }} className="pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5">
+                  {m.name || m.email || m.uid}
+                  {canManageCrew && (
+                    <button onClick={() => onToggleCrew(m.uid)} title={t.removeLabel}><X size={11} /></button>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
+          {canManageCrew && offCrew.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {offCrew.map((m) => (
+                <button
+                  key={m.uid}
+                  draggable
+                  onDragStart={(e) => e.dataTransfer.setData("text/member-uid", m.uid)}
+                  onClick={() => onToggleCrew(m.uid)}
+                  style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.muted }}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-bold cursor-grab active:cursor-grabbing"
+                >
+                  + {m.name || m.email || m.uid}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={() => onOpenRapport(project.id)}
@@ -6906,10 +7112,46 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
         )}
         </div>
 
-        <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
-        <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
-        <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
-        </div>
+        {/* Grouped by trade, because "what did the Spengler use" is the
+            question actually asked when the job is costed or disputed. With a
+            single trade on site the headers would be noise, so they only
+            appear once there is more than one. */}
+        {(() => {
+          const used = TRADES.filter((tr) =>
+            materials.some((e) => (e.trade || DEFAULT_TRADE) === tr.key) ||
+            tools.some((e) => (e.trade || DEFAULT_TRADE) === tr.key)
+          );
+          if (used.length <= 1) {
+            return (
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
+                <Section title={`${t.materials} (${materials.length})`} items={materials} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
+                <Section title={`${t.tools} (${tools.length})`} items={tools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />
+              </div>
+            );
+          }
+          return used.map((tr) => {
+            const mine = materials.filter((e) => (e.trade || DEFAULT_TRADE) === tr.key);
+            const myTools = tools.filter((e) => (e.trade || DEFAULT_TRADE) === tr.key);
+            const tradeHours = entries
+              .filter((e) => e.type === "time" && (e.trade || DEFAULT_TRADE) === tr.key)
+              .reduce((sum, e) => sum + (parseFloat(e.qty) || 0), 0);
+            return (
+              <div key={tr.key} style={{ background: COLORS.card, border: `1px solid ${tr.color}55` }} className="rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span style={{ background: tr.color }} className="w-2.5 h-2.5 rounded-full shrink-0" />
+                    <span style={{ color: tr.color }} className="text-xs font-black uppercase tracking-wide">{t[tr.labelKey]}</span>
+                  </div>
+                  {tradeHours > 0 && (
+                    <span style={{ color: COLORS.muted }} className="text-[11px] font-bold">{tradeHours.toFixed(1)} h</span>
+                  )}
+                </div>
+                {mine.length > 0 && <Section title={`${t.materials} (${mine.length})`} items={mine} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />}
+                {myTools.length > 0 && <Section title={`${t.tools} (${myTools.length})`} items={myTools} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />}
+              </div>
+            );
+          });
+        })()}
 
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.commentsTitle}</div>
