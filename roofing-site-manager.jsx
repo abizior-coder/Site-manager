@@ -824,36 +824,13 @@ function cprSteps(t) {
   return [1, 2, 3, 4, 5, 6, 7].map((n) => ({ title: t[`cpr${n}t`], text: t[`cpr${n}x`] }));
 }
 
-const SAFETY_RULES_ROOF = [
-  { title: "Fall protection is mandatory above 2–3 m", text: "Any roof edge with a drop of more than 2 m (BauAV) generally needs protection; SUVA's own guidance sets the practical threshold at 3 m depending on roof pitch. Collective protection (scaffolding, guardrails, safety nets) always takes priority over personal gear like a harness." },
-  { title: "Steeper roofs need more", text: "Above roughly 25–30° pitch a roofer's protection wall (Dachdeckerschutzwand) is required; above 60° a mobile elevating platform or equivalent is typically needed instead of a harness alone." },
-  { title: "Skylights and openings", text: "Roof lights and openings aren't reliably break-proof — they need their own additional securing (safety glass, grille, netting), not just general edge protection." },
-  { title: "Harness use needs training", text: "Personal fall-arrest gear (PSAgA) may only be used when collective protection genuinely isn't possible, and requires at least basic training in anchor points and use." },
-  { title: "Falling material", text: "Protection is also required against tools or material falling from the roof onto people below, not just against people falling." },
-];
-
-const SAFETY_RULES_METAL = [
-  { title: "Fume extraction when welding or grinding", text: "Welding and cutting metal must use extraction or ventilation plus the required respirator — welding fume is a recognised health hazard, and some fumes carry a cancer risk." },
-  { title: "Hands and eyes are the most common injuries", text: "Cut-resistant gloves, welding-rated eyewear, and spark/UV-resistant welder's clothing are minimum kit — fingers, hands and eyes account for most metalwork injuries." },
-  { title: "Fall protection applies here too", text: "Assembling steel frames, glass facade elements, or roof flashing at height follows the same fall-protection rules as any other trade — secure yourself and only stand on load-bearing surfaces." },
-  { title: "Only trained staff run cranes or rig loads", text: "Craning and rigging loads (including glass and frame elements) requires trained personnel and properly rated lifting gear." },
-  { title: "Check for asbestos on pre-1990 material", text: "Before welding, cutting, or grinding older material, confirm whether it contains asbestos and take the required precautions if so." },
-];
-
-const SAFETY_RULES_FORMWORK = [
-  { title: "Edge protection required above 2 m since 2025", text: "As of 1 January 2025, fall protection is mandatory on slab/deck formwork work above 2 m (the earlier practical exception sat at 3 m). Collective protection — nets, guardrails — is preferred over a harness alone." },
-  { title: "Use a platform ladder above 1 m", text: "When fitting props, pour platforms, or edge-protection parts above 1 m, use a podium/platform ladder or similar aid rather than working freestanding." },
-  { title: "Fit elements while they're lying flat", text: "Attach props, pour platforms and side-protection parts to formwork panels while they're still on the ground where possible, and only release the crane sling once the element is fully secured." },
-  { title: "Prefer systems built from underneath", text: "Formwork systems assembled from below (element or beam-grid systems) avoid working at height entirely and are inherently safer than conventional top-down formwork." },
-];
-
-const SAFETY_RULES_GROUND = [
-  { title: "Trenches over 1.5 m need shoring or sloping", text: "Any trench, shaft, or excavation deeper than 1.5 m must be shored, sloped, or otherwise secured (BauAV) — this is the threshold SUVA cites, and fatal accidents have happened at depths as shallow as 1.2 m." },
-  { title: "Know what's underground before you dig", text: "Existing gas, water, power, or other buried lines must be located and marked before excavation starts." },
-  { title: "Keep vehicles and material back from the edge", text: "A safety strip of at least 0.6 m must stay clear at the top edge on both sides, and slopes must never be additionally loaded by vehicles, machinery, or material stockpiles." },
-  { title: "Helmets in and around excavations", text: "Hard hats are required in trenches and pits, and anywhere near excavators or heavy earthmoving machinery." },
-  { title: "Steep or deep slopes need an engineer's sign-off", text: "Slopes steeper than roughly 45–63° (depending on soil type), deeper than 4 m, or subject to extra load, water, or vibration require a formal stability assessment by a qualified engineer or geotechnician." },
-];
+// Each entry is an i18n key stem; the title lives under <stem>T and the body
+// under <stem>X. SUVA publishes in German and the Polier reads German, so the
+// German text is the primary one, English the fallback for the other languages.
+const SAFETY_RULES_ROOF = ["safety_roof_1", "safety_roof_2", "safety_roof_3", "safety_roof_4", "safety_roof_5"];
+const SAFETY_RULES_METAL = ["safety_metal_1", "safety_metal_2", "safety_metal_3", "safety_metal_4", "safety_metal_5"];
+const SAFETY_RULES_FORMWORK = ["safety_formwork_1", "safety_formwork_2", "safety_formwork_3", "safety_formwork_4"];
+const SAFETY_RULES_GROUND = ["safety_ground_1", "safety_ground_2", "safety_ground_3", "safety_ground_4", "safety_ground_5"];
 
 const SAFETY_CATEGORIES = [
   { key: "roof", labelKey: "safetyCatRoof", icon: Mountain, rules: SAFETY_RULES_ROOF, url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/dacharbeiten-absturzsicherung" },
@@ -1364,7 +1341,7 @@ export default function SiteManager() {
         setProfile({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
         setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
         setTeam({ members: [], invites: [], busy: false });
-        setMaterialPrices({}); setMaterialUnits({});
+        setArticleMaster({});
         setSyncState({ error: null, fromCache: false });
       }
     }).then((fn) => { unsub = fn; }).catch(() => setAuthChecked(true));
@@ -1533,6 +1510,20 @@ export default function SiteManager() {
   }, [user, membership]);
 
   useEffect(() => { customersRef.current = customers; }, [customers]);
+
+  // Everyone needs the roster once: the Team tab lists it, and the crew shown
+  // on a job are looked up by uid in it. It used to load only for managers and
+  // only on three tabs, so crew saw an empty team and "nobody on this job"
+  // while the Polier had just assigned two people. The rules already let every
+  // member read the list.
+  useEffect(() => {
+    if (!membership) return;
+    let alive = true;
+    listMembers()
+      .then((members) => { if (alive) setTeam((s) => ({ ...s, members })); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [membership]);
 
   // The dashboard needs names and each person's clock. Refreshed on entry and
   // then periodically, since "who is on site right now" goes stale quickly.
@@ -3910,7 +3901,7 @@ export default function SiteManager() {
             {{
               today: t.navToday, materials: t.navMaterials, calendar: t.navCalendar,
               projects: t.navProjects, reports: t.navReports, customers: t.navCustomers,
-              board: t.navBoard, cockpit: t.navCockpit, safety: t.navSafety,
+              board: t.navBoard, cockpit: t.navCockpit, safety: t.navSafety, team: t.navTeam,
             }[tab] || t.appLabel}
           </div>
         </div>
@@ -5294,8 +5285,8 @@ export default function SiteManager() {
                   <div className="flex flex-col gap-3">
                     {cat.rules.map((r, i) => (
                       <div key={i}>
-                        <div className="text-sm font-bold">{r.title}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{r.text}</div>
+                        <div className="text-sm font-bold">{t[r + "T"]}</div>
+                        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{t[r + "X"]}</div>
                       </div>
                     ))}
                   </div>

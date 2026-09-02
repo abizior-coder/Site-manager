@@ -4,6 +4,11 @@ export function getSdk() { return {}; }
 export function currentUser() { return { uid: "u1", email: "owner@example.com" }; }
 
 export async function onAuthChange(cb) {
+  // Real Firebase reports "nobody" before it reports the persisted user, so
+  // the signed-out branch runs on every cold load. A stale setter in that
+  // branch reached the live app because this stub skipped straight to the
+  // signed-in state.
+  cb(null);
   cb({ uid: "u1", email: "owner@example.com" });
   return () => {};
 }

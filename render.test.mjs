@@ -182,6 +182,17 @@ async function renderAs(role) {
   check("crew: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("crew: money is not shown", !text().includes("R-2026-001"), "an invoice number leaked into the crew view");
   check("crew: no overview button", ![...window.document.querySelectorAll("button")].some((b) => (b.getAttribute("title") || "").match(/Übersicht|Overview/)), "crew can reach the overview");
+  // The roster used to load only for managers and only on three tabs, so a
+  // crew member opened Team and saw nobody -- and the crew shown on a job,
+  // looked up by uid in that roster, came out as "nobody assigned" while the
+  // Polier had just assigned two people.
+  {
+    const teamBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Team");
+    teamBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    check("crew: team tab lists the roster", text().includes("Mitarbeiter") && text().includes("Chef"), "roster empty for crew");
+    check("crew: cannot attach people to jobs", !/Zu Baustelle hinzuf|Add to a job/.test(text()), "crew offered the add-to-job picker");
+  }
   if (errors.length) problems.push(...errors);
 }
 
