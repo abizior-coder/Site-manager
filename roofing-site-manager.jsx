@@ -1952,11 +1952,21 @@ export default function SiteManager() {
     showToast(t.saveProfile);
   }
 
-  function renderReportDocument(subtitle, sections) {
+  function renderReportDocument(subtitle, sections, remark) {
+    // Notes are free text typed on a roof; the print must not become HTML
+    // because someone wrote "<3" in a comment.
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const rowsHtml = (items) =>
       items
-        .map((i) => `<tr><td>${i.description || ""}</td><td>${i.qty || ""}</td><td>${i.unit || ""}</td></tr>`)
+        .map((i) => `<tr><td>${esc(i.description)}</td><td>${esc(i.qty)}</td><td>${esc(i.unit)}</td></tr>`)
         .join("");
+
+    // What was said on site belongs on the record next to what was used.
+    const notesHtml = (notes) =>
+      notes && notes.length
+        ? `<div class="tablabel">${t.notesLabel}</div>
+           <ul class="notes">${notes.map((n) => `<li><span class="when">${esc(n.date)}</span>${esc(n.description)}</li>`).join("")}</ul>`
+        : "";
 
     const tableHtml = (label, items) =>
       items.length
@@ -1975,6 +1985,7 @@ export default function SiteManager() {
         <div class="totalhours">${t.totalHoursLabel}: ${s.hours.toFixed(1)} h</div>
         ${tableHtml(t.materialsLogged, s.materials)}
         ${tableHtml(t.machinesToolsLabel, s.machines)}
+        ${notesHtml(s.notes)}
       </div>`
       )
       .join("");
@@ -1997,6 +2008,10 @@ export default function SiteManager() {
         th:nth-child(1), td:nth-child(1) { width: 60%; }
         th:nth-child(2), td:nth-child(2) { width: 20%; }
         th:nth-child(3), td:nth-child(3) { width: 20%; }
+        .notes { list-style: none; padding: 0; margin: 0 0 8px; font-size: 12px; }
+        .notes li { padding: 6px 8px; border-bottom: 1px solid #eee; }
+        .notes .when { color: #888; margin-right: 10px; font-variant-numeric: tabular-nums; }
+        .remark { font-size: 12px; margin: 0 0 16px; padding: 10px 12px; background: #fff7e6; border-left: 3px solid #E0B341; white-space: pre-wrap; }
         .footer { margin-top: 24px; font-size: 11px; color: #999; }
         @media print { body { padding: 0; } .section { page-break-inside: avoid; } }
       </style>
@@ -2008,6 +2023,7 @@ export default function SiteManager() {
           </div>
           <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
         </div>
+        ${remark ? `<div class="remark">${esc(remark)}</div>` : ""}
         ${sectionsHtml || `<div class="meta">${t.noProjectsYet}</div>`}
         <div class="footer">${t.generatedOnLabel}: ${new Date().toLocaleString()}</div>
       </body></html>`;
@@ -2035,10 +2051,12 @@ export default function SiteManager() {
       const hours = ents.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
       const materials = ents.filter((e) => e.type === "material");
       const machines = ents.filter((e) => e.type === "tool");
-      return { title: siteName, client: clientNameFor(proj), address: proj?.address || "", hours, materials, machines };
+      const notes = ents.filter((e) => e.type === "note");
+      return { title: siteName, client: clientNameFor(proj), address: proj?.address || "", hours, materials, machines, notes };
     });
     const subtitle = `${periodLabel} · ${report.periodLabel}${profile.name ? " · " + profile.name : ""}`;
-    return renderReportDocument(subtitle, sections);
+    // The author's own remark on the report goes on top, before the sites.
+    return renderReportDocument(subtitle, sections, report.notes);
   }
 
   function buildProjectsReportHtml(projectIds) {
@@ -2049,9 +2067,10 @@ export default function SiteManager() {
         const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
         const materials = pEntries.filter((e) => e.type === "material");
         const machines = pEntries.filter((e) => e.type === "tool");
-        return { title: p.name, client: clientNameFor(p), address: p.address || "", hours, materials, machines };
+        const notes = pEntries.filter((e) => e.type === "note").sort((a, b) => String(a.date).localeCompare(String(b.date)) || (a.createdAt || 0) - (b.createdAt || 0));
+        return { title: p.name, client: clientNameFor(p), address: p.address || "", hours, materials, machines, notes };
       })
-      .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0);
+      .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0 || s.notes.length > 0);
     const subtitle = `${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}`;
     return renderReportDocument(subtitle, sections);
   }
