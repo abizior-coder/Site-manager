@@ -165,6 +165,30 @@ await testEnv.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(d, "companies", CID, "reports", "r-open"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: null });
   await setDoc(doc(d, "companies", CID, "reports", "r-signed"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: Date.now(), signerName: "Kunde" });
 });
+// --- plans and documents (metadata; the bytes are in R2) ------------------
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  const d = ctx.firestore();
+  await setDoc(doc(d, "companies", CID, "files", "f-crew"), { uploadedBy: CREW, projectId: "p1", name: "Dach.pdf", kind: "plan", size: 1000, type: "application/pdf", createdAt: Date.now() });
+  await setDoc(doc(d, "companies", CID, "files", "f-sup"), { uploadedBy: SUP, projectId: "p1", name: "Offerte.pdf", kind: "offer", size: 1000, type: "application/pdf", createdAt: Date.now() });
+});
+await check("crew CAN add a plan to a job", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "files", "f-new"), { uploadedBy: CREW, projectId: "p1", name: "Plan.pdf", kind: "plan", size: 10, type: "application/pdf", createdAt: Date.now() })));
+await check("crew CANNOT add a plan in someone else's name", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "files", "f-fake"), { uploadedBy: SUP, projectId: "p1", name: "Plan.pdf", kind: "plan", size: 10, type: "application/pdf", createdAt: Date.now() })));
+await check("crew CAN see the job's plans", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "files", "f-sup"))));
+// `outsider` joins the company with an invite code earlier in this file, so a
+// fresh account that never joined is the right stranger here.
+const stranger = testEnv.authenticatedContext("never-joined").firestore();
+await check("a stranger CANNOT see them", () =>
+  assertFails(getDoc(doc(stranger, "companies", CID, "files", "f-sup"))));
+await check("crew CANNOT delete a manager's file", () =>
+  assertFails(deleteDoc(doc(crew, "companies", CID, "files", "f-sup"))));
+await check("the uploader CAN delete their own file", () =>
+  assertSucceeds(deleteDoc(doc(crew, "companies", CID, "files", "f-crew"))));
+await check("a manager CAN delete anyone's file", () =>
+  assertSucceeds(deleteDoc(doc(sup, "companies", CID, "files", "f-new"))));
+
 await check("crew CAN create a report on site", () =>
   assertSucceeds(setDoc(doc(crew, "companies", CID, "reports", "r-new"), { userId: CREW, projectId: "p1", date: "2026-09-02", signedAt: null })));
 await check("crew CANNOT create a report as someone else", () =>

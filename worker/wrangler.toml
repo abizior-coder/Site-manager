@@ -12,3 +12,7 @@ ALLOWED_ORIGINS = "https://abizior-coder.github.io,http://localhost:5566"
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 id = "1aefbbb10efd457295860fc138ce7d19"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "site-log-files"

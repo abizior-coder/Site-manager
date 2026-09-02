@@ -46,7 +46,7 @@ surface only; the office screens fall back to English by design.
 | Tests | `logic.test.mjs`, `render.test.mjs`, `order-flow.test.mjs`, `rules.test.mjs` | `npm test` runs all four |
 | Bundle | `bundle.js` | **Generated — never edit by hand** |
 | Cache-bust | `scripts/stamp.mjs` | Stamps `bundle.js?v=<hash>` into `index.html` |
-| AI proxy | `worker/src/index.js` | Cloudflare Worker holding the Anthropic key |
+| AI proxy + files | `worker/src/index.js`, `worker/src/files.js` | Cloudflare Worker holding the Anthropic key; `/files/*` serves plans from R2. `node worker/files.test.mjs` runs it against an in-memory bucket |
 
 **Build and deploy:**
 
@@ -101,6 +101,7 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/entries/{id}` | One per entry, each carrying `userId` |
 | `companies/{cid}/customers/{id}` | One per customer, with `contacts` history |
 | `companies/{cid}/documents/{id}` | Quotes and invoices — **owner only** |
+| `companies/{cid}/files/{id}` | Plans and documents on a job — **metadata only**: `name, size, type, kind (plan\|offer\|contract\|delivery\|photo\|other), projectId, uploadedBy, createdAt`, or `url` for an external link. The bytes live in **Cloudflare R2** (`site-log-files`, key `companies/{cid}/files/{id}`) behind the Worker's `/files/{cid}/{projectId}` (POST), `/files/{cid}/{id}` (GET, DELETE). The Worker checks membership on every call by reading `/members/{uid}` **as the caller** through the Firestore REST API — the rules are the check, no service account. 25 MB per file, executables refused. Members read; create needs `uploadedBy == auth.uid`; delete by a manager or the uploader (same rule in Firestore and in the Worker). |
 | `companies/{cid}/sentReports/{id}` | Reports sent to a supervisor. **One per person, period and day** (`id = userId-period-periodLabel`); a re-send appends to `sends`, never a second record. Carries `entryIds` (+ `entryLabels`, `excludedIds`), not copies — rendered by joining the live log (`reports.js`). Pre-model reports still carry `entries` and render from those. Monthly = the month minus what daily reports already sent (owner's decision, 2026-09-02). |
 | `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, managers write |
 | `companies/{cid}/leave/{id}` | Absences — anyone raises their own, only a manager decides |
@@ -221,10 +222,20 @@ These are real and currently unfixed. Ordered by how much damage they do.
    refused and never stored (the mail still opened). Anything you see from
    before that date came through the old `site-meta` migration. Fixed in
    `sendReportToSupervisor`; nothing to migrate because nothing was written.
-9. **No merge for duplicate customers.** Migrated client strings produced
+9. **Files need the R2 bucket bound and the Worker deployed** (`worker/wrangler.toml`,
+   `npx wrangler deploy` from `worker/`). Without the binding the Worker answers
+   503 and the app says "Dateiablage ist noch nicht eingerichtet" instead of
+   spinning. R2 is on the Cloudflare free tier (10 GB, zero egress) but needed a
+   payment method on the account to enable. Firebase Storage was ruled out:
+   the Spark plan has had no buckets at all since February 2026.
+10. **The emulator cannot exercise uploads.** The Worker verifies ID tokens
+   against Google, and emulator tokens are not real, so plans can only be
+   tested end to end in the live app with a real account. The Worker's own
+   suite covers routing, limits and who-may-delete with a fake bucket.
+11. **No merge for duplicate customers.** Migrated client strings produced
    spelling variants as separate records. Deliberately not auto-merged,
    because two similar names can be two different people.
-10. `roofing-site-manager.html` was an unused stale duplicate and has been
+12. `roofing-site-manager.html` was an unused stale duplicate and has been
    deleted.
 
 ### Data safety

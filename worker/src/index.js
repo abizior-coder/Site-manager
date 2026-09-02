@@ -1,3 +1,5 @@
+import { handleFiles, firestoreMember } from "./files.js";
+
 const MODEL = "claude-sonnet-5";
 const MAX_IMAGE_BLOCKS = 4;
 const DAILY_LIMIT = 200; // scans per account per day, when KV is bound
@@ -10,7 +12,7 @@ function corsHeaders(origin, allowedOrigins) {
   const allowOrigin = allowed.includes(origin) ? origin : allowed[0] || "*";
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
 }
@@ -46,7 +48,8 @@ async function verifyUser(request) {
   const data = await res.json().catch(() => null);
   const user = data && data.users && data.users[0];
   if (!user || !user.localId) return { ok: false, status: 401, error: "invalid sign-in" };
-  return { ok: true, uid: user.localId };
+  // The token travels on so the files routes can read Firestore as this user.
+  return { ok: true, uid: user.localId, token };
 }
 
 // Per-account daily cap. A valid account is now required, but sign-up is open,
@@ -69,6 +72,16 @@ export default {
     const headers = corsHeaders(origin, env.ALLOWED_ORIGINS);
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
+
+    // Plans and documents live under /files; everything else is the AI proxy.
+    if (new URL(request.url).pathname.startsWith("/files")) {
+      return handleFiles({
+        request, env, headers,
+        verify: verifyUser,
+        isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
+      });
+    }
+
     if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers });
 
     const auth = await verifyUser(request);

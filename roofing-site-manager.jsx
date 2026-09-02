@@ -8,8 +8,9 @@ import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, credi
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
   syncCollection, loadCollection, subscribeCollection, companyStorage, isOwner, getRole,
-  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor,
+  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor, getCompanyId,
 } from "./company-store.js";
+import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -1252,6 +1253,12 @@ export default function SiteManager() {
   const [importCodeInput, setImportCodeInput] = useState("");
   const [importError, setImportError] = useState(null);
   const [sentReports, setSentReports] = useState([]);
+  // Plans and documents: metadata here, bytes in R2 behind the Worker.
+  const [projectFiles, setProjectFiles] = useState([]);
+  const projectFilesRef = useRef([]);
+  const [fileViewer, setFileViewer] = useState(null); // { file, url }
+  const [fileBusy, setFileBusy] = useState(0);
+  const [linkForm, setLinkForm] = useState(null); // { projectId, url, name, kind }
   const [reportViewModal, setReportViewModal] = useState(null); // report object being viewed/edited
   const [rapportExists, setRapportExists] = useState(null); // { existing, projectId, date } when a signed Rapport already covers that day
   const [editTimeModal, setEditTimeModal] = useState(null); // the time entry being adjusted
@@ -1357,7 +1364,7 @@ export default function SiteManager() {
         // on screen for a role that must never see them.
         setProjects([]); setEntries([]); setCustomers([]);
         setLeaveRequests([]); setSentReports([]); setActiveClock(null);
-        setDocuments([]); setAssignments([]); setClocks([]); setSiteReports([]);
+        setDocuments([]); setAssignments([]); setClocks([]); setSiteReports([]); setProjectFiles([]); projectFilesRef.current = [];
         setBilling({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
         setProfile({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
         setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
@@ -1418,6 +1425,7 @@ export default function SiteManager() {
     unsubs.push(subscribeCollection("leave", setLeaveRequests, onErr));
     unsubs.push(subscribeCollection("reports", setSiteReports, onErr));
     unsubs.push(subscribeCollection("sentReports", setSentReports, onErr));
+    unsubs.push(subscribeCollection("files", setProjectFiles, onErr));
     // Crew have no access to quotes and invoices — subscribing would simply
     // be denied, so don't ask.
     if (isOwner()) unsubs.push(subscribeCollection("documents", setDocuments, onErr));
@@ -1536,6 +1544,7 @@ export default function SiteManager() {
   }, [user, membership]);
 
   useEffect(() => { customersRef.current = customers; }, [customers]);
+  useEffect(() => { projectFilesRef.current = projectFiles; }, [projectFiles]);
 
   // Everyone needs the roster once: the Team tab lists it, and the crew shown
   // on a job are looked up by uid in it. It used to load only for managers and
@@ -2497,6 +2506,7 @@ export default function SiteManager() {
     if (next.documents) setDocuments(next.documents);
     if (next.assignments) setAssignments(next.assignments);
     if (next.siteReports) setSiteReports(next.siteReports);
+    if (next.projectFiles) { setProjectFiles(next.projectFiles); projectFilesRef.current = next.projectFiles; }
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -2510,6 +2520,7 @@ export default function SiteManager() {
       if (next.documents) await syncCollection("documents", next.documents);
       if (next.assignments) await syncCollection("assignments", next.assignments);
       if (next.siteReports) await syncCollection("reports", next.siteReports);
+      if (next.projectFiles) await syncCollection("files", next.projectFiles);
       if (next.sentReports) await syncCollection("sentReports", next.sentReports);
 
       // The clock is personal — each crew member has their own.
@@ -2799,12 +2810,14 @@ export default function SiteManager() {
 
   function dockAccepts(dt) {
     const types = Array.from((dt && dt.types) || []);
-    return types.includes("text/material") || types.includes("text/project-id") || (types.includes("text/member-uid") && canManage());
+    return types.includes("Files") || types.includes("text/material") || types.includes("text/project-id") || (types.includes("text/member-uid") && canManage());
   }
 
   function dropOnProject(projectId, dt) {
     const pr = projects.find((x) => x.id === projectId);
     if (!pr || !dt) return;
+    // A file from the desk dropped on a job tile: same tray, same gesture.
+    if (dt.files && dt.files.length) { uploadFiles(projectId, dt.files); return; }
     const memberUid = dt.getData("text/member-uid");
     if (memberUid) {
       if (!canManage()) return;
@@ -2831,6 +2844,107 @@ export default function SiteManager() {
     });
     if (payload.basketId) setBasket((b) => b.filter((i) => i.id !== payload.basketId));
     showToast(`${name} → ${pr.name}`);
+  }
+
+  // --- plans and documents ---------------------------------------------------
+  // The bytes go to R2 through the Worker, which checks membership as the
+  // caller; the app only keeps the metadata. Several files in one drop are
+  // uploaded one after another, each with its own outcome, so one bad file
+  // never takes the others down with it.
+  async function uploadFiles(projectId, fileList, kind) {
+    const files = Array.from(fileList || []);
+    const cid = getCompanyId();
+    if (!files.length || !cid || !projectId) return;
+    let current = projectFilesRef.current;
+    for (const file of files) {
+      if (file.size > MAX_FILE_BYTES) { showToast(`${file.name}: ${t.filesTooLarge}`); continue; }
+      setFileBusy((n) => n + 1);
+      try {
+        const token = await getIdToken();
+        const fd = new FormData();
+        fd.append("file", file, file.name);
+        fd.append("kind", kind || guessKind(file.name, file.type));
+        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${projectId}`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
+        if (res.status === 413) { showToast(`${file.name}: ${t.filesTooLarge}`); continue; }
+        if (res.status === 415) { showToast(`${file.name}: ${t.filesTypeRefused}`); continue; }
+        if (res.status === 503) { showToast(t.filesNotConfigured); continue; }
+        if (!res.ok) { showToast(t.filesFailed); continue; }
+        const meta = await res.json();
+        const record = { id: meta.id, name: meta.name, size: meta.size, type: meta.type, kind: meta.kind, projectId, uploadedBy: user?.uid || null, createdAt: Date.now() };
+        current = [record, ...current];
+        projectFilesRef.current = current;
+        await persist({ projectFiles: current });
+        showToast(`${meta.name} ${t.filesUploaded}`);
+      } catch (e) {
+        showToast(t.filesFailed);
+      } finally {
+        setFileBusy((n) => Math.max(0, n - 1));
+      }
+    }
+  }
+
+  async function fetchFileBlob(f) {
+    const cid = getCompanyId();
+    const token = await getIdToken();
+    const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(String(res.status));
+    return await res.blob();
+  }
+
+  // Shown from a blob: URL, so nothing is ever public and nothing is cached
+  // by a proxy. Images and PDFs open in the app; anything else downloads.
+  async function openFile(f) {
+    if (f.url) { window.open(f.url, "_blank", "noopener"); return; }
+    setFileBusy((n) => n + 1);
+    try {
+      const blob = await fetchFileBlob(f);
+      const url = URL.createObjectURL(blob);
+      if (isImage(f.type) || isPdf(f.type, f.name)) {
+        setFileViewer({ file: f, url });
+      } else {
+        const a = document.createElement("a");
+        a.href = url; a.download = f.name || "file"; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+    } catch (e) {
+      showToast(t.filesFailed);
+    } finally {
+      setFileBusy((n) => Math.max(0, n - 1));
+    }
+  }
+
+  function closeFileViewer() {
+    if (fileViewer && fileViewer.url) { try { URL.revokeObjectURL(fileViewer.url); } catch (e) {} }
+    setFileViewer(null);
+  }
+
+  function canDeleteFile(f) {
+    return canManage() || (!!f && f.uploadedBy === user?.uid);
+  }
+
+  async function deleteFile(f) {
+    if (!f) return;
+    if (!f.url) {
+      try {
+        const cid = getCompanyId();
+        const token = await getIdToken();
+        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok && res.status !== 404) { showToast(t.filesFailed); return; }
+      } catch (e) { showToast(t.filesFailed); return; }
+    }
+    persist({ projectFiles: projectFilesRef.current.filter((x) => x.id !== f.id) });
+    showToast(t.filesDeleted);
+  }
+
+  // A plan that already lives in the architect's Dropbox needs no upload.
+  function addFileLink() {
+    if (!linkForm) return;
+    const url = normaliseLink(linkForm.url);
+    if (!url) return;
+    const name = (linkForm.name || "").trim() || url.replace(/^https?:\/\//, "").slice(0, 80);
+    const record = { id: uid(), name, url, kind: linkForm.kind || "plan", projectId: linkForm.projectId, uploadedBy: user?.uid || null, createdAt: Date.now(), size: 0, type: "text/uri-list" };
+    persist({ projectFiles: [record, ...projectFilesRef.current] });
+    setLinkForm(null);
   }
 
   function memberName(memberUid) {
@@ -6692,6 +6806,13 @@ export default function SiteManager() {
           onEditCustomer={(c) => openCustomerForm(c)}
           crew={projectCrew(projects.find((x) => x.id === selectedProject))}
           pinned={pinnedIds.includes(selectedProject)}
+          files={projectFiles.filter((f) => f.projectId === selectedProject)}
+          onUploadFiles={(list, kind) => uploadFiles(selectedProject, list, kind)}
+          onOpenFile={openFile}
+          onDeleteFile={deleteFile}
+          canDeleteFile={canDeleteFile}
+          onAddLink={() => setLinkForm({ projectId: selectedProject, url: "", name: "", kind: "plan" })}
+          fileBusy={fileBusy}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -6949,6 +7070,55 @@ export default function SiteManager() {
         </Modal>
         );
       })()}
+
+      {fileViewer && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(0,0,0,0.94)" }}>
+          <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-3 px-4 py-2">
+            <div className="text-sm font-bold truncate">{fileViewer.file.name}</div>
+            <div className="flex items-center gap-4 shrink-0">
+              <a href={fileViewer.url} download={fileViewer.file.name} style={{ color: COLORS.muted }} className="text-[11px] font-bold uppercase">{t.filesDownload}</a>
+              <button onClick={closeFileViewer}><X size={20} color={COLORS.muted} /></button>
+            </div>
+          </div>
+          <div className="flex-1 min-h-0">
+            {isImage(fileViewer.file.type)
+              ? <img src={fileViewer.url} alt={fileViewer.file.name} className="w-full h-full object-contain" />
+              : <iframe src={fileViewer.url} title={fileViewer.file.name} className="w-full h-full" style={{ border: 0, background: "#fff" }} />}
+          </div>
+        </div>
+      )}
+
+      {linkForm && (
+        <Modal onClose={() => setLinkForm(null)} title={t.filesAddLink}>
+          <input
+            value={linkForm.url}
+            onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
+            placeholder={t.filesLinkPlaceholder}
+            inputMode="url"
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+          />
+          <input
+            value={linkForm.name}
+            onChange={(e) => setLinkForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder={t.filesLinkName}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full mt-2 rounded-lg px-3 py-2 text-sm outline-none"
+          />
+          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-3 mb-1.5">{t.filesKindLabel}</div>
+          <div className="flex flex-wrap gap-1.5">
+            {FILE_KINDS.map((k) => {
+              const on = linkForm.kind === k;
+              return (
+                <button key={k} onClick={() => setLinkForm((f) => ({ ...f, kind: k }))} style={{ background: on ? `${COLORS.accent}22` : COLORS.cardAlt, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? COLORS.accent : COLORS.muted }} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
+                  {t[`fileKind_${k}`]}
+                </button>
+              );
+            })}
+          </div>
+          <button onClick={addFileLink} disabled={!normaliseLink(linkForm.url)} style={{ background: normaliseLink(linkForm.url) ? COLORS.accent : COLORS.cardAlt, opacity: normaliseLink(linkForm.url) ? 1 : 0.5 }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+        </Modal>
+      )}
 
       {rapportExists && (
         <Modal onClose={() => setRapportExists(null)} title={t.rapportExistsTitle}>
@@ -7612,12 +7782,14 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
   const notes = entries.filter((e) => e.type === "note");
   const [dragOver, setDragOver] = useState(false);
+  const [filesOver, setFilesOver] = useState(false);
+  const fileInputRef = useRef(null);
   const onCrew = (roster || []).filter((m) => (crew || []).includes(m.uid));
   const offCrew = (roster || []).filter((m) => !(crew || []).includes(m.uid));
   return (
@@ -7743,6 +7915,52 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
                   + {m.name || m.email || m.uid}
                 </button>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* The plan is the one thing a Polier looks for before anything else.
+            Files dropped here upload to this job; on a phone the buttons do
+            the same. */}
+        <div
+          onDragOver={(e) => { if (Array.from(e.dataTransfer?.types || []).includes("Files")) { e.preventDefault(); if (!filesOver) setFilesOver(true); } }}
+          onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFilesOver(false); }}
+          onDrop={(e) => { if (e.dataTransfer?.files?.length) { e.preventDefault(); setFilesOver(false); onUploadFiles(e.dataTransfer.files); } }}
+          style={{ background: filesOver ? `${COLORS.accent}1A` : COLORS.card, border: `1px ${filesOver ? "dashed" : "solid"} ${filesOver ? COLORS.accent : COLORS.border}` }}
+          className="rounded-xl p-3 mb-3"
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide flex items-center gap-1.5">
+              <FileText size={11} /> {t.filesTitle} ({(files || []).length})
+              {fileBusy > 0 && <Loader2 size={11} className="animate-spin" />}
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => onAddLink()} style={{ color: COLORS.muted }} className="text-[10px] font-bold uppercase flex items-center gap-1"><ExternalLink size={11} /> {t.filesAddLink}</button>
+              <button onClick={() => fileInputRef.current?.click()} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.filesAdd}</button>
+              <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => { onUploadFiles(e.target.files); e.target.value = ""; }} />
+            </div>
+          </div>
+          {(files || []).length === 0 ? (
+            <div style={{ color: COLORS.muted }} className="text-xs">{filesOver ? t.filesDropHint : t.filesEmpty}</div>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              {sortFiles(files).map((f) => {
+                const Icon = f.url ? ExternalLink : f.kind === "photo" ? Camera : f.kind === "plan" ? Layers : FileText;
+                return (
+                  <div key={f.id} style={{ background: COLORS.cardAlt }} className="rounded-lg px-3 py-2 flex items-center gap-2">
+                    <Icon size={15} color={f.kind === "plan" ? COLORS.accent : COLORS.muted} className="shrink-0" />
+                    <button onClick={() => onOpenFile(f)} className="flex-1 min-w-0 text-left">
+                      <div className="text-sm truncate">{f.name}</div>
+                      <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                        {[t[`fileKind_${f.kind}`] || f.kind, f.url ? t.filesLinkLabel : fmtSize(f.size), f.createdAt ? new Date(f.createdAt).toLocaleDateString() : ""].filter(Boolean).join(" · ")}
+                      </div>
+                    </button>
+                    {canDeleteFile(f) && (
+                      <button onClick={() => onDeleteFile(f)} title={t.deleteLabel} style={{ color: COLORS.danger }} className="shrink-0"><Trash2 size={13} /></button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

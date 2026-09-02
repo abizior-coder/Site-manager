@@ -1,6 +1,6 @@
 # Plans and documents on a job
 
-**Status: proposed — options compared, recommendation below, waiting for a go.**
+**Status: implemented 2026-09-02** (owner enabled R2 and said "rób bucket"; bucket `site-log-files`, Worker deployed).
 
 ## Goal
 

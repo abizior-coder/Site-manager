@@ -144,6 +144,7 @@ async function renderAs(role) {
       await new Promise((r) => setTimeout(r, 250));
       check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
       check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
+      check("owner: job view offers plans and documents", /Pläne & Dokumente|Plans & documents/.test(text()), "no files section in the job view");
 
       const matBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Material");
       if (matBtn) {

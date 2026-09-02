@@ -165,6 +165,17 @@ service cloud.firestore {
         allow update, delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
       }
 
+      // Plans and documents: the bytes live in R2 behind the Worker, which
+      // checks membership by reading /members as the caller. This is the
+      // metadata. Anyone on the job may add a plan; only a manager or the
+      // person who uploaded it may take it away.
+      match /files/{id} {
+        allow read: if isMember(cid);
+        allow create: if isMember(cid) && request.resource.data.uploadedBy == request.auth.uid;
+        allow update: if canManage(cid) || (isMember(cid) && resource.data.uploadedBy == request.auth.uid);
+        allow delete: if canManage(cid) || (isMember(cid) && resource.data.uploadedBy == request.auth.uid);
+      }
+
       // Photos, preferences, technical library.
       match /kv/{key} {
         allow read, write: if isMember(cid);

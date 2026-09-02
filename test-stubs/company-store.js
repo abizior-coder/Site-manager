@@ -3,7 +3,7 @@
 // customerId but no client string, an entry with a photoId, an invoice, an
 // assignment and a leave request.
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports", "sentReports"];
+export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports", "sentReports", "files"];
 
 export const SAMPLE = {
   projects: [

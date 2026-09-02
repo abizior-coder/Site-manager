@@ -7,6 +7,7 @@
 import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
+import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -225,6 +226,32 @@ t("another person's report is a different one", reportId("u2", "daily", "2026-09
   t("a changed quantity after signing is flagged", rapportChanged(signed, [day[0], { ...day[1], qty: "10" }]), true);
   t("an added line after signing is flagged", rapportChanged(signed, [...day, { type: "material", description: "Ziegel", qty: "1" }]), true);
   t("changed hours after signing are flagged", rapportChanged(signed, [{ type: "time", qty: "9" }, day[1]]), true);
+}
+
+// --- plans and documents ---------------------------------------------------
+t("a jpg is a photo", guessKind("IMG_2231.jpg", "image/jpeg"), "photo");
+t("a dwg is a plan", guessKind("Dach_Sued.dwg", "application/octet-stream"), "plan");
+t("a pdf called Offerte is an offer", guessKind("Offerte_Schlatter.pdf", "application/pdf"), "offer");
+t("a Werkvertrag is a contract", guessKind("Werkvertrag.pdf", "application/pdf"), "contract");
+t("a Lieferschein is a delivery note", guessKind("Lieferschein_HGC.pdf", "application/pdf"), "delivery");
+t("an unnamed pdf is a plan by default", guessKind("scan.pdf", "application/pdf"), "plan");
+t("a spreadsheet is other", guessKind("Kalkulation.xlsx", "application/vnd.ms-excel"), "other");
+t("sizes read as a phone shows them", [fmtSize(900), fmtSize(20480), fmtSize(2.5 * 1024 * 1024), fmtSize(15 * 1024 * 1024)], ["900 B", "20 KB", "2.5 MB", "15 MB"]);
+t("the client limit matches the Worker's 25 MB", MAX_UPLOAD, 25 * 1024 * 1024);
+{
+  const sorted = sortFiles([
+    { id: "a", kind: "other", name: "Z", createdAt: 3 },
+    { id: "b", kind: "plan", name: "Old plan", createdAt: 1 },
+    { id: "c", kind: "plan", name: "New plan", createdAt: 2 },
+    { id: "d", kind: "offer", name: "Offerte", createdAt: 5 },
+  ]).map((f) => f.id);
+  t("plans first, newest plan first, then the paperwork", sorted, ["c", "b", "d", "a"]);
+}
+t("a bare domain becomes https", normaliseLink("dropbox.com/s/abc"), "https://dropbox.com/s/abc");
+t("an http link is kept", normaliseLink("http://intranet/plan"), "http://intranet/plan");
+t("a javascript: link is refused", normaliseLink("javascript:alert(1)"), "");
+t("an empty link is empty", normaliseLink("   "), "");
+{
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
