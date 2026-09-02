@@ -3012,17 +3012,29 @@ export default function SiteManager() {
 
   // One person is planned onto one job per day. Tapping the same job again
   // clears the plan rather than needing a separate delete.
+  // Several jobs on one day for one person is normal: the morning on one
+  // roof, the afternoon on another. Dropping adds one; clicking a chip
+  // removes that chip only. It used to replace, so the second drop silently
+  // threw the first job away.
   function toggleAssignment(date, userId, projectId) {
-    const existing = assignments.find((a) => a.date === date && a.userId === userId);
-    if (existing && existing.projectId === projectId) {
+    const existing = assignments.find((a) => a.date === date && a.userId === userId && a.projectId === projectId);
+    if (existing) {
       persist({ assignments: assignments.filter((a) => a.id !== existing.id) });
       return;
     }
-    if (existing) {
-      persist({ assignments: assignments.map((a) => (a.id === existing.id ? { ...a, projectId } : a)) });
-      return;
-    }
     persist({ assignments: [{ id: uid(), date, userId, projectId, createdAt: Date.now() }, ...assignments] });
+  }
+
+  // The day starts on the job, not on a list. If the clock is running on
+  // another job, that day is closed first so the hours land where they were
+  // worked.
+  function startDayOn(projectId) {
+    if (activeClock) {
+      if (activeClock.projectId === projectId) return;
+      clockOut();
+    }
+    persist({ activeClock: { projectId, startedAt: Date.now() } });
+    showToast(t.clockedIn);
   }
 
   // These are personal, not the company's: a name, a private phone, an
@@ -4413,26 +4425,11 @@ export default function SiteManager() {
                 </>
               ) : (
                 <>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{t.startYourDay}</div>
-                  {projects.length === 0 ? (
-                    <div style={{ color: COLORS.muted }} className="text-sm">{t.addProjectFirst}</div>
-                  ) : (
-                    // Every job you could still be working on, not just the
-                    // first few: capping the list at four silently made the
-                    // fifth project impossible to clock into. Finished and
-                    // lost jobs are left out rather than the list being cut
-                    // short, and it scrolls once there are many.
-                    <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
-                      {projects
-                        .filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS))
-                        .map((p) => (
-                          <button key={p.id} onClick={() => clockIn(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-3 px-3 rounded-lg text-sm font-semibold flex items-center justify-between">
-                            <span className="flex items-center gap-2 min-w-0"><Play size={14} color={COLORS.accent} className="shrink-0" /> <span className="truncate">{p.name}</span></span>
-                            <ChevronRight size={16} color={COLORS.muted} className="shrink-0" />
-                          </button>
-                        ))}
-                    </div>
-                  )}
+                  {/* The list of every job to clock into is gone. The day
+                      starts inside the job the Polier assigned -- tap it under
+                      "Heutiger Einsatz" above, or open it under Projekte. */}
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.startYourDay}</div>
+                  <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed">{t.startDayHint}</div>
                 </>
               )}
             </div>
@@ -5034,31 +5031,42 @@ export default function SiteManager() {
                                 {m.name || m.email || m.uid}
                               </div>
                               {days.map((d) => {
-                                const a = assignments.find((x) => x.date === d.date && x.userId === m.uid);
+                                const mineHere = assignments.filter((x) => x.date === d.date && x.userId === m.uid);
                                 const away = leaveRequests.find((r) => r.date === d.date && r.userId === m.uid);
-                                const pr = a ? projects.find((x) => x.id === a.projectId) : null;
-                                const col = a ? projectColour(a.projectId) : null;
+                                const first = mineHere.length ? projectColour(mineHere[0].projectId) : null;
                                 return (
                                   <div
                                     key={d.date}
                                     onDragOver={(e) => { if (dragProject) e.preventDefault(); }}
                                     onDrop={(e) => {
                                       e.preventDefault();
-                                      if (dragProject) toggleAssignment(d.date, m.uid, dragProject.projectId);
+                                      if (dragProject && !mineHere.some((x) => x.projectId === dragProject.projectId)) toggleAssignment(d.date, m.uid, dragProject.projectId);
                                       setDragProject(null);
                                     }}
-                                    onClick={() => { if (a) toggleAssignment(d.date, m.uid, a.projectId); }}
                                     title={away ? t.plannerAway : ""}
                                     style={{
-                                      background: a ? `${col}22` : away ? `${COLORS.amber}14` : COLORS.cardAlt,
-                                      border: `1px solid ${a ? col : away ? `${COLORS.amber}55` : COLORS.border}`,
-                                      opacity: away && !a ? 0.85 : 1,
+                                      background: mineHere.length ? `${first}12` : away ? `${COLORS.amber}14` : COLORS.cardAlt,
+                                      border: `1px solid ${mineHere.length ? `${first}55` : away ? `${COLORS.amber}55` : COLORS.border}`,
+                                      opacity: away && !mineHere.length ? 0.85 : 1,
                                     }}
-                                    className="min-h-[46px] rounded-lg px-2 py-1.5 text-[11px] leading-tight flex items-center justify-center text-center cursor-pointer hover:brightness-125 transition"
+                                    className="min-h-[46px] rounded-lg p-1 text-[11px] leading-tight flex flex-col gap-1 justify-center transition"
                                   >
-                                    {a ? (
-                                      <span className="truncate w-full" style={{ color: col }}>{pr ? pr.name : "—"}</span>
-                                    ) : away ? (
+                                    {mineHere.map((a) => {
+                                      const pr = projects.find((x) => x.id === a.projectId);
+                                      const col = projectColour(a.projectId);
+                                      return (
+                                        <button
+                                          key={a.id}
+                                          onClick={() => toggleAssignment(d.date, m.uid, a.projectId)}
+                                          title={t.plannerChipRemove}
+                                          style={{ background: `${col}26`, border: `1px solid ${col}`, color: col }}
+                                          className="w-full rounded px-1.5 py-1 truncate text-center hover:brightness-125"
+                                        >
+                                          {pr ? pr.name : "—"}
+                                        </button>
+                                      );
+                                    })}
+                                    {!mineHere.length && away ? (
                                       <span style={{ color: COLORS.amber }} className="truncate w-full">
                                         {t[`leave${(away.type || "other").charAt(0).toUpperCase()}${(away.type || "other").slice(1)}`] || t.leaveOther}
                                       </span>
@@ -5661,8 +5669,10 @@ export default function SiteManager() {
               <div className="flex flex-col gap-2">
                 {roster.map((m) => {
                   const jobs = openJobs.filter((pr) => projectCrew(pr).includes(m.uid));
-                  const todayPlan = assignments.find((a) => a.date === todayKey() && a.userId === m.uid);
-                  const todayProject = todayPlan && projects.find((pr) => pr.id === todayPlan.projectId);
+                  const todayProjects = assignments
+                    .filter((a) => a.date === todayKey() && a.userId === m.uid)
+                    .map((a) => projects.find((pr) => pr.id === a.projectId))
+                    .filter(Boolean);
                   return (
                     <div
                       key={m.uid}
@@ -5679,9 +5689,13 @@ export default function SiteManager() {
                             {m.email && m.name ? ` · ${m.email}` : ""}
                           </div>
                         </div>
-                        {todayProject && (
-                          <span style={{ background: `${projectColour(todayProject.id)}22`, color: projectColour(todayProject.id), border: `1px solid ${projectColour(todayProject.id)}66` }} className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full max-w-[45%] truncate">
-                            {todayProject.name}
+                        {todayProjects.length > 0 && (
+                          <span className="shrink-0 flex flex-wrap justify-end gap-1 max-w-[50%]">
+                            {todayProjects.map((tp) => (
+                              <span key={tp.id} style={{ background: `${projectColour(tp.id)}22`, color: projectColour(tp.id), border: `1px solid ${projectColour(tp.id)}66` }} className="text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-[9rem]">
+                                {tp.name}
+                              </span>
+                            ))}
                           </span>
                         )}
                       </div>
@@ -6855,6 +6869,9 @@ export default function SiteManager() {
           canDeleteFile={canDeleteFile}
           onAddLink={() => setLinkForm({ projectId: selectedProject, url: "", name: "", kind: "plan" })}
           fileBusy={fileBusy}
+          activeClock={activeClock}
+          onStartDay={startDayOn}
+          onStopDay={clockOut}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -7872,7 +7889,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -7933,6 +7950,24 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
         {/* Each part of a job is its own block, so the eye can find the one it
             wants instead of reading a single long strip. */}
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
+        {/* The day starts on the job, not on a list: the Polier assigned it,
+            the worker opens it and taps. */}
+        {activeClock && activeClock.projectId === project.id ? (
+          <button data-day-stop onClick={onStopDay} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2 mb-3">
+            <Square size={16} /> {t.clockOut}
+          </button>
+        ) : (
+          <button
+            data-day-start
+            onClick={() => onStartDay(project.id)}
+            style={activeClock
+              ? { background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.text }
+              : { background: COLORS.success, color: "#0B1A0B" }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2 mb-3"
+          >
+            <Play size={16} /> {activeClock ? t.switchDayHere : t.startDayHere}
+          </button>
+        )}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button onClick={() => onAdd("material")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Package size={13} color={COLORS.success} /> {t.materials}</button>
           <button onClick={() => onAdd("tool")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Wrench size={13} color={COLORS.amber} /> {t.tools}</button>

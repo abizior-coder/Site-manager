@@ -145,6 +145,17 @@ async function renderAs(role) {
       check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
       check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
       check("owner: job view offers plans and documents", /Pläne & Dokumente|Plans & documents/.test(text()), "no files section in the job view");
+      // The day starts inside the job now, not from a list on Today.
+      {
+        const start = window.document.querySelector("[data-day-start]");
+        check("owner: job view offers to start the day here", !!start, "no start button in the job view");
+        start?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 250));
+        check("owner: starting turns into a stop button", !!window.document.querySelector("[data-day-stop]"), "no stop button after starting");
+        window.document.querySelector("[data-day-stop]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 250));
+        check("owner: stopping brings the start button back", !!window.document.querySelector("[data-day-start]"), "start button missing after stop");
+      }
 
       const matBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Material");
       if (matBtn) {

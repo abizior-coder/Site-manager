@@ -656,5 +656,9 @@
   "fileKind_other": "Other",
   "filesLinkLabel": "Link",
   "filesNotConfigured": "File storage is not set up yet.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Start the day here",
+  "switchDayHere": "Switch here",
+  "startDayHint": "The day starts inside the job: tap it under “Today’s assignment” above, or open it under Projects.",
+  "plannerChipRemove": "Click to remove"
 }

@@ -618,5 +618,9 @@
   "fileKind_other": "Outro",
   "filesLinkLabel": "Ligação",
   "filesNotConfigured": "O armazenamento de ficheiros ainda não está configurado.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Começar o dia aqui",
+  "switchDayHere": "Mudar para aqui",
+  "startDayHint": "O dia começa na obra: toque nela em «Tarefa de hoje» ou abra-a em Obras.",
+  "plannerChipRemove": "Clique para remover"
 }

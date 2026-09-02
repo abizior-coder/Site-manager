@@ -618,5 +618,9 @@
   "fileKind_other": "Inne",
   "filesLinkLabel": "Link",
   "filesNotConfigured": "Magazyn plików nie jest jeszcze skonfigurowany.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Zacznij dzień tutaj",
+  "switchDayHere": "Przenieś tutaj",
+  "startDayHint": "Dzień zaczyna się w zleceniu: dotknij je w „Dzisiejszy przydział” powyżej albo otwórz w Projekty.",
+  "plannerChipRemove": "Kliknij, aby usunąć"
 }

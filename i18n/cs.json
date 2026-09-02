@@ -618,5 +618,9 @@
   "fileKind_other": "Jiné",
   "filesLinkLabel": "Odkaz",
   "filesNotConfigured": "Úložiště souborů ještě není nastaveno.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Začít den tady",
+  "switchDayHere": "Přepnout sem",
+  "startDayHint": "Den začíná na stavbě: klepněte na ni v „Dnešní přidělení“ nebo ji otevřete ve Stavbách.",
+  "plannerChipRemove": "Kliknutím odeberete"
 }

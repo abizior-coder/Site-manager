@@ -618,5 +618,9 @@
   "fileKind_other": "Tjetër",
   "filesLinkLabel": "Lidhje",
   "filesNotConfigured": "Ruajtja e skedarëve nuk është konfiguruar ende.",
-  "navMenu": "Menyja"
+  "navMenu": "Menyja",
+  "startDayHere": "Fillo ditën këtu",
+  "switchDayHere": "Kalo këtu",
+  "startDayHint": "Dita fillon në punishte: preke te «Detyra e sotme» sipër ose hape te Punishtet.",
+  "plannerChipRemove": "Kliko për ta hequr"
 }

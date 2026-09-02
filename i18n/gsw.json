@@ -618,5 +618,9 @@
   "fileKind_other": "Anders",
   "filesLinkLabel": "Link",
   "filesNotConfigured": "Dateiablag isch nonig iigrichtet.",
-  "navMenu": "Menü"
+  "navMenu": "Menü",
+  "startDayHere": "Tag da starte",
+  "switchDayHere": "Da ane wechsle",
+  "startDayHint": "De Tag fangt im Uftrag aa: obe under «Hüttige Iisatz» aatippe oder under Projekt öffne.",
+  "plannerChipRemove": "Klicke zum Entfärne"
 }

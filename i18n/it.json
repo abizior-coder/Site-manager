@@ -618,5 +618,9 @@
   "fileKind_other": "Altro",
   "filesLinkLabel": "Link",
   "filesNotConfigured": "L'archivio file non è ancora configurato.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Inizia la giornata qui",
+  "switchDayHere": "Passa qui",
+  "startDayHint": "La giornata inizia nel cantiere: toccalo sotto «Incarico di oggi» oppure aprilo in Cantieri.",
+  "plannerChipRemove": "Clicca per rimuovere"
 }

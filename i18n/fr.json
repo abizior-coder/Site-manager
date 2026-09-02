@@ -618,5 +618,9 @@
   "fileKind_other": "Autre",
   "filesLinkLabel": "Lien",
   "filesNotConfigured": "Le stockage de fichiers n'est pas encore configuré.",
-  "navMenu": "Menu"
+  "navMenu": "Menu",
+  "startDayHere": "Commencer la journée ici",
+  "switchDayHere": "Passer ici",
+  "startDayHint": "La journée commence dans le chantier : touchez-le sous « Affectation du jour » ou ouvrez-le sous Chantiers.",
+  "plannerChipRemove": "Cliquer pour retirer"
 }

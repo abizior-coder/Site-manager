@@ -618,5 +618,9 @@
   "fileKind_other": "Друго",
   "filesLinkLabel": "Връзка",
   "filesNotConfigured": "Файловото хранилище още не е настроено.",
-  "navMenu": "Меню"
+  "navMenu": "Меню",
+  "startDayHere": "Започни деня тук",
+  "switchDayHere": "Премини тук",
+  "startDayHint": "Денят започва в обекта: докоснете го в „Днешна задача“ или го отворете в Обекти.",
+  "plannerChipRemove": "Клик за премахване"
 }

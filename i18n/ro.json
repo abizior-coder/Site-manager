@@ -618,5 +618,9 @@
   "fileKind_other": "Altele",
   "filesLinkLabel": "Link",
   "filesNotConfigured": "Stocarea fișierelor nu este încă configurată.",
-  "navMenu": "Meniu"
+  "navMenu": "Meniu",
+  "startDayHere": "Începe ziua aici",
+  "switchDayHere": "Treci aici",
+  "startDayHint": "Ziua începe în șantier: atinge-l la «Repartizarea de azi» sau deschide-l la Șantiere.",
+  "plannerChipRemove": "Clic pentru a elimina"
 }
