@@ -7861,10 +7861,13 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
       {/* On a phone this stays a sheet you thumb through. On a desk a job is
           the thing you are working on, so it takes the whole screen. */}
       <div style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-none rounded-t-2xl lg:rounded-none p-5 lg:p-8 max-h-[85vh] lg:max-h-none lg:h-full overflow-y-auto">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <div className="font-black text-lg">{project.name}</div>
+        {/* The name block yields and wraps; the buttons keep their width. On a
+            phone the name plus two chips plus 'Bearbeiten' and the close
+            button pushed the header past the right edge. */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="font-black text-lg break-words">{project.name}</div>
               {project.category && (
                 <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                   {t[PROJECT_CATEGORIES.find((c) => c.key === project.category)?.labelKey] || project.category}
@@ -7881,8 +7884,8 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             </div>
             {project.client && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{project.client}</div>}
             {project.address ? (
-              <a href={mapsUrl(project.address)} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5">
-                <MapPin size={11} /> {project.address}
+              <a href={mapsUrl(project.address)} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5 min-w-0">
+                <MapPin size={11} className="shrink-0" /> <span className="break-words min-w-0">{project.address}</span>
               </a>
             ) : (
               <button onClick={onEdit} style={{ color: COLORS.muted }} className="text-xs flex items-center gap-1 mt-0.5 underline">
@@ -7890,7 +7893,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0 pt-1">
             <button onClick={onTogglePin} title={pinned ? t.dockUnpin : t.dockPin} style={{ color: pinned ? COLORS.accent : COLORS.muted }}>
               <Pin size={16} fill={pinned ? COLORS.accent : "none"} />
             </button>
@@ -7992,14 +7995,14 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           style={{ background: filesOver ? `${COLORS.accent}1A` : COLORS.card, border: `1px ${filesOver ? "dashed" : "solid"} ${filesOver ? COLORS.accent : COLORS.border}` }}
           className="rounded-xl p-3 mb-3"
         >
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide flex items-center gap-1.5">
-              <FileText size={11} /> {t.filesTitle} ({(files || []).length})
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide flex items-center gap-1.5 min-w-0">
+              <FileText size={11} /> <span className="truncate">{t.filesTitle} ({(files || []).length})</span>
               {fileBusy > 0 && <Loader2 size={11} className="animate-spin" />}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => onAddLink()} style={{ color: COLORS.muted }} className="text-[10px] font-bold uppercase flex items-center gap-1"><ExternalLink size={11} /> {t.filesAddLink}</button>
-              <button onClick={() => fileInputRef.current?.click()} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.filesAdd}</button>
+              <button onClick={() => onAddLink()} style={{ color: COLORS.muted }} className="text-[10px] font-bold uppercase flex items-center gap-1 whitespace-nowrap"><ExternalLink size={11} /> {t.filesAddLink}</button>
+              <button onClick={() => fileInputRef.current?.click()} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 whitespace-nowrap"><Plus size={11} /> {t.filesAdd}</button>
               <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => { onUploadFiles(e.target.files); e.target.value = ""; }} />
             </div>
           </div>
@@ -8324,31 +8327,34 @@ function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder
 
   return (
     <div className="mb-3">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{title}</div>
-        <div className="flex items-center gap-1">
-          {[
-            ["name", t.sortName],
-            ["qty", t.sortQty],
-            ["unit", t.sortUnit],
-            ["supplier", t.sortSupplier],
-            ["date", t.sortDate],
-            ["manual", t.sortManual],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setSort(key)}
-              style={{
-                background: sort === key ? `${COLORS.accent}22` : "transparent",
-                color: sort === key ? COLORS.accent : COLORS.muted,
-                border: `1px solid ${sort === key ? COLORS.accent : "transparent"}`,
-              }}
-              className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide truncate min-w-0">{title}</div>
+        {/* One picker instead of six chips: the chips ran off the right edge
+            of a phone. A native select opens the system list on Android. */}
+        <label
+          data-sort-select
+          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}
+          className="shrink-0 flex items-center gap-1 rounded-lg pl-2 pr-1.5 py-1"
+        >
+          <ArrowUpDown size={11} />
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            style={{ background: "transparent", color: COLORS.text }}
+            className="text-[11px] font-bold outline-none appearance-none pr-3 max-w-[9rem]"
+          >
+            {[
+              ["name", t.sortName],
+              ["qty", t.sortQty],
+              ["unit", t.sortUnit],
+              ["supplier", t.sortSupplier],
+              ["date", t.sortDate],
+              ["manual", t.sortManual],
+            ].map(([key, label]) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
+          </select>
+        </label>
       </div>
       {sort === "manual" ? (
         <ReorderList items={sorted} onReorder={onReorder} renderItem={row} />
