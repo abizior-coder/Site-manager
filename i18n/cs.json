@@ -617,5 +617,6 @@
   "fileKind_photo": "Fotka",
   "fileKind_other": "Jiné",
   "filesLinkLabel": "Odkaz",
-  "filesNotConfigured": "Úložiště souborů ještě není nastaveno."
+  "filesNotConfigured": "Úložiště souborů ještě není nastaveno.",
+  "navMenu": "Menu"
 }

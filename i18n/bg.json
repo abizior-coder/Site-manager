@@ -617,5 +617,6 @@
   "fileKind_photo": "Снимка",
   "fileKind_other": "Друго",
   "filesLinkLabel": "Връзка",
-  "filesNotConfigured": "Файловото хранилище още не е настроено."
+  "filesNotConfigured": "Файловото хранилище още не е настроено.",
+  "navMenu": "Меню"
 }

@@ -655,5 +655,6 @@
   "fileKind_photo": "Photo",
   "fileKind_other": "Other",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "File storage is not set up yet."
+  "filesNotConfigured": "File storage is not set up yet.",
+  "navMenu": "Menu"
 }

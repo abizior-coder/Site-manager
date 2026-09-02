@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -1284,6 +1284,7 @@ export default function SiteManager() {
   const [pinnedIds, setPinnedIds] = useState([]);
   const [dockOver, setDockOver] = useState(null);
   const [dockDragOver, setDockDragOver] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
     try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
@@ -4228,13 +4229,16 @@ export default function SiteManager() {
           content without it, so the scrolling area never gets a bounded
           height, the page grows past the viewport and scrolling breaks. */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
-      <div style={{ borderBottom: `1px solid ${COLORS.border}` }} className="relative px-5 pt-6 pb-4 flex items-center justify-between">
-        <div className="relative">
-          <div className="flex items-center gap-1.5">
+      <div style={{ borderBottom: `1px solid ${COLORS.border}` }} className="relative px-4 lg:px-5 pt-6 pb-4 flex items-center justify-between gap-2">
+        {/* min-w-0 so the title gives way on a narrow phone; without it the
+            icon cluster was pushed past the right edge and the menu button
+            lost its last 13 px. */}
+        <div className="relative min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             <SwissCross size={13} />
-            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</div>
+            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase truncate">{t.appLabel}</div>
           </div>
-          <div className="text-xl font-black uppercase tracking-tight">
+          <div className="text-xl font-black uppercase tracking-tight truncate">
             {{
               today: t.navToday, materials: t.navMaterials, calendar: t.navCalendar,
               projects: t.navProjects, reports: t.navReports, customers: t.navCustomers,
@@ -4242,7 +4246,7 @@ export default function SiteManager() {
             }[tab] || t.appLabel}
           </div>
         </div>
-        <div className="relative flex items-center gap-2">
+        <div className="relative flex items-center gap-2 shrink-0">
           {activeClock ? (
             <div style={{ background: "#2E2620", color: COLORS.amber, border: `1px solid ${COLORS.amber}` }} className="text-xs font-bold px-2 py-1 rounded uppercase">{t.onSite}</div>
           ) : null}
@@ -4261,6 +4265,14 @@ export default function SiteManager() {
             <Globe size={13} color={COLORS.muted} />
             <span style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{lang}</span>
           </button>
+          {/* The bottom bar holds six tabs; the sidebar has ten. On a phone
+              the rest -- Team, Sicherheit, Board -- live behind this. Its own
+              container, so it never competes with the status chips. */}
+          <div style={{ borderLeft: `1px solid ${COLORS.border}` }} className="lg:hidden pl-2 ml-0.5 shrink-0">
+            <button data-menu-button onClick={() => setMenuOpen(true)} title={t.navMenu} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center justify-center w-8 h-8 rounded-lg">
+              <Menu size={16} color={COLORS.text} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -5818,7 +5830,10 @@ export default function SiteManager() {
 
       </div>
 
-      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-2xl mx-auto flex lg:hidden">
+      {/* z-30: the dock below it is z-20 and reserves this strip with padding;
+          without the z-index the dock's background painted over the nav and
+          the phone lost its menu. */}
+      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-2xl mx-auto flex lg:hidden z-30">
         {[
           { id: "today", label: t.navToday, icon: Clock },
           { id: "materials", label: t.navMaterials, icon: Package },
@@ -7070,6 +7085,54 @@ export default function SiteManager() {
         </Modal>
         );
       })()}
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/60" />
+          <div data-menu-drawer style={{ background: COLORS.card, borderLeft: `1px solid ${COLORS.border}` }} className="relative ml-auto h-full w-72 max-w-[85vw] flex flex-col pt-4 pb-6 px-3 overflow-y-auto">
+            <div className="flex items-center justify-between px-2 mb-3">
+              <div className="flex items-center gap-1.5">
+                <SwissCross size={12} />
+                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-[11px] font-bold uppercase">{t.appLabel}</span>
+              </div>
+              <button onClick={() => setMenuOpen(false)}><X size={18} color={COLORS.muted} /></button>
+            </div>
+            {[
+              ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Ruler }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
+              { id: "today", label: t.navToday, icon: Clock },
+              { id: "projects", label: t.navProjects, icon: MapPin },
+              { id: "customers", label: t.navCustomers, icon: User },
+              { id: "calendar", label: t.navCalendar, icon: CalendarDays },
+              { id: "materials", label: t.navMaterials, icon: Package },
+              { id: "team", label: t.navTeam, icon: Users },
+              { id: "reports", label: t.navReports, icon: FileText },
+              { id: "safety", label: t.navSafety, icon: ShieldAlert },
+            ].map((it) => {
+              const Icon = it.icon;
+              const active = tab === it.id;
+              const accent = it.id === "safety" ? COLORS.danger : COLORS.accent;
+              return (
+                <button
+                  key={it.id}
+                  onClick={() => { setTab(it.id); setMenuOpen(false); }}
+                  style={{ background: active ? `${accent}1F` : "transparent", color: active ? accent : COLORS.text }}
+                  className="w-full px-3 py-3 rounded-lg text-sm font-semibold flex items-center gap-3 text-left"
+                >
+                  <Icon size={18} color={active ? accent : COLORS.muted} /> {it.label}
+                </button>
+              );
+            })}
+            <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-3 pt-3 flex flex-col gap-0.5">
+              <button onClick={() => { setMenuOpen(false); openProfile(); }} style={{ color: COLORS.muted }} className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left">
+                <User size={16} /> {t.profileTitle}
+              </button>
+              <button onClick={() => { setMenuOpen(false); setLangPickerOpen(true); }} style={{ color: COLORS.muted }} className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left">
+                <Globe size={16} /> {lang.toUpperCase()}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {fileViewer && (
         <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(0,0,0,0.94)" }}>

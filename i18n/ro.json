@@ -617,5 +617,6 @@
   "fileKind_photo": "Fotografie",
   "fileKind_other": "Altele",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "Stocarea fișierelor nu este încă configurată."
+  "filesNotConfigured": "Stocarea fișierelor nu este încă configurată.",
+  "navMenu": "Meniu"
 }

@@ -617,5 +617,6 @@
   "fileKind_photo": "Zdjęcie",
   "fileKind_other": "Inne",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "Magazyn plików nie jest jeszcze skonfigurowany."
+  "filesNotConfigured": "Magazyn plików nie jest jeszcze skonfigurowany.",
+  "navMenu": "Menu"
 }

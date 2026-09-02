@@ -617,5 +617,6 @@
   "fileKind_photo": "Foto",
   "fileKind_other": "Outro",
   "filesLinkLabel": "Ligação",
-  "filesNotConfigured": "O armazenamento de ficheiros ainda não está configurado."
+  "filesNotConfigured": "O armazenamento de ficheiros ainda não está configurado.",
+  "navMenu": "Menu"
 }

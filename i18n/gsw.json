@@ -617,5 +617,6 @@
   "fileKind_photo": "Foti",
   "fileKind_other": "Anders",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "Dateiablag isch nonig iigrichtet."
+  "filesNotConfigured": "Dateiablag isch nonig iigrichtet.",
+  "navMenu": "Menü"
 }

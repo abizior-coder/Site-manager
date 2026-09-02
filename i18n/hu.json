@@ -617,5 +617,6 @@
   "fileKind_photo": "Fotó",
   "fileKind_other": "Egyéb",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "A fájltároló még nincs beállítva."
+  "filesNotConfigured": "A fájltároló még nincs beállítva.",
+  "navMenu": "Menü"
 }

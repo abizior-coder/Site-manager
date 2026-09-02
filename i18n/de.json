@@ -655,5 +655,6 @@
   "fileKind_photo": "Foto",
   "fileKind_other": "Sonstiges",
   "filesLinkLabel": "Link",
-  "filesNotConfigured": "Dateiablage ist noch nicht eingerichtet."
+  "filesNotConfigured": "Dateiablage ist noch nicht eingerichtet.",
+  "navMenu": "Menü"
 }

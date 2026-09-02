@@ -617,5 +617,6 @@
   "fileKind_photo": "Foto",
   "fileKind_other": "Tjetër",
   "filesLinkLabel": "Lidhje",
-  "filesNotConfigured": "Ruajtja e skedarëve nuk është konfiguruar ende."
+  "filesNotConfigured": "Ruajtja e skedarëve nuk është konfiguruar ende.",
+  "navMenu": "Menyja"
 }

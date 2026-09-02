@@ -205,6 +205,23 @@ async function renderAs(role) {
   check("crew: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("crew: money is not shown", !text().includes("R-2026-001"), "an invoice number leaked into the crew view");
   check("crew: no overview button", ![...window.document.querySelectorAll("button")].some((b) => (b.getAttribute("title") || "").match(/Übersicht|Overview/)), "crew can reach the overview");
+  // On a phone the bottom bar has six tabs and the sidebar is hidden, so
+  // Team and Sicherheit are only reachable through the hamburger.
+  {
+    const burger = window.document.querySelector("[data-menu-button]");
+    check("crew: header has a menu button", !!burger, "no hamburger");
+    burger?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const drawer = window.document.querySelector("[data-menu-drawer]");
+    const items = [...(drawer?.querySelectorAll("button") || [])].map((b) => (b.textContent || "").trim());
+    check("crew: the menu lists Team and Sicherheit", items.includes("Team") && items.includes("Sicherheit"), items.join(" | "));
+    check("crew: the menu does not offer the Board", !items.includes("Board"), "Board offered to crew");
+    const team = [...(drawer?.querySelectorAll("button") || [])].find((b) => (b.textContent || "").trim() === "Team");
+    team?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("crew: choosing an item closes the menu", !window.document.querySelector("[data-menu-drawer]"), "drawer still open");
+  }
+
   // The roster used to load only for managers and only on three tabs, so a
   // crew member opened Team and saw nobody -- and the crew shown on a job,
   // looked up by uid in that roster, came out as "nobody assigned" while the
