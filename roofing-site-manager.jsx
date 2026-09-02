@@ -885,6 +885,55 @@ const PROJECT_CATEGORIES = [
   { key: "facade", labelKey: "projectCatFacade", icon: Building2 },
   { key: "other", labelKey: "projectCatOther", icon: HardHat },
 ];
+// A job is recognisable by its shape before its name: a gable, a flat slab
+// with a parapet, a window grid, a hard hat. Drawn here rather than taken
+// from an icon set so all four read as one family and take the project's
+// colour.
+function ProjectIcon({ category, size = 40, color = "currentColor" }) {
+  const common = { width: size, height: size, viewBox: "0 0 48 48", fill: "none", stroke: color, strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" };
+  switch (category) {
+    case "pitched":
+      return (
+        <svg {...common} aria-hidden="true">
+          <path d="M5 25 L24 7 L43 25" />
+          <path d="M31 13 V8 h5 v10" />
+          <path d="M11 21 V41 H37 V21" />
+          <path d="M16 27 H32 M16 33 H32" strokeWidth="2" />
+          <path d="M21 41 V32 h6 v9" />
+        </svg>
+      );
+    case "flat":
+      return (
+        <svg {...common} aria-hidden="true">
+          <path d="M4 17 H44" strokeWidth="4" />
+          <path d="M9 12 H39 M9 17 V41 H39 V17" />
+          <path d="M13 12 V17 M35 12 V17" strokeWidth="2" />
+          <rect x="14" y="24" width="7" height="7" strokeWidth="2" />
+          <rect x="27" y="24" width="7" height="7" strokeWidth="2" />
+          <path d="M40 22 v6" strokeWidth="2" />
+        </svg>
+      );
+    case "facade":
+      return (
+        <svg {...common} aria-hidden="true">
+          <rect x="9" y="6" width="30" height="36" rx="2" />
+          <path d="M15 12 h6 v6 h-6z M27 12 h6 v6 h-6z M15 22 h6 v6 h-6z M27 22 h6 v6 h-6z" strokeWidth="2" />
+          <path d="M21 42 V33 h6 v9" />
+          <path d="M4 42 H44" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...common} aria-hidden="true">
+          <path d="M10 31 a14 14 0 0 1 28 0" />
+          <path d="M24 17 v9" strokeWidth="2.5" />
+          <path d="M6 31 H42" strokeWidth="4" />
+          <path d="M9 36 q15 6 30 0" strokeWidth="2.5" />
+        </svg>
+      );
+  }
+}
+
 function categoryIcon(key) {
   return (PROJECT_CATEGORIES.find((c) => c.key === key) || PROJECT_CATEGORIES[PROJECT_CATEGORIES.length - 1]).icon;
 }
@@ -5496,6 +5545,9 @@ export default function SiteManager() {
                 return (
                   <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1">
                     {handle}
+                    <span style={{ background: `${projectColour(p.id)}26`, color: projectColour(p.id) }} className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mr-2">
+                      <ProjectIcon category={p.category} size={24} color={projectColour(p.id)} />
+                    </span>
                     <button onClick={() => setSelectedProject(p.id)} className="flex-1 min-w-0 text-left flex items-center justify-between gap-2">
                       <div
                         className="min-w-0 cursor-grab active:cursor-grabbing"
@@ -5799,25 +5851,21 @@ export default function SiteManager() {
                         transform: over ? "scale(1.04)" : "none",
                         transition: "transform 0.1s, background 0.1s",
                       }}
-                      className="shrink-0 w-52 rounded-xl px-3 py-2 text-left cursor-pointer select-none"
+                      className="shrink-0 w-24 rounded-xl px-1.5 py-2 cursor-pointer select-none flex flex-col items-center gap-1 text-center"
                     >
-                      {(() => { const CatIcon = categoryIcon(pr.category); return (
-                      <div className="flex items-center gap-2">
-                        <span style={{ background: `${col}33`, color: col }} className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" title={t[(PROJECT_CATEGORIES.find((c) => c.key === pr.category) || PROJECT_CATEGORIES[3]).labelKey]}>
-                          <CatIcon size={16} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1">
-                            {pinned && <Pin size={10} color={col} className="shrink-0" />}
-                            <span className="text-xs font-bold truncate">{pr.name}</span>
-                          </div>
-                          <div style={{ color: sm.color }} className="text-[10px] truncate">{t[sm.labelKey]}</div>
-                        </div>
+                      {/* The tile is the picture. Status is the ring colour's
+                          little dot; the name sits underneath, two lines at most. */}
+                      <div style={{ background: `${col}2A`, border: `2px solid ${col}`, color: col }} className="relative w-14 h-14 rounded-2xl flex items-center justify-center" title={t[(PROJECT_CATEGORIES.find((c) => c.key === pr.category) || PROJECT_CATEGORIES[3]).labelKey]}>
+                        <ProjectIcon category={pr.category} size={38} color={col} />
+                        {pinned && (
+                          <span style={{ background: COLORS.card, color: col }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"><Pin size={11} /></span>
+                        )}
+                        <span style={{ background: sm.color, border: `2px solid ${COLORS.card}` }} className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 rounded-full" title={t[sm.labelKey]} />
                       </div>
-                      ); })()}
-                      <div style={{ color: COLORS.muted }} className="flex items-center gap-2 mt-1 text-[10px] tabular-nums">
-                        <span className="flex items-center gap-0.5"><Users size={10} /> {crewN}</span>
-                        <span className="flex items-center gap-0.5"><Package size={10} /> {mats}</span>
+                      <div className="text-[11px] font-bold leading-tight w-full overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{pr.name}</div>
+                      <div style={{ color: COLORS.muted }} className="flex items-center gap-1.5 text-[10px] tabular-nums">
+                        <span className="flex items-center gap-0.5"><Users size={9} /> {crewN}</span>
+                        <span className="flex items-center gap-0.5"><Package size={9} /> {mats}</span>
                       </div>
                     </div>
                   );
