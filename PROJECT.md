@@ -20,21 +20,30 @@ Anything that only works with a mouse is broken. Anything that needs a
 steady connection or careful typing will not survive a wet Tuesday on a
 roof.
 
-Interface languages: `de, fr, it, en, es, pt, pl, sk, cs` (German first —
-the primary users are German-speaking Swiss crews).
+Interface languages: `de, gsw, fr, it, en, sq, ro, bg, hu, pl, pt, es, sk,
+cs` (German first — the primary users are German-speaking Swiss crews; the
+crews themselves are often not).
+
+Only `de`, `gsw`, `fr`, `it`, `en`, `es`, `pt`, `pl`, `sk`, `cs` and `sq` are
+actually translated. `ro`, `bg` and `hu` are listed in the picker but still
+fall back to English for almost everything — **finish those before telling
+anyone the app speaks their language.** Albanian covers the crew-facing
+surface only; the office screens fall back to English by design.
 
 ## 2. Architecture
 
 | Piece | File | Role |
 |---|---|---|
-| App | `roofing-site-manager.jsx` | The whole app — one ~4,700-line React component tree |
+| App | `roofing-site-manager.jsx` | The whole app — one ~7,800-line React component tree |
+| Translations | `i18n/<lang>.json`, `i18n/index.js` | One file per language; non-English falls back to English per key |
+| Price lists | `price-list.js` | Parses supplier CSV / DATANORM into the article master |
 | Mount | `entry.jsx` | Build entry; mounts `SiteManager` into `#root` |
 | Shell | `index.html` | Tailwind CDN only — deliberately no app logic |
 | Firebase | `firebase-client.js` | SDK boot, auth, offline cache |
 | Company store | `company-store.js` | Company-scoped storage, diff writes, invites, migration |
 | QR-bill | `swiss-qr.js` | Swiss QR-Rechnung payload |
 | Rules | `firestore.rules` | The real access control |
-| Tests | `logic.test.mjs`, `rules.test.mjs` | `npm test` |
+| Tests | `logic.test.mjs`, `render.test.mjs`, `order-flow.test.mjs`, `rules.test.mjs` | `npm test` runs all four |
 | Bundle | `bundle.js` | **Generated — never edit by hand** |
 | Cache-bust | `scripts/stamp.mjs` | Stamps `bundle.js?v=<hash>` into `index.html` |
 | AI proxy | `worker/src/index.js` | Cloudflare Worker holding the Anthropic key |
@@ -106,9 +115,27 @@ one and writes only changed documents** (`syncCollection`), which is what
 keeps two phones from overwriting each other. Call sites did not have to
 change; do not "simplify" persist back into a single write.
 
-**Entries** use a `type` discriminator: `time`, `material`, `tool`, `note`,
-`photo`, `pickup`, `inspection`. Materials and tools shown in a project are
-*filtered slices* of the entries array.
+**Entries** use a `type` discriminator: `time`, `material`, `tool`, `order`,
+`note`, `photo`, `pickup`, `inspection`. Materials and tools shown in a
+project are *filtered slices* of the entries array.
+
+Every material, tool and hour also carries a **`trade`** (`steildach`,
+`flachdach`, `spengler`, `holz`, `geruest`, `unterhalt`, `other`) and,
+optionally, `supplier` and `artNo`. A Swiss roofing job is several trades
+sharing one address, costed separately; the job view groups by trade once
+more than one is on site.
+
+An **`order`** entry is a material request with `orderStatus`: `requested` →
+`ordered` → `delivered`. Marking it delivered rewrites the entry to
+`type: "material"`, which is what puts it into costing. Do not "tidy" orders
+into their own collection — the rules already let crew create their own
+entries, and a separate collection would need its own.
+
+The **article master** (`site-material-catalog` in `kv`) holds what each
+material name knows about itself: unit, price, supplier, article number. It
+replaced two parallel maps (`site-material-units`, `site-material-prices`),
+which are folded into it on first load. A price-list import writes into it.
+Filling a form from it only ever touches blank fields.
 
 > **Build every entry through `newEntry()`.** The rules reject a create whose
 > `userId` is not the signed-in user, so an entry object assembled by hand is
@@ -155,10 +182,30 @@ These are real and currently unfixed. Ordered by how much damage they do.
    a prototype: a careless migration loses someone's working week. Still
    untried by anyone: the AI scan and inspection flows (they need a real photo
    and cost real API credit), printing a QR-bill, and the supervisor webhook.
-4. **No merge for duplicate customers.** Migrated client strings produced
+4. **Romanian, Bulgarian and Hungarian are in the language picker but not
+   translated.** They fall back to English. Either finish them or take them
+   out of the picker — offering a language and then not speaking it is worse
+   than not offering it.
+5. **The CPR and emergency first-aid strings have never been checked by a
+   native speaker** in any language but German. They are translated rather
+   than left in English, on the grounds that imperfect Albanian beats
+   unreadable English in an emergency, but this is a judgement call that
+   deserves a real review.
+6. **The price-list import reads DATANORM by a published field order that
+   has not been checked against a real merchant file.** Field order varies
+   between wholesalers. The import previews and warns before writing; keep
+   both. CSV is the tested path.
+7. **HGC offers OCI free to any shop customer** (article number, name,
+   quantity, *your* net price, product hierarchy). Their net-price ERP
+   interface is *not* open — it is limited to AbaBau, BauBit PRO and Sorba.
+   OCI returns the basket as an HTTP POST, which a static GitHub Pages site
+   cannot read; the existing Cloudflare Worker would have to receive it and
+   hand it over. Not built: it needs an HGC OCI access, which the owner must
+   request with their customer number.
+8. **No merge for duplicate customers.** Migrated client strings produced
    spelling variants as separate records. Deliberately not auto-merged,
    because two similar names can be two different people.
-5. `roofing-site-manager.html` was an unused stale duplicate and has been
+9. `roofing-site-manager.html` was an unused stale duplicate and has been
    deleted.
 
 ### Data safety
