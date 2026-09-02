@@ -254,9 +254,11 @@ threshold to make the message go away.
 
 ## The desktop layout
 
-The phone layout is right for a roof and wrong for a desk. Above 1024px the
-same app rearranges: a sidebar replaces the bottom nav, dialogs centre instead
-of rising from the bottom edge, and the overview becomes a three-column grid.
+The phone layout is right for a roof and wrong for a desk. On a phone the
+navigation is a hamburger in the header (a drawer with every tab); the bottom
+edge belongs to the dock. Above 1024px the same app rearranges: a sidebar
+appears, dialogs centre instead of rising from the bottom edge, and the
+overview becomes a three-column grid.
 One codebase, Tailwind `lg:` breakpoints — **do not fork a desktop build**.
 
 `board` is the desktop command centre for managers: the month with each day

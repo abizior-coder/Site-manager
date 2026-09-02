@@ -4295,7 +4295,7 @@ export default function SiteManager() {
         </div>
       )}
 
-      <div className="relative flex-1 overflow-y-auto px-5 pb-28 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+      <div className="relative flex-1 overflow-y-auto px-5 pb-20 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {tab === "today" && (
           <div className="flex flex-col gap-4">
             {(() => {
@@ -5473,7 +5473,7 @@ export default function SiteManager() {
               <FileText size={16} /> {t.generateReportBtn}
             </button>
             {projects.length > 0 && (
-              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+              <div className="flex flex-wrap gap-1.5 pb-1">
                 {[{ key: "all", label: t.pipelineAll, color: COLORS.muted }, ...PROJECT_STATUSES.map((s) => ({ key: s.key, label: t[s.labelKey], color: s.color }))].map((f) => {
                   const count = f.key === "all" ? projects.length : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === f.key).length;
                   if (f.key !== "all" && count === 0) return null;
@@ -5728,7 +5728,7 @@ export default function SiteManager() {
         onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
         disabled={projects.length === 0}
         style={{ background: COLORS.accent, opacity: projects.length === 0 ? 0.4 : 1 }}
-        className={`fixed ${dockShown ? "bottom-[196px] lg:bottom-[132px]" : "bottom-20"} right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30 transition-all`}
+        className={`fixed ${dockShown ? "bottom-[150px] lg:bottom-[132px]" : "bottom-5 lg:bottom-8"} right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30 transition-all`}
       >
         <Camera size={22} color="#fff" />
       </button>
@@ -5746,7 +5746,7 @@ export default function SiteManager() {
             onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDockDragOver(false); }}
             onDrop={(e) => { if (pinFromDrop(e.dataTransfer)) e.preventDefault(); setDockDragOver(false); }}
             style={{ background: dockDragOver ? `${COLORS.accent}14` : COLORS.card, borderTop: `1px solid ${dockDragOver ? COLORS.accent : COLORS.border}`, transition: "background 0.1s" }}
-            className="shrink-0 relative z-20 pb-[62px] lg:pb-0"
+            className="shrink-0 relative z-20"
           >
             <div className="flex items-center gap-1 px-4 py-1">
               <button onClick={() => setDockOpenRemembered(!dockOpen)} className="flex-1 min-w-0 flex items-center gap-1.5 py-0.5 text-left">
@@ -5830,29 +5830,8 @@ export default function SiteManager() {
 
       </div>
 
-      {/* z-30: the dock below it is z-20 and reserves this strip with padding;
-          without the z-index the dock's background painted over the nav and
-          the phone lost its menu. */}
-      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="fixed bottom-0 left-0 right-0 max-w-md md:max-w-2xl mx-auto flex lg:hidden z-30">
-        {[
-          { id: "today", label: t.navToday, icon: Clock },
-          { id: "materials", label: t.navMaterials, icon: Package },
-          { id: "customers", label: t.navCustomers, icon: User },
-          { id: "calendar", label: t.navCalendar, icon: CalendarDays },
-          { id: "projects", label: t.navProjects, icon: MapPin },
-          { id: "reports", label: t.navReports, icon: FileText },
-        ].map((it) => {
-          const Icon = it.icon;
-          const active = tab === it.id;
-          const isSafety = it.id === "safety";
-          return (
-            <button key={it.id} onClick={() => setTab(it.id)} className="flex-1 py-3 flex flex-col items-center gap-1">
-              <Icon size={19} color={active ? (isSafety ? COLORS.danger : COLORS.accent) : COLORS.muted} />
-              <span style={{ color: active ? (isSafety ? COLORS.danger : COLORS.accent) : COLORS.muted }} className="text-[10px] font-bold uppercase tracking-wide">{it.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* No bottom bar on a phone any more: the hamburger in the header holds
+          every tab, and the dock has the bottom edge to itself. */}
 
       {docEditor && (() => {
         const totals = documentTotals(docEditor);
