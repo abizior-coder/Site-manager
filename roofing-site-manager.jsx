@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -1263,6 +1263,14 @@ export default function SiteManager() {
   const [newProjectAddr, setNewProjectAddr] = useState("");
   const [addModal, setAddModal] = useState(null);
   const [lastTrade, setLastTrade] = useState(DEFAULT_TRADE);
+  // The dock: active jobs plus whatever this person pinned, as a tray of
+  // tiles at the bottom of every screen. Pins are personal -- the Polier and
+  // the Chef care about different jobs in a given week.
+  const [pinnedIds, setPinnedIds] = useState([]);
+  const [dockOver, setDockOver] = useState(null);
+  const [dockOpen, setDockOpen] = useState(() => {
+    try { return localStorage.getItem("site-dock-open") !== "0"; } catch (e) { return true; }
+  });
   const [priceImport, setPriceImport] = useState(null);
   const priceFileRef = useRef(null);
   const [suggestCat, setSuggestCat] = useState(null);
@@ -1342,6 +1350,7 @@ export default function SiteManager() {
         setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
         setTeam({ members: [], invites: [], busy: false });
         setArticleMaster({});
+        setPinnedIds([]);
         setSyncState({ error: null, fromCache: false });
       }
     }).then((fn) => { unsub = fn; }).catch(() => setAuthChecked(true));
@@ -1459,6 +1468,10 @@ export default function SiteManager() {
           setInsuranceCards(docs.insurance || []);
           setCertificates(docs.certificates || []);
         }
+      } catch (e) {}
+      try {
+        const pinsRes = await window.storage.get(personalKey("site-dock-pins"));
+        if (pinsRes && pinsRes.value) setPinnedIds(JSON.parse(pinsRes.value));
       } catch (e) {}
       try {
         const catRes = await window.storage.get("site-material-catalog");
@@ -2627,6 +2640,78 @@ export default function SiteManager() {
     const crew = projectCrew(pr);
     const next = crew.includes(memberUid) ? crew.filter((u) => u !== memberUid) : [...crew, memberUid];
     persist({ projects: projects.map((x) => (x.id === projectId ? { ...x, crew: next } : x)) });
+  }
+
+  function togglePin(projectId) {
+    const next = pinnedIds.includes(projectId) ? pinnedIds.filter((x) => x !== projectId) : [...pinnedIds, projectId];
+    setPinnedIds(next);
+    window.storage.set(personalKey("site-dock-pins"), JSON.stringify(next)).catch(() => {});
+  }
+
+  function setDockOpenRemembered(open) {
+    setDockOpen(open);
+    try { localStorage.setItem("site-dock-open", open ? "1" : "0"); } catch (e) {}
+  }
+
+  // What can be picked up and carried to a job tile. The payload is the
+  // name, never an index: the basket re-renders between dragstart and drop.
+  function materialDragProps(name, kind, extra = {}) {
+    return {
+      draggable: true,
+      onDragStart: (e) => {
+        e.dataTransfer.setData("text/material", JSON.stringify({ name, kind, ...extra }));
+        e.dataTransfer.effectAllowed = "copyMove";
+      },
+    };
+  }
+
+  // The trade a job is mostly about, so a drop files itself where the rest
+  // of that job's material already is. Falls back to whatever was used last.
+  function dominantTrade(projectId) {
+    const counts = {};
+    entries.forEach((e) => {
+      if (e.projectId !== projectId || !["material", "tool", "time"].includes(e.type)) return;
+      const tr = e.trade || DEFAULT_TRADE;
+      counts[tr] = (counts[tr] || 0) + 1;
+    });
+    const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return best ? best[0] : lastTrade;
+  }
+
+  function dockAccepts(dt) {
+    const types = Array.from((dt && dt.types) || []);
+    return types.includes("text/material") || (types.includes("text/member-uid") && canManage());
+  }
+
+  function dropOnProject(projectId, dt) {
+    const pr = projects.find((x) => x.id === projectId);
+    if (!pr || !dt) return;
+    const memberUid = dt.getData("text/member-uid");
+    if (memberUid) {
+      if (!canManage()) return;
+      if (!projectCrew(pr).includes(memberUid)) toggleProjectCrew(projectId, memberUid);
+      showToast(`${memberName(memberUid)} → ${pr.name}`);
+      return;
+    }
+    let payload = null;
+    try { payload = JSON.parse(dt.getData("text/material") || "null"); } catch (e) { payload = null; }
+    const name = payload && String(payload.name || "").trim();
+    if (!name) return;
+    const known = articleMaster[name.toLowerCase()] || {};
+    const price = known.price ? parseFloat(known.price) : "";
+    addEntry({
+      type: payload.kind === "tool" ? "tool" : "material",
+      projectId,
+      description: name,
+      qty: String(payload.qty || "1"),
+      unit: payload.unit || known.unit || "",
+      unitPrice: Number.isFinite(price) ? price : "",
+      supplier: known.supplier || "",
+      artNo: known.artNo || "",
+      trade: dominantTrade(projectId),
+    });
+    if (payload.basketId) setBasket((b) => b.filter((i) => i.id !== payload.basketId));
+    showToast(`${name} → ${pr.name}`);
   }
 
   function memberName(memberUid) {
@@ -3830,6 +3915,13 @@ export default function SiteManager() {
   const CPR_STEPS = cprSteps(t);
   const wCond = weather.data ? weatherFromCode(weather.data.weather_code, t) : null;
 
+  // Active jobs plus this person's pins: what the dock shows, pinned first.
+  const dockProjects = projects
+    .filter((pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS))
+    .filter((pr) => pinnedIds.includes(pr.id) || (pr.status || DEFAULT_PROJECT_STATUS) === "construction")
+    .sort((a, b) => (pinnedIds.includes(b.id) ? 1 : 0) - (pinnedIds.includes(a.id) ? 1 : 0) || String(a.name).localeCompare(String(b.name)));
+  const dockShown = !!membership && dockProjects.length > 0 && dockOpen;
+
   return (
     <div style={{ background: COLORS.shell, color: COLORS.text, fontFamily: "system-ui, -apple-system, sans-serif", height: "100dvh" }} className="w-full h-screen max-w-md md:max-w-2xl lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden">
       <MountainBackground />
@@ -4198,7 +4290,7 @@ export default function SiteManager() {
                           <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
                           <div className="flex flex-wrap gap-1.5">
                             {grp.items.map((name) => (
-                              <button key={name} onClick={() => addToBasket(name, "material")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                              <button key={name} {...materialDragProps(name, "material")} onClick={() => addToBasket(name, "material")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
                                 {name}
                               </button>
                             ))}
@@ -4232,7 +4324,7 @@ export default function SiteManager() {
                               <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
                               <div className="flex flex-wrap gap-1.5">
                                 {grp.items.map((name) => (
-                                  <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                  <button key={name} {...materialDragProps(name, "tool")} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
                                     {name}
                                   </button>
                                 ))}
@@ -4261,7 +4353,7 @@ export default function SiteManager() {
                                 <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{toolsCatalog.cats[supplierKey]}</div>
                                 <div className="flex flex-wrap gap-1.5">
                                   {matchingGroups.flatMap((g) => g.items).map((name) => (
-                                    <button key={name} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
+                                    <button key={name} {...materialDragProps(name, "tool")} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
                                       {name}
                                     </button>
                                   ))}
@@ -4359,7 +4451,9 @@ export default function SiteManager() {
                   <div className="flex flex-col gap-2">
                     {basket.map((i) => (
                       <div key={i.id} className="flex items-center gap-2">
-                        <span className="flex-1 text-sm truncate">{i.name}</span>
+                        <span {...materialDragProps(i.name, i.kind, { qty: i.qty, unit: i.unit, basketId: i.id })} className="flex-1 text-sm truncate flex items-center gap-1 cursor-grab active:cursor-grabbing select-none">
+                          <GripVertical size={12} color={COLORS.muted} className="shrink-0" /> {i.name}
+                        </span>
                         <input value={i.qty} onChange={(e) => updateBasketItem(i.id, "qty", e.target.value)} inputMode="decimal" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-12 text-xs rounded px-1.5 py-1.5 outline-none" />
                         <input value={i.unit} onChange={(e) => updateBasketItem(i.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-16 text-xs rounded px-1.5 py-1.5 outline-none" />
                         <button onClick={() => removeBasketItem(i.id)} style={{ color: COLORS.muted }}><X size={14} /></button>
@@ -5305,10 +5399,74 @@ export default function SiteManager() {
         onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
         disabled={projects.length === 0}
         style={{ background: COLORS.accent, opacity: projects.length === 0 ? 0.4 : 1 }}
-        className="fixed bottom-20 right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30"
+        className={`fixed ${dockShown ? "bottom-[196px] lg:bottom-[132px]" : "bottom-20"} right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30 transition-all`}
       >
         <Camera size={22} color="#fff" />
       </button>
+
+      {/* The dock. Active jobs and pinned ones as a tray of tiles, the way a
+          game keeps its characters along the bottom: always there, scroll
+          sideways, drop things on them. It takes real height from the column
+          rather than floating, so nothing ever scrolls underneath it. */}
+      {membership && (() => {
+        if (dockProjects.length === 0) return null;
+        return (
+          <div data-dock style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="shrink-0 relative z-20 pb-[62px] lg:pb-0">
+            <button onClick={() => setDockOpenRemembered(!dockOpen)} className="w-full flex items-center justify-between px-4 py-1.5">
+              <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1.5">
+                <MapPin size={11} /> {t.dockTitle} ({dockProjects.length})
+              </span>
+              <ChevronRight size={14} color={COLORS.muted} style={{ transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+            </button>
+            {dockOpen && (
+              <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ WebkitOverflowScrolling: "touch" }}>
+                {dockProjects.map((pr) => {
+                  const col = projectColour(pr.id);
+                  const over = dockOver === pr.id;
+                  const pinned = pinnedIds.includes(pr.id);
+                  const sm = statusMeta(pr.status || DEFAULT_PROJECT_STATUS);
+                  const mats = entries.filter((e) => e.projectId === pr.id && (e.type === "material" || e.type === "tool")).length;
+                  const crewN = projectCrew(pr).length;
+                  return (
+                    <div
+                      key={pr.id}
+                      data-dock-project={pr.id}
+                      role="button"
+                      tabIndex={0}
+                      title={canManage() ? t.dockDropHint : pr.name}
+                      onClick={() => { setTab("projects"); setSelectedProject(pr.id); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { setTab("projects"); setSelectedProject(pr.id); } }}
+                      onDragOver={(e) => { if (dockAccepts(e.dataTransfer)) { e.preventDefault(); if (!over) setDockOver(pr.id); } }}
+                      onDragLeave={() => setDockOver(null)}
+                      onDrop={(e) => { e.preventDefault(); setDockOver(null); dropOnProject(pr.id, e.dataTransfer); }}
+                      style={{
+                        background: over ? `${col}40` : `${col}1A`,
+                        borderTop: `1px solid ${over ? col : col + "55"}`,
+                        borderRight: `1px solid ${over ? col : col + "55"}`,
+                        borderBottom: `1px solid ${over ? col : col + "55"}`,
+                        borderLeft: `4px solid ${col}`,
+                        transform: over ? "scale(1.04)" : "none",
+                        transition: "transform 0.1s, background 0.1s",
+                      }}
+                      className="shrink-0 w-44 rounded-xl px-3 py-2 text-left cursor-pointer select-none"
+                    >
+                      <div className="flex items-center gap-1">
+                        {pinned && <Pin size={10} color={col} className="shrink-0" />}
+                        <span className="text-xs font-bold truncate">{pr.name}</span>
+                      </div>
+                      <div style={{ color: sm.color }} className="text-[10px] truncate">{t[sm.labelKey]}</div>
+                      <div style={{ color: COLORS.muted }} className="flex items-center gap-2 mt-1 text-[10px] tabular-nums">
+                        <span className="flex items-center gap-0.5"><Users size={10} /> {crewN}</span>
+                        <span className="flex items-center gap-0.5"><Package size={10} /> {mats}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       </div>
 
@@ -6299,6 +6457,8 @@ export default function SiteManager() {
           customer={customerFor(projects.find((p) => p.id === selectedProject))}
           onEditCustomer={(c) => openCustomerForm(c)}
           crew={projectCrew(projects.find((x) => x.id === selectedProject))}
+          pinned={pinnedIds.includes(selectedProject)}
+          onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
           onToggleCrew={(memberUid) => toggleProjectCrew(selectedProject, memberUid)}
@@ -7175,7 +7335,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -7219,6 +7379,9 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             )}
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={onTogglePin} title={pinned ? t.dockUnpin : t.dockPin} style={{ color: pinned ? COLORS.accent : COLORS.muted }}>
+              <Pin size={16} fill={pinned ? COLORS.accent : "none"} />
+            </button>
             <button onClick={() => onShare(project, entries)} style={{ color: COLORS.muted }}><Share2 size={16} /></button>
             <button onClick={onEdit} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.editLabel}</button>
             <button onClick={onClose}><X size={20} color={COLORS.muted} /></button>

@@ -568,5 +568,9 @@
   "orderDelivered": "Entregado",
   "markOrdered": "Pedido",
   "markDelivered": "Entregado",
-  "supplierUnknown": "Sin proveedor"
+  "supplierUnknown": "Sin proveedor",
+  "dockTitle": "Obras activas",
+  "dockPin": "Fijar abajo",
+  "dockUnpin": "Soltar",
+  "dockDropHint": "Suelta aquí material o una persona"
 }

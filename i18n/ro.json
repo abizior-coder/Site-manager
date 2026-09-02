@@ -568,5 +568,9 @@
   "orderDelivered": "Livrat",
   "markOrdered": "Comandat",
   "markDelivered": "Livrat",
-  "supplierUnknown": "Fără furnizor"
+  "supplierUnknown": "Fără furnizor",
+  "dockTitle": "Șantiere active",
+  "dockPin": "Fixează jos",
+  "dockUnpin": "Desprinde",
+  "dockDropHint": "Trage aici material sau o persoană"
 }

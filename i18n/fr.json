@@ -568,5 +568,9 @@
   "orderDelivered": "Livré",
   "markOrdered": "Commandé",
   "markDelivered": "Livré",
-  "supplierUnknown": "Sans fournisseur"
+  "supplierUnknown": "Sans fournisseur",
+  "dockTitle": "Chantiers actifs",
+  "dockPin": "Épingler en bas",
+  "dockUnpin": "Détacher",
+  "dockDropHint": "Déposez du matériel ou une personne ici"
 }

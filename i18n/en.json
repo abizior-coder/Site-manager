@@ -606,5 +606,9 @@
   "safety_ground_4T": "Helmets in and around excavations",
   "safety_ground_4X": "Hard hats are required in trenches and pits, and anywhere near excavators or heavy earthmoving machinery.",
   "safety_ground_5T": "Steep or deep slopes need an engineer's sign-off",
-  "safety_ground_5X": "Slopes steeper than roughly 45–63° (depending on soil type), deeper than 4 m, or subject to extra load, water, or vibration require a formal stability assessment by a qualified engineer or geotechnician."
+  "safety_ground_5X": "Slopes steeper than roughly 45–63° (depending on soil type), deeper than 4 m, or subject to extra load, water, or vibration require a formal stability assessment by a qualified engineer or geotechnician.",
+  "dockTitle": "Active jobs",
+  "dockPin": "Pin to the dock",
+  "dockUnpin": "Unpin",
+  "dockDropHint": "Drop material or a person here"
 }

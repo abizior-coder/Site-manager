@@ -1,73 +1,78 @@
-# Drag material onto a project
+# Project dock — drag anything onto an active job
 
-**Status: proposed — waiting for a human to accept the plan before code.**
+**Status: accepted by the owner on 2026-09-02** ("weźmimy z gry Toca Boca
+World … oddzielny pasek na dole … dostęp do aktywnych projektów na bieżąco").
+Supersedes the Board-strip proposal from earlier the same day.
 
 ## Goal
 
-On a desk, the Polier plans a job by dragging what it needs onto it: a person
-(already works), a day (already works), and now the material. Today the basket
-reaches a project only through a modal picker, and a catalog item reaches a
-project only through the basket. There is no drag anywhere in the material
-path, and nothing was ever built for it — the earlier "drag" work on
-materials was reordering rows *inside* a job, not moving material *into* one.
+A persistent tray at the bottom of every screen showing the **active**
+projects (status *In Ausführung*) plus any the user has **pinned**, as big
+tiles the way Toca Boca World keeps its characters in a bottom tray. The
+tiles are both the shortcut *to* a job and the thing you drop *onto*:
 
-## Where the drag can physically happen
+- drag a catalog item or a basket row from the Materials tab onto a tile →
+  it is booked as material on that job;
+- drag a person from Team or from a job's crew chips onto a tile → they
+  join that job's crew (managers only);
+- tap a tile → the job opens.
 
-HTML5 drag does not cross tabs, so source and target must share a screen.
-Two options were considered:
-
-| Option | Source | Target | Verdict |
-|---|---|---|---|
-| A. Board tab | a material strip added to the Board | the job cards already on the Board | **Chosen.** Board is the desk command centre; the job cards are already drop-capable in spirit (people, days). |
-| B. Materials tab | catalog / basket rows | a project list added to the Materials tab | Rejected: duplicates the project list on a phone-first tab that has no room. |
+Because the dock is on every tab, the "HTML5 drag cannot cross tabs"
+problem from the first proposal disappears.
 
 ## Constraints
 
-- Desktop only in practice (`lg:`), but every drop must have a tap
-  equivalent — the phone remains the primary device and touch has no HTML5
-  drag. The tap path is the existing basket → picker; nothing is taken away.
-- Dropped material is a normal `material` entry built through `newEntry()`
-  with the dragged item's name, the article master's unit/price/supplier/
-  article number when known, and `trade` = the project's dominant trade
-  (most entries) or `other`. No new collection, no rule change.
-- Quantity: a drop books **1 unit** and opens the row for editing quantity
-  inline, the way the basket does. Guessing quantities is how wrong figures
-  reach costing.
-- The Board's material strip shows the **basket first** (what the Polier
-  already collected), then the catalog category chips. Dragging a basket row
-  onto a job moves that row out of the basket.
+- Phone first. Touch has no HTML5 drag; on a phone the dock is a row of
+  tappable shortcuts and nothing else is lost — the basket picker stays.
+- The dock takes real height from the main column (not an overlay), so
+  nothing scrolls underneath it. It collapses to a one-line handle and
+  remembers that per device (`localStorage`, try/catch, default open).
+- Hidden entirely when nothing is active and nothing pinned. No empty bar.
+- Pins are personal (`personalKey("site-dock-pins")`), not company-wide:
+  the Polier and the Chef care about different jobs on a given week.
+- A material drop books **1 unit** (or the basket row's quantity), fills
+  unit / price / supplier / article number from the article master, and
+  files it under the job's dominant trade (most entries) or the last used
+  one. It never guesses a quantity.
+- A basket row dropped on a job leaves the basket.
+- Payload is `text/material` = JSON `{name, kind, qty?, unit?, basketId?}`
+  and the existing `text/member-uid`. Never an index — the basket
+  re-renders between dragstart and drop.
+- Entries are built through `newEntry()` as always; no new collection, no
+  rule change. Crew may drop material (their own entry), only managers may
+  drop people (same check as the crew zone).
 
 ## Definition of done
 
-- On the Board, a basket row or a catalog item can be dragged onto a job
-  card; the job gains one material entry and the card's entry count rises.
-- A basket row dropped on a job leaves the basket.
-- `order-flow.test.mjs`-style browser test drives dragstart → drop with real
-  `DataTransfer` and asserts the entry lands on the project with supplier and
-  article number filled from the article master.
-- Crew never see the strip (Board is manager-only already).
-- Render suite still green; no new console errors on a cold load.
+- Dock renders on every tab for every role; tiles show name, status, crew
+  count and material count, pinned tiles first.
+- Pin/unpin from the job view header; survives reload for that account.
+- Drop of a catalog item, a basket row and a person all land, with a toast
+  naming the job.
+- jsdom test drives dragstart → dragover → drop with a fake DataTransfer for
+  material and for a person, and checks the entry / crew member is on the
+  project afterwards.
+- Render suite green; no new console errors on a cold load.
 
 ## Out of scope
 
-- Dragging between projects (moving material from one job to another).
-- Dragging onto a *day* in the planner (material is per job, not per day).
-- Any touch drag polyfill.
-- OCI / HGC basket import — separate spec once OCI access exists.
+- Moving material between two jobs.
+- Dropping onto a planner day.
+- Touch drag polyfill.
+- OCI / HGC basket — separate spec once OCI access exists.
 
 ## Files
 
-- `roofing-site-manager.jsx`: Board tab (material strip, drop handlers on job
-  cards), one helper `dropMaterialOnProject(projectId, payload)`.
-- `i18n/*.json`: 3 keys (`boardMaterialStrip`, `dropMaterialHint`,
-  `materialDropped`) — German/English written, others fall back.
-- New `material-drop.test.mjs` (jsdom, real DataTransfer) or a block in
-  `order-flow.test.mjs`.
+- `roofing-site-manager.jsx`: dock (inside the main column, after the scroll
+  area), `dropOnProject`, `materialDragProps`, pin state + persistence, pin
+  button in `ProjectDetail`, draggable catalog chips and basket names.
+- `i18n/*.json`: `dockTitle`, `dockPin`, `dockUnpin`, `dockDropHint`,
+  `dockPersonDropped`.
+- `dock.test.mjs` (jsdom).
 
 ## Risks
 
-- The Board is already the densest screen; a strip must collapse by default
-  on narrow desktops (900–1100 px) or the planner loses height.
-- Payload must be the material *name* plus a source flag (`basket:<id>` vs
-  `catalog`), never an index — the basket re-renders between dragstart and
-  drop.
+- The floating camera button sits bottom-right; if it covers the last tile
+  it must move up while the dock is open.
+- On a 900–1000 px desktop the dock costs the Board planner one row; the
+  collapse handle is the answer, not hiding the dock on that tab.

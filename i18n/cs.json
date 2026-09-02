@@ -568,5 +568,9 @@
   "orderDelivered": "Dodáno",
   "markOrdered": "Objednáno",
   "markDelivered": "Dodáno",
-  "supplierUnknown": "Bez dodavatele"
+  "supplierUnknown": "Bez dodavatele",
+  "dockTitle": "Aktivní stavby",
+  "dockPin": "Připnout dole",
+  "dockUnpin": "Odepnout",
+  "dockDropHint": "Přetáhněte sem materiál nebo osobu"
 }

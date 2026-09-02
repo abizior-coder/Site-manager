@@ -568,5 +568,9 @@
   "orderDelivered": "Доставено",
   "markOrdered": "Поръчано",
   "markDelivered": "Доставено",
-  "supplierUnknown": "Без доставчик"
+  "supplierUnknown": "Без доставчик",
+  "dockTitle": "Активни обекти",
+  "dockPin": "Закачи долу",
+  "dockUnpin": "Откачи",
+  "dockDropHint": "Пуснете тук материал или човек"
 }

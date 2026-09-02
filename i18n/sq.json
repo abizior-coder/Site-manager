@@ -568,5 +568,9 @@
   "orderDelivered": "E dorëzuar",
   "markOrdered": "E porositur",
   "markDelivered": "E dorëzuar",
-  "supplierUnknown": "Pa furnitor"
+  "supplierUnknown": "Pa furnitor",
+  "dockTitle": "Punishtet aktive",
+  "dockPin": "Ngjite poshtë",
+  "dockUnpin": "Hiqe",
+  "dockDropHint": "Lësho këtu material ose një person"
 }

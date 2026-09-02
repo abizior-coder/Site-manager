@@ -568,5 +568,9 @@
   "orderDelivered": "Consegnato",
   "markOrdered": "Ordinato",
   "markDelivered": "Consegnato",
-  "supplierUnknown": "Nessun fornitore"
+  "supplierUnknown": "Nessun fornitore",
+  "dockTitle": "Cantieri attivi",
+  "dockPin": "Fissa in basso",
+  "dockUnpin": "Sblocca",
+  "dockDropHint": "Trascina qui materiale o una persona"
 }

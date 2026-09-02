@@ -131,6 +131,19 @@ An **`order`** entry is a material request with `orderStatus`: `requested` →
 into their own collection — the rules already let crew create their own
 entries, and a separate collection would need its own.
 
+The **dock** is the tray of job tiles at the bottom of every screen: jobs
+with status `construction` plus the ones this account pinned
+(`personalKey("site-dock-pins")` — pins are personal, not company-wide). It
+takes real height in the main column rather than floating, so nothing
+scrolls under it. Tiles accept two drag payloads: `text/member-uid` (a
+person → the job's crew, managers only) and `text/material` (JSON
+`{name, kind, qty?, unit?, basketId?}` → a material/tool entry through
+`newEntry()`, unit/price/supplier/article number filled from the article
+master, filed under the job's dominant trade). The payload is always a
+name, never an index — the basket re-renders between dragstart and drop.
+Touch has no HTML5 drag, so on a phone the tiles are shortcuts and the
+basket picker stays.
+
 The **article master** (`site-material-catalog` in `kv`) holds what each
 material name knows about itself: unit, price, supplier, article number. It
 replaced two parallel maps (`site-material-units`, `site-material-prices`),

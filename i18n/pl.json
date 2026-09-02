@@ -568,5 +568,9 @@
   "orderDelivered": "Dostarczone",
   "markOrdered": "Zamówione",
   "markDelivered": "Dostarczone",
-  "supplierUnknown": "Brak dostawcy"
+  "supplierUnknown": "Brak dostawcy",
+  "dockTitle": "Aktywne budowy",
+  "dockPin": "Przypnij na dole",
+  "dockUnpin": "Odepnij",
+  "dockDropHint": "Upuść tu materiał albo osobę"
 }

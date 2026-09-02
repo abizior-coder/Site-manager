@@ -606,5 +606,9 @@
   "safety_ground_4T": "Helm in und um Baugruben",
   "safety_ground_4X": "In Gräben und Gruben sowie überall in der Nähe von Baggern und schweren Erdbaumaschinen ist der Schutzhelm Pflicht.",
   "safety_ground_5T": "Steile oder tiefe Böschungen braucht ein Ingenieur",
-  "safety_ground_5X": "Böschungen steiler als etwa 45–63° (je nach Bodenart), tiefer als 4 m oder mit zusätzlicher Last, Wasser oder Erschütterungen brauchen einen formellen Stabilitätsnachweis durch einen qualifizierten Ingenieur oder Geotechniker."
+  "safety_ground_5X": "Böschungen steiler als etwa 45–63° (je nach Bodenart), tiefer als 4 m oder mit zusätzlicher Last, Wasser oder Erschütterungen brauchen einen formellen Stabilitätsnachweis durch einen qualifizierten Ingenieur oder Geotechniker.",
+  "dockTitle": "Aktive Baustellen",
+  "dockPin": "Unten anheften",
+  "dockUnpin": "Lösen",
+  "dockDropHint": "Material oder Person hierher ziehen"
 }

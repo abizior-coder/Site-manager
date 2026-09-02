@@ -568,5 +568,9 @@
   "orderDelivered": "Gliferet",
   "markOrdered": "Bstellt",
   "markDelivered": "Gliferet",
-  "supplierUnknown": "Kein Liferant"
+  "supplierUnknown": "Kein Liferant",
+  "dockTitle": "Aktivi Baustelle",
+  "dockPin": "Une aahefte",
+  "dockUnpin": "Löse",
+  "dockDropHint": "Material oder Person da ane zieh"
 }

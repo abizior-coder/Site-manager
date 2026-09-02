@@ -568,5 +568,9 @@
   "orderDelivered": "Leszállítva",
   "markOrdered": "Megrendelve",
   "markDelivered": "Leszállítva",
-  "supplierUnknown": "Nincs szállító"
+  "supplierUnknown": "Nincs szállító",
+  "dockTitle": "Aktív munkák",
+  "dockPin": "Rögzítés alul",
+  "dockUnpin": "Leválasztás",
+  "dockDropHint": "Húzz ide anyagot vagy egy személyt"
 }
