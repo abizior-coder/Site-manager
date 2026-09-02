@@ -572,5 +572,16 @@
   "dockTitle": "Aktywne budowy",
   "dockPin": "Przypnij na dole",
   "dockUnpin": "Odepnij",
-  "dockDropHint": "Upuść tu materiał albo osobę"
+  "dockDropHint": "Upuść tu materiał albo osobę",
+  "reportSentTimes": "wysłano",
+  "reportLastSent": "ostatnio",
+  "reportExclude": "Wyłącz z tego raportu",
+  "reportRestore": "Przywróć",
+  "reportExcludedTitle": "Poza tym raportem",
+  "reportDeletedEntry": "(usunięty)",
+  "reportAlreadySentDaily": "wpisów już wysłanych w raportach dziennych — tu pominięte",
+  "rapportExistsTitle": "Na ten dzień jest już podpisany raport",
+  "rapportOpenExisting": "Otwórz istniejący",
+  "rapportCreateNew": "Mimo to utwórz nowy",
+  "rapportChangedSince": "log zmieniony po podpisie"
 }

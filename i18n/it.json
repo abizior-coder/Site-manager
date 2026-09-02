@@ -572,5 +572,16 @@
   "dockTitle": "Cantieri attivi",
   "dockPin": "Fissa in basso",
   "dockUnpin": "Sblocca",
-  "dockDropHint": "Trascina qui materiale o una persona"
+  "dockDropHint": "Trascina qui materiale o una persona",
+  "reportSentTimes": "inviato",
+  "reportLastSent": "ultimo",
+  "reportExclude": "Togli da questo rapporto",
+  "reportRestore": "Rimetti",
+  "reportExcludedTitle": "Non in questo rapporto",
+  "reportDeletedEntry": "(eliminato)",
+  "reportAlreadySentDaily": "voci già inviate nei rapporti giornalieri — qui omesse",
+  "rapportExistsTitle": "Un rapporto firmato copre già questo giorno",
+  "rapportOpenExisting": "Apri quello esistente",
+  "rapportCreateNew": "Creane uno nuovo comunque",
+  "rapportChangedSince": "registro modificato dopo la firma"
 }

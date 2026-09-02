@@ -572,5 +572,16 @@
   "dockTitle": "Aktív munkák",
   "dockPin": "Rögzítés alul",
   "dockUnpin": "Leválasztás",
-  "dockDropHint": "Húzz ide anyagot vagy egy személyt"
+  "dockDropHint": "Húzz ide anyagot vagy egy személyt",
+  "reportSentTimes": "elküldve",
+  "reportLastSent": "utoljára",
+  "reportExclude": "Kivétel ebből a jelentésből",
+  "reportRestore": "Visszatétel",
+  "reportExcludedTitle": "Nincs ebben a jelentésben",
+  "reportDeletedEntry": "(törölve)",
+  "reportAlreadySentDaily": "bejegyzés már napi jelentésben elküldve — itt kihagyva",
+  "rapportExistsTitle": "Erre a napra már van aláírt jelentés",
+  "rapportOpenExisting": "Meglévő megnyitása",
+  "rapportCreateNew": "Mégis új létrehozása",
+  "rapportChangedSince": "a napló az aláírás óta változott"
 }

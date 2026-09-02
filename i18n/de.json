@@ -610,5 +610,16 @@
   "dockTitle": "Aktive Baustellen",
   "dockPin": "Unten anheften",
   "dockUnpin": "Lösen",
-  "dockDropHint": "Material oder Person hierher ziehen"
+  "dockDropHint": "Material oder Person hierher ziehen",
+  "reportSentTimes": "gesendet",
+  "reportLastSent": "zuletzt",
+  "reportExclude": "Aus diesem Bericht nehmen",
+  "reportRestore": "Wieder aufnehmen",
+  "reportExcludedTitle": "Nicht in diesem Bericht",
+  "reportDeletedEntry": "(gelöscht)",
+  "reportAlreadySentDaily": "Einträge bereits in Tagesberichten gesendet — hier weggelassen",
+  "rapportExistsTitle": "Für diesen Tag gibt es schon einen unterschriebenen Rapport",
+  "rapportOpenExisting": "Bestehenden öffnen",
+  "rapportCreateNew": "Trotzdem neuen erstellen",
+  "rapportChangedSince": "seit Unterschrift geändert"
 }

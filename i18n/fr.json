@@ -572,5 +572,16 @@
   "dockTitle": "Chantiers actifs",
   "dockPin": "Épingler en bas",
   "dockUnpin": "Détacher",
-  "dockDropHint": "Déposez du matériel ou une personne ici"
+  "dockDropHint": "Déposez du matériel ou une personne ici",
+  "reportSentTimes": "envoyé",
+  "reportLastSent": "dernier",
+  "reportExclude": "Retirer de ce rapport",
+  "reportRestore": "Remettre",
+  "reportExcludedTitle": "Hors de ce rapport",
+  "reportDeletedEntry": "(supprimé)",
+  "reportAlreadySentDaily": "entrées déjà envoyées dans des rapports journaliers — omises ici",
+  "rapportExistsTitle": "Un rapport signé couvre déjà ce jour",
+  "rapportOpenExisting": "Ouvrir l'existant",
+  "rapportCreateNew": "En créer un nouveau quand même",
+  "rapportChangedSince": "journal modifié depuis la signature"
 }

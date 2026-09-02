@@ -572,5 +572,16 @@
   "dockTitle": "Șantiere active",
   "dockPin": "Fixează jos",
   "dockUnpin": "Desprinde",
-  "dockDropHint": "Trage aici material sau o persoană"
+  "dockDropHint": "Trage aici material sau o persoană",
+  "reportSentTimes": "trimis",
+  "reportLastSent": "ultima",
+  "reportExclude": "Scoate din acest raport",
+  "reportRestore": "Pune la loc",
+  "reportExcludedTitle": "Nu în acest raport",
+  "reportDeletedEntry": "(șters)",
+  "reportAlreadySentDaily": "înregistrări deja trimise în rapoartele zilnice — omise aici",
+  "rapportExistsTitle": "Există deja un raport semnat pentru această zi",
+  "rapportOpenExisting": "Deschide-l pe cel existent",
+  "rapportCreateNew": "Creează totuși unul nou",
+  "rapportChangedSince": "jurnal modificat după semnătură"
 }

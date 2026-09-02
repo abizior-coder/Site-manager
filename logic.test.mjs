@@ -6,6 +6,7 @@
 
 import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
+import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -155,6 +156,75 @@ t("a dash stays empty", parsePrice("-"), "");
 {
   const m = mergeIntoCatalog({}, [{ name: "Blech", artNo: "", unit: "", price: "", supplier: "" }], "");
   t("a row with no price does not invent one", m.catalog.blech.price, "");
+}
+
+// --- the report model ----------------------------------------------------
+// A report is a view over entries plus a send record. These pin down the
+// two things that used to duplicate: identity, and copied rows.
+t("one id per person, period and day", reportId("u1", "daily", "2026-09-02"), "u1-daily-2026-09-02");
+t("a second send makes the same id", reportId("u1", "daily", "2026-09-02") === reportId("u1", "daily", "2026-09-02"), true);
+t("another person's report is a different one", reportId("u2", "daily", "2026-09-02") === reportId("u1", "daily", "2026-09-02"), false);
+
+{
+  const log = [
+    { id: "a", type: "time", qty: "7.5", projectId: "p1", description: "7h 30m" },
+    { id: "b", type: "material", qty: "8", unit: "m", projectId: "p1", description: "Lattung" },
+    { id: "c", type: "tool", qty: "1", projectId: "p2", description: "Bauaufzug" },
+  ];
+  const report = { entryIds: ["a", "b", "c", "gone"], entryLabels: { gone: "Ziegel · 24 m2" }, excludedIds: ["c"] };
+  const rows = reportRows(report, log);
+  t("rows come from the live log, not a copy", rows.find((r) => r.id === "b").qty, "8");
+  t("an excluded entry is not a row", rows.some((r) => r.id === "c"), false);
+  t("a deleted entry stays as a marked row", rows.find((r) => r.id === "gone").deleted, true);
+  t("the deleted row keeps its label", rows.find((r) => r.id === "gone").description, "Ziegel · 24 m2");
+  const totals = reportTotals(rows);
+  t("hours are summed from live time entries", totals.hours, 7.5);
+  t("deleted rows count for nothing", totals.materialsCount, 1);
+  t("sites come from the live rows", totals.projIds, ["p1"]);
+  // A corrected quantity in the log reaches the report without any copy.
+  const fixed = log.map((e) => (e.id === "b" ? { ...e, qty: "10" } : e));
+  t("a fix in the log shows in the report", reportRows(report, fixed).find((r) => r.id === "b").qty, "10");
+}
+{
+  const legacy = { entries: [{ id: "x", type: "material", description: "Alt", qty: "1" }], hours: 3 };
+  t("an old report still renders from its own copy", reportRows(legacy, []).length, 1);
+}
+{
+  const month = [
+    { id: "d1", date: "2026-09-01", type: "time", qty: "8" },
+    { id: "d2", date: "2026-09-01", type: "material", qty: "1" },
+    { id: "n1", date: "2026-09-02", type: "time", qty: "8" },
+  ];
+  const sent = [
+    { id: "u1-daily-2026-09-01", period: "daily", periodLabel: "2026-09-01", userId: "u1", entryIds: ["d1", "d2"] },
+    { id: "u2-daily-2026-09-02", period: "daily", periodLabel: "2026-09-02", userId: "u2", entryIds: ["n1"] },
+    { id: "u1-daily-2026-08-31", period: "daily", periodLabel: "2026-08-31", userId: "u1", entryIds: ["n1"] },
+  ];
+  const r = unsentMonthEntries(month, sent, "u1", "2026-09");
+  t("monthly leaves out what daily already sent", r.entries.map((e) => e.id), ["n1"]);
+  t("and says how many it left out", r.alreadySent, 2);
+  t("another person's daily report does not hide my entries", unsentMonthEntries(month, sent.filter((x) => x.userId === "u2"), "u1", "2026-09").entries.length, 3);
+  t("a daily report from another month does not count", unsentMonthEntries(month, [sent[2]], "u1", "2026-09").entries.length, 3);
+}
+{
+  const first = withSend({ id: "r", period: "daily" }, "mail", 1000);
+  t("the first send starts the history", first.sends, [{ at: 1000, via: "mail" }]);
+  const second = withSend(first, "whatsapp", 2000);
+  t("a second send appends, it does not replace", second.sends.length, 2);
+  t("sentAt follows the latest send", second.sentAt, 2000);
+  const old = withSend({ id: "o", sentAt: 500 }, "mail", 3000);
+  t("an old report's single sentAt becomes its first history line", old.sends[0], { at: 500, via: "mail" });
+}
+{
+  const signed = { hours: "7.5", lines: [{ description: "Lattung", qty: "8", unit: "m" }] };
+  const day = [
+    { type: "time", qty: "7.5" },
+    { type: "material", description: "Lattung", qty: "8", unit: "m" },
+  ];
+  t("a day that matches the signature is not flagged", rapportChanged(signed, day), false);
+  t("a changed quantity after signing is flagged", rapportChanged(signed, [day[0], { ...day[1], qty: "10" }]), true);
+  t("an added line after signing is flagged", rapportChanged(signed, [...day, { type: "material", description: "Ziegel", qty: "1" }]), true);
+  t("changed hours after signing are flagged", rapportChanged(signed, [{ type: "time", qty: "9" }, day[1]]), true);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

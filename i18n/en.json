@@ -610,5 +610,16 @@
   "dockTitle": "Active jobs",
   "dockPin": "Pin to the dock",
   "dockUnpin": "Unpin",
-  "dockDropHint": "Drop material or a person here"
+  "dockDropHint": "Drop material or a person here",
+  "reportSentTimes": "sent",
+  "reportLastSent": "last",
+  "reportExclude": "Take out of this report",
+  "reportRestore": "Put back",
+  "reportExcludedTitle": "Not in this report",
+  "reportDeletedEntry": "(deleted)",
+  "reportAlreadySentDaily": "entries already sent in daily reports — left out here",
+  "rapportExistsTitle": "A signed report already covers this day",
+  "rapportOpenExisting": "Open the existing one",
+  "rapportCreateNew": "Create a new one anyway",
+  "rapportChangedSince": "log changed since signature"
 }

@@ -1,6 +1,7 @@
 # One report system: live, editable, never duplicated
 
-**Status: proposed — analysis done, waiting for a go before code.**
+**Status: implemented 2026-09-02** (owner's go: "wykluczać" — the monthly
+report *excludes* what daily reports already sent, rather than flagging it).
 
 ## What exists today (read from the code, 2026-09-02)
 
@@ -60,9 +61,10 @@ sentReports/{id}
 - **Editable** means three things and nothing else: change the notes,
   exclude/include an entry (`excludedIds`), and fix the entry itself in the
   log. No free-text editing of copied lines.
-- **Monthly** marks each entry that was already in a sent daily report
-  (`entryIds` of that month's daily reports) so the supervisor sees what is
-  new. It still includes them — a month total must add up.
+- **Monthly** leaves out every entry that a sent daily report of this
+  person already carried (`unsentMonthEntries`), and says how many it left
+  out. Owner's call: nothing reaches the supervisor twice; the month total
+  is therefore "what is new", not the calendar month.
 - **Rapport (signed)** stays frozen, and gains one guard: opening a Rapport
   for a job + day that already has one offers *open existing* first. After
   signing, if the day's entries change, the job view shows *Einträge seit
@@ -78,7 +80,7 @@ sentReports/{id}
 - Sending the same day twice yields one record with two `sends`.
 - Editing an entry's quantity in the log changes what the sent report shows.
 - Excluding an entry from a report does not touch the log.
-- Monthly report flags entries already sent daily.
+- Monthly report excludes entries already sent daily and says how many.
 - Second Rapport for the same job + day is offered as *open existing*.
 - Rules: `sentReports` create/update require `userId == auth.uid` (crew own
   their reports; managers may read all) — one new rules test per line.

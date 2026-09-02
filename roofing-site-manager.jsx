@@ -3,6 +3,7 @@ import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, 
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
+import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
@@ -1246,6 +1247,7 @@ export default function SiteManager() {
   const [importError, setImportError] = useState(null);
   const [sentReports, setSentReports] = useState([]);
   const [reportViewModal, setReportViewModal] = useState(null); // report object being viewed/edited
+  const [rapportExists, setRapportExists] = useState(null); // { existing, projectId, date } when a signed Rapport already covers that day
   const [editTimeModal, setEditTimeModal] = useState(null); // the time entry being adjusted
   const [editHoursInput, setEditHoursInput] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
@@ -1823,10 +1825,27 @@ export default function SiteManager() {
     }
   }
 
+  // What a report says right now. Reports carry entry ids and are joined
+  // against the live log, so a corrected quantity reaches the supervisor on
+  // the next send. Old reports still carry copies and read from those.
+  function reportFigures(report) {
+    const rows = reportRows(report, entries);
+    const totals = reportTotals(rows);
+    const live = Array.isArray(report.entryIds);
+    return {
+      rows,
+      hours: live ? totals.hours : (report.hours ?? totals.hours),
+      materialsCount: live ? totals.materialsCount : (report.materialsCount ?? totals.materialsCount),
+      toolsCount: live ? totals.toolsCount : (report.toolsCount ?? totals.toolsCount),
+      sites: live ? totals.projIds.map(projectName).filter(Boolean) : (report.sitesVisited || []),
+    };
+  }
+
   function reportSendText(report) {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
+    const f = reportFigures(report);
     const subject = `${periodLabel} ${t.sendToSupervisor}: ${report.periodLabel}`;
-    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${report.hours}\n${t.materialsLogged}: ${report.materialsCount}\n${t.toolsLogged}: ${report.toolsCount}\n${t.sitesLabel}: ${report.sitesVisited.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
+    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${f.hours}\n${t.materialsLogged}: ${f.materialsCount}\n${t.toolsLogged}: ${f.toolsCount}\n${t.sitesLabel}: ${f.sites.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
     return { subject, body };
   }
 
@@ -1842,24 +1861,70 @@ export default function SiteManager() {
     }
   }
 
+  function sendVia() {
+    return profile.supervisorEmail ? "mail" : profile.supervisorPhone ? "whatsapp" : "none";
+  }
+
+  // The same report for the same day is one record. Tapping send again
+  // refreshes its scope (entries logged since), keeps the notes and the
+  // exclusions, and adds one more line to its send history -- it never makes
+  // a second report. userId is required by the rules; without it the create
+  // was refused and nothing was stored.
   function sendReportToSupervisor(view, summary, list, periodLabelOverride) {
-    const report = {
-      id: uid(),
+    const periodLabel = periodLabelOverride || (view === "daily" ? todayKey() : monthKey());
+    const id = reportId(user?.uid, view, periodLabel);
+    const existing = sentReports.find((r) => r.id === id);
+    const excludedIds = existing?.excludedIds || [];
+    const scoped = list.filter((e) => !excludedIds.includes(e.id));
+    const totals = reportTotals(scoped);
+    const base = {
+      id,
       period: view,
-      periodLabel: periodLabelOverride || (view === "daily" ? todayKey() : monthKey()),
-      hours: Number(summary.hours.toFixed(2)),
-      materialsCount: summary.materials.length,
-      toolsCount: summary.tools.length,
-      sitesVisited: summary.projIds.map(projectName).filter(Boolean),
-      entries: list.map((e) => ({ id: e.id, type: e.type, description: e.description, qty: e.qty || "", unit: e.unit || "", projectName: e.projectId ? projectName(e.projectId) : "" })),
-      notes: "",
-      sentAt: Date.now(),
-      editedAt: null,
+      periodLabel,
+      userId: user?.uid || null,
+      entryIds: scoped.map((e) => e.id),
+      entryLabels: entryLabels(scoped),
+      excludedIds,
+      // Kept as a summary of the moment it went out, for the record; the
+      // modal and the mail read the live rows.
+      hours: totals.hours,
+      materialsCount: totals.materialsCount,
+      toolsCount: totals.toolsCount,
+      sitesVisited: totals.projIds.map(projectName).filter(Boolean),
+      notes: existing?.notes || "",
+      editedAt: existing?.editedAt || null,
+      createdAt: existing?.createdAt || Date.now(),
+      sends: existing?.sends,
+      sentAt: existing?.sentAt,
     };
-    persist({ sentReports: [report, ...sentReports] });
+    const report = withSend(base, sendVia());
+    persist({ sentReports: existing ? sentReports.map((r) => (r.id === id ? report : r)) : [report, ...sentReports] });
     setReportViewModal(report);
     sendReportVia(report);
-    sendWebhook("report", { period: report.period, periodLabel: report.periodLabel, hours: report.hours, materialsCount: report.materialsCount, toolsCount: report.toolsCount, sitesVisited: report.sitesVisited, entries: report.entries });
+    sendWebhook("report", {
+      reportId: id, sendIndex: report.sends.length,
+      period: report.period, periodLabel: report.periodLabel, hours: report.hours,
+      materialsCount: report.materialsCount, toolsCount: report.toolsCount, sitesVisited: report.sitesVisited,
+      entries: scoped.map((e) => ({ id: e.id, type: e.type, description: e.description, qty: e.qty || "", unit: e.unit || "", projectName: e.projectId ? projectName(e.projectId) : "" })),
+    });
+  }
+
+  // Sending an existing report again: same record, one more line of history.
+  function resendReport(report) {
+    const updated = withSend(report, sendVia());
+    persist({ sentReports: sentReports.map((r) => (r.id === updated.id ? updated : r)) });
+    setReportViewModal(updated);
+    sendReportVia(updated);
+    const f = reportFigures(updated);
+    sendWebhook("report", { reportId: updated.id, sendIndex: updated.sends.length, period: updated.period, periodLabel: updated.periodLabel, hours: f.hours, materialsCount: f.materialsCount, toolsCount: f.toolsCount, sitesVisited: f.sites });
+  }
+
+  function toggleReportEntry(id) {
+    setReportViewModal((r) => {
+      if (!r) return r;
+      const ex = r.excludedIds || [];
+      return { ...r, excludedIds: ex.includes(id) ? ex.filter((x) => x !== id) : [...ex, id] };
+    });
   }
 
   function generateDayReport(dateStr) {
@@ -1949,8 +2014,9 @@ export default function SiteManager() {
   function buildReportHtml(report) {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const bySite = {};
-    report.entries.forEach((e) => {
-      const key = e.projectName || t.sitesLabel;
+    reportRows(report, entries).forEach((e) => {
+      if (e.deleted) return;
+      const key = e.projectName || (e.projectId ? projectName(e.projectId) : "") || t.sitesLabel;
       (bySite[key] = bySite[key] || []).push(e);
     });
     const sections = Object.entries(bySite).map(([siteName, ents]) => {
@@ -2458,8 +2524,12 @@ export default function SiteManager() {
   // It is the piece that stops "we never agreed to that" arguments later, so
   // it snapshots the hours and materials rather than referring to records that
   // could change afterwards.
-  function openRapport(projectId, date) {
+  function openRapport(projectId, date, force = false) {
     const d = date || todayKey();
+    // A signed Rapport already covers this day: open it rather than quietly
+    // making a second one. The signed record itself is never touched.
+    const existing = !force && siteReports.find((r) => r.projectId === projectId && r.date === d);
+    if (existing) { setRapportExists({ existing, projectId, date: d }); return; }
     const list = entries.filter((e) => e.projectId === projectId && e.date === d);
     const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
     setRapportModal({
@@ -3912,6 +3982,10 @@ export default function SiteManager() {
 
   const daily = dailySummary(todayEntries);
   const monthly = dailySummary(monthEntries);
+  // Owner's decision: the monthly report carries only what no daily report
+  // of this person has sent yet, so the supervisor gets nothing twice.
+  const monthUnsent = unsentMonthEntries(monthEntries, sentReports, user?.uid, monthKey());
+  const monthlyUnsent = dailySummary(monthUnsent.entries);
   const CPR_STEPS = cprSteps(t);
   const wCond = weather.data ? weatherFromCode(weather.data.weather_code, t) : null;
 
@@ -5220,8 +5294,8 @@ export default function SiteManager() {
               <button onClick={() => setReportView("monthly")} style={{ background: reportView === "monthly" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-sm font-bold uppercase">{t.monthly}</button>
             </div>
             {(() => {
-              const s = reportView === "daily" ? daily : monthly;
-              const list = reportView === "daily" ? todayEntries : monthEntries;
+              const s = reportView === "daily" ? daily : monthlyUnsent;
+              const list = reportView === "daily" ? todayEntries : monthUnsent.entries;
               return (
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{reportView === "daily" ? todayKey() : monthKey()}</div>
@@ -5230,6 +5304,9 @@ export default function SiteManager() {
                   <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
                   <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
                   <div style={{ color: COLORS.muted }} className="text-xs mt-3 mb-1">{t.sitesLabel}: {s.projIds.map(projectName).join(", ") || "—"}</div>
+                  {reportView === "monthly" && monthUnsent.alreadySent > 0 && (
+                    <div style={{ color: COLORS.amber }} className="text-[11px] mb-1">{monthUnsent.alreadySent} {t.reportAlreadySentDaily}</div>
+                  )}
                   <button onClick={() => sendReportToSupervisor(reportView, s, list)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
                     <FileText size={15} /> {t.sendToSupervisor}
                   </button>
@@ -5238,7 +5315,7 @@ export default function SiteManager() {
             })()}
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.entriesTitle}</div>
-              <EntryGroups entries={reportView === "daily" ? todayEntries : monthEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
+              <EntryGroups entries={reportView === "daily" ? todayEntries : monthUnsent.entries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
             </div>
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.sentReports}</div>
@@ -5250,7 +5327,11 @@ export default function SiteManager() {
                     <button key={r.id} onClick={() => setReportViewModal(r)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-lg p-3 flex items-center justify-between">
                       <div>
                         <div className="text-sm font-semibold">{(r.period === "daily" ? t.daily : t.monthly)} · {r.periodLabel}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs">{r.hours}h{r.editedAt ? ` · ${t.editedTag}` : ""}</div>
+                        <div style={{ color: COLORS.muted }} className="text-xs">
+                          {reportFigures(r).hours}h · {t.reportSentTimes} {(r.sends || []).length || 1}×
+                          {r.sentAt ? ` · ${t.reportLastSent} ${new Date(r.sentAt).toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}` : ""}
+                          {r.editedAt ? ` · ${t.editedTag}` : ""}
+                        </div>
                       </div>
                       <ChevronRight size={16} color={COLORS.muted} />
                     </button>
@@ -6651,36 +6732,79 @@ export default function SiteManager() {
         </Modal>
       )}
 
-      {reportViewModal && (
+      {reportViewModal && (() => {
+        const live = Array.isArray(reportViewModal.entryIds);
+        const f = reportFigures(reportViewModal);
+        const excludedRows = live
+          ? (reportViewModal.excludedIds || []).map((id) => entries.find((e) => e.id === id) || { id, description: (reportViewModal.entryLabels || {})[id] || "", deleted: true })
+          : [];
+        return (
         <Modal onClose={() => setReportViewModal(null)} title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}>
           <div className="flex flex-col gap-3">
             <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-3">
-              <Stat label={t.sitesLabel} value={reportViewModal.sitesVisited.join(", ") || "—"} color={COLORS.text} />
-              <Stat label={t.materialsLogged} value={reportViewModal.materialsCount} color={COLORS.success} />
-              <Stat label={t.toolsLogged} value={reportViewModal.toolsCount} color={COLORS.amber} />
+              <Stat label={t.sitesLabel} value={f.sites.join(", ") || "—"} color={COLORS.text} />
+              <Stat label={t.hoursWorked} value={f.hours.toFixed(1)} color={COLORS.accent} />
+              <Stat label={t.materialsLogged} value={f.materialsCount} color={COLORS.success} />
+              <Stat label={t.toolsLogged} value={f.toolsCount} color={COLORS.amber} />
+              {(reportViewModal.sends || []).length > 0 && (
+                <div style={{ color: COLORS.muted }} className="text-[10px] mt-1">
+                  {t.reportSentTimes} {reportViewModal.sends.length}× · {t.reportLastSent} {new Date(reportViewModal.sends[reportViewModal.sends.length - 1].at).toLocaleString()}
+                </div>
+              )}
             </div>
             <div style={{ color: COLORS.muted }} className="text-xs">{t.editReportHint}</div>
-            <div className="flex items-center gap-2">
+            {!live && (<div className="flex items-center gap-2">
               <span style={{ color: COLORS.muted }} className="text-xs">{t.hoursFieldLabel}</span>
               <input type="number" inputMode="decimal" step="0.1" value={reportViewModal.hours} onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-            </div>
+            </div>)}
             <textarea value={reportViewModal.notes} onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))} placeholder={t.notesLabel} rows={3} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
             <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
-              {reportViewModal.entries.map((e) => {
-                const meta = typeMeta(e.type, t);
+              {f.rows.map((e) => {
+                const meta = typeMeta(e.type, t) || typeMeta("note", t);
                 return (
-                  <div key={e.id} style={{ background: COLORS.cardAlt }} className="rounded-lg px-3 py-2 text-xs flex justify-between">
-                    <span>{e.description}</span>
-                    <span style={{ color: COLORS.muted }}>{e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}</span>
+                  <div key={e.id} style={{ background: COLORS.cardAlt, opacity: e.deleted ? 0.6 : 1 }} className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2">
+                    <span className="min-w-0 truncate">
+                      {e.description}{e.deleted ? ` ${t.reportDeletedEntry}` : ""}
+                    </span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span style={{ color: COLORS.muted }}>{e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}</span>
+                      {live && (
+                        <button onClick={() => toggleReportEntry(e.id)} title={t.reportExclude} style={{ color: COLORS.muted }}><X size={12} /></button>
+                      )}
+                    </span>
                   </div>
                 );
               })}
+              {excludedRows.length > 0 && (
+                <>
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-2">{t.reportExcludedTitle} ({excludedRows.length})</div>
+                  {excludedRows.map((e) => (
+                    <div key={e.id} style={{ background: COLORS.cardAlt, opacity: 0.55 }} className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2">
+                      <span className="min-w-0 truncate line-through">{e.description}</span>
+                      <button onClick={() => toggleReportEntry(e.id)} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase shrink-0">{t.reportRestore}</button>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
             <button onClick={saveReportEdits} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => saveReportAsPdf(reportViewModal)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Printer size={14} /> {t.savePdfBtn}</button>
-              <button onClick={() => sendReportVia(reportViewModal)} style={{ background: COLORS.accentDim }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Send size={14} /> {t.resendBtn}</button>
+              <button onClick={() => resendReport(reportViewModal)} style={{ background: COLORS.accentDim }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Send size={14} /> {t.resendBtn}</button>
             </div>
+          </div>
+        </Modal>
+        );
+      })()}
+
+      {rapportExists && (
+        <Modal onClose={() => setRapportExists(null)} title={t.rapportExistsTitle}>
+          <div style={{ color: COLORS.muted }} className="text-sm mb-3">
+            {projectName(rapportExists.projectId)} · {rapportExists.date} · {rapportExists.existing.signerName}
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <button onClick={() => { const r = rapportExists.existing; setRapportExists(null); printRapport(r); }} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.rapportOpenExisting}</button>
+            <button onClick={() => { const { projectId, date } = rapportExists; setRapportExists(null); openRapport(projectId, date, true); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.muted }} className="w-full py-3 rounded-lg font-bold uppercase text-xs">{t.rapportCreateNew}</button>
           </div>
         </Modal>
       )}
@@ -7484,7 +7608,10 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
               <button key={r.id} onClick={() => onPrintRapport(r)} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm truncate">{t.rapportTitle} · {r.date}</div>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{r.signerName} · {r.hours} h</div>
+                  <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                    {r.signerName} · {r.hours} h
+                    {rapportChanged(r, entries.filter((e) => e.date === r.date)) && <span style={{ color: COLORS.amber }}> · {t.rapportChangedSince}</span>}
+                  </div>
                 </div>
                 <Printer size={14} color={COLORS.muted} className="shrink-0" />
               </button>

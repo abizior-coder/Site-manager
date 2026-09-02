@@ -572,5 +572,16 @@
   "dockTitle": "Punishtet aktive",
   "dockPin": "Ngjite poshtë",
   "dockUnpin": "Hiqe",
-  "dockDropHint": "Lësho këtu material ose një person"
+  "dockDropHint": "Lësho këtu material ose një person",
+  "reportSentTimes": "dërguar",
+  "reportLastSent": "së fundi",
+  "reportExclude": "Hiqe nga ky raport",
+  "reportRestore": "Ktheje",
+  "reportExcludedTitle": "Jo në këtë raport",
+  "reportDeletedEntry": "(fshirë)",
+  "reportAlreadySentDaily": "regjistrime të dërguara tashmë në raportet ditore — këtu të lëna jashtë",
+  "rapportExistsTitle": "Për këtë ditë ka tashmë një raport të nënshkruar",
+  "rapportOpenExisting": "Hap ekzistuesin",
+  "rapportCreateNew": "Krijo një të ri gjithsesi",
+  "rapportChangedSince": "ndryshuar pas nënshkrimit"
 }

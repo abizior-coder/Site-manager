@@ -572,5 +572,16 @@
   "dockTitle": "Aktivi Baustelle",
   "dockPin": "Une aahefte",
   "dockUnpin": "Löse",
-  "dockDropHint": "Material oder Person da ane zieh"
+  "dockDropHint": "Material oder Person da ane zieh",
+  "reportSentTimes": "gschickt",
+  "reportLastSent": "zletscht",
+  "reportExclude": "Us dem Bricht neh",
+  "reportRestore": "Wieder ine",
+  "reportExcludedTitle": "Nöd i dem Bricht",
+  "reportDeletedEntry": "(glöscht)",
+  "reportAlreadySentDaily": "Iiträg scho i Tagesbricht gschickt — da weggla",
+  "rapportExistsTitle": "Für de Tag git's scho en unterschribene Rapport",
+  "rapportOpenExisting": "Bestehende öffne",
+  "rapportCreateNew": "Trotzdem en neue mache",
+  "rapportChangedSince": "sit de Unterschrift gänderet"
 }

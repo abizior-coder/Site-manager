@@ -69,6 +69,7 @@ async function renderAs(role) {
   window.scrollTo = () => {};
   window.HTMLCanvasElement.prototype.getContext = () => null;
   window.navigator.geolocation = { getCurrentPosition: () => {} };
+  window.open = () => null; // sending a report opens the mail app
 
   dom.window.eval(code);
   dom.window.__setRole(role);
@@ -97,6 +98,27 @@ async function renderAs(role) {
     check(`owner: tab ${label} renders`, errors.length === before && (window.document.body.textContent || "").length > 50,
       errors.slice(before, before + 1).join(" | "));
   }
+  // Sending the same day twice used to make two reports, both mailed. It is
+  // one record now, with a send history.
+  {
+    const tabBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "BERICHTE");
+    tabBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const send = () => [...window.document.querySelectorAll("button")].find((x) => /An Vorgesetzten senden|Send to supervisor/.test(x.textContent || ""));
+    const closeModal = () => window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    send()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    closeModal();
+    await new Promise((r) => setTimeout(r, 150));
+    send()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    closeModal();
+    await new Promise((r) => setTimeout(r, 150));
+    const rows = [...window.document.querySelectorAll("button")].filter((x) => /^(Täglich|Daily) · /.test((x.textContent || "").trim()));
+    check("owner: sending a day twice yields one report", rows.length === 1, `${rows.length} report rows`);
+    check("owner: the report shows it went out twice", /gesendet 2×|sent 2×/.test(rows[0]?.textContent || ""), (rows[0]?.textContent || "").slice(0, 120));
+  }
+
   // The price-list import is owner-only and writes the prices that end up on
   // invoices, so at minimum it has to be reachable.
   {

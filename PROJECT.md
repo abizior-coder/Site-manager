@@ -101,6 +101,7 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/entries/{id}` | One per entry, each carrying `userId` |
 | `companies/{cid}/customers/{id}` | One per customer, with `contacts` history |
 | `companies/{cid}/documents/{id}` | Quotes and invoices — **owner only** |
+| `companies/{cid}/sentReports/{id}` | Reports sent to a supervisor. **One per person, period and day** (`id = userId-period-periodLabel`); a re-send appends to `sends`, never a second record. Carries `entryIds` (+ `entryLabels`, `excludedIds`), not copies — rendered by joining the live log (`reports.js`). Pre-model reports still carry `entries` and render from those. Monthly = the month minus what daily reports already sent (owner's decision, 2026-09-02). |
 | `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, managers write |
 | `companies/{cid}/leave/{id}` | Absences — anyone raises their own, only a manager decides |
 | `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
@@ -215,10 +216,15 @@ These are real and currently unfixed. Ordered by how much damage they do.
    cannot read; the existing Cloudflare Worker would have to receive it and
    hand it over. Not built: it needs an HGC OCI access, which the owner must
    request with their customer number.
-8. **No merge for duplicate customers.** Migrated client strings produced
+8. **`sentReports` created before 2026-09-02 have no `userId`** — the app
+   never set one, and the rules require it on create, so those sends were
+   refused and never stored (the mail still opened). Anything you see from
+   before that date came through the old `site-meta` migration. Fixed in
+   `sendReportToSupervisor`; nothing to migrate because nothing was written.
+9. **No merge for duplicate customers.** Migrated client strings produced
    spelling variants as separate records. Deliberately not auto-merged,
    because two similar names can be two different people.
-9. `roofing-site-manager.html` was an unused stale duplicate and has been
+10. `roofing-site-manager.html` was an unused stale duplicate and has been
    deleted.
 
 ### Data safety

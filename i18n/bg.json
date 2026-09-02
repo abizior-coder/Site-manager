@@ -572,5 +572,16 @@
   "dockTitle": "Активни обекти",
   "dockPin": "Закачи долу",
   "dockUnpin": "Откачи",
-  "dockDropHint": "Пуснете тук материал или човек"
+  "dockDropHint": "Пуснете тук материал или човек",
+  "reportSentTimes": "изпратен",
+  "reportLastSent": "последно",
+  "reportExclude": "Извади от този отчет",
+  "reportRestore": "Върни",
+  "reportExcludedTitle": "Не в този отчет",
+  "reportDeletedEntry": "(изтрит)",
+  "reportAlreadySentDaily": "записа вече изпратени в дневни отчети — тук пропуснати",
+  "rapportExistsTitle": "За този ден вече има подписан отчет",
+  "rapportOpenExisting": "Отвори съществуващия",
+  "rapportCreateNew": "Все пак създай нов",
+  "rapportChangedSince": "дневникът е променен след подписа"
 }

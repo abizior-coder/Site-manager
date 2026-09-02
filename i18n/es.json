@@ -572,5 +572,16 @@
   "dockTitle": "Obras activas",
   "dockPin": "Fijar abajo",
   "dockUnpin": "Soltar",
-  "dockDropHint": "Suelta aquí material o una persona"
+  "dockDropHint": "Suelta aquí material o una persona",
+  "reportSentTimes": "enviado",
+  "reportLastSent": "último",
+  "reportExclude": "Quitar de este informe",
+  "reportRestore": "Volver a incluir",
+  "reportExcludedTitle": "Fuera de este informe",
+  "reportDeletedEntry": "(eliminado)",
+  "reportAlreadySentDaily": "entradas ya enviadas en informes diarios — omitidas aquí",
+  "rapportExistsTitle": "Ya hay un informe firmado para este día",
+  "rapportOpenExisting": "Abrir el existente",
+  "rapportCreateNew": "Crear uno nuevo de todos modos",
+  "rapportChangedSince": "registro cambiado tras la firma"
 }

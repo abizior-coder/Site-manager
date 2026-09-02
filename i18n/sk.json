@@ -572,5 +572,16 @@
   "dockTitle": "Aktívne stavby",
   "dockPin": "Pripnúť dole",
   "dockUnpin": "Odopnúť",
-  "dockDropHint": "Presuňte sem materiál alebo osobu"
+  "dockDropHint": "Presuňte sem materiál alebo osobu",
+  "reportSentTimes": "odoslané",
+  "reportLastSent": "naposledy",
+  "reportExclude": "Vyňať z tejto správy",
+  "reportRestore": "Vrátiť",
+  "reportExcludedTitle": "Nie v tejto správe",
+  "reportDeletedEntry": "(zmazané)",
+  "reportAlreadySentDaily": "záznamov už odoslaných v denných správach — tu vynechané",
+  "rapportExistsTitle": "Na tento deň už existuje podpísaný rapport",
+  "rapportOpenExisting": "Otvoriť existujúci",
+  "rapportCreateNew": "Aj tak vytvoriť nový",
+  "rapportChangedSince": "denník zmenený po podpise"
 }
