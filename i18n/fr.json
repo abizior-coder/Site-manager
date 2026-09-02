@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Un rapport signé couvre déjà ce jour",
   "rapportOpenExisting": "Ouvrir l'existant",
   "rapportCreateNew": "En créer un nouveau quand même",
-  "rapportChangedSince": "journal modifié depuis la signature"
+  "rapportChangedSince": "journal modifié depuis la signature",
+  "materialSearchPlaceholder": "Chercher un matériau ou un article…",
+  "searchOurArticles": "Nos articles",
+  "searchCatalog": "Catalogue",
+  "searchNoResults": "Rien trouvé.",
+  "dockSort_pinned": "Épinglés d'abord",
+  "dockSort_name": "Nom",
+  "dockSort_status": "Statut",
+  "dockSort_recent": "Récents",
+  "dockDropProject": "Déposez le projet ici pour l'épingler",
+  "dockPinnedToast": "épinglé"
 }

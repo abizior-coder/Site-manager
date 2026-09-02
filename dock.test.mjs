@@ -110,6 +110,58 @@ await click(tile(), 300);
 check("tapping a tile opens the job", /Mannschaft auf dieser Baustelle/i.test(txt()), "job view did not open");
 check("the job now lists the dropped material", txt().includes((chip?.textContent || "").trim()), "dropped item missing from the job view");
 
+// --- search: one box, every hit draggable -------------------------------------
+{
+  window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 150));
+  await click(btns().find((b) => (b.textContent || "").trim().toUpperCase() === "MATERIAL"));
+  const box = window.document.querySelector('input[placeholder*="suchen"], input[placeholder*="Search"]');
+  check("materials tab has a search box", !!box, "no search input");
+  if (box) {
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    set.call(box, "latt");
+    box.dispatchEvent(new window.Event("input", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const hit = btns().find((b) => b.getAttribute("draggable") === "true" && /latt/i.test(b.textContent || ""));
+    check("search finds catalog items as draggable chips", !!hit, "no draggable hit for 'latt'");
+    check("search hides the category browser", !btns().some((b) => (b.textContent || "").trim() === "Holz"), "category buttons still shown while searching");
+    set.call(box, "");
+    box.dispatchEvent(new window.Event("input", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    check("clearing the search brings the browser back", btns().some((b) => (b.textContent || "").trim() === "Holz"), "categories missing after clearing");
+  }
+}
+
+// --- a project card can be dragged onto the tray -----------------------------------
+{
+  // Unpin the lead first so there is something to pin back.
+  await click(btns().find((b) => (b.textContent || "").trim().toUpperCase() === "PROJEKTE"));
+  await click(btns().find((b) => (b.textContent || "").includes("Dach Kontrolle")), 300);
+  const unpin = btns().find((b) => /Lösen|Unpin/.test(b.getAttribute("title") || ""));
+  if (unpin) await click(unpin, 300);
+  window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  check("unpinned lead leaves the tray", !dockText().includes("Dach Kontrolle"), dockText().slice(0, 120));
+
+  const card = [...window.document.querySelectorAll("[draggable='true']")].find((el) => (el.textContent || "").includes("Dach Kontrolle"));
+  check("project cards are draggable", !!card, "no draggable project card");
+  const dock = window.document.querySelector("[data-dock]");
+  if (card && dock) await drag(card, dock);
+  check("dropping a project card on the tray pins it", dockText().includes("Dach Kontrolle"), dockText().slice(0, 120));
+}
+
+// --- one tap cycles the order --------------------------------------------------------
+{
+  const sortBtn = () => window.document.querySelector("[data-dock-sort]");
+  check("the tray has a sort control", !!sortBtn(), "no sort button in the stripe");
+  const before = (sortBtn()?.textContent || "").trim();
+  await click(sortBtn(), 150);
+  const after = (sortBtn()?.textContent || "").trim();
+  check("tapping it changes the order", before !== after && after.length > 0, `${before} -> ${after}`);
+  await click(sortBtn(), 150); await click(sortBtn(), 150); await click(sortBtn(), 150);
+  check("four taps come back round", (sortBtn()?.textContent || "").trim() === before, (sortBtn()?.textContent || "").trim());
+}
+
 check("no runtime errors during the whole flow", errors.length === 0, errors.slice(0, 2).join(" | "));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -621,5 +621,15 @@
   "rapportExistsTitle": "A signed report already covers this day",
   "rapportOpenExisting": "Open the existing one",
   "rapportCreateNew": "Create a new one anyway",
-  "rapportChangedSince": "log changed since signature"
+  "rapportChangedSince": "log changed since signature",
+  "materialSearchPlaceholder": "Search material or article…",
+  "searchOurArticles": "Our articles",
+  "searchCatalog": "Catalog",
+  "searchNoResults": "Nothing found.",
+  "dockSort_pinned": "Pinned first",
+  "dockSort_name": "Name",
+  "dockSort_status": "Status",
+  "dockSort_recent": "Recently used",
+  "dockDropProject": "Drop the project here to pin it",
+  "dockPinnedToast": "pinned"
 }

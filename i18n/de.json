@@ -621,5 +621,15 @@
   "rapportExistsTitle": "Für diesen Tag gibt es schon einen unterschriebenen Rapport",
   "rapportOpenExisting": "Bestehenden öffnen",
   "rapportCreateNew": "Trotzdem neuen erstellen",
-  "rapportChangedSince": "seit Unterschrift geändert"
+  "rapportChangedSince": "seit Unterschrift geändert",
+  "materialSearchPlaceholder": "Material oder Artikel suchen…",
+  "searchOurArticles": "Unsere Artikel",
+  "searchCatalog": "Katalog",
+  "searchNoResults": "Nichts gefunden.",
+  "dockSort_pinned": "Angeheftet zuerst",
+  "dockSort_name": "Name",
+  "dockSort_status": "Status",
+  "dockSort_recent": "Zuletzt bearbeitet",
+  "dockDropProject": "Projekt hier ablegen zum Anheften",
+  "dockPinnedToast": "angeheftet"
 }

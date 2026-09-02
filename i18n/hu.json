@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Erre a napra már van aláírt jelentés",
   "rapportOpenExisting": "Meglévő megnyitása",
   "rapportCreateNew": "Mégis új létrehozása",
-  "rapportChangedSince": "a napló az aláírás óta változott"
+  "rapportChangedSince": "a napló az aláírás óta változott",
+  "materialSearchPlaceholder": "Anyag vagy cikk keresése…",
+  "searchOurArticles": "Cikkeink",
+  "searchCatalog": "Katalógus",
+  "searchNoResults": "Nincs találat.",
+  "dockSort_pinned": "Rögzítettek elöl",
+  "dockSort_name": "Név",
+  "dockSort_status": "Állapot",
+  "dockSort_recent": "Legutóbbiak",
+  "dockDropProject": "Húzd ide a munkát a rögzítéshez",
+  "dockPinnedToast": "rögzítve"
 }

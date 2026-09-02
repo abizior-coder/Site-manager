@@ -583,5 +583,15 @@
   "rapportExistsTitle": "За този ден вече има подписан отчет",
   "rapportOpenExisting": "Отвори съществуващия",
   "rapportCreateNew": "Все пак създай нов",
-  "rapportChangedSince": "дневникът е променен след подписа"
+  "rapportChangedSince": "дневникът е променен след подписа",
+  "materialSearchPlaceholder": "Търси материал или артикул…",
+  "searchOurArticles": "Нашите артикули",
+  "searchCatalog": "Каталог",
+  "searchNoResults": "Нищо не е намерено.",
+  "dockSort_pinned": "Закачените първо",
+  "dockSort_name": "Име",
+  "dockSort_status": "Статус",
+  "dockSort_recent": "Скорошни",
+  "dockDropProject": "Пуснете проекта тук, за да го закачите",
+  "dockPinnedToast": "закачен"
 }

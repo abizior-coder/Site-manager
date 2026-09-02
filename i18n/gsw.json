@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Für de Tag git's scho en unterschribene Rapport",
   "rapportOpenExisting": "Bestehende öffne",
   "rapportCreateNew": "Trotzdem en neue mache",
-  "rapportChangedSince": "sit de Unterschrift gänderet"
+  "rapportChangedSince": "sit de Unterschrift gänderet",
+  "materialSearchPlaceholder": "Material oder Artikel sueche…",
+  "searchOurArticles": "Üsi Artikel",
+  "searchCatalog": "Katalog",
+  "searchNoResults": "Nüt gfunde.",
+  "dockSort_pinned": "Aaghäftet zerscht",
+  "dockSort_name": "Name",
+  "dockSort_status": "Status",
+  "dockSort_recent": "Zletscht bearbeitet",
+  "dockDropProject": "Projekt da ablegge zum Aahefte",
+  "dockPinnedToast": "aaghäftet"
 }

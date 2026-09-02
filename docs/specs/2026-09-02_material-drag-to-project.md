@@ -54,6 +54,22 @@ problem from the first proposal disappears.
   project afterwards.
 - Render suite green; no new console errors on a cold load.
 
+## Second pass (owner's screenshot, 2026-09-02)
+
+Asked for after seeing it live with real data:
+
+- **Search box** on the Materials tab. One box finds a thing wherever it
+  lives: the firm's own article master first (it carries price and
+  article number), then the merchants' catalogs and tools. Every hit is a
+  draggable chip; while a search is open the category browser is hidden.
+- **Tiles show the job's category as an icon** (flat → layers, pitched →
+  mountain, facade → building, other → hard hat) in the project's colour.
+  At tile size there is no room for the word.
+- **Project cards in the Projects tab can be dragged onto the tray** to
+  pin them. Dropping is an "add" gesture only — a slip never unpins.
+- **A sort control in the stripe** above the tiles: one tap cycles pinned
+  first → name → status → recently used, remembered per device.
+
 ## Out of scope
 
 - Moving material between two jobs.

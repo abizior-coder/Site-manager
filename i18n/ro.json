@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Există deja un raport semnat pentru această zi",
   "rapportOpenExisting": "Deschide-l pe cel existent",
   "rapportCreateNew": "Creează totuși unul nou",
-  "rapportChangedSince": "jurnal modificat după semnătură"
+  "rapportChangedSince": "jurnal modificat după semnătură",
+  "materialSearchPlaceholder": "Caută material sau articol…",
+  "searchOurArticles": "Articolele noastre",
+  "searchCatalog": "Catalog",
+  "searchNoResults": "Nimic găsit.",
+  "dockSort_pinned": "Fixate mai întâi",
+  "dockSort_name": "Nume",
+  "dockSort_status": "Stare",
+  "dockSort_recent": "Recente",
+  "dockDropProject": "Lasă proiectul aici pentru a-l fixa",
+  "dockPinnedToast": "fixat"
 }

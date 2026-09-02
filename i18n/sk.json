@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Na tento deň už existuje podpísaný rapport",
   "rapportOpenExisting": "Otvoriť existujúci",
   "rapportCreateNew": "Aj tak vytvoriť nový",
-  "rapportChangedSince": "denník zmenený po podpise"
+  "rapportChangedSince": "denník zmenený po podpise",
+  "materialSearchPlaceholder": "Hľadať materiál alebo artikel…",
+  "searchOurArticles": "Naše artikle",
+  "searchCatalog": "Katalóg",
+  "searchNoResults": "Nič sa nenašlo.",
+  "dockSort_pinned": "Pripnuté najprv",
+  "dockSort_name": "Názov",
+  "dockSort_status": "Stav",
+  "dockSort_recent": "Naposledy",
+  "dockDropProject": "Pusťte projekt sem na pripnutie",
+  "dockPinnedToast": "pripnuté"
 }

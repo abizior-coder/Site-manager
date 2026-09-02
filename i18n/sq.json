@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Për këtë ditë ka tashmë një raport të nënshkruar",
   "rapportOpenExisting": "Hap ekzistuesin",
   "rapportCreateNew": "Krijo një të ri gjithsesi",
-  "rapportChangedSince": "ndryshuar pas nënshkrimit"
+  "rapportChangedSince": "ndryshuar pas nënshkrimit",
+  "materialSearchPlaceholder": "Kërko material ose artikull…",
+  "searchOurArticles": "Artikujt tanë",
+  "searchCatalog": "Katalogu",
+  "searchNoResults": "Asgjë nuk u gjet.",
+  "dockSort_pinned": "Të ngjiturit së pari",
+  "dockSort_name": "Emri",
+  "dockSort_status": "Statusi",
+  "dockSort_recent": "Së fundi",
+  "dockDropProject": "Lësho projektin këtu për ta ngjitur",
+  "dockPinnedToast": "u ngjit"
 }

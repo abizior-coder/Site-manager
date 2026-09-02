@@ -583,5 +583,15 @@
   "rapportExistsTitle": "Un rapporto firmato copre già questo giorno",
   "rapportOpenExisting": "Apri quello esistente",
   "rapportCreateNew": "Creane uno nuovo comunque",
-  "rapportChangedSince": "registro modificato dopo la firma"
+  "rapportChangedSince": "registro modificato dopo la firma",
+  "materialSearchPlaceholder": "Cerca materiale o articolo…",
+  "searchOurArticles": "I nostri articoli",
+  "searchCatalog": "Catalogo",
+  "searchNoResults": "Nessun risultato.",
+  "dockSort_pinned": "Prima i fissati",
+  "dockSort_name": "Nome",
+  "dockSort_status": "Stato",
+  "dockSort_recent": "Recenti",
+  "dockDropProject": "Rilascia qui il progetto per fissarlo",
+  "dockPinnedToast": "fissato"
 }

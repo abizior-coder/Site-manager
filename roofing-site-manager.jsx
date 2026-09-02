@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -876,12 +876,18 @@ function tradeMeta(key) {
   return TRADES.find((x) => x.key === key) || TRADES[TRADES.length - 1];
 }
 
+// Each category carries an icon so a job is recognisable at tile size, where
+// there is no room for the word.
 const PROJECT_CATEGORIES = [
-  { key: "flat", labelKey: "projectCatFlat" },
-  { key: "pitched", labelKey: "projectCatPitched" },
-  { key: "facade", labelKey: "projectCatFacade" },
-  { key: "other", labelKey: "projectCatOther" },
+  { key: "flat", labelKey: "projectCatFlat", icon: Layers },
+  { key: "pitched", labelKey: "projectCatPitched", icon: Mountain },
+  { key: "facade", labelKey: "projectCatFacade", icon: Building2 },
+  { key: "other", labelKey: "projectCatOther", icon: HardHat },
 ];
+function categoryIcon(key) {
+  return (PROJECT_CATEGORIES.find((c) => c.key === key) || PROJECT_CATEGORIES[PROJECT_CATEGORIES.length - 1]).icon;
+}
+const DOCK_SORTS = ["pinned", "name", "status", "recent"];
 
 // Pipeline, in funnel order: an enquiry becomes a quote, a quote becomes work,
 // work finishes — or it is lost. `waiting` predates the pipeline and means
@@ -1270,6 +1276,11 @@ export default function SiteManager() {
   // the Chef care about different jobs in a given week.
   const [pinnedIds, setPinnedIds] = useState([]);
   const [dockOver, setDockOver] = useState(null);
+  const [dockDragOver, setDockDragOver] = useState(false);
+  const [materialSearch, setMaterialSearch] = useState("");
+  const [dockSort, setDockSort] = useState(() => {
+    try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
+  });
   const [dockOpen, setDockOpen] = useState(() => {
     try { return localStorage.getItem("site-dock-open") !== "0"; } catch (e) { return true; }
   });
@@ -2718,6 +2729,25 @@ export default function SiteManager() {
     window.storage.set(personalKey("site-dock-pins"), JSON.stringify(next)).catch(() => {});
   }
 
+  // One tap cycles the order of the tray. Remembered per device, like open/closed.
+  function cycleDockSort() {
+    const next = DOCK_SORTS[(DOCK_SORTS.indexOf(dockSort) + 1) % DOCK_SORTS.length];
+    setDockSort(next);
+    try { localStorage.setItem("site-dock-sort", next); } catch (e) {}
+  }
+
+  // A project dropped anywhere on the tray gets pinned. Never unpinned that
+  // way: dropping is an "add" gesture, and a slip should not remove a job.
+  function pinFromDrop(dt) {
+    const id = dt && dt.getData("text/project-id");
+    if (!id || !projects.some((x) => x.id === id)) return false;
+    if (!pinnedIds.includes(id)) {
+      togglePin(id);
+      showToast(`${projectName(id)} · ${t.dockPinnedToast}`);
+    }
+    return true;
+  }
+
   function setDockOpenRemembered(open) {
     setDockOpen(open);
     try { localStorage.setItem("site-dock-open", open ? "1" : "0"); } catch (e) {}
@@ -2750,7 +2780,7 @@ export default function SiteManager() {
 
   function dockAccepts(dt) {
     const types = Array.from((dt && dt.types) || []);
-    return types.includes("text/material") || (types.includes("text/member-uid") && canManage());
+    return types.includes("text/material") || types.includes("text/project-id") || (types.includes("text/member-uid") && canManage());
   }
 
   function dropOnProject(projectId, dt) {
@@ -3990,10 +4020,18 @@ export default function SiteManager() {
   const wCond = weather.data ? weatherFromCode(weather.data.weather_code, t) : null;
 
   // Active jobs plus this person's pins: what the dock shows, pinned first.
+  const lastTouched = {};
+  if (dockSort === "recent") entries.forEach((e) => { if (e.projectId) lastTouched[e.projectId] = Math.max(lastTouched[e.projectId] || 0, e.createdAt || 0); });
   const dockProjects = projects
     .filter((pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS))
     .filter((pr) => pinnedIds.includes(pr.id) || (pr.status || DEFAULT_PROJECT_STATUS) === "construction")
-    .sort((a, b) => (pinnedIds.includes(b.id) ? 1 : 0) - (pinnedIds.includes(a.id) ? 1 : 0) || String(a.name).localeCompare(String(b.name)));
+    .sort((a, b) => {
+      const byName = String(a.name).localeCompare(String(b.name));
+      if (dockSort === "name") return byName;
+      if (dockSort === "status") return PROJECT_STATUSES.findIndex((x) => x.key === (a.status || DEFAULT_PROJECT_STATUS)) - PROJECT_STATUSES.findIndex((x) => x.key === (b.status || DEFAULT_PROJECT_STATUS)) || byName;
+      if (dockSort === "recent") return (lastTouched[b.id] || 0) - (lastTouched[a.id] || 0) || byName;
+      return (pinnedIds.includes(b.id) ? 1 : 0) - (pinnedIds.includes(a.id) ? 1 : 0) || byName;
+    });
   const dockShown = !!membership && dockProjects.length > 0 && dockOpen;
 
   return (
@@ -4335,6 +4373,22 @@ export default function SiteManager() {
                   </div>
                 );
               })()}
+              {/* One box finds a thing wherever it lives: our own article
+                  master first (it has the price and the article number), then
+                  the merchants' catalogs. Every hit can be dragged to a job. */}
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl px-3 py-2 flex items-center gap-2">
+                <Search size={15} color={COLORS.muted} className="shrink-0" />
+                <input
+                  value={materialSearch}
+                  onChange={(e) => setMaterialSearch(e.target.value)}
+                  placeholder={t.materialSearchPlaceholder}
+                  style={{ background: "transparent", color: COLORS.text }}
+                  className="flex-1 min-w-0 text-sm outline-none"
+                />
+                {materialSearch && (
+                  <button onClick={() => setMaterialSearch("")} style={{ color: COLORS.muted }} className="shrink-0"><X size={14} /></button>
+                )}
+              </div>
               <div className="grid grid-cols-4 gap-2">
                 <button onClick={() => { setMaterialsSubTab("shop"); setShopCat(null); }} style={{ background: materialsSubTab === "shop" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><ShoppingCart size={14} /> {t.shopTab}</button>
                 <button onClick={() => { setMaterialsSubTab("tools"); setShopCat(null); }} style={{ background: materialsSubTab === "tools" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><Wrench size={14} /> {t.toolsTab}</button>
@@ -4342,7 +4396,52 @@ export default function SiteManager() {
                 <button onClick={() => { setMaterialsSubTab("library"); setShopCat(null); }} style={{ background: materialsSubTab === "library" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1"><BookOpen size={14} /> {t.libraryTab}</button>
               </div>
 
-              {materialsSubTab === "shop" && (
+              {materialSearch.trim() && (materialsSubTab === "shop" || materialsSubTab === "tools") && (() => {
+                const q = materialSearch.trim().toLowerCase();
+                const own = Object.values(articleMaster).filter((a) => String(a.name || "").toLowerCase().includes(q)).slice(0, 40);
+                const seen = new Set(own.map((a) => String(a.name).toLowerCase()));
+                const found = [];
+                const consider = (name, kind, where) => {
+                  const k = String(name).toLowerCase();
+                  if (!k.includes(q) || seen.has(k)) return;
+                  seen.add(k);
+                  found.push({ name, kind, where });
+                };
+                Object.entries(catalog.items || {}).forEach(([key, groups]) => groups.forEach((g) => g.items.forEach((n) => consider(n, "material", catalog.cats[key]))));
+                Object.entries(toolsCatalog.items || {}).forEach(([key, groups]) => groups.forEach((g) => g.items.forEach((n) => consider(n, "tool", toolsCatalog.cats[key]))));
+                const hits = found.slice(0, 60);
+                const chip = (name, kind, sub) => (
+                  <button key={kind + name} {...materialDragProps(name, kind)} onClick={() => addToBasket(name, kind)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs text-left cursor-grab active:cursor-grabbing">
+                    <div>{name}</div>
+                    {sub && <div style={{ color: COLORS.muted }} className="text-[10px]">{sub}</div>}
+                  </button>
+                );
+                return (
+                  <div className="flex flex-col gap-3">
+                    {own.length > 0 && (
+                      <div>
+                        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.searchOurArticles} ({own.length})</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {own.map((a) => chip(a.name, "material", [a.supplier, a.artNo && `${t.artNoShort} ${a.artNo}`, a.price && `${a.price}${a.unit ? "/" + a.unit : ""}`].filter(Boolean).join(" · ")))}
+                        </div>
+                      </div>
+                    )}
+                    {hits.length > 0 && (
+                      <div>
+                        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.searchCatalog} ({hits.length})</div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {hits.map((h) => chip(h.name, h.kind, h.where))}
+                        </div>
+                      </div>
+                    )}
+                    {own.length === 0 && hits.length === 0 && (
+                      <div style={{ color: COLORS.muted }} className="text-sm">{t.searchNoResults}</div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {materialsSubTab === "shop" && !materialSearch.trim() && (
                 <>
                   <SortToggle />
                   <div className="grid grid-cols-2 gap-2">
@@ -4376,7 +4475,7 @@ export default function SiteManager() {
                 </>
               )}
 
-              {materialsSubTab === "tools" && (
+              {materialsSubTab === "tools" && !materialSearch.trim() && (
                 <>
                   <SortToggle />
                   {sortMode === "supplier" ? (
@@ -5253,7 +5352,11 @@ export default function SiteManager() {
                   <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1">
                     {handle}
                     <button onClick={() => setSelectedProject(p.id)} className="flex-1 min-w-0 text-left flex items-center justify-between gap-2">
-                      <div className="min-w-0">
+                      <div
+                        className="min-w-0 cursor-grab active:cursor-grabbing"
+                        draggable
+                        onDragStart={(e) => { e.stopPropagation(); e.dataTransfer.setData("text/project-id", p.id); e.dataTransfer.effectAllowed = "copy"; }}
+                      >
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <div className="font-bold">{p.name}</div>
                           {p.category && (
@@ -5492,13 +5595,35 @@ export default function SiteManager() {
       {membership && (() => {
         if (dockProjects.length === 0) return null;
         return (
-          <div data-dock style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="shrink-0 relative z-20 pb-[62px] lg:pb-0">
-            <button onClick={() => setDockOpenRemembered(!dockOpen)} className="w-full flex items-center justify-between px-4 py-1.5">
-              <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide font-bold flex items-center gap-1.5">
-                <MapPin size={11} /> {t.dockTitle} ({dockProjects.length})
-              </span>
-              <ChevronRight size={14} color={COLORS.muted} style={{ transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-            </button>
+          <div
+            data-dock
+            onDragOver={(e) => { if (Array.from(e.dataTransfer?.types || []).includes("text/project-id")) { e.preventDefault(); if (!dockDragOver) setDockDragOver(true); } }}
+            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDockDragOver(false); }}
+            onDrop={(e) => { if (pinFromDrop(e.dataTransfer)) e.preventDefault(); setDockDragOver(false); }}
+            style={{ background: dockDragOver ? `${COLORS.accent}14` : COLORS.card, borderTop: `1px solid ${dockDragOver ? COLORS.accent : COLORS.border}`, transition: "background 0.1s" }}
+            className="shrink-0 relative z-20 pb-[62px] lg:pb-0"
+          >
+            <div className="flex items-center gap-1 px-4 py-1">
+              <button onClick={() => setDockOpenRemembered(!dockOpen)} className="flex-1 min-w-0 flex items-center gap-1.5 py-0.5 text-left">
+                <MapPin size={11} color={COLORS.muted} />
+                <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide font-bold truncate">
+                  {dockDragOver ? t.dockDropProject : `${t.dockTitle} (${dockProjects.length})`}
+                </span>
+              </button>
+              {/* One tap cycles the order; the word next to it says which. */}
+              <button
+                data-dock-sort
+                onClick={cycleDockSort}
+                title={t[`dockSort_${dockSort}`]}
+                style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }}
+                className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+              >
+                <ArrowUpDown size={11} /> {t[`dockSort_${dockSort}`]}
+              </button>
+              <button onClick={() => setDockOpenRemembered(!dockOpen)} className="shrink-0 pl-1">
+                <ChevronRight size={14} color={COLORS.muted} style={{ transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
+              </button>
+            </div>
             {dockOpen && (
               <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ WebkitOverflowScrolling: "touch" }}>
                 {dockProjects.map((pr) => {
@@ -5529,13 +5654,22 @@ export default function SiteManager() {
                         transform: over ? "scale(1.04)" : "none",
                         transition: "transform 0.1s, background 0.1s",
                       }}
-                      className="shrink-0 w-44 rounded-xl px-3 py-2 text-left cursor-pointer select-none"
+                      className="shrink-0 w-52 rounded-xl px-3 py-2 text-left cursor-pointer select-none"
                     >
-                      <div className="flex items-center gap-1">
-                        {pinned && <Pin size={10} color={col} className="shrink-0" />}
-                        <span className="text-xs font-bold truncate">{pr.name}</span>
+                      {(() => { const CatIcon = categoryIcon(pr.category); return (
+                      <div className="flex items-center gap-2">
+                        <span style={{ background: `${col}33`, color: col }} className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center" title={t[(PROJECT_CATEGORIES.find((c) => c.key === pr.category) || PROJECT_CATEGORIES[3]).labelKey]}>
+                          <CatIcon size={16} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1">
+                            {pinned && <Pin size={10} color={col} className="shrink-0" />}
+                            <span className="text-xs font-bold truncate">{pr.name}</span>
+                          </div>
+                          <div style={{ color: sm.color }} className="text-[10px] truncate">{t[sm.labelKey]}</div>
+                        </div>
                       </div>
-                      <div style={{ color: sm.color }} className="text-[10px] truncate">{t[sm.labelKey]}</div>
+                      ); })()}
                       <div style={{ color: COLORS.muted }} className="flex items-center gap-2 mt-1 text-[10px] tabular-nums">
                         <span className="flex items-center gap-0.5"><Users size={10} /> {crewN}</span>
                         <span className="flex items-center gap-0.5"><Package size={10} /> {mats}</span>
