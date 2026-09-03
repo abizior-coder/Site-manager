@@ -650,5 +650,8 @@
   "photoTool_text": "Tekst",
   "addMorePhotos": "Shto më shumë foto",
   "photosSelected": "foto të zgjedhura",
-  "photosAdded": "foto u shtuan"
+  "photosAdded": "foto u shtuan",
+  "teamRemove": "Hiq nga ekipi",
+  "teamRemoveConfirm": "Ta heq? Qasja mbaron menjëherë.",
+  "teamRemoved": "U hoq"
 }

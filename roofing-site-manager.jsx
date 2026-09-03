@@ -8,7 +8,7 @@ import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, credi
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
   syncCollection, loadCollection, subscribeCollection, companyStorage, isOwner, getRole,
-  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor, getCompanyId,
+  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor, getCompanyId, setMemberActive,
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
 import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -1090,9 +1090,9 @@ function waHref(v) { return `https://wa.me/${String(v).replace(/[^\d]/g, "")}`; 
 // Uses the existing window.storage shim, so index.html needs no change.
 const photoCache = new Map();
 
-async function savePhoto(dataUrl) {
+async function savePhoto(dataUrl, meta) {
   const id = uid();
-  await window.storage.set(`photo-${id}`, dataUrl);
+  await window.storage.set(`photo-${id}`, dataUrl, meta);
   photoCache.set(id, dataUrl);
   return id;
 }
@@ -1620,18 +1620,25 @@ export default function SiteManager() {
   useEffect(() => { customersRef.current = customers; }, [customers]);
   useEffect(() => { projectFilesRef.current = projectFiles; }, [projectFiles]);
 
+  // The languages the crew reads live in one shared document, one line per
+  // member, kept up to date by each member for themselves. (Scanning the
+  // personal keys would need a collection query the rules rightly refuse.)
   useEffect(() => {
-    if (!membership) return;
+    if (!membership || !user) return;
     let alive = true;
     (async () => {
       try {
-        const { keys } = await companyStorage.list("site-lang-");
-        const vals = await Promise.all((keys || []).map((k) => companyStorage.get(k).then((r) => r && r.value).catch(() => null)));
-        if (alive) setMemberLangs([...new Set(vals.filter((v) => v && T[v]))]);
+        const res = await companyStorage.get("site-langs");
+        const map = res && res.value ? JSON.parse(res.value) : {};
+        if (map[user.uid] !== lang) {
+          map[user.uid] = lang;
+          companyStorage.set("site-langs", JSON.stringify(map)).catch(() => {});
+        }
+        if (alive) setMemberLangs([...new Set(Object.values(map).filter((v) => v && T[v]))]);
       } catch (e) {}
     })();
     return () => { alive = false; };
-  }, [membership]);
+  }, [membership, lang]);
 
   useEffect(() => {
     if (!selectedProject || !membership) return;
@@ -1654,7 +1661,7 @@ export default function SiteManager() {
     if (!membership) return;
     let alive = true;
     listMembers()
-      .then((members) => { if (alive) setTeam((s) => ({ ...s, members })); })
+      .then((all) => { if (alive) setTeam((s) => ({ ...s, members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false) })); })
       .catch(() => {});
     return () => { alive = false; };
   }, [membership]);
@@ -1666,17 +1673,22 @@ export default function SiteManager() {
     if (!["cockpit", "calendar", "board"].includes(tab) || !membership || !canManage()) return;
     let alive = true;
     async function refresh() {
+      // Declared outside the try: the clock loop below needs it, and a
+      // block-scoped const would leave it undefined there.
+      let members = [];
       try {
-        const members = await listMembers();
-        if (alive) setTeam((s) => ({ ...s, members }));
+        const all = await listMembers();
+        members = all.filter((m) => m.active !== false);
+        if (alive) setTeam((s) => ({ ...s, members, former: all.filter((m) => m.active === false) }));
       } catch (e) {}
       try {
-        const { keys } = await companyStorage.list("clock-");
+        // One read per member rather than a listing: the rules let a manager
+        // read every clock but never list the bucket.
         const rows = [];
-        for (const k of keys) {
-          const res = await companyStorage.get(k);
+        for (const m of members || []) {
+          const res = await companyStorage.get(`clock-${m.uid}`).catch(() => null);
           if (!res || !res.value) continue;
-          try { rows.push({ uid: k.slice("clock-".length), ...JSON.parse(res.value) }); } catch {}
+          try { rows.push({ uid: m.uid, ...JSON.parse(res.value) }); } catch {}
         }
         if (alive) setClocks(rows);
       } catch (e) {}
@@ -1726,8 +1738,8 @@ export default function SiteManager() {
     setTeamModalOpen(true);
     setTeam((s) => ({ ...s, busy: true }));
     try {
-      const [members, invites] = await Promise.all([listMembers(), listInvites()]);
-      setTeam({ members, invites, busy: false });
+      const [all, invites] = await Promise.all([listMembers(), listInvites()]);
+      setTeam({ members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false), invites, busy: false });
     } catch (e) {
       setTeam((s) => ({ ...s, busy: false }));
     }
@@ -2702,7 +2714,7 @@ export default function SiteManager() {
     try {
       // The signature is stored like any other photo: its own document, so a
       // report never bloats the record it belongs to.
-      const signatureId = await savePhoto(rapportModal.signature);
+      const signatureId = await savePhoto(rapportModal.signature, { kind: "signature" });
       const record = {
         id: uid(),
         projectId: rapportModal.projectId,
@@ -3062,8 +3074,26 @@ export default function SiteManager() {
   }
 
   function memberName(memberUid) {
-    const m = team.members.find((x) => x.uid === memberUid);
+    const m = team.members.find((x) => x.uid === memberUid) || (team.former || []).find((x) => x.uid === memberUid);
     return m?.name || m?.email || memberUid;
+  }
+
+  // Offboarding from the Team tab. The document stays with active:false so
+  // the person's entries keep a name; the rules and the Worker shut the door.
+  const [removeConfirm, setRemoveConfirm] = useState(null);
+  async function removeMember(memberUid) {
+    try {
+      await setMemberActive(memberUid, false);
+      setRemoveConfirm(null);
+      await openTeamRefresh();
+      showToast(t.teamRemoved);
+    } catch (e) {
+      showToast(t.couldntSave);
+    }
+  }
+  async function openTeamRefresh() {
+    const all = await listMembers();
+    setTeam((s) => ({ ...s, members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false) }));
   }
 
   function assignmentsFor(date) {
@@ -5921,6 +5951,17 @@ export default function SiteManager() {
                           <span style={{ color: COLORS.muted }} className="text-[11px]">{t.crewNoJobs}</span>
                         )}
                       </div>
+                      {isOwner() && m.role !== "owner" && m.uid !== user?.uid && (
+                        removeConfirm === m.uid ? (
+                          <div className="flex items-center gap-2 mt-2">
+                            <span style={{ color: COLORS.danger }} className="text-[11px] font-bold">{t.teamRemoveConfirm}</span>
+                            <button data-remove-yes onClick={() => removeMember(m.uid)} style={{ background: COLORS.danger }} className="px-2.5 py-1 rounded text-[11px] font-bold uppercase">{t.teamRemove}</button>
+                            <button onClick={() => setRemoveConfirm(null)} style={{ color: COLORS.muted }} className="px-2 py-1 text-[11px] font-bold uppercase">{t.back}</button>
+                          </div>
+                        ) : (
+                          <button data-remove-member onClick={() => setRemoveConfirm(m.uid)} style={{ color: COLORS.danger }} className="mt-2 text-[10px] font-bold uppercase flex items-center gap-1"><LogOut size={11} /> {t.teamRemove}</button>
+                        )
+                      )}
                       {canManage() && (
                         <select
                           value=""
@@ -8628,6 +8669,16 @@ function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = true, t
   const lastTap = useRef(0);
 
   const clamp = (v) => ({ ...v, scale: Math.min(8, Math.max(1, v.scale)) });
+  // React registers wheel listeners as passive, so preventDefault there only
+  // logs an error and the page scrolls behind the photo. A native listener
+  // with passive:false is the only way to own the wheel.
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const onWheel = (e) => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY); };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  });
   const zoomAt = (factor, cx, cy) => {
     const box = boxRef.current?.getBoundingClientRect();
     if (!box) return;
@@ -8707,7 +8758,6 @@ function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = true, t
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onWheel={(e) => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY); }}
       >
         <img
           src={src}

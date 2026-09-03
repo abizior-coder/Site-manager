@@ -688,5 +688,8 @@
   "photoTool_text": "Text",
   "addMorePhotos": "Add more photos",
   "photosSelected": "photos selected",
-  "photosAdded": "photos added"
+  "photosAdded": "photos added",
+  "teamRemove": "Remove from team",
+  "teamRemoveConfirm": "Remove? They lose access at once.",
+  "teamRemoved": "Removed"
 }

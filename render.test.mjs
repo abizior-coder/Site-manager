@@ -239,6 +239,7 @@ async function renderAs(role) {
       check("owner: team tab renders the roster", errors.length === before && text().includes("Mitarbeiter"),
         errors.slice(before, before + 1).join(" | ") || text().slice(0, 150));
       check("owner: roster offers a job to assign to", text().includes("Trockenbau"), "no project offered in the add-to-job picker");
+      check("owner: can remove a crew member", !!window.document.querySelector("[data-remove-member]"), "no remove button for the owner");
     }
   }
 
@@ -298,6 +299,7 @@ async function renderAs(role) {
     await new Promise((r) => setTimeout(r, 250));
     check("crew: team tab lists the roster", text().includes("Mitarbeiter") && text().includes("Chef"), "roster empty for crew");
     check("crew: cannot attach people to jobs", !/Zu Baustelle hinzuf|Add to a job/.test(text()), "crew offered the add-to-job picker");
+    check("crew: cannot remove anyone", !window.document.querySelector("[data-remove-member]"), "crew offered a remove button");
   }
   if (errors.length) problems.push(...errors);
 }

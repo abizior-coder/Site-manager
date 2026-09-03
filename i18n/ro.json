@@ -650,5 +650,8 @@
   "photoTool_text": "Text",
   "addMorePhotos": "Adaugă mai multe fotografii",
   "photosSelected": "fotografii selectate",
-  "photosAdded": "fotografii adăugate"
+  "photosAdded": "fotografii adăugate",
+  "teamRemove": "Elimină din echipă",
+  "teamRemoveConfirm": "Elimini? Accesul se încheie imediat.",
+  "teamRemoved": "Eliminat"
 }

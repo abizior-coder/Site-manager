@@ -650,5 +650,8 @@
   "photoTool_text": "Testo",
   "addMorePhotos": "Aggiungi altre foto",
   "photosSelected": "foto selezionate",
-  "photosAdded": "foto aggiunte"
+  "photosAdded": "foto aggiunte",
+  "teamRemove": "Rimuovi dalla squadra",
+  "teamRemoveConfirm": "Rimuovere? L'accesso termina subito.",
+  "teamRemoved": "Rimosso"
 }

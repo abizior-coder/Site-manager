@@ -650,5 +650,8 @@
   "photoTool_text": "Текст",
   "addMorePhotos": "Добави още снимки",
   "photosSelected": "избрани снимки",
-  "photosAdded": "добавени снимки"
+  "photosAdded": "добавени снимки",
+  "teamRemove": "Премахни от екипа",
+  "teamRemoveConfirm": "Премахване? Достъпът спира веднага.",
+  "teamRemoved": "Премахнат"
 }

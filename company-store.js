@@ -8,7 +8,7 @@
 // phones editing different records no longer overwrite each other — which was
 // the whole reason the single blob had to go.
 
-import { initFirebase, getSdk } from "./firebase-client.js";
+import { initFirebase, getSdk, currentUser } from "./firebase-client.js";
 
 export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports", "sentReports", "files"];
 
@@ -69,10 +69,22 @@ export async function loadMembership(uid) {
     }
   }
   if (!member.exists()) return null;
+  // Removed from the company: the document stays (their entries keep a
+  // name), the access does not.
+  if (member.data().active === false) return null;
 
   companyId = data.companyId;
   role = member.data().role || "crew";
   return { companyId, role, member: member.data() };
+}
+
+// Offboarding. The member document is kept with active:false rather than
+// deleted, so the person's entries and reports keep their name; the rules
+// and the Worker treat active:false as "not a member".
+export async function setMemberActive(uid, active) {
+  await initFirebase();
+  if (!companyId) throw new Error("no company");
+  await fs().updateDoc(fs().doc(db(), "companies", companyId, "members", uid), { active: !!active, ...(active ? {} : { removedAt: Date.now() }) });
 }
 
 export async function createCompany(uid, { companyName, displayName, email }) {
@@ -260,10 +272,15 @@ export const companyStorage = {
     if (!snap.exists()) return null;
     return { key, value: snap.data().value };
   },
-  async set(key, value) {
+  // A photo carries who put it there, because the rules let only that
+  // person or a manager change or remove it. A signature says so, because
+  // the rules then let nobody touch it at all.
+  async set(key, value, meta = {}) {
     await initFirebase();
     if (!companyId) throw new Error("no company");
-    await fs().setDoc(docRef("kv", key), { value });
+    const doc = { value, ...meta };
+    if (key.startsWith("photo-") && !doc.by) doc.by = (currentUser() || {}).uid || null;
+    await fs().setDoc(docRef("kv", key), doc);
     return { key, value };
   },
   async delete(key) {

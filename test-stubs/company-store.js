@@ -92,3 +92,4 @@ export async function saveFinance() {}
 export async function migrateFromPersonal() { return {}; }
 export async function personalDataSummary() { return { hasData: false }; }
 export function resetCompanyState() {}
+export async function setMemberActive() {}

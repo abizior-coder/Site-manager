@@ -14,8 +14,10 @@ service cloud.firestore {
       return /databases/$(database)/documents/companies/$(cid)/members/$(request.auth.uid);
     }
 
+    // A member who was removed keeps a document (their entries keep a name)
+    // but no access: active == false is the same as not being there.
     function isMember(cid) {
-      return signedIn() && exists(memberPath(cid));
+      return signedIn() && exists(memberPath(cid)) && get(memberPath(cid)).data.get('active', true) != false;
     }
 
     function roleOf(cid) {
@@ -194,8 +196,49 @@ service cloud.firestore {
       }
 
       // Photos, preferences, technical library.
+      // The key/value bucket used to be open to every member. It holds each
+      // worker's insurance cards, emergency contact and running clock, every
+      // site photo and the signatures behind signed reports -- none of which
+      // a colleague has any business reading, let alone rewriting. Keys are
+      // flat strings, so the rules match on prefix and on the caller's uid.
       match /kv/{key} {
-        allow read, write: if isMember(cid);
+        function mine(prefix) { return key == prefix + request.auth.uid; }
+        function personal() {
+          return mine('site-profile-') || mine('site-docs-') || mine('site-dock-pins-')
+              || mine('site-lang-') || mine('clock-');
+        }
+        // Anyone's personal keys, whoever they belong to.
+        function personalAny() {
+          return key.matches('site-(profile|docs|dock-pins)-.*') || key.matches('clock-.*');
+        }
+        function isPhoto() { return key.matches('photo-.*'); }
+        function isSignature() { return 'kind' in resource.data && resource.data.kind == 'signature'; }
+        function photoOwner() { return 'by' in resource.data && resource.data.by == request.auth.uid; }
+        function valueFits() {
+          // A delete carries no incoming document.
+          return request.method == 'delete'
+              || !('value' in request.resource.data)
+              || !(request.resource.data.value is string)
+              || request.resource.data.value.size() <= 1000000;
+        }
+        // Read: my own personal keys; everything that is nobody's personal
+        // key; managers additionally see every clock (who is on site).
+        allow read: if isMember(cid) && (personal() || !personalAny());
+        allow read: if canManage(cid) && key.matches('clock-.*');
+        // Write: my own personal keys.
+        allow write: if isMember(cid) && personal() && valueFits();
+        // Photos: anyone may add one and must sign it; only its owner or a
+        // manager may change or remove it; a signature is never touched.
+        allow create: if isMember(cid) && isPhoto() && request.resource.data.by == request.auth.uid && valueFits();
+        allow update, delete: if isMember(cid) && isPhoto() && !isSignature()
+                              && (canManage(cid) || photoOwner()) && valueFits();
+        // Shared and member-written: the article master, the tech library,
+        // note translations and the language roster. Low sensitivity.
+        allow write: if isMember(cid) && valueFits()
+                     && (key == 'site-material-catalog' || key == 'site-tech-library'
+                         || key == 'site-langs' || key.matches('xl-.*'));
+        // Anything else that is nobody's personal key: managers.
+        allow write: if canManage(cid) && !isPhoto() && !personalAny() && valueFits();
       }
     }
 

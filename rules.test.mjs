@@ -215,6 +215,81 @@ await check("crew CANNOT create a report as someone else", () =>
   assertFails(setDoc(doc(crew, "companies", CID, "reports", "r-fake"), { userId: SUP, projectId: "p1", date: "2026-09-02", signedAt: null })));
 await check("manager CAN edit an unsigned report", () =>
   assertSucceeds(setDoc(doc(sup, "companies", CID, "reports", "r-open"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: null, note: "korrigiert" })));
+// --- the key/value bucket ------------------------------------------------------
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  const d = ctx.firestore();
+  await setDoc(doc(d, "companies", CID, "kv", `site-docs-${OWNER}`), { value: JSON.stringify({ insurance: [{ provider: "CSS", policyNumber: "756.1234" }] }) });
+  await setDoc(doc(d, "companies", CID, "kv", `site-profile-${SUP}`), { value: JSON.stringify({ name: "Polier", phone: "079", webhookUrl: "" }) });
+  await setDoc(doc(d, "companies", CID, "kv", `clock-${SUP}`), { value: JSON.stringify({ projectId: "p1", startedAt: 1 }) });
+  await setDoc(doc(d, "companies", CID, "kv", "photo-sig1"), { value: "data:image/png;base64,AA==", by: CREW, kind: "signature" });
+  await setDoc(doc(d, "companies", CID, "kv", "photo-legacy"), { value: "data:image/png;base64,AA==" });
+  await setDoc(doc(d, "companies", CID, "kv", "photo-crew1"), { value: "data:image/png;base64,AA==", by: CREW });
+  await setDoc(doc(d, "companies", CID, "kv", "site-material-catalog"), { value: "{}" });
+  await setDoc(doc(d, "companies", CID, "kv", "site-meta"), { value: "{}" });
+  await setDoc(doc(d, "companies", CID, "kv", `site-lang-${SUP}`), { value: "sq" });
+});
+await check("crew CANNOT read the owner's insurance cards", () =>
+  assertFails(getDoc(doc(crew, "companies", CID, "kv", `site-docs-${OWNER}`))));
+await check("crew CANNOT read a colleague's profile", () =>
+  assertFails(getDoc(doc(crew, "companies", CID, "kv", `site-profile-${SUP}`))));
+await check("crew CANNOT overwrite a colleague's profile", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", `site-profile-${SUP}`), { value: JSON.stringify({ webhookUrl: "https://evil.example" }) })));
+await check("crew CAN keep their own profile", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "kv", `site-profile-${CREW}`), { value: JSON.stringify({ name: "Hans" }) })));
+await check("crew CANNOT rewrite a colleague's running clock", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", `clock-${SUP}`), { value: JSON.stringify({ projectId: "p1", startedAt: 0 }) })));
+await check("crew CANNOT read a colleague's clock", () =>
+  assertFails(getDoc(doc(crew, "companies", CID, "kv", `clock-${SUP}`))));
+await check("a manager CAN read a crew clock (who is on site)", () =>
+  assertSucceeds(getDoc(doc(sup, "companies", CID, "kv", `clock-${SUP}`))));
+await check("crew CAN write their own clock", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "kv", `clock-${CREW}`), { value: "{}" })));
+await check("a signature CANNOT be overwritten, not even by a manager", () =>
+  assertFails(setDoc(doc(sup, "companies", CID, "kv", "photo-sig1"), { value: "data:image/png;base64,BB==", by: SUP, kind: "signature" })));
+await check("a signature CANNOT be deleted", () =>
+  assertFails(deleteDoc(doc(sup, "companies", CID, "kv", "photo-sig1"))));
+await check("crew CAN add a photo they sign as theirs", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "kv", "photo-new1"), { value: "data:image/png;base64,AA==", by: CREW })));
+await check("crew CANNOT add a photo in someone else's name", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", "photo-new2"), { value: "data:image/png;base64,AA==", by: SUP })));
+await check("crew CANNOT add an unsigned photo", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", "photo-new3"), { value: "data:image/png;base64,AA==" })));
+await check("crew CAN delete their own photo", () =>
+  assertSucceeds(deleteDoc(doc(crew, "companies", CID, "kv", "photo-crew1"))));
+await check("crew CANNOT delete a legacy photo nobody signed", () =>
+  assertFails(deleteDoc(doc(crew, "companies", CID, "kv", "photo-legacy"))));
+await check("a manager CAN delete a legacy photo", () =>
+  assertSucceeds(deleteDoc(doc(sup, "companies", CID, "kv", "photo-legacy"))));
+await check("crew CAN read the article master", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "kv", "site-material-catalog"))));
+await check("crew CAN learn a unit into the article master", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "kv", "site-material-catalog"), { value: "{\"lattung\":{\"unit\":\"m\"}}" })));
+await check("crew CANNOT rewrite site-meta", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", "site-meta"), { value: "{}" })));
+await check("a manager CAN rewrite site-meta", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "kv", "site-meta"), { value: "{}" })));
+await check("crew CAN read a colleague's language (translation targets)", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "kv", `site-lang-${SUP}`))));
+await check("crew CANNOT list the whole bucket", () =>
+  assertFails(getDocs(collection(crew, "companies", CID, "kv"))));
+await check("a value over 1 MB is refused", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "kv", `site-profile-${CREW}`), { value: "x".repeat(1000001) })));
+
+// --- offboarding --------------------------------------------------------------
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  await setDoc(doc(ctx.firestore(), "companies", CID, "members", "u-gone"), { role: "crew", name: "Gone", email: "", active: false, joinedAt: 1 });
+});
+const gone = testEnv.authenticatedContext("u-gone").firestore();
+await check("a removed member CANNOT read projects any more", () =>
+  assertFails(getDoc(doc(gone, "companies", CID, "projects", "p1"))));
+await check("a removed member CANNOT read the bucket", () =>
+  assertFails(getDoc(doc(gone, "companies", CID, "kv", "site-material-catalog"))));
+await check("the owner CAN remove a member", () =>
+  assertSucceeds(setDoc(doc(owner, "companies", CID, "members", CREW), { active: false }, { merge: true })));
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  await setDoc(doc(ctx.firestore(), "companies", CID, "members", CREW), { active: true }, { merge: true });
+});
+
 await check("a signed report CANNOT be deleted, even by a manager", () =>
   assertFails(deleteDoc(doc(sup, "companies", CID, "reports", "r-signed"))));
 await check("an unsigned report CAN be deleted by a manager", () =>

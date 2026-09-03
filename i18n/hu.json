@@ -650,5 +650,8 @@
   "photoTool_text": "Szöveg",
   "addMorePhotos": "További fotók hozzáadása",
   "photosSelected": "fotó kiválasztva",
-  "photosAdded": "fotó hozzáadva"
+  "photosAdded": "fotó hozzáadva",
+  "teamRemove": "Eltávolítás a csapatból",
+  "teamRemoveConfirm": "Eltávolítod? A hozzáférés azonnal megszűnik.",
+  "teamRemoved": "Eltávolítva"
 }

@@ -650,5 +650,8 @@
   "photoTool_text": "Text",
   "addMorePhotos": "No meh Fotis zuefüege",
   "photosSelected": "Fotis usgwählt",
-  "photosAdded": "Fotis zuegfüegt"
+  "photosAdded": "Fotis zuegfüegt",
+  "teamRemove": "Us em Team neh",
+  "teamRemoveConfirm": "Entfärne? De Zuegang endet sofort.",
+  "teamRemoved": "Entfärnt"
 }

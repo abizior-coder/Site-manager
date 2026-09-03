@@ -650,5 +650,8 @@
   "photoTool_text": "Text",
   "addMorePhotos": "Přidat další fotky",
   "photosSelected": "vybraných fotek",
-  "photosAdded": "fotek přidáno"
+  "photosAdded": "fotek přidáno",
+  "teamRemove": "Odebrat z týmu",
+  "teamRemoveConfirm": "Odebrat? Přístup končí okamžitě.",
+  "teamRemoved": "Odebrán"
 }
