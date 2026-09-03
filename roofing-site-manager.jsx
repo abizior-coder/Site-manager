@@ -8604,7 +8604,7 @@ function PhotoViewer({ src, entry, onClose, onEdit, onRestore, t }) {
   };
 
   const onPointerDown = (e) => {
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 1) {
       const now = Date.now();
@@ -8764,7 +8764,7 @@ function PhotoEditor({ src, onCancel, onSave, t }) {
   };
   const onDown = (e) => {
     if (!ready) return;
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     const p = toCanvas(e); const c = canvasRef.current; const width = strokeFor(c);
     if (tool === "text") { setTextAt(p); setTextValue(""); return; }
     if (tool === "pen") setDraft({ tool, colour, width, points: [p] });
@@ -8980,7 +8980,7 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
   function beginDrag(e, id) {
     e.preventDefault();
     e.stopPropagation();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     startedRef.current = false;
     setDragId(id);
     setOrder(items.map((i) => i.id));
@@ -9082,7 +9082,7 @@ function SignaturePad({ onChange, t }) {
 
   function start(e) {
     e.preventDefault();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     const ctx = canvasRef.current.getContext("2d");
     const { x, y } = pos(e);
     ctx.beginPath();
