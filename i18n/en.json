@@ -660,5 +660,10 @@
   "startDayHere": "Start the day here",
   "switchDayHere": "Switch here",
   "startDayHint": "The day starts inside the job: tap it under “Today’s assignment” above, or open it under Projects.",
-  "plannerChipRemove": "Click to remove"
+  "plannerChipRemove": "Click to remove",
+  "breaksTitle": "Breaks",
+  "break_znuni": "Morning break",
+  "break_mittag": "Lunch",
+  "typeBreak": "Break",
+  "breaksDeducted": "Breaks deducted"
 }

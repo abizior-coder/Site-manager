@@ -622,5 +622,10 @@
   "startDayHere": "Začít den tady",
   "switchDayHere": "Přepnout sem",
   "startDayHint": "Den začíná na stavbě: klepněte na ni v „Dnešní přidělení“ nebo ji otevřete ve Stavbách.",
-  "plannerChipRemove": "Kliknutím odeberete"
+  "plannerChipRemove": "Kliknutím odeberete",
+  "breaksTitle": "Přestávky",
+  "break_znuni": "Svačina",
+  "break_mittag": "Oběd",
+  "typeBreak": "Přestávka",
+  "breaksDeducted": "Odečtené přestávky"
 }

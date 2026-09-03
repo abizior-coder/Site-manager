@@ -622,5 +622,10 @@
   "startDayHere": "Започни деня тук",
   "switchDayHere": "Премини тук",
   "startDayHint": "Денят започва в обекта: докоснете го в „Днешна задача“ или го отворете в Обекти.",
-  "plannerChipRemove": "Клик за премахване"
+  "plannerChipRemove": "Клик за премахване",
+  "breaksTitle": "Почивки",
+  "break_znuni": "Почивка в девет",
+  "break_mittag": "Обяд",
+  "typeBreak": "Почивка",
+  "breaksDeducted": "Приспаднати почивки"
 }

@@ -622,5 +622,10 @@
   "startDayHere": "Inizia la giornata qui",
   "switchDayHere": "Passa qui",
   "startDayHint": "La giornata inizia nel cantiere: toccalo sotto «Incarico di oggi» oppure aprilo in Cantieri.",
-  "plannerChipRemove": "Clicca per rimuovere"
+  "plannerChipRemove": "Clicca per rimuovere",
+  "breaksTitle": "Pause",
+  "break_znuni": "Pausa delle nove",
+  "break_mittag": "Pranzo",
+  "typeBreak": "Pausa",
+  "breaksDeducted": "Pause dedotte"
 }

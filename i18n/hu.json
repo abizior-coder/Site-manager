@@ -622,5 +622,10 @@
   "startDayHere": "Nap indítása itt",
   "switchDayHere": "Átváltás ide",
   "startDayHint": "A nap a munkában kezdődik: koppints rá a „Mai beosztás” alatt, vagy nyisd meg a Munkák alatt.",
-  "plannerChipRemove": "Kattints az eltávolításhoz"
+  "plannerChipRemove": "Kattints az eltávolításhoz",
+  "breaksTitle": "Szünetek",
+  "break_znuni": "Kilencórai szünet",
+  "break_mittag": "Ebéd",
+  "typeBreak": "Szünet",
+  "breaksDeducted": "Levont szünetek"
 }

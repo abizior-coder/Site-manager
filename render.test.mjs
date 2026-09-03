@@ -171,6 +171,21 @@ async function renderAs(role) {
     }
   }
 
+  // Two taps mark the two breaks of a site day; the second tap unmarks.
+  {
+    const heute = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Heute");
+    heute?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const chip = () => window.document.querySelector('[data-break="mittag"]');
+    check("owner: Today offers the two break tiles", !!chip() && !!window.document.querySelector('[data-break="znuni"]'), "no break tiles on Today");
+    chip()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    check("owner: marking lunch logs a break", /Pause\s*\(1\)/.test(text()), "no break entry after marking lunch");
+    chip()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    check("owner: a second tap unmarks it", !/Pause\s*\(1\)/.test(text()), "break still logged after unmarking");
+  }
+
   // The team roster is a sidebar tab, so the mobile-label walk above never
   // reaches it. It is also where crew get attached to jobs, so a crash here
   // silently costs the Polier the feature.

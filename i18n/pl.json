@@ -622,5 +622,10 @@
   "startDayHere": "Zacznij dzień tutaj",
   "switchDayHere": "Przenieś tutaj",
   "startDayHint": "Dzień zaczyna się w zleceniu: dotknij je w „Dzisiejszy przydział” powyżej albo otwórz w Projekty.",
-  "plannerChipRemove": "Kliknij, aby usunąć"
+  "plannerChipRemove": "Kliknij, aby usunąć",
+  "breaksTitle": "Przerwy",
+  "break_znuni": "Znüni",
+  "break_mittag": "Obiad",
+  "typeBreak": "Przerwa",
+  "breaksDeducted": "Przerwy odjęte"
 }

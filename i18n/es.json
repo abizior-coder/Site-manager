@@ -622,5 +622,10 @@
   "startDayHere": "Empezar el día aquí",
   "switchDayHere": "Cambiar aquí",
   "startDayHint": "El día empieza en la obra: tócala en «Asignación de hoy» o ábrela en Obras.",
-  "plannerChipRemove": "Clic para quitar"
+  "plannerChipRemove": "Clic para quitar",
+  "breaksTitle": "Pausas",
+  "break_znuni": "Pausa de las nueve",
+  "break_mittag": "Comida",
+  "typeBreak": "Pausa",
+  "breaksDeducted": "Pausas descontadas"
 }

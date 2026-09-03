@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -11,6 +11,7 @@ import {
   loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor, getCompanyId,
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
+import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -1212,6 +1213,7 @@ function typeMeta(type, t) {
     pickup: { label: t.typePickup, icon: QrCode, color: "#C9A6F5" },
     inspection: { label: t.typeInspection, icon: ClipboardCheck, color: "#6FB3D9" },
     order: { label: t.typeOrder, icon: Truck, color: "#C68B4F" },
+    break: { label: t.typeBreak, icon: Coffee, color: "#B48EAD" },
   };
   return map[type];
 }
@@ -2751,10 +2753,12 @@ export default function SiteManager() {
     const holidayDays = parseFloat(billing.holidayDays || 0) || 0;
     const contractDaily = weekly > 0 ? weekly / 5 : 0;
 
-    const worked = entries.filter((e) =>
-      e.type === "time" && e.userId === uidKey &&
+    const mine = entries.filter((e) =>
+      (e.type === "time" || e.type === "break") && e.userId === uidKey &&
       (!from || e.date >= from) && (!to || e.date <= to));
-    const workedHours = worked.reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
+    const worked = mine.filter((e) => e.type === "time");
+    // Net of the breaks marked in the period: Znüni and Mittag are not work.
+    const workedHours = netHours(mine);
 
     // Days that were actually worked, so a week off does not read as a deficit.
     const workedDays = new Set(worked.map((e) => e.date)).size;
@@ -3028,6 +3032,16 @@ export default function SiteManager() {
   // The day starts on the job, not on a list. If the clock is running on
   // another job, that day is closed first so the hours land where they were
   // worked.
+  // A tap marks the break taken; a second tap unmarks it. Stored as an entry
+  // so it syncs and is owned like everything else.
+  function toggleBreak(key, date = todayKey()) {
+    const existing = entries.find((e) => e.type === "break" && e.breakKey === key && e.date === date && e.userId === user?.uid);
+    if (existing) { persist({ entries: entries.filter((e) => e.id !== existing.id) }); return; }
+    const meta = breakMeta(key);
+    if (!meta) return;
+    persist({ entries: [newEntry({ type: "break", breakKey: key, date, qty: String(meta.minutes / 60), unit: "h", description: `${t[`break_${key}`]} ${meta.start}` }), ...entries] });
+  }
+
   function startDayOn(projectId) {
     if (activeClock) {
       if (activeClock.projectId === projectId) return;
@@ -4046,11 +4060,14 @@ export default function SiteManager() {
       }));
 
     // Hours this month per person.
+    // Net of the breaks each person marked: Znüni and Mittag are not work.
     const hoursByUser = {};
-    entries.filter((e) => e.type === "time" && (e.date || "").startsWith(month)).forEach((e) => {
+    entries.filter((e) => (e.type === "time" || e.type === "break") && (e.date || "").startsWith(month)).forEach((e) => {
       const k = e.userId || "—";
-      hoursByUser[k] = (hoursByUser[k] || 0) + (parseFloat(e.qty || 0) || 0);
+      const h = parseFloat(e.qty || 0) || 0;
+      hoursByUser[k] = (hoursByUser[k] || 0) + (e.type === "break" ? -h : h);
     });
+    Object.keys(hoursByUser).forEach((k) => { hoursByUser[k] = Math.max(0, Math.round(hoursByUser[k] * 100) / 100); });
 
     const activeJobs = projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === "construction").length;
     const leads = projects.filter((p) => ["lead", "quoted"].includes(p.status || "")).length;
@@ -4073,11 +4090,12 @@ export default function SiteManager() {
   }
 
   function dailySummary(list) {
-    const hours = list.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
+    const hours = netHours(list);
+    const breaks = breakHours(list);
     const materials = list.filter((e) => e.type === "material");
     const tools = list.filter((e) => e.type === "tool");
     const projIds = [...new Set(list.map((e) => e.projectId).filter(Boolean))];
-    return { hours, materials, tools, projIds };
+    return { hours, breaks, materials, tools, projIds };
   }
 
   if (!authChecked) {
@@ -4417,6 +4435,7 @@ export default function SiteManager() {
               {activeClock ? (
                 <>
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.workingAt}</div>
+                  <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
                   <div className="font-bold text-lg mb-3">{projectName(activeClock.projectId)}</div>
                   <div style={{ color: COLORS.accent }} className="text-3xl font-black mb-4 tabular-nums">{fmtHM(Date.now() - activeClock.startedAt)}</div>
                   <button onClick={clockOut} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
@@ -4430,6 +4449,7 @@ export default function SiteManager() {
                       "Heutiger Einsatz" above, or open it under Projekte. */}
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.startYourDay}</div>
                   <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed">{t.startDayHint}</div>
+                  <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
                 </>
               )}
             </div>
@@ -5608,6 +5628,7 @@ export default function SiteManager() {
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{reportView === "daily" ? todayKey() : monthKey()}</div>
                   <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
+                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-[11px] -mt-1 mb-2">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
                   <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
                   <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
                   <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
@@ -7851,7 +7872,7 @@ function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) 
   );
 }
 
-const ENTRY_TYPE_ORDER = ["time", "material", "tool", "order", "photo", "pickup", "inspection", "note"];
+const ENTRY_TYPE_ORDER = ["time", "break", "material", "tool", "order", "photo", "pickup", "inspection", "note"];
 
 function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEntry, onDelete }) {
   const [expanded, setExpanded] = useState({});
@@ -8344,6 +8365,40 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
 // that matter. Manual order stays available — the crew's own arrangement is
 // sometimes the order of work — and dragging is only offered in that mode,
 // since dragging a sorted list would silently do nothing.
+// Znüni at nine, Mittag at noon: two tiles, tap to mark taken. Today only --
+// yesterday's break is corrected by the Polier in the hours review, not here.
+function BreakChips({ entries, userId, onToggle, t }) {
+  const today = todayKey();
+  const mine = (entries || []).filter((e) => e.date === today && e.userId === userId);
+  return (
+    <div className="mt-3">
+      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.breaksTitle}</div>
+      <div className="grid grid-cols-2 gap-2">
+        {BREAKS.map((b) => {
+          const on = breakTaken(mine, b.key);
+          const Icon = b.key === "mittag" ? Utensils : Coffee;
+          return (
+            <button
+              key={b.key}
+              data-break={b.key}
+              onClick={() => onToggle(b.key)}
+              style={{
+                background: on ? "#B48EAD22" : COLORS.cardAlt,
+                border: `1px solid ${on ? "#B48EAD" : COLORS.border}`,
+                color: on ? "#B48EAD" : COLORS.muted,
+              }}
+              className="py-2.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5"
+            >
+              {on ? <Check size={14} /> : <Icon size={14} />}
+              <span className="truncate">{t[`break_${b.key}`]} {b.start} · {b.minutes} min</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder, t }) {
   const [sort, setSort] = useState("name");
   if (items.length === 0) return null;

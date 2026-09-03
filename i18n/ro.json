@@ -622,5 +622,10 @@
   "startDayHere": "Începe ziua aici",
   "switchDayHere": "Treci aici",
   "startDayHint": "Ziua începe în șantier: atinge-l la «Repartizarea de azi» sau deschide-l la Șantiere.",
-  "plannerChipRemove": "Clic pentru a elimina"
+  "plannerChipRemove": "Clic pentru a elimina",
+  "breaksTitle": "Pauze",
+  "break_znuni": "Pauza de la nouă",
+  "break_mittag": "Prânz",
+  "typeBreak": "Pauză",
+  "breaksDeducted": "Pauze scăzute"
 }

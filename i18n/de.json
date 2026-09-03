@@ -660,5 +660,10 @@
   "startDayHere": "Tag hier starten",
   "switchDayHere": "Hierher wechseln",
   "startDayHint": "Der Tag beginnt im Auftrag: oben unter «Heutiger Einsatz» antippen oder unter Projekte öffnen.",
-  "plannerChipRemove": "Klicken zum Entfernen"
+  "plannerChipRemove": "Klicken zum Entfernen",
+  "breaksTitle": "Pausen",
+  "break_znuni": "Znüni",
+  "break_mittag": "Mittag",
+  "typeBreak": "Pause",
+  "breaksDeducted": "Pausen abgezogen"
 }

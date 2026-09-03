@@ -8,6 +8,7 @@ import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
+import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -251,6 +252,23 @@ t("a bare domain becomes https", normaliseLink("dropbox.com/s/abc"), "https://dr
 t("an http link is kept", normaliseLink("http://intranet/plan"), "http://intranet/plan");
 t("a javascript: link is refused", normaliseLink("javascript:alert(1)"), "");
 t("an empty link is empty", normaliseLink("   "), "");
+
+// --- breaks ---------------------------------------------------------------
+t("two breaks a day: nine and noon", BREAKS.map((b) => `${b.key}@${b.start}/${b.minutes}`), ["znuni@09:00/30", "mittag@12:00/60"]);
+{
+  const day = [
+    { type: "time", qty: "8.5", date: "2026-09-03", userId: "u1" },
+    { type: "break", breakKey: "znuni", qty: "0.5", date: "2026-09-03", userId: "u1" },
+    { type: "break", breakKey: "mittag", qty: "1", date: "2026-09-03", userId: "u1" },
+  ];
+  t("both breaks come to an hour and a half", breakHours(day), 1.5);
+  t("the day reads net of breaks", netHours(day), 7);
+  t("a break marked is found", breakTaken(day, "mittag", "2026-09-03", "u1"), true);
+  t("a break not marked is not", breakTaken(day.slice(0, 2), "mittag"), false);
+  t("someone else's break is not mine", breakTaken(day, "mittag", "2026-09-03", "u2"), false);
+}
+t("a break before any clock entry does not read as negative work", netHours([{ type: "break", breakKey: "znuni", qty: "0.5" }]), 0);
+t("a break of unknown kind falls back to its stored hours", breakHours([{ type: "break", breakKey: "kaffee", qty: "0.25" }]), 0.25);
 {
 }
 

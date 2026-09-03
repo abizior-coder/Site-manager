@@ -622,5 +622,10 @@
   "startDayHere": "Commencer la journée ici",
   "switchDayHere": "Passer ici",
   "startDayHint": "La journée commence dans le chantier : touchez-le sous « Affectation du jour » ou ouvrez-le sous Chantiers.",
-  "plannerChipRemove": "Cliquer pour retirer"
+  "plannerChipRemove": "Cliquer pour retirer",
+  "breaksTitle": "Pauses",
+  "break_znuni": "Pause de neuf heures",
+  "break_mittag": "Midi",
+  "typeBreak": "Pause",
+  "breaksDeducted": "Pauses déduites"
 }

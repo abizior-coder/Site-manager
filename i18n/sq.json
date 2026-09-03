@@ -622,5 +622,10 @@
   "startDayHere": "Fillo ditën këtu",
   "switchDayHere": "Kalo këtu",
   "startDayHint": "Dita fillon në punishte: preke te «Detyra e sotme» sipër ose hape te Punishtet.",
-  "plannerChipRemove": "Kliko për ta hequr"
+  "plannerChipRemove": "Kliko për ta hequr",
+  "breaksTitle": "Pushimet",
+  "break_znuni": "Pushimi i nëntës",
+  "break_mittag": "Dreka",
+  "typeBreak": "Pushim",
+  "breaksDeducted": "Pushimet e zbritura"
 }
