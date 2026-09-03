@@ -146,6 +146,25 @@ async function renderAs(role) {
       check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
       check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
       check("owner: job view offers plans and documents", /Pläne & Dokumente|Plans & documents/.test(text()), "no files section in the job view");
+      // A photo opens full-screen and can be marked up; the editor's toolbar
+      // is there even though jsdom cannot decode the image.
+      {
+        const thumb = window.document.querySelector("[data-photo-thumb]");
+        check("owner: a photo thumbnail is tappable", !!thumb, "no photo thumbnail in the job view");
+        thumb?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 300));
+        check("owner: tapping opens the photo viewer", !!window.document.querySelector("[data-photo-viewer]"), "viewer did not open");
+        window.document.querySelector("[data-photo-edit]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 200));
+        const editor = window.document.querySelector("[data-photo-editor]");
+        check("owner: the pen opens the editor", !!editor, "editor did not open");
+        check("owner: the editor offers pen, arrow, box, circle and text", ["pen", "arrow", "rect", "circle", "text"].every((k) => !!window.document.querySelector(`[data-photo-tool="${k}"]`)), "a tool is missing");
+        [...(editor?.querySelectorAll("button") || [])].find((b) => (b.textContent || "").trim() === "Zurück")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 150));
+        [...window.document.querySelectorAll("[data-photo-viewer] button")].pop()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 150));
+      }
+
       // A note in one language is read in another: one tap, and the
       // translation sits under the original.
       {

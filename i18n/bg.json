@@ -632,5 +632,20 @@
   "translateAll": "Преведи всичко",
   "translationLabel": "Превод",
   "translateFailed": "Преводът не успя — проверете връзката и опитайте отново.",
-  "webhookHttpsOnly": "Webhook трябва да започва с https:// — изтрит."
+  "webhookHttpsOnly": "Webhook трябва да започва с https:// — изтрит.",
+  "photoEdit": "Отбележи",
+  "photoSaved": "Снимката е запазена",
+  "photoRestored": "Оригиналът е възстановен",
+  "photoRestore": "Обратно към оригинала",
+  "photoEditedTag": "отбелязана",
+  "photoZoomIn": "Увеличи",
+  "photoZoomOut": "Намали",
+  "photoZoomHint": "Два пръста или скрол за мащаб · плъзнете за преместване · двойно докосване за скок",
+  "photoUndo": "Отмени",
+  "photoTextPrompt": "Текст…",
+  "photoTool_pen": "Писалка",
+  "photoTool_arrow": "Стрелка",
+  "photoTool_rect": "Рамка",
+  "photoTool_circle": "Кръг",
+  "photoTool_text": "Текст"
 }

@@ -632,5 +632,20 @@
   "translateAll": "Összes fordítása",
   "translationLabel": "Fordítás",
   "translateFailed": "A fordítás nem sikerült — ellenőrizd a kapcsolatot és próbáld újra.",
-  "webhookHttpsOnly": "A webhooknak https://-sel kell kezdődnie — törölve."
+  "webhookHttpsOnly": "A webhooknak https://-sel kell kezdődnie — törölve.",
+  "photoEdit": "Jelölés",
+  "photoSaved": "Fotó mentve",
+  "photoRestored": "Eredeti visszaállítva",
+  "photoRestore": "Vissza az eredetihez",
+  "photoEditedTag": "jelölt",
+  "photoZoomIn": "Nagyítás",
+  "photoZoomOut": "Kicsinyítés",
+  "photoZoomHint": "Két ujj vagy görgetés a nagyításhoz · húzás a mozgatáshoz · dupla koppintás az ugráshoz",
+  "photoUndo": "Visszavonás",
+  "photoTextPrompt": "Szöveg…",
+  "photoTool_pen": "Toll",
+  "photoTool_arrow": "Nyíl",
+  "photoTool_rect": "Keret",
+  "photoTool_circle": "Kör",
+  "photoTool_text": "Szöveg"
 }

@@ -72,6 +72,8 @@ export function subscribeCollection(name, cb) {
 
 export const companyStorage = {
   async get(key) {
+    // A one-pixel JPEG, so the photo viewer has something to open.
+    if (key === "photo-ph1") return { key, value: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=" };
     if (key === "site-meta") {
       return { key, value: JSON.stringify({
         leaveRequests: [{ id: "l1", date: "2026-08-27", userId: "u2", type: "vacation", note: "", status: "pending" }],

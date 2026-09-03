@@ -632,5 +632,20 @@
   "translateAll": "Përkthe të gjitha",
   "translationLabel": "Përkthim",
   "translateFailed": "Përkthimi dështoi — kontrollo lidhjen dhe provo sërish.",
-  "webhookHttpsOnly": "Webhook duhet të fillojë me https:// — u fshi."
+  "webhookHttpsOnly": "Webhook duhet të fillojë me https:// — u fshi.",
+  "photoEdit": "Shëno",
+  "photoSaved": "Fotoja u ruajt",
+  "photoRestored": "Origjinali u rikthye",
+  "photoRestore": "Kthehu te origjinali",
+  "photoEditedTag": "e shënuar",
+  "photoZoomIn": "Zmadho",
+  "photoZoomOut": "Zvogëlo",
+  "photoZoomHint": "Dy gishta ose rrotullo për zoom · tërhiq për të lëvizur · prek dy herë për të kërcyer",
+  "photoUndo": "Zhbëj",
+  "photoTextPrompt": "Tekst…",
+  "photoTool_pen": "Stilolaps",
+  "photoTool_arrow": "Shigjetë",
+  "photoTool_rect": "Kornizë",
+  "photoTool_circle": "Rreth",
+  "photoTool_text": "Tekst"
 }

@@ -670,5 +670,20 @@
   "translateAll": "Alle übersetzen",
   "translationLabel": "Übersetzung",
   "translateFailed": "Übersetzung fehlgeschlagen — Verbindung prüfen und nochmals versuchen.",
-  "webhookHttpsOnly": "Webhook muss mit https:// beginnen — gelöscht."
+  "webhookHttpsOnly": "Webhook muss mit https:// beginnen — gelöscht.",
+  "photoEdit": "Markieren",
+  "photoSaved": "Foto gespeichert",
+  "photoRestored": "Original wiederhergestellt",
+  "photoRestore": "Zurück zum Original",
+  "photoEditedTag": "markiert",
+  "photoZoomIn": "Vergrössern",
+  "photoZoomOut": "Verkleinern",
+  "photoZoomHint": "Zwei Finger oder Scrollen zum Zoomen · ziehen zum Verschieben · doppelt tippen zum Springen",
+  "photoUndo": "Rückgängig",
+  "photoTextPrompt": "Text…",
+  "photoTool_pen": "Stift",
+  "photoTool_arrow": "Pfeil",
+  "photoTool_rect": "Rahmen",
+  "photoTool_circle": "Kreis",
+  "photoTool_text": "Text"
 }

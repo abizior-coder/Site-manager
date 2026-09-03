@@ -632,5 +632,20 @@
   "translateAll": "Alli übersetze",
   "translationLabel": "Übersetzig",
   "translateFailed": "Übersetzig fehlgschlage — Verbindig prüefe und nomal probiere.",
-  "webhookHttpsOnly": "Webhook muess mit https:// aafange — glöscht."
+  "webhookHttpsOnly": "Webhook muess mit https:// aafange — glöscht.",
+  "photoEdit": "Markiere",
+  "photoSaved": "Foti gspeicheret",
+  "photoRestored": "Original zrugg",
+  "photoRestore": "Zrugg zum Original",
+  "photoEditedTag": "markiert",
+  "photoZoomIn": "Vergrössere",
+  "photoZoomOut": "Verchlinere",
+  "photoZoomHint": "Zwei Finger oder scrolle zum Zoome · zieh zum Verschiebe · doppelt tippe zum Springe",
+  "photoUndo": "Rückgängig",
+  "photoTextPrompt": "Text…",
+  "photoTool_pen": "Stift",
+  "photoTool_arrow": "Pfiil",
+  "photoTool_rect": "Rahme",
+  "photoTool_circle": "Chreis",
+  "photoTool_text": "Text"
 }

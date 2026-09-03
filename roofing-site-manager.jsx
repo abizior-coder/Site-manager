@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages, ZoomIn, ZoomOut, Undo2, MoveUpRight, Circle, Type, Paintbrush, RotateCcw, Download } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -1352,6 +1352,9 @@ export default function SiteManager() {
   // stored preference. A note is translated into these on save -- not into
   // all fourteen the app speaks.
   const [memberLangs, setMemberLangs] = useState([]);
+  // A photo opened full-screen, and the same photo under the pen.
+  const [photoView, setPhotoView] = useState(null); // { entry, src }
+  const [photoEdit, setPhotoEdit] = useState(null); // { entry, src }
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
     try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
@@ -3894,6 +3897,40 @@ export default function SiteManager() {
   async function translateAllNotes(projectId) {
     const list = entries.filter((e) => e.projectId === projectId && e.type === "note");
     for (const n of list) await translateNote(n, projectId);
+  }
+
+  // --- photos: look, zoom, mark up ----------------------------------------------
+  async function openPhoto(entry) {
+    const src = entry.photo || (await loadPhoto(entry.photoId));
+    if (!src) { showToast(t.couldntSave); return; }
+    setPhotoView({ entry, src });
+  }
+
+  // A marked-up photo is a new photo. The original stays under the entry so
+  // an arrow drawn in the wrong place can be undone tomorrow, not just now.
+  async function savePhotoEdit(entry, dataUrl) {
+    try {
+      const id = await savePhoto(dataUrl);
+      const updated = { ...entry, photoId: id, photo: null, originalPhotoId: entry.originalPhotoId || entry.photoId || null, editedAt: Date.now() };
+      persist({ entries: entries.map((e) => (e.id === entry.id ? updated : e)) });
+      setPhotoEdit(null);
+      setPhotoView({ entry: updated, src: dataUrl });
+      showToast(t.photoSaved);
+    } catch (e) {
+      showToast(t.couldntSave);
+    }
+  }
+
+  async function restorePhotoOriginal(entry) {
+    if (!entry.originalPhotoId) return;
+    const src = await loadPhoto(entry.originalPhotoId);
+    if (!src) { showToast(t.couldntSave); return; }
+    const edited = entry.photoId;
+    const updated = { ...entry, photoId: entry.originalPhotoId, originalPhotoId: null, editedAt: null };
+    persist({ entries: entries.map((e) => (e.id === entry.id ? updated : e)) });
+    if (edited && edited !== entry.originalPhotoId) deletePhoto(edited);
+    setPhotoView({ entry: updated, src });
+    showToast(t.photoRestored);
   }
 
   function parseJsonSafe(text, fallback) {
@@ -7020,6 +7057,7 @@ export default function SiteManager() {
           onTranslateAll={() => translateAllNotes(selectedProject)}
           translatingIds={translatingIds}
           lang={lang}
+          onOpenPhoto={openPhoto}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -7326,6 +7364,25 @@ export default function SiteManager() {
             </div>
           </div>
         </div>
+      )}
+
+      {photoView && !photoEdit && (
+        <PhotoViewer
+          src={photoView.src}
+          entry={photoView.entry}
+          onClose={() => setPhotoView(null)}
+          onEdit={() => setPhotoEdit({ entry: photoView.entry, src: photoView.src })}
+          onRestore={photoView.entry.originalPhotoId ? () => restorePhotoOriginal(photoView.entry) : null}
+          t={t}
+        />
+      )}
+      {photoEdit && (
+        <PhotoEditor
+          src={photoEdit.src}
+          onCancel={() => setPhotoEdit(null)}
+          onSave={(dataUrl) => savePhotoEdit(photoEdit.entry, dataUrl)}
+          t={t}
+        />
       )}
 
       {fileViewer && (
@@ -8039,7 +8096,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -8495,7 +8552,12 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             <div className="grid grid-cols-3 gap-2">
               {photos.map((p) => (
                 <div key={p.id} className="relative">
-                  <StoredImage photo={p.photo} photoId={p.photoId} className="w-full h-20 object-cover rounded-md" />
+                  <button data-photo-thumb onClick={() => onOpenPhoto(p)} className="w-full block">
+                    <StoredImage photo={p.photo} photoId={p.photoId} className="w-full h-20 object-cover rounded-md" />
+                  </button>
+                  {p.originalPhotoId && (
+                    <span style={{ background: "rgba(0,0,0,0.65)", color: COLORS.amber }} className="absolute bottom-1 left-1 px-1 rounded text-[9px] font-bold uppercase">{t.photoEditedTag}</span>
+                  )}
                   <button onClick={() => onDeleteEntry(p)} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
                     <X size={12} color="#fff" />
                   </button>
@@ -8516,6 +8578,272 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
 // that matter. Manual order stays available — the crew's own arrangement is
 // sometimes the order of work — and dragging is only offered in that mode,
 // since dragging a sorted list would silently do nothing.
+// A photo full-screen: pinch or scroll to zoom, drag to pan, double-tap to
+// jump between fit and 2.5x. A crack in a tile is a few pixels on a phone;
+// this is how the Polier actually looks at it.
+function PhotoViewer({ src, entry, onClose, onEdit, onRestore, t }) {
+  const [view, setView] = useState({ scale: 1, tx: 0, ty: 0 });
+  const pointers = useRef(new Map());
+  const gesture = useRef(null);
+  const boxRef = useRef(null);
+  const lastTap = useRef(0);
+
+  const clamp = (v) => ({ ...v, scale: Math.min(8, Math.max(1, v.scale)) });
+  const zoomAt = (factor, cx, cy) => {
+    const box = boxRef.current?.getBoundingClientRect();
+    if (!box) return;
+    // Zoom around the finger or the cursor, not the centre.
+    const px = cx - box.left - box.width / 2;
+    const py = cy - box.top - box.height / 2;
+    setView((v) => {
+      const scale = Math.min(8, Math.max(1, v.scale * factor));
+      const k = scale / v.scale;
+      const next = { scale, tx: px - (px - v.tx) * k, ty: py - (py - v.ty) * k };
+      return scale === 1 ? { scale: 1, tx: 0, ty: 0 } : next;
+    });
+  };
+
+  const onPointerDown = (e) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 1) {
+      const now = Date.now();
+      if (now - lastTap.current < 300) { zoomAt(view.scale > 1 ? 0 : 2.5, e.clientX, e.clientY); lastTap.current = 0; return; }
+      lastTap.current = now;
+      gesture.current = { kind: "pan", x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
+    } else if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      gesture.current = { kind: "pinch", dist: Math.hypot(a.x - b.x, a.y - b.y), scale: view.scale, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, tx: view.tx, ty: view.ty };
+    }
+  };
+  const onPointerMove = (e) => {
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const g = gesture.current;
+    if (!g) return;
+    if (g.kind === "pan" && pointers.current.size === 1) {
+      if (view.scale === 1) return;
+      setView((v) => ({ ...v, tx: g.tx + (e.clientX - g.x), ty: g.ty + (e.clientY - g.y) }));
+    } else if (g.kind === "pinch" && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const scale = Math.min(8, Math.max(1, g.scale * (dist / g.dist)));
+      setView(clamp({ scale, tx: g.tx, ty: g.ty }));
+    }
+  };
+  const onPointerUp = (e) => {
+    pointers.current.delete(e.pointerId);
+    gesture.current = null;
+    if (pointers.current.size === 1) {
+      const [p] = [...pointers.current.values()];
+      gesture.current = { kind: "pan", x: p.x, y: p.y, tx: view.tx, ty: view.ty };
+    }
+  };
+
+  return (
+    <div data-photo-viewer className="fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(0,0,0,0.96)" }}>
+      <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0">
+        <div className="min-w-0">
+          <div className="text-sm font-bold truncate">{entry?.description || t.photoLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-[10px]">{entry?.date}{entry?.originalPhotoId ? ` · ${t.photoEditedTag}` : ""} · {Math.round(view.scale * 100)}%</div>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => zoomAt(0.7, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomOut} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><ZoomOut size={18} /></button>
+          <button onClick={() => zoomAt(1.4, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomIn} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><ZoomIn size={18} /></button>
+          {onRestore && (
+            <button onClick={onRestore} title={t.photoRestore} style={{ color: COLORS.amber }} className="w-9 h-9 flex items-center justify-center"><RotateCcw size={18} /></button>
+          )}
+          <a href={src} download={`${(entry?.description || "foto").replace(/[^\w.-]+/g, "_")}.jpg`} title={t.filesDownload} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><Download size={18} /></a>
+          <button data-photo-edit onClick={onEdit} title={t.photoEdit} style={{ background: COLORS.accent }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Paintbrush size={18} color="#fff" /></button>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center"><X size={20} color={COLORS.muted} /></button>
+        </div>
+      </div>
+      <div
+        ref={boxRef}
+        className="flex-1 min-h-0 overflow-hidden flex items-center justify-center select-none"
+        style={{ touchAction: "none", cursor: view.scale > 1 ? "grab" : "zoom-in" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onWheel={(e) => { e.preventDefault(); zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY); }}
+      >
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          className="max-w-full max-h-full object-contain"
+          style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`, transition: gesture.current ? "none" : "transform 0.08s", willChange: "transform" }}
+        />
+      </div>
+      <div style={{ color: COLORS.muted }} className="text-[10px] text-center py-1.5 shrink-0">{t.photoZoomHint}</div>
+    </div>
+  );
+}
+
+// Marking up a photo: an arrow at the leak, a circle round the bad flashing,
+// a word next to it. Drawn on a canvas over the image and flattened into a
+// new JPEG on save. Coordinates are kept in image pixels, so a line drawn on
+// a phone lands in the same place on a desk.
+const PHOTO_COLOURS = ["#DA291C", "#FFD400", "#2E8BFF", "#FFFFFF", "#111111"];
+function PhotoEditor({ src, onCancel, onSave, t }) {
+  const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const [ready, setReady] = useState(false);
+  const [tool, setTool] = useState("pen");
+  const [colour, setColour] = useState(PHOTO_COLOURS[0]);
+  const [thick, setThick] = useState(2); // 1..3
+  const [shapes, setShapes] = useState([]);
+  const [draft, setDraft] = useState(null);
+  const [textAt, setTextAt] = useState(null);
+  const [textValue, setTextValue] = useState("");
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      imgRef.current = img;
+      const c = canvasRef.current;
+      if (!c) return;
+      // The stored photo is already scaled for Firestore; cap again so the
+      // flattened result cannot outgrow the 1 MB document.
+      const max = 1600;
+      const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      c.width = Math.round(img.naturalWidth * k);
+      c.height = Math.round(img.naturalHeight * k);
+      setReady(true);
+    };
+    img.src = src;
+  }, [src]);
+
+  const strokeFor = (c) => Math.max(2, Math.round((c.width / 900) * [3, 6, 11][thick - 1]));
+
+  const drawShape = (ctx, c, sh) => {
+    ctx.save();
+    ctx.strokeStyle = sh.colour; ctx.fillStyle = sh.colour;
+    ctx.lineWidth = sh.width; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = sh.width;
+    if (sh.tool === "pen" && sh.points.length) {
+      ctx.beginPath(); ctx.moveTo(sh.points[0].x, sh.points[0].y);
+      sh.points.forEach((p) => ctx.lineTo(p.x, p.y)); ctx.stroke();
+    } else if (sh.tool === "arrow") {
+      const { from, to } = sh;
+      ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+      const ang = Math.atan2(to.y - from.y, to.x - from.x); const head = sh.width * 3.2;
+      ctx.beginPath(); ctx.moveTo(to.x, to.y);
+      ctx.lineTo(to.x - head * Math.cos(ang - 0.5), to.y - head * Math.sin(ang - 0.5));
+      ctx.lineTo(to.x - head * Math.cos(ang + 0.5), to.y - head * Math.sin(ang + 0.5));
+      ctx.closePath(); ctx.fill();
+    } else if (sh.tool === "rect") {
+      ctx.strokeRect(Math.min(sh.from.x, sh.to.x), Math.min(sh.from.y, sh.to.y), Math.abs(sh.to.x - sh.from.x), Math.abs(sh.to.y - sh.from.y));
+    } else if (sh.tool === "circle") {
+      const rx = Math.abs(sh.to.x - sh.from.x) / 2, ry = Math.abs(sh.to.y - sh.from.y) / 2;
+      ctx.beginPath(); ctx.ellipse((sh.from.x + sh.to.x) / 2, (sh.from.y + sh.to.y) / 2, Math.max(1, rx), Math.max(1, ry), 0, 0, Math.PI * 2); ctx.stroke();
+    } else if (sh.tool === "text") {
+      const size = sh.width * 5;
+      ctx.font = `bold ${size}px system-ui, sans-serif`;
+      ctx.lineWidth = Math.max(2, sh.width / 2); ctx.strokeStyle = "rgba(0,0,0,0.85)";
+      ctx.strokeText(sh.text, sh.at.x, sh.at.y); ctx.fillText(sh.text, sh.at.x, sh.at.y);
+    }
+    ctx.restore();
+  };
+
+  useEffect(() => {
+    const c = canvasRef.current; const img = imgRef.current;
+    if (!c || !img || !ready) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    shapes.forEach((sh) => drawShape(ctx, c, sh));
+    if (draft) drawShape(ctx, c, draft);
+  }, [shapes, draft, ready]);
+
+  const toCanvas = (e) => {
+    const c = canvasRef.current; const r = c.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * (c.width / r.width), y: (e.clientY - r.top) * (c.height / r.height) };
+  };
+  const onDown = (e) => {
+    if (!ready) return;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const p = toCanvas(e); const c = canvasRef.current; const width = strokeFor(c);
+    if (tool === "text") { setTextAt(p); setTextValue(""); return; }
+    if (tool === "pen") setDraft({ tool, colour, width, points: [p] });
+    else setDraft({ tool, colour, width, from: p, to: p });
+  };
+  const onMove = (e) => {
+    if (!draft) return;
+    const p = toCanvas(e);
+    setDraft((d) => (d.tool === "pen" ? { ...d, points: [...d.points, p] } : { ...d, to: p }));
+  };
+  const onUp = () => {
+    if (!draft) return;
+    const d = draft; setDraft(null);
+    const moved = d.tool === "pen" ? d.points.length > 1 : Math.hypot(d.to.x - d.from.x, d.to.y - d.from.y) > 3;
+    if (moved) setShapes((s) => [...s, d]);
+  };
+  const commitText = () => {
+    if (textAt && textValue.trim()) {
+      const c = canvasRef.current;
+      setShapes((s) => [...s, { tool: "text", colour, width: strokeFor(c), at: textAt, text: textValue.trim() }]);
+    }
+    setTextAt(null); setTextValue("");
+  };
+  const save = () => {
+    const c = canvasRef.current;
+    if (!c || !c.getContext("2d")) return;
+    onSave(c.toDataURL("image/jpeg", 0.85));
+  };
+
+  const tools = [["pen", Paintbrush], ["arrow", MoveUpRight], ["rect", Square], ["circle", Circle], ["text", Type]];
+  return (
+    <div data-photo-editor className="fixed inset-0 z-50 flex flex-col" style={{ background: "#000" }}>
+      <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0">
+        <button onClick={onCancel} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.back}</button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setShapes((s) => s.slice(0, -1))} disabled={!shapes.length} title={t.photoUndo} style={{ color: shapes.length ? COLORS.text : COLORS.border }} className="w-9 h-9 flex items-center justify-center"><Undo2 size={18} /></button>
+          <button data-photo-save onClick={save} disabled={!ready} style={{ background: COLORS.accent, opacity: ready ? 1 : 0.5 }} className="px-4 h-9 rounded-lg text-xs font-bold uppercase">{t.saveLabel}</button>
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 flex items-center justify-center p-2">
+        <canvas
+          ref={canvasRef}
+          className="max-w-full max-h-full"
+          style={{ touchAction: "none", cursor: "crosshair", background: "#000" }}
+          onPointerDown={onDown}
+          onPointerMove={onMove}
+          onPointerUp={onUp}
+          onPointerCancel={onUp}
+        />
+      </div>
+      {textAt && (
+        <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="flex items-center gap-2 px-3 py-2 shrink-0">
+          <input autoFocus value={textValue} onChange={(e) => setTextValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextAt(null); }} placeholder={t.photoTextPrompt} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+          <button onClick={commitText} style={{ background: COLORS.accent }} className="px-3 h-9 rounded-lg text-xs font-bold uppercase">OK</button>
+        </div>
+      )}
+      <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 flex-wrap">
+        <div className="flex items-center gap-1">
+          {tools.map(([key, Icon]) => (
+            <button key={key} data-photo-tool={key} onClick={() => setTool(key)} title={t[`photoTool_${key}`]} style={{ background: tool === key ? `${COLORS.accent}33` : "transparent", color: tool === key ? COLORS.accent : COLORS.muted, border: `1px solid ${tool === key ? COLORS.accent : "transparent"}` }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Icon size={18} /></button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1.5">
+          {PHOTO_COLOURS.map((c) => (
+            <button key={c} onClick={() => setColour(c)} style={{ background: c, outline: colour === c ? `2px solid ${COLORS.text}` : "none", outlineOffset: 2 }} className="w-6 h-6 rounded-full" />
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          {[1, 2, 3].map((n) => (
+            <button key={n} onClick={() => setThick(n)} style={{ color: thick === n ? COLORS.accent : COLORS.muted }} className="w-8 h-8 flex items-center justify-center">
+              <span style={{ background: "currentColor", width: 4 + n * 4, height: 4 + n * 4 }} className="rounded-full" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Znüni at nine, Mittag at noon: two tiles, tap to mark taken. Today only --
 // yesterday's break is corrected by the Polier in the hours review, not here.
 function BreakChips({ entries, userId, onToggle, t }) {

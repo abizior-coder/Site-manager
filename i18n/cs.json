@@ -632,5 +632,20 @@
   "translateAll": "Přeložit vše",
   "translationLabel": "Překlad",
   "translateFailed": "Překlad selhal — zkontrolujte připojení a zkuste to znovu.",
-  "webhookHttpsOnly": "Webhook musí začínat https:// — smazáno."
+  "webhookHttpsOnly": "Webhook musí začínat https:// — smazáno.",
+  "photoEdit": "Označit",
+  "photoSaved": "Fotka uložena",
+  "photoRestored": "Originál obnoven",
+  "photoRestore": "Zpět na originál",
+  "photoEditedTag": "označená",
+  "photoZoomIn": "Přiblížit",
+  "photoZoomOut": "Oddálit",
+  "photoZoomHint": "Dva prsty nebo kolečko pro zoom · tažením posun · dvojité klepnutí pro skok",
+  "photoUndo": "Zpět",
+  "photoTextPrompt": "Text…",
+  "photoTool_pen": "Pero",
+  "photoTool_arrow": "Šipka",
+  "photoTool_rect": "Rám",
+  "photoTool_circle": "Kruh",
+  "photoTool_text": "Text"
 }

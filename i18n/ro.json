@@ -632,5 +632,20 @@
   "translateAll": "Tradu tot",
   "translationLabel": "Traducere",
   "translateFailed": "Traducerea a eșuat — verifică conexiunea și încearcă din nou.",
-  "webhookHttpsOnly": "Webhook-ul trebuie să înceapă cu https:// — șters."
+  "webhookHttpsOnly": "Webhook-ul trebuie să înceapă cu https:// — șters.",
+  "photoEdit": "Adnotează",
+  "photoSaved": "Fotografie salvată",
+  "photoRestored": "Original restaurat",
+  "photoRestore": "Înapoi la original",
+  "photoEditedTag": "adnotată",
+  "photoZoomIn": "Mărește",
+  "photoZoomOut": "Micșorează",
+  "photoZoomHint": "Două degete sau scroll pentru zoom · trage pentru a muta · atingere dublă pentru salt",
+  "photoUndo": "Anulează",
+  "photoTextPrompt": "Text…",
+  "photoTool_pen": "Creion",
+  "photoTool_arrow": "Săgeată",
+  "photoTool_rect": "Cadru",
+  "photoTool_circle": "Cerc",
+  "photoTool_text": "Text"
 }
