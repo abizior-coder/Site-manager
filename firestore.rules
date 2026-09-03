@@ -116,7 +116,11 @@ service cloud.firestore {
       match /entries/{id} {
         allow read: if isMember(cid);
         allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
-        allow update, delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+        // Whoever may edit a row may not hand it to someone else: hours stay
+        // attributed to the person who logged them.
+        allow update: if (canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid))
+                      && request.resource.data.userId == resource.data.userId;
+        allow delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
       }
 
       // Quotes, invoices and anything priced.
@@ -153,7 +157,9 @@ service cloud.firestore {
         allow read: if isMember(cid);
         allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
         allow update: if canManage(cid) && resource.data.signedAt == null;
-        allow delete: if canManage(cid);
+        // A signed report is evidence. It cannot be edited, and it cannot be
+        // deleted and re-created with different figures either.
+        allow delete: if canManage(cid) && resource.data.signedAt == null;
       }
 
       // Reports sent to a supervisor. Their own documents rather than a field
@@ -162,17 +168,28 @@ service cloud.firestore {
       match /sentReports/{id} {
         allow read: if isMember(cid);
         allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
-        allow update, delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+        allow update: if (canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid))
+                      && request.resource.data.userId == resource.data.userId;
+        allow delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
       }
 
       // Plans and documents: the bytes live in R2 behind the Worker, which
       // checks membership by reading /members as the caller. This is the
       // metadata. Anyone on the job may add a plan; only a manager or the
       // person who uploaded it may take it away.
+      // A link must be a web address, and a type must be something the
+      // Worker would serve. The Worker refuses these at upload too; the rule
+      // stops metadata being written around it.
+      function fileMetaOk(d) {
+        return (!('url' in d) || (d.url is string && d.url.matches('https?://.*')))
+            && (!('type' in d) || (d.type is string && !d.type.lower().matches('(text/html|image/svg.*|application/xhtml.*|text/javascript).*')))
+            && (!('size' in d) || (d.size is number && d.size <= 26214400))
+            && (!('name' in d) || (d.name is string && d.name.size() <= 200));
+      }
       match /files/{id} {
         allow read: if isMember(cid);
-        allow create: if isMember(cid) && request.resource.data.uploadedBy == request.auth.uid;
-        allow update: if canManage(cid) || (isMember(cid) && resource.data.uploadedBy == request.auth.uid);
+        allow create: if isMember(cid) && request.resource.data.uploadedBy == request.auth.uid && fileMetaOk(request.resource.data);
+        allow update: if (canManage(cid) || (isMember(cid) && resource.data.uploadedBy == request.auth.uid)) && fileMetaOk(request.resource.data);
         allow delete: if canManage(cid) || (isMember(cid) && resource.data.uploadedBy == request.auth.uid);
       }
 

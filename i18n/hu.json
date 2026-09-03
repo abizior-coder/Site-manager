@@ -631,5 +631,6 @@
   "translateBtn": "Fordítás",
   "translateAll": "Összes fordítása",
   "translationLabel": "Fordítás",
-  "translateFailed": "A fordítás nem sikerült — ellenőrizd a kapcsolatot és próbáld újra."
+  "translateFailed": "A fordítás nem sikerült — ellenőrizd a kapcsolatot és próbáld újra.",
+  "webhookHttpsOnly": "A webhooknak https://-sel kell kezdődnie — törölve."
 }

@@ -631,5 +631,6 @@
   "translateBtn": "Přeložit",
   "translateAll": "Přeložit vše",
   "translationLabel": "Překlad",
-  "translateFailed": "Překlad selhal — zkontrolujte připojení a zkuste to znovu."
+  "translateFailed": "Překlad selhal — zkontrolujte připojení a zkuste to znovu.",
+  "webhookHttpsOnly": "Webhook musí začínat https:// — smazáno."
 }

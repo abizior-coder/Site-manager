@@ -631,5 +631,6 @@
   "translateBtn": "Übersetze",
   "translateAll": "Alli übersetze",
   "translationLabel": "Übersetzig",
-  "translateFailed": "Übersetzig fehlgschlage — Verbindig prüefe und nomal probiere."
+  "translateFailed": "Übersetzig fehlgschlage — Verbindig prüefe und nomal probiere.",
+  "webhookHttpsOnly": "Webhook muess mit https:// aafange — glöscht."
 }

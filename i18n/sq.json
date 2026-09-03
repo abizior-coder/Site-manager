@@ -631,5 +631,6 @@
   "translateBtn": "Përkthe",
   "translateAll": "Përkthe të gjitha",
   "translationLabel": "Përkthim",
-  "translateFailed": "Përkthimi dështoi — kontrollo lidhjen dhe provo sërish."
+  "translateFailed": "Përkthimi dështoi — kontrollo lidhjen dhe provo sërish.",
+  "webhookHttpsOnly": "Webhook duhet të fillojë me https:// — u fshi."
 }

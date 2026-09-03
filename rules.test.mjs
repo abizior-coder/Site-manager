@@ -188,6 +188,21 @@ await check("the uploader CAN delete their own file", () =>
   assertSucceeds(deleteDoc(doc(crew, "companies", CID, "files", "f-crew"))));
 await check("a manager CAN delete anyone's file", () =>
   assertSucceeds(deleteDoc(doc(sup, "companies", CID, "files", "f-new"))));
+// Metadata cannot be written around the Worker's refusals.
+await check("a file link must be a web address", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "files", "f-js"), { uploadedBy: CREW, projectId: "p1", name: "x", kind: "plan", url: "javascript:alert(1)", createdAt: Date.now() })));
+await check("a file may not claim to be html", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "files", "f-html"), { uploadedBy: CREW, projectId: "p1", name: "Plan.pdf", kind: "plan", size: 10, type: "text/html", createdAt: Date.now() })));
+await check("an https link is fine", () =>
+  assertSucceeds(setDoc(doc(crew, "companies", CID, "files", "f-ok"), { uploadedBy: CREW, projectId: "p1", name: "Plan", kind: "plan", url: "https://example.ch/plan", createdAt: Date.now() })));
+
+// --- attribution stays put ---------------------------------------------------
+await check("crew CANNOT hand their own entry to someone else", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "entries", "e-crew"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
+await check("a manager CANNOT re-attribute an entry either", () =>
+  assertFails(setDoc(doc(sup, "companies", CID, "entries", "e-crew"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
+await check("a manager CAN still correct the hours on it", () =>
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "entries", "e-crew"), { userId: CREW, type: "time", qty: "7.5", date: "2026-09-02" })));
 
 await check("crew CAN create a report on site", () =>
   assertSucceeds(setDoc(doc(crew, "companies", CID, "reports", "r-new"), { userId: CREW, projectId: "p1", date: "2026-09-02", signedAt: null })));
@@ -195,6 +210,10 @@ await check("crew CANNOT create a report as someone else", () =>
   assertFails(setDoc(doc(crew, "companies", CID, "reports", "r-fake"), { userId: SUP, projectId: "p1", date: "2026-09-02", signedAt: null })));
 await check("manager CAN edit an unsigned report", () =>
   assertSucceeds(setDoc(doc(sup, "companies", CID, "reports", "r-open"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: null, note: "korrigiert" })));
+await check("a signed report CANNOT be deleted, even by a manager", () =>
+  assertFails(deleteDoc(doc(sup, "companies", CID, "reports", "r-signed"))));
+await check("an unsigned report CAN be deleted by a manager", () =>
+  assertSucceeds(deleteDoc(doc(sup, "companies", CID, "reports", "r-open"))));
 // The point of a signature is that what was signed cannot change afterwards.
 await check("a SIGNED report cannot be altered, even by the owner", () =>
   assertFails(setDoc(doc(owner, "companies", CID, "reports", "r-signed"), { userId: CREW, projectId: "p1", date: "2026-09-01", signedAt: Date.now(), signerName: "Jemand anders" })));

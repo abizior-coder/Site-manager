@@ -2,7 +2,7 @@
 // a membership table. What is pinned down is who may do what and where the
 // limits bite -- the parts that would be expensive to learn from a plan
 // that vanished. Run: node worker/files.test.mjs
-import { handleFiles, refusedType, objectKey, MAX_FILE_BYTES } from "./src/files.js";
+import { handleFiles, refusedType, objectKey, inlineType, MAX_FILE_BYTES } from "./src/files.js";
 
 let pass = 0, fail = 0;
 function t(name, got, want) {
@@ -52,6 +52,14 @@ t("an exe is refused by extension", refusedType("setup.exe", "application/octet-
 t("a script is refused by extension", refusedType("run.ps1", "text/plain"), true);
 t("an executable is refused by mime", refusedType("thing", "application/x-msdownload"), true);
 t("object keys are company-scoped", objectKey("c1", "abc"), "companies/c1/files/abc");
+// A page is not a plan. HTML and SVG would run as the app if opened inline.
+t("html is refused by extension", refusedType("Plan.html", "application/octet-stream"), true);
+t("html is refused by mime even as .pdf", refusedType("Plan.pdf", "text/html"), true);
+t("svg is refused", refusedType("logo.svg", "image/svg+xml"), true);
+t("xhtml is refused", refusedType("x.xhtml", "application/xhtml+xml"), true);
+t("pdf may open inline", inlineType("application/pdf"), "application/pdf");
+t("jpeg may open inline", inlineType("image/jpeg"), "image/jpeg");
+t("anything else may not", [inlineType("text/plain"), inlineType("application/octet-stream"), inlineType("")], ["", "", ""]);
 
 // --- the happy path: upload, open, delete ----------------------------------------
 const env = { FILES: fakeBucket() };
@@ -67,6 +75,7 @@ const env = { FILES: fakeBucket() };
   t("it comes back as a pdf", open.headers.get("Content-Type"), "application/pdf");
   t("the umlaut in the name survives", open.headers.get("Content-Disposition").includes("filename*=UTF-8''Dach%20S%C3%BCd.pdf"), true);
   t("it is never cached by a proxy", open.headers.get("Cache-Control"), "private, max-age=0, no-store");
+  t("every file response is sandboxed by CSP", open.headers.get("Content-Security-Policy"), "sandbox; default-src 'none'");
 
   const stranger = await call(env, "GET", `/files/c1/${meta.id}`, { token: "tok-other" });
   t("a member of another company gets 403, not the plan", stranger.status, 403);
@@ -87,6 +96,17 @@ const env = { FILES: fakeBucket() };
 }
 
 // --- limits and refusals ----------------------------------------------------------
+{
+  // A CAD export is stored as what it is, but handed over as a download with
+  // a neutral type -- never rendered.
+  const up = await call(env, "POST", "/files/c1/p1", { token: "tok-crew", form: pdfForm("Dach.dwg", 500, "plan", "application/acad") });
+  const meta = await up.json();
+  const open = await call(env, "GET", `/files/c1/${meta.id}`, { token: "tok-crew" });
+  t("a non-inline type comes back as octet-stream", open.headers.get("Content-Type"), "application/octet-stream");
+  t("and as an attachment", open.headers.get("Content-Disposition").startsWith("attachment;"), true);
+  const html = await call(env, "POST", "/files/c1/p1", { token: "tok-crew", form: pdfForm("Plan.pdf", 500, "plan", "text/html") });
+  t("an html file named .pdf is refused at upload", html.status, 415);
+}
 {
   const big = await call(env, "POST", "/files/c1/p1", { token: "tok-crew", form: pdfForm("huge.pdf", MAX_FILE_BYTES + 1) });
   t("over 25 MB is refused with a readable status", big.status, 413);

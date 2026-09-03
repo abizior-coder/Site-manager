@@ -15,8 +15,17 @@ export const MAX_FILE_BYTES = 25 * 1024 * 1024;
 
 // Nothing that a phone or a desk could run. Plans, scans, photos, office
 // documents and CAD exports all pass; the list is what gets refused.
-const REFUSED_EXT = /\.(exe|msi|bat|cmd|com|scr|pif|vbs|vbe|js|jse|wsf|wsh|ps1|psm1|sh|apk|jar|dll|cpl|hta|lnk|reg)$/i;
-const REFUSED_MIME = /^(application\/(x-msdownload|x-msdos-program|x-sh|x-shellscript|java-archive|vnd\.android\.package-archive|x-executable)|text\/javascript)$/i;
+// Also refused: anything a browser would *render as a page*. An HTML or SVG
+// "plan" opened inline would run as the app itself.
+const REFUSED_EXT = /\.(exe|msi|bat|cmd|com|scr|pif|vbs|vbe|js|jse|wsf|wsh|ps1|psm1|sh|apk|jar|dll|cpl|hta|lnk|reg|html?|xhtml|mhtml?|svgz?)$/i;
+const REFUSED_MIME = /^(application\/(x-msdownload|x-msdos-program|x-sh|x-shellscript|java-archive|vnd\.android\.package-archive|x-executable|xhtml\+xml)|text\/(javascript|html)|image\/svg\+xml)/i;
+
+// What may open inline. Everything else is handed over as a download with a
+// neutral type, whatever the uploader claimed it was.
+const INLINE_MIME = /^(application\/pdf|image\/(jpeg|png|gif|webp|heic|heif|bmp))$/i;
+export function inlineType(type) {
+  return INLINE_MIME.test(type || "") ? type : "";
+}
 
 export function refusedType(name, type) {
   return REFUSED_EXT.test(name || "") || REFUSED_MIME.test(type || "");
@@ -100,18 +109,23 @@ export async function handleFiles({ request, env, headers, verify, isMember }) {
     const obj = await bucket.get(objectKey(cid, third));
     if (!obj) return json({ error: "not found" }, 404, headers);
     const meta = obj.customMetadata || {};
-    const type = (obj.httpMetadata && obj.httpMetadata.contentType) || "application/octet-stream";
+    const stored = (obj.httpMetadata && obj.httpMetadata.contentType) || "";
+    const safe = inlineType(stored);
     // ASCII fallback plus RFC 5987 so an umlaut in the plan's name survives.
     const ascii = String(meta.name || "file").replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
+    const fname = `filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(meta.name || "file")}`;
     return new Response(obj.body, {
       status: 200,
       headers: {
         ...headers,
-        "Content-Type": type,
+        "Content-Type": safe || "application/octet-stream",
         "Content-Length": String(obj.size),
-        "Content-Disposition": `inline; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(meta.name || "file")}`,
+        "Content-Disposition": `${safe ? "inline" : "attachment"}; ${fname}`,
         "Cache-Control": "private, max-age=0, no-store",
         "X-Content-Type-Options": "nosniff",
+        // Even if a browser ever navigated straight to this response, nothing
+        // in it may run or reach anything.
+        "Content-Security-Policy": "sandbox; default-src 'none'",
       },
     });
   }

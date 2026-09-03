@@ -1780,9 +1780,14 @@ export default function SiteManager() {
   }
 
   async function saveProfileInfo() {
-    setProfile(profileDraft);
+    // Report payloads go wherever this points. https only, and a bad value is
+    // dropped rather than kept around to fire later.
+    const badHook = profileDraft.webhookUrl && !/^https:\/\/[^\s/]+/.test(String(profileDraft.webhookUrl).trim());
+    const cleanedProfile = badHook ? { ...profileDraft, webhookUrl: "" } : profileDraft;
+    if (badHook) { showToast(t.webhookHttpsOnly); setProfileDraft(cleanedProfile); }
+    setProfile(cleanedProfile);
     setProfileModalOpen(false);
-    try { await window.storage.set(personalKey("site-profile"), JSON.stringify(profileDraft)); } catch (e) {}
+    try { await window.storage.set(personalKey("site-profile"), JSON.stringify(cleanedProfile)); } catch (e) {}
   }
 
   async function saveDocs(next) {
@@ -2057,7 +2062,7 @@ export default function SiteManager() {
   function renderReportDocument(subtitle, sections, remark) {
     // Notes are free text typed on a roof; the print must not become HTML
     // because someone wrote "<3" in a comment.
-    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const rowsHtml = (items) =>
       items
         .map((i) => `<tr><td>${esc(i.description)}</td><td>${esc(i.qty)}</td><td>${esc(i.unit)}</td></tr>`)
@@ -2081,9 +2086,9 @@ export default function SiteManager() {
       .map(
         (s) => `
       <div class="section">
-        <h2>${s.title}</h2>
-        ${s.client ? `<div class="meta">${s.client}</div>` : ""}
-        ${s.address ? `<div class="meta">${s.address}</div>` : ""}
+        <h2>${esc(s.title)}</h2>
+        ${s.client ? `<div class="meta">${esc(s.client)}</div>` : ""}
+        ${s.address ? `<div class="meta">${esc(s.address)}</div>` : ""}
         <div class="totalhours">${t.totalHoursLabel}: ${s.hours.toFixed(1)} h</div>
         ${tableHtml(t.materialsLogged, s.materials)}
         ${tableHtml(t.machinesToolsLabel, s.machines)}
@@ -2121,7 +2126,7 @@ export default function SiteManager() {
         <div class="header">
           <div>
             <h1>${t.appLabel}</h1>
-            <div class="sub">${subtitle}</div>
+            <div class="sub">${esc(subtitle)}</div>
           </div>
           <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
         </div>
@@ -2183,7 +2188,7 @@ export default function SiteManager() {
     const totals = documentTotals(doc);
     const cur = billing.currency || "CHF";
     const isInvoice = doc.type === "invoice";
-    const esc = (v) => String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const fmt = (n) => n.toLocaleString("de-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // The payment part is only produced when the billing details are actually
@@ -2989,13 +2994,21 @@ export default function SiteManager() {
   // Shown from a blob: URL, so nothing is ever public and nothing is cached
   // by a proxy. Images and PDFs open in the app; anything else downloads.
   async function openFile(f) {
-    if (f.url) { window.open(f.url, "_blank", "noopener"); return; }
+    // A stored link is re-checked every time: metadata is member-writable, and
+    // a javascript: url planted there must never reach window.open.
+    if (f.url) { const safe = normaliseLink(f.url); if (safe) window.open(safe, "_blank", "noopener"); return; }
     setFileBusy((n) => n + 1);
     try {
-      const blob = await fetchFileBlob(f);
+      const raw = await fetchFileBlob(f);
+      // Route by what the Worker sent back, not by the filename, and pin the
+      // blob to that type: bytes that are secretly a page fail to parse as a
+      // PDF instead of running as the app.
+      const served = String(raw.type || "").toLowerCase();
+      const inline = /^(application\/pdf|image\/(jpeg|png|gif|webp|heic|heif|bmp))$/.test(served) ? served : "";
+      const blob = new Blob([raw], { type: inline || "application/octet-stream" });
       const url = URL.createObjectURL(blob);
-      if (isImage(f.type) || isPdf(f.type, f.name)) {
-        setFileViewer({ file: f, url });
+      if (inline) {
+        setFileViewer({ file: { ...f, type: inline }, url });
       } else {
         const a = document.createElement("a");
         a.href = url; a.download = f.name || "file"; a.click();

@@ -631,5 +631,6 @@
   "translateBtn": "Tradu",
   "translateAll": "Tradu tot",
   "translationLabel": "Traducere",
-  "translateFailed": "Traducerea a eșuat — verifică conexiunea și încearcă din nou."
+  "translateFailed": "Traducerea a eșuat — verifică conexiunea și încearcă din nou.",
+  "webhookHttpsOnly": "Webhook-ul trebuie să înceapă cu https:// — șters."
 }

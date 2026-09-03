@@ -631,5 +631,6 @@
   "translateBtn": "Преведи",
   "translateAll": "Преведи всичко",
   "translationLabel": "Превод",
-  "translateFailed": "Преводът не успя — проверете връзката и опитайте отново."
+  "translateFailed": "Преводът не успя — проверете връзката и опитайте отново.",
+  "webhookHttpsOnly": "Webhook трябва да започва с https:// — изтрит."
 }

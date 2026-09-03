@@ -631,5 +631,6 @@
   "translateBtn": "Traduci",
   "translateAll": "Traduci tutto",
   "translationLabel": "Traduzione",
-  "translateFailed": "Traduzione fallita — controlla la connessione e riprova."
+  "translateFailed": "Traduzione fallita — controlla la connessione e riprova.",
+  "webhookHttpsOnly": "Il webhook deve iniziare con https:// — cancellato."
 }
