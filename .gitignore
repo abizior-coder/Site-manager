@@ -7,3 +7,6 @@ ui-debug.log
 
 # Claude Code local launch config
 .claude/
+
+# Security audits stay local: the repo is public and the findings are unfixed
+docs/security-audit-*.md
