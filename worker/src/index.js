@@ -1,5 +1,6 @@
 import { handleFiles, firestoreMember } from "./files.js";
 import { checkLimits } from "./limits.js";
+import { handleMetrics } from "./metrics.js";
 
 const MODEL = "claude-sonnet-5";
 const MAX_IMAGE_BLOCKS = 4;
@@ -59,7 +60,15 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers });
 
-    // Plans and documents live under /files; everything else is the AI proxy.
+    // Usage counts live under /metrics, plans and documents under /files;
+    // everything else is the AI proxy.
+    if (new URL(request.url).pathname.startsWith("/metrics")) {
+      return handleMetrics({
+        request, env, headers,
+        verify: verifyUser,
+        isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
+      });
+    }
     if (new URL(request.url).pathname.startsWith("/files")) {
       return handleFiles({
         request, env, headers,

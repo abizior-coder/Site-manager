@@ -402,3 +402,35 @@ removing them shifts every later field so banks reject the bill.
   authoritative for billing.
 - Safety content (SUVA / BauAV, CPR) is a summary only. The binding text
   governs and can change. Do not reword it to sound more definitive.
+
+## Module map (since 2026-09-03)
+
+The monolith is being taken apart one tab at a time. What has moved so far:
+
+| Module | Holds |
+|---|---|
+| `ui/theme.js` | `COLORS` |
+| `ui/format.js` | `todayKey`, `monthKey`, `uid`, `fmtHM` |
+| `ui/entries.jsx` | `typeMeta`, `ENTRY_TYPE_ORDER`, `EntryRow`, `EntryGroups`, `Stat`, `StoredImage`, `loadPhoto` |
+| `ui/break-chips.jsx` | `BreakChips` |
+| `tabs/TodayTab.jsx` | the Today tab; state stays in the app and comes in as props |
+| `metrics-client.js` | the usage tracker (batched counts, flushed on hide) |
+| `worker/src/metrics.js` | `/metrics/<cid>`: POST counts (members), GET 30 days (owner/supervisor); KV keys `m:<cid>:<day>`, 400-day TTL |
+
+Rules for the next cut: a tab component renders only; handlers and state
+stay in `roofing-site-manager.jsx` until a real store exists. Shared
+pieces go to `ui/`, never the other way round. `fmtHM` is re-exported from
+the monolith because the logic tests import it from there.
+
+**Usage metrics** are counts per company and day — event names such as
+`open`, `entry.material`, `report.sent`, `rapport.sign`, `file.upload`,
+`translate` — plus a 12-hex hash per active account. No text, no site, no
+name. The owner sees them on the Cockpit ("Nutzung").
+
+**CI** (`.github/workflows/ci.yml`) runs every suite, rules included, on
+every push and pull request; the Pages deploy still checks that the
+committed bundle matches the source.
+
+**Languages:** all 14 files carry every key (a logic test guards it);
+RO/BG/HU were completed on 2026-09-03; the SUVA safety texts exist in
+every language. Albanian still shows English on the manager-only screens.

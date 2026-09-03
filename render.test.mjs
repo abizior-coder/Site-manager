@@ -300,6 +300,18 @@ async function renderAs(role) {
     check("owner: the month totals count it", /1\.5/.test(text()) && /200/.test(text()), "totals missing");
   }
 
+  // The owner's usage card must render on a Cockpit that has no numbers yet.
+  {
+    const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");
+    check("owner: the cockpit is in the menu", !!cockpit, "no Übersicht button");
+    const before = errors.length;
+    cockpit?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    const card = window.document.querySelector("[data-usage-card]");
+    check("owner: the cockpit shows the usage card without crashing", errors.length === before && !!card, errors.slice(before, before + 1).join(" | ") || "no usage card");
+    check("owner: an empty answer reads as no usage yet, not as an error", /Noch keine Nutzung|No usage yet/.test(card?.textContent || ""), (card?.textContent || "").slice(0, 100));
+  }
+
   // The team roster is a sidebar tab, so the mobile-label walk above never
   // reaches it. It is also where crew get attached to jobs, so a crash here
   // silently costs the Polier the feature.

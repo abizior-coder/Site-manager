@@ -11,7 +11,7 @@
     "emulators": "firebase emulators:start --only auth,firestore",
     "test:order": "node order-flow.test.mjs",
     "test:dock": "node dock.test.mjs",
-    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs"
+    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",

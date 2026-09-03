@@ -334,5 +334,28 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("transport hours are told apart from work", reportTotals([{ type: "time", qty: "8" }, { type: "transport", hours: 1.5, qty: "1.5" }, { type: "break", qty: "0.5" }]), { hours: 7.5, breaks: 0.5, transportHours: 1.5, materialsCount: 0, toolsCount: 0, projIds: [] });
 }
 
+{
+  // Every language carries every key, and the languages that were once a
+  // thin layer over English are translated -- a key that falls back to
+  // English is not a translation, it is a gap that only shows on a phone.
+  const { readFileSync, readdirSync } = await import("node:fs");
+  const en = JSON.parse(readFileSync("i18n/en.json", "utf8"));
+  const files = readdirSync("i18n").filter((f) => f.endsWith(".json") && f !== "en.json");
+  const missing = {};
+  const englishLeft = {};
+  const SAME_OK = new Set(["OK", "km", "SUVA", "PDF", "QR", "SOS", "Pipeline", "Board", "Text…", "Text", "Link", "Plan", "Status", "Name", "Art.", "Transport", "Material", "Steildach", "Flachdach", "Spengler", "Holzbau", "Gerüst", "Unterhalt", "Shop", "Wind", "Route", "E-Mail", "Email", "Total", "Team", "Standard", "IBAN", "Mulde", "Subtotal", "Manual", "Calendar", "Catalog", "Contract", "Defect", "https://hooks.zapier.com/...", "https://… (Dropbox, SharePoint, Drive)"]);
+  for (const f of files) {
+    const d = JSON.parse(readFileSync(`i18n/${f}`, "utf8"));
+    const miss = Object.keys(en).filter((k) => !(k in d));
+    if (miss.length) missing[f] = miss.length;
+    const same = Object.keys(en).filter((k) => k in d && d[k] === en[k] && String(en[k]).length > 3 && !SAME_OK.has(en[k]));
+    englishLeft[f] = same.length;
+  }
+  t("every language file has every key", missing, {});
+  for (const code of ["ro", "bg", "hu", "pl", "pt", "fr", "it", "es", "sk", "cs", "gsw"]) {
+    t(`${code} is translated, not English with a flag (${englishLeft[code + ".json"]} left)`, englishLeft[code + ".json"] < 40, true);
+  }
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

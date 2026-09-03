@@ -14,26 +14,41 @@ import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFil
 import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode } from "./import-guard.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
+import { COLORS } from "./ui/theme.js";
+import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
+import { photoCache, loadPhoto, StoredImage, typeMeta, Stat, EntryRow, ENTRY_TYPE_ORDER, EntryGroups } from "./ui/entries.jsx";
+import { BreakChips } from "./ui/break-chips.jsx";
+import { TodayTab } from "./tabs/TodayTab.jsx";
+export { fmtHM };
+import { createTracker } from "./metrics-client.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
 // leave the app without a way to reach the proxy.
 const CLAUDE_PROXY_URL = "https://site-log-claude-proxy.abizior.workers.dev";
 
-const COLORS = {
-  shell: "#1B1B1A",
-  card: "#242322",
-  cardAlt: "#2C2A28",
-  accent: "#DA291C",
-  accentDim: "#A61F15",
-  text: "#F5F1E8",
-  muted: "#9C9791",
-  border: "#3A3835",
-  success: "#7FA65C",
-  amber: "#E8B923",
-  danger: "#E5484D",
-  stone: "#6B7280",
-};
+// Usage counts, batched and sent to the Worker: event names and how often,
+// per company. Never a description, a name or a site. A failed send keeps
+// the batch; the page going to the background flushes it.
+const tracker = createTracker({
+  send: async (events) => {
+    const cid = getCompanyId();
+    if (!cid) return false;
+    const token = await getIdToken();
+    if (!token) return false;
+    const res = await fetch(`${CLAUDE_PROXY_URL}/metrics/${cid}`, {
+      method: "POST", keepalive: true,
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ events }),
+    });
+    return res.ok;
+  },
+});
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") tracker.flush(); });
+}
+
+
 
 
 const MATERIALS_CATALOG = {
@@ -1100,57 +1115,6 @@ function waHref(v) { return `https://wa.me/${String(v).replace(/[^\d]/g, "")}`; 
 // document and a scaled photo is 200-500 KB, so a couple of inline photos used
 // to push those blobs over the limit and make every later save fail silently.
 // Uses the existing window.storage shim, so index.html needs no change.
-const photoCache = new Map();
-
-async function savePhoto(dataUrl, meta) {
-  const id = uid();
-  await window.storage.set(`photo-${id}`, dataUrl, meta);
-  photoCache.set(id, dataUrl);
-  return id;
-}
-
-async function loadPhoto(id) {
-  if (!id) return null;
-  if (photoCache.has(id)) return photoCache.get(id);
-  try {
-    const res = await window.storage.get(`photo-${id}`);
-    const value = res ? res.value : null;
-    if (value) photoCache.set(id, value);
-    return value;
-  } catch {
-    return null;
-  }
-}
-
-async function deletePhoto(id) {
-  if (!id) return;
-  photoCache.delete(id);
-  try { await window.storage.delete(`photo-${id}`); } catch {}
-}
-
-// Renders either a stored photo (by id) or a legacy inline data URL, so
-// entries saved before photos moved out of the blob still display.
-function StoredImage({ photoId, photo, className, alt = "" }) {
-  const [src, setSrc] = useState(photo || null);
-  useEffect(() => {
-    let alive = true;
-    if (photo) { setSrc(photo); return; }
-    if (!photoId) { setSrc(null); return; }
-    loadPhoto(photoId).then((v) => { if (alive) setSrc(v); });
-    return () => { alive = false; };
-  }, [photoId, photo]);
-  if (!src) return <div className={className} style={{ background: COLORS.cardAlt }} />;
-  return <img src={src} alt={alt} className={className} />;
-}
-
-function todayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
-function monthKey(d = new Date()) { return d.toISOString().slice(0, 7); }
-function uid() { return Math.random().toString(36).slice(2, 10); }
-export function fmtHM(ms) {
-  const h = Math.floor(ms / 3600000);
-  const m = Math.floor((ms % 3600000) / 60000);
-  return `${h}h ${m}m`;
-}
 function mapsUrl(address) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`; }
 export function encodeProjectCode(project, entries) {
   const items = (entries || [])
@@ -1221,22 +1185,6 @@ export function classifyNote(text) {
   if (/(drill|saw|ladder|nail gun|hammer|scaffold|harness|tool|grinder|compressor|leiter|échelle|scala|escalera|escada|drabina|rebrík|žebřík)/.test(t)) return "tool";
   if (/(hour|hrs|clock|overtime|start|finish|break|off site|stunde|heure|ora|hora|godzin|hodin)/.test(t)) return "time";
   return "note";
-}
-
-function typeMeta(type, t) {
-  const map = {
-    time: { label: t.typeTime, icon: Clock, color: COLORS.accent },
-    material: { label: t.typeMaterial, icon: Package, color: COLORS.success },
-    tool: { label: t.typeTool, icon: Wrench, color: COLORS.amber },
-    note: { label: t.typeNote, icon: MessageSquare, color: COLORS.muted },
-    photo: { label: t.typePhoto, icon: Camera, color: "#7FA0C7" },
-    pickup: { label: t.typePickup, icon: QrCode, color: "#C9A6F5" },
-    inspection: { label: t.typeInspection, icon: ClipboardCheck, color: "#6FB3D9" },
-    order: { label: t.typeOrder, icon: Truck, color: "#C68B4F" },
-    break: { label: t.typeBreak, icon: Coffee, color: "#B48EAD" },
-    transport: { label: t.typeTransport, icon: Truck, color: "#C68B4F" },
-  };
-  return map[type];
 }
 
 function weatherFromCode(code, t) {
@@ -1655,6 +1603,25 @@ export default function SiteManager() {
     return () => { alive = false; };
   }, [membership, lang]);
 
+  // One "open" per company per session; the Worker turns it into "people
+  // active today".
+  useEffect(() => {
+    if (membership) tracker.track("open");
+  }, [membership?.companyId]);
+
+  const [usage, setUsage] = useState(null);
+  async function loadUsage() {
+    try {
+      const cid = getCompanyId();
+      const token = await getIdToken();
+      const res = await fetch(`${CLAUDE_PROXY_URL}/metrics/${cid}?days=30`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = res.ok ? await res.json() : null;
+      setUsage(data && Array.isArray(data.days) ? data : { days: [], totals: {}, activePeople: 0 });
+    } catch {
+      setUsage({ days: [], totals: {}, activePeople: 0 });
+    }
+  }
+
   useEffect(() => {
     if (!selectedProject || !membership) return;
     let alive = true;
@@ -2023,6 +1990,7 @@ export default function SiteManager() {
   // a second report. userId is required by the rules; without it the create
   // was refused and nothing was stored.
   function sendReportToSupervisor(view, summary, list, periodLabelOverride) {
+    tracker.track("report.sent");
     const periodLabel = periodLabelOverride || (view === "daily" ? todayKey() : monthKey());
     const id = reportId(user?.uid, view, periodLabel);
     const existing = sentReports.find((r) => r.id === id);
@@ -2722,6 +2690,7 @@ export default function SiteManager() {
   }
 
   async function saveRapport() {
+    tracker.track("rapport.sign");
     if (!rapportModal) return;
     if (!rapportModal.signature || !rapportModal.signerName.trim()) {
       showToast(t.sigNeeded);
@@ -2987,6 +2956,7 @@ export default function SiteManager() {
   // uploaded one after another, each with its own outcome, so one bad file
   // never takes the others down with it.
   async function uploadFiles(projectId, fileList, kind) {
+    tracker.track("file.upload");
     const files = Array.from(fileList || []);
     const cid = getCompanyId();
     if (!files.length || !cid || !projectId) return;
@@ -3183,6 +3153,7 @@ export default function SiteManager() {
   }
 
   function newEntry(partial) {
+    tracker.track(`entry.${(partial && partial.type) || "note"}`);
     return { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...partial };
   }
 
@@ -3920,6 +3891,7 @@ export default function SiteManager() {
   // request however many languages the crew reads. The result is only ever
   // shown as text, never parsed into anything but this map.
   async function translateEntry(entry, projectId, targets, { quiet = false } = {}) {
+    tracker.track("translate");
     const text = String(entry.description || "").trim();
     const wanted = [...new Set((targets || []).filter((c) => LANG_NAMES[c]))];
     if (!text || !projectId || !wanted.length || translatingIds.includes(entry.id)) return;
@@ -4688,106 +4660,7 @@ export default function SiteManager() {
       )}
 
       <div className="relative flex-1 overflow-y-auto px-5 pb-20 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
-        {tab === "today" && (
-          <div className="flex flex-col gap-4">
-            {(() => {
-              // What am I meant to be doing today? The first thing a crew
-              // member opens the app to find out.
-              const mine = myAssignments(todayKey());
-              if (mine.length === 0) return null;
-              return (
-                <div style={{ background: "#6FB3D914", border: "1px solid #6FB3D955" }} className="rounded-xl p-4">
-                  <div style={{ color: "#6FB3D9" }} className="text-xs uppercase tracking-wide mb-2 font-bold flex items-center gap-1.5">
-                    <CalendarDays size={13} /> {t.schedToday}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    {mine.map((a) => {
-                      const pr = projects.find((x) => x.id === a.projectId);
-                      if (!pr) return null;
-                      return (
-                        <button key={a.id} onClick={() => { setTab("projects"); setSelectedProject(pr.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
-                          <div className="text-sm font-semibold">{pr.name}</div>
-                          {pr.address && <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{pr.address}</div>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-              <div className="flex items-center justify-between mb-1">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.weatherTitle} · {weatherLoc.name}</div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => { setWeatherEditOpen((o) => !o); setWeatherCityInput(""); }} className="text-xs font-bold uppercase" style={{ color: COLORS.accent }}>{t.changeLocation}</button>
-                  <button onClick={() => fetchWeather(weatherLoc)}><RefreshCw size={14} color={COLORS.muted} /></button>
-                </div>
-              </div>
-              {weatherEditOpen && (
-                <div className="flex gap-2 my-2">
-                  <input value={weatherCityInput} onChange={(e) => setWeatherCityInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitWeatherCity()} placeholder={t.cityPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                  <button onClick={submitWeatherCity} style={{ background: COLORS.accent }} className="rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
-                </div>
-              )}
-              {weather.loading && <div style={{ color: COLORS.muted }} className="text-sm">{t.weatherLoading}</div>}
-              {weather.error && <div style={{ color: COLORS.danger }} className="text-xs">{weather.error}</div>}
-              {weather.data && wCond && (
-                <>
-                  <div className="flex items-center gap-2 mt-1">
-                    <wCond.Icon size={26} color={COLORS.accent} />
-                    <div className="text-2xl font-black">{Math.round(weather.data.temperature_2m)}°C</div>
-                    <div style={{ color: COLORS.muted }} className="text-sm">{wCond.label}</div>
-                  </div>
-                  <div style={{ color: COLORS.muted }} className="text-xs mt-1">{t.windLabel}: {Math.round(weather.data.wind_speed_10m)} km/h</div>
-                </>
-              )}
-              <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.weatherSource}</div>
-            </div>
-
-            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-              {activeClock ? (
-                <>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.workingAt}</div>
-                  <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
-                  <div className="font-bold text-lg mb-3">{projectName(activeClock.projectId)}</div>
-                  <div style={{ color: COLORS.accent }} className="text-3xl font-black mb-4 tabular-nums">{fmtHM(Date.now() - activeClock.startedAt)}</div>
-                  <button onClick={clockOut} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
-                    <Square size={16} /> {t.clockOut}
-                  </button>
-                </>
-              ) : (
-                <>
-                  {/* The list of every job to clock into is gone. The day
-                      starts inside the job the Polier assigned -- tap it under
-                      "Heutiger Einsatz" above, or open it under Projekte. */}
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.startYourDay}</div>
-                  <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed">{t.startDayHint}</div>
-                  <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
-                </>
-              )}
-            </div>
-
-            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 flex items-center gap-1">
-                <MessageSquare size={13} /> {t.tellLog}
-              </div>
-              <div className="flex gap-2">
-                <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitNote()} placeholder={t.tellLogPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                <button onClick={() => toggleVoiceInput()} style={{ background: voiceListening && voiceTarget === "today" ? COLORS.danger : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 flex items-center justify-center"><Mic size={16} color={voiceListening && voiceTarget === "today" ? "#fff" : COLORS.muted} /></button>
-                <button onClick={submitNote} style={{ background: COLORS.accent }} className="rounded-lg px-3 flex items-center justify-center"><Send size={16} /></button>
-              </div>
-              <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.autoSortHint}</div>
-            </div>
-
-            {/* The roof inspection starts from the job now (see the job view). */}
-
-            <div>
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 mt-2">{t.todaysTickets}</div>
-              <EntryGroups entries={todayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
-            </div>
-          </div>
-        )}
-
+        {tab === "today" && <TodayTab t={t} projects={projects} entries={entries} user={user} activeClock={activeClock} todayEntries={todayEntries} myAssignments={myAssignments} projectName={projectName} setTab={setTab} setSelectedProject={setSelectedProject} weather={weather} weatherLoc={weatherLoc} wCond={wCond} weatherEditOpen={weatherEditOpen} setWeatherEditOpen={setWeatherEditOpen} weatherCityInput={weatherCityInput} setWeatherCityInput={setWeatherCityInput} submitWeatherCity={submitWeatherCity} fetchWeather={fetchWeather} toggleBreak={toggleBreak} clockOut={clockOut} noteText={noteText} setNoteText={setNoteText} submitNote={submitNote} toggleVoiceInput={toggleVoiceInput} voiceListening={voiceListening} voiceTarget={voiceTarget} openEditTime={openEditTime} openEditEntry={openEditEntry} deleteEntryFn={deleteEntryFn} />}
         {tab === "materials" && (() => {
           const catalog = MATERIALS_CATALOG[lang] || MATERIALS_CATALOG.en;
           const toolsCatalog = TOOLS_CATALOG[lang] || TOOLS_CATALOG.en;
@@ -5624,6 +5497,8 @@ export default function SiteManager() {
                   <Tile label={t.ccPipeline} value={money(c.pipelineValue)} sub={`${c.leads} ${t.projStatusLead}`} color="#B48EAD" />
                 </div>
               ) : null}
+
+              {isOwner() && <UsageCard t={t} usage={usage} onLoad={loadUsage} />}
 
               <div className="grid grid-cols-2 gap-2 lg:col-span-3">
                 <Tile label={t.ccHoursToApprove} value={String(c.pendingHours.length)} color={c.pendingHours.length ? COLORS.amber : COLORS.success} />
@@ -8366,73 +8241,49 @@ function SwissCross({ size = 14 }) {
   );
 }
 
-function Stat({ label, value, color }) {
-  return (
-    <div className="flex items-center justify-between py-1.5" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-      <span style={{ color: COLORS.muted }} className="text-sm">{label}</span>
-      <span style={{ color }} className="font-black text-lg">{value}</span>
+// Usage, for the owner: how many people used the app, how often, for what.
+// Counts per company and day from the Worker; no names, no text.
+function UsageCard({ t, usage, onLoad }) {
+  useEffect(() => { if (!usage) onLoad(); }, []);
+  const days = (usage && usage.days) || [];
+  const totals = (usage && usage.totals) || {};
+  const last7 = days.slice(-7);
+  const people7 = new Set();
+  const sum = (list, pick) => list.reduce((s, d) => s + Object.entries(d.events || {}).filter(([k]) => pick(k)).reduce((x, [, v]) => x + v, 0), 0);
+  const entries7 = sum(last7, (k) => k.startsWith("entry."));
+  const active7 = Math.max(...last7.map((d) => d.active), 0);
+  const entries30 = Object.entries(totals).filter(([k]) => k.startsWith("entry.")).reduce((s, [, v]) => s + v, 0);
+  const reports30 = (totals["report.sent"] || 0) + (totals["rapport.sign"] || 0);
+  const trips30 = (totals["entry.transport"] || 0) + (totals["entry.inspection"] || 0);
+  const maxActive = Math.max(...days.map((d) => d.active), 1);
+  const tile = (label, value) => (
+    <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2.5">
+      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{label}</div>
+      <div className="text-lg font-black leading-tight">{value}</div>
     </div>
   );
-}
-
-function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) {
-  const meta = typeMeta(entry.type, t);
-  const Icon = meta.icon;
-  const handleEdit = entry.type === "time" ? onEditTime : onEditEntry;
   return (
-    <div style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}` }} className="rounded-lg p-3 flex items-start gap-3">
-      <div style={{ background: COLORS.shell, border: `1px solid ${meta.color}` }} className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-        <Icon size={14} color={meta.color} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div style={{ whiteSpace: entry.type === "inspection" ? "pre-wrap" : "normal" }} className="text-sm font-semibold">{entry.description}</div>
-        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
-          {meta.label}{entry.qty ? ` · ${entry.qty}${entry.unit ? " " + entry.unit : ""}` : ""}{entry.projectId ? ` · ${projectName(entry.projectId)}` : ""}
-        </div>
-        {(entry.photo || entry.photoId) && <StoredImage photo={entry.photo} photoId={entry.photoId} className="w-full rounded-md mt-2 max-h-32 object-cover" />}
-      </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {handleEdit && <button onClick={() => handleEdit(entry)} style={{ color: COLORS.muted }}><Pencil size={14} /></button>}
-        {onDelete && <button onClick={() => onDelete(entry)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>}
-      </div>
-    </div>
-  );
-}
-
-const ENTRY_TYPE_ORDER = ["time", "break", "material", "tool", "order", "transport", "photo", "pickup", "inspection", "note"];
-
-function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEntry, onDelete }) {
-  const [expanded, setExpanded] = useState({});
-  if (!entries || entries.length === 0) {
-    return emptyLabel ? <div style={{ color: COLORS.muted }} className="text-sm">{emptyLabel}</div> : null;
-  }
-  const groups = {};
-  entries.forEach((e) => { (groups[e.type] = groups[e.type] || []).push(e); });
-  const presentTypes = ENTRY_TYPE_ORDER.filter((ty) => groups[ty] && groups[ty].length > 0);
-  return (
-    <div className="flex flex-col gap-2">
-      {presentTypes.map((ty) => {
-        const meta = typeMeta(ty, t);
-        const Icon = meta.icon;
-        const isOpen = !!expanded[ty];
-        const items = groups[ty];
-        return (
-          <div key={ty} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-lg overflow-hidden">
-            <button onClick={() => setExpanded((s) => ({ ...s, [ty]: !s[ty] }))} className="w-full flex items-center justify-between px-3 py-2.5">
-              <span className="flex items-center gap-2 text-sm font-semibold">
-                <Icon size={15} color={meta.color} /> {meta.label}
-                <span style={{ color: COLORS.muted }} className="text-xs font-normal">({items.length})</span>
-              </span>
-              <ChevronRight size={16} color={COLORS.muted} style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.15s" }} />
-            </button>
-            {isOpen && (
-              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="px-3 pt-2 pb-3 flex flex-col gap-2">
-                {items.map((e) => (<EntryRow key={e.id} entry={e} projectName={projectName} t={t} onEditTime={onEditTime} onEditEntry={onEditEntry} onDelete={onDelete} />))}
-              </div>
-            )}
+    <div data-usage-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
+      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccUsage}</div>
+      {!usage && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
+      {usage && days.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageEmpty}</div>}
+      {usage && days.length > 0 && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+            {tile(t.ccUsageActive30, String(usage.activePeople || 0))}
+            {tile(t.ccUsageActive7, String(active7))}
+            {tile(t.ccUsageEntries30, `${entries30} · ${entries7}`)}
+            {tile(t.ccUsageReports30, String(reports30))}
+            {tile(t.ccUsageTrips30, String(trips30))}
           </div>
-        );
-      })}
+          <div className="flex items-end gap-[3px] h-10 mt-3">
+            {days.map((d) => (
+              <div key={d.date} title={`${d.date}: ${d.active}`} style={{ height: `${Math.max(6, Math.round((d.active / maxActive) * 100))}%`, background: d.active ? COLORS.accent : COLORS.border }} className="flex-1 rounded-sm" />
+            ))}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.ccUsageFootnote}</div>
+        </>
+      )}
     </div>
   );
 }
@@ -9249,37 +9100,7 @@ function PhotoEditor({ src, onCancel, onSave, t }) {
 
 // Znüni at nine, Mittag at noon: two tiles, tap to mark taken. Today only --
 // yesterday's break is corrected by the Polier in the hours review, not here.
-function BreakChips({ entries, userId, onToggle, t }) {
-  const today = todayKey();
-  const mine = (entries || []).filter((e) => e.date === today && e.userId === userId);
-  return (
-    <div className="mt-3">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.breaksTitle}</div>
-      <div className="grid grid-cols-2 gap-2">
-        {BREAKS.map((b) => {
-          const on = breakTaken(mine, b.key);
-          const Icon = b.key === "mittag" ? Utensils : Coffee;
-          return (
-            <button
-              key={b.key}
-              data-break={b.key}
-              onClick={() => onToggle(b.key)}
-              style={{
-                background: on ? "#B48EAD22" : COLORS.cardAlt,
-                border: `1px solid ${on ? "#B48EAD" : COLORS.border}`,
-                color: on ? "#B48EAD" : COLORS.muted,
-              }}
-              className="py-2.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5"
-            >
-              {on ? <Check size={14} /> : <Icon size={14} />}
-              <span className="truncate">{t[`break_${b.key}`]} {b.start} · {b.minutes} min</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+
 
 function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder, t }) {
   const [sort, setSort] = useState("name");
