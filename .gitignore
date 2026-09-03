@@ -10,3 +10,6 @@ ui-debug.log
 
 # Security audits stay local: the repo is public and the findings are unfixed
 docs/security-audit-*.md
+
+# Business plans stay local like the audits
+docs/value-plan-*.md
