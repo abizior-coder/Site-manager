@@ -197,12 +197,17 @@ await check("an https link is fine", () =>
   assertSucceeds(setDoc(doc(crew, "companies", CID, "files", "f-ok"), { uploadedBy: CREW, projectId: "p1", name: "Plan", kind: "plan", url: "https://example.ch/plan", createdAt: Date.now() })));
 
 // --- attribution stays put ---------------------------------------------------
+// A fresh row: e-crew was deleted further up, and a setDoc on a missing doc
+// is a create, which is a different rule.
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  await setDoc(doc(ctx.firestore(), "companies", CID, "entries", "e-attr"), { userId: CREW, type: "time", qty: "8", date: "2026-09-02" });
+});
 await check("crew CANNOT hand their own entry to someone else", () =>
-  assertFails(setDoc(doc(crew, "companies", CID, "entries", "e-crew"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
+  assertFails(setDoc(doc(crew, "companies", CID, "entries", "e-attr"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
 await check("a manager CANNOT re-attribute an entry either", () =>
-  assertFails(setDoc(doc(sup, "companies", CID, "entries", "e-crew"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
+  assertFails(setDoc(doc(sup, "companies", CID, "entries", "e-attr"), { userId: SUP, type: "time", qty: "8", date: "2026-09-02" })));
 await check("a manager CAN still correct the hours on it", () =>
-  assertSucceeds(setDoc(doc(sup, "companies", CID, "entries", "e-crew"), { userId: CREW, type: "time", qty: "7.5", date: "2026-09-02" })));
+  assertSucceeds(setDoc(doc(sup, "companies", CID, "entries", "e-attr"), { userId: CREW, type: "time", qty: "7.5", date: "2026-09-02" })));
 
 await check("crew CAN create a report on site", () =>
   assertSucceeds(setDoc(doc(crew, "companies", CID, "reports", "r-new"), { userId: CREW, projectId: "p1", date: "2026-09-02", signedAt: null })));
