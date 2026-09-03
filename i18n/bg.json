@@ -647,5 +647,8 @@
   "photoTool_arrow": "Стрелка",
   "photoTool_rect": "Рамка",
   "photoTool_circle": "Кръг",
-  "photoTool_text": "Текст"
+  "photoTool_text": "Текст",
+  "addMorePhotos": "Добави още снимки",
+  "photosSelected": "избрани снимки",
+  "photosAdded": "добавени снимки"
 }

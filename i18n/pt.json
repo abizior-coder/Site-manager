@@ -647,5 +647,8 @@
   "photoTool_arrow": "Seta",
   "photoTool_rect": "Moldura",
   "photoTool_circle": "Círculo",
-  "photoTool_text": "Texto"
+  "photoTool_text": "Texto",
+  "addMorePhotos": "Adicionar mais fotos",
+  "photosSelected": "fotos selecionadas",
+  "photosAdded": "fotos adicionadas"
 }

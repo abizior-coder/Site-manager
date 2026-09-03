@@ -647,5 +647,8 @@
   "photoTool_arrow": "Strzałka",
   "photoTool_rect": "Ramka",
   "photoTool_circle": "Okrąg",
-  "photoTool_text": "Tekst"
+  "photoTool_text": "Tekst",
+  "addMorePhotos": "Dodaj więcej zdjęć",
+  "photosSelected": "zdjęć wybranych",
+  "photosAdded": "zdjęć dodano"
 }

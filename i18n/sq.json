@@ -647,5 +647,8 @@
   "photoTool_arrow": "Shigjetë",
   "photoTool_rect": "Kornizë",
   "photoTool_circle": "Rreth",
-  "photoTool_text": "Tekst"
+  "photoTool_text": "Tekst",
+  "addMorePhotos": "Shto më shumë foto",
+  "photosSelected": "foto të zgjedhura",
+  "photosAdded": "foto u shtuan"
 }

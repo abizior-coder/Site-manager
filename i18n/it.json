@@ -647,5 +647,8 @@
   "photoTool_arrow": "Freccia",
   "photoTool_rect": "Riquadro",
   "photoTool_circle": "Cerchio",
-  "photoTool_text": "Testo"
+  "photoTool_text": "Testo",
+  "addMorePhotos": "Aggiungi altre foto",
+  "photosSelected": "foto selezionate",
+  "photosAdded": "foto aggiunte"
 }

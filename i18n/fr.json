@@ -647,5 +647,8 @@
   "photoTool_arrow": "Flèche",
   "photoTool_rect": "Cadre",
   "photoTool_circle": "Cercle",
-  "photoTool_text": "Texte"
+  "photoTool_text": "Texte",
+  "addMorePhotos": "Ajouter d'autres photos",
+  "photosSelected": "photos sélectionnées",
+  "photosAdded": "photos ajoutées"
 }

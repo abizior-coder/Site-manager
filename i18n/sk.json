@@ -647,5 +647,8 @@
   "photoTool_arrow": "Šípka",
   "photoTool_rect": "Rám",
   "photoTool_circle": "Kruh",
-  "photoTool_text": "Text"
+  "photoTool_text": "Text",
+  "addMorePhotos": "Pridať ďalšie fotky",
+  "photosSelected": "vybraných fotiek",
+  "photosAdded": "fotiek pridaných"
 }

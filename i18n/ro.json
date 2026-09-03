@@ -647,5 +647,8 @@
   "photoTool_arrow": "Săgeată",
   "photoTool_rect": "Cadru",
   "photoTool_circle": "Cerc",
-  "photoTool_text": "Text"
+  "photoTool_text": "Text",
+  "addMorePhotos": "Adaugă mai multe fotografii",
+  "photosSelected": "fotografii selectate",
+  "photosAdded": "fotografii adăugate"
 }

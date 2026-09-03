@@ -647,5 +647,8 @@
   "photoTool_arrow": "Pfiil",
   "photoTool_rect": "Rahme",
   "photoTool_circle": "Chreis",
-  "photoTool_text": "Text"
+  "photoTool_text": "Text",
+  "addMorePhotos": "No meh Fotis zuefüege",
+  "photosSelected": "Fotis usgwählt",
+  "photosAdded": "Fotis zuegfüegt"
 }

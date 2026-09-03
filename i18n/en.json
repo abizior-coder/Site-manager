@@ -685,5 +685,8 @@
   "photoTool_arrow": "Arrow",
   "photoTool_rect": "Box",
   "photoTool_circle": "Circle",
-  "photoTool_text": "Text"
+  "photoTool_text": "Text",
+  "addMorePhotos": "Add more photos",
+  "photosSelected": "photos selected",
+  "photosAdded": "photos added"
 }

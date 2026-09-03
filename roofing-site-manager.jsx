@@ -1354,6 +1354,9 @@ export default function SiteManager() {
   const [memberLangs, setMemberLangs] = useState([]);
   // A photo opened full-screen, and the same photo under the pen.
   const [photoView, setPhotoView] = useState(null); // { entry, src }
+  // More than one photo picked at once: the first is the preview, the rest
+  // wait here and each becomes its own entry on save.
+  const [photoExtra, setPhotoExtra] = useState([]);
   const [photoEdit, setPhotoEdit] = useState(null); // { entry, src }
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
@@ -3583,6 +3586,7 @@ export default function SiteManager() {
     // filed wrong.
     setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false, trade: lastTrade, supplier: "", artNo: "" });
     setPhotoPreview(null);
+    setPhotoExtra([]);
     setPhotoPreviewId(null);
     setSuggestCat(null);
     setPendingSuggestion(null);
@@ -3596,6 +3600,7 @@ export default function SiteManager() {
     // reuses that document instead of writing a duplicate.
     setPhotoPreviewId(entry.photoId || null);
     setPhotoPreview(entry.photo || null);
+    setPhotoExtra([]);
     if (!entry.photo && entry.photoId) loadPhoto(entry.photoId).then((v) => setPhotoPreview(v));
     setSuggestCat(null);
     setPendingSuggestion(null);
@@ -3730,7 +3735,16 @@ export default function SiteManager() {
         persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description || t.photoLabel, photoId, photo: null } : e)) });
         if (previous && previous.photoId && previous.photoId !== photoId) deletePhoto(previous.photoId);
       } else {
-        addEntry({ type: "photo", projectId: addModal.projectId, description: form.description || t.photoLabel, photoId });
+        // One entry per photo, the caption on each; stored one document at a
+        // time so a slow connection loses at most the last one, not all.
+        const extraIds = [];
+        for (const dataUrl of photoExtra) {
+          try { extraIds.push(await savePhoto(dataUrl)); } catch { showToast(t.couldntSave); }
+        }
+        const caption = form.description || t.photoLabel;
+        const made = [photoId, ...extraIds].map((id) => newEntry({ type: "photo", projectId: addModal.projectId, description: caption, photoId: id }));
+        persist({ entries: [...made, ...entries] });
+        if (made.length > 1) showToast(`${made.length} ${t.photosAdded}`);
       }
     } else {
       if (!form.description.trim()) return;
@@ -3768,17 +3782,28 @@ export default function SiteManager() {
   }
 
   async function handleFile(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []).filter((f) => f && (!f.type || /^image\//.test(f.type)));
+    e.target.value = "";
+    if (!files.length) return;
+    // Editing an existing photo replaces that one photo; adding takes as
+    // many as were picked. Twelve is plenty for one tap and keeps a slow
+    // phone from chewing through a whole camera roll.
+    const editing = !!(addModal && addModal.editingId);
+    const list = editing ? files.slice(0, 1) : files.slice(0, 12);
     // Must be a data URL, not URL.createObjectURL: a blob: URL dies with the
     // page session, so a persisted entry would show a broken image on reload
     // and never render on another device.
-    try {
-      const { dataUrl } = await fileToScaledImage(file);
-      setPhotoPreview(dataUrl);
+    const scaled = [];
+    for (const file of list) {
+      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch { showToast(t.couldntSave); }
+    }
+    if (!scaled.length) return;
+    if (editing || !photoPreview) {
+      setPhotoPreview(scaled[0]);
       setPhotoPreviewId(null); // a new image needs its own document
-    } catch {
-      showToast(t.couldntSave);
+      if (!editing) setPhotoExtra((x) => [...x, ...scaled.slice(1)]);
+    } else {
+      setPhotoExtra((x) => [...x, ...scaled]);
     }
   }
 
@@ -7527,12 +7552,25 @@ export default function SiteManager() {
         <Modal onClose={() => setAddModal(null)} title={addModal.editingId ? t.editLabel : (addModal.type === "material" ? t.addMaterialTitle : addModal.type === "tool" ? t.addToolTitle : t.attachPhotoTitle)}>
           {addModal.type === "photo" ? (
             <div className="flex flex-col gap-3">
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+              <input ref={fileRef} data-photo-input type="file" accept="image/*" multiple={!addModal.editingId} onChange={handleFile} className="hidden" />
               <button onClick={() => fileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-6 rounded-xl flex flex-col items-center gap-2">
                 <Camera size={22} color={COLORS.accent} />
-                <span style={{ color: COLORS.accent }} className="text-sm font-bold">{t.attachPhotoTitle}</span>
+                <span style={{ color: COLORS.accent }} className="text-sm font-bold">{photoPreview && !addModal.editingId ? t.addMorePhotos : t.attachPhotoTitle}</span>
               </button>
               {photoPreview && <img src={photoPreview} alt="preview" className="w-full rounded-lg max-h-48 object-cover" />}
+              {photoExtra.length > 0 && (
+                <div>
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{1 + photoExtra.length} {t.photosSelected}</div>
+                  <div data-photo-extra className="grid grid-cols-4 gap-1.5">
+                    {photoExtra.map((src, i) => (
+                      <div key={i} className="relative">
+                        <img src={src} alt="" className="w-full h-16 object-cover rounded-md" />
+                        <button onClick={() => setPhotoExtra((x) => x.filter((_, j) => j !== i))} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"><X size={11} color="#fff" /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t.captionPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             </div>
           ) : (

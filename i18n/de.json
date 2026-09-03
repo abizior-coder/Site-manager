@@ -685,5 +685,8 @@
   "photoTool_arrow": "Pfeil",
   "photoTool_rect": "Rahmen",
   "photoTool_circle": "Kreis",
-  "photoTool_text": "Text"
+  "photoTool_text": "Text",
+  "addMorePhotos": "Weitere Fotos hinzufügen",
+  "photosSelected": "Fotos ausgewählt",
+  "photosAdded": "Fotos hinzugefügt"
 }
