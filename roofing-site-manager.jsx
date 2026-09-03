@@ -7372,7 +7372,8 @@ export default function SiteManager() {
           entry={photoView.entry}
           onClose={() => setPhotoView(null)}
           onEdit={() => setPhotoEdit({ entry: photoView.entry, src: photoView.src })}
-          onRestore={photoView.entry.originalPhotoId ? () => restorePhotoOriginal(photoView.entry) : null}
+          onRestore={photoView.entry.originalPhotoId && (canManage() || photoView.entry.userId === user?.uid) ? () => restorePhotoOriginal(photoView.entry) : null}
+          canEdit={canManage() || photoView.entry.userId === user?.uid}
           t={t}
         />
       )}
@@ -8581,7 +8582,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
 // A photo full-screen: pinch or scroll to zoom, drag to pan, double-tap to
 // jump between fit and 2.5x. A crack in a tile is a few pixels on a phone;
 // this is how the Polier actually looks at it.
-function PhotoViewer({ src, entry, onClose, onEdit, onRestore, t }) {
+function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = true, t }) {
   const [view, setView] = useState({ scale: 1, tx: 0, ty: 0 });
   const pointers = useRef(new Map());
   const gesture = useRef(null);
@@ -8654,7 +8655,9 @@ function PhotoViewer({ src, entry, onClose, onEdit, onRestore, t }) {
             <button onClick={onRestore} title={t.photoRestore} style={{ color: COLORS.amber }} className="w-9 h-9 flex items-center justify-center"><RotateCcw size={18} /></button>
           )}
           <a href={src} download={`${(entry?.description || "foto").replace(/[^\w.-]+/g, "_")}.jpg`} title={t.filesDownload} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><Download size={18} /></a>
-          <button data-photo-edit onClick={onEdit} title={t.photoEdit} style={{ background: COLORS.accent }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Paintbrush size={18} color="#fff" /></button>
+          {canEdit && (
+            <button data-photo-edit onClick={onEdit} title={t.photoEdit} style={{ background: COLORS.accent }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Paintbrush size={18} color="#fff" /></button>
+          )}
           <button onClick={onClose} className="w-9 h-9 flex items-center justify-center"><X size={20} color={COLORS.muted} /></button>
         </div>
       </div>
@@ -8694,7 +8697,8 @@ function PhotoEditor({ src, onCancel, onSave, t }) {
   const [colour, setColour] = useState(PHOTO_COLOURS[0]);
   const [thick, setThick] = useState(2); // 1..3
   const [shapes, setShapes] = useState([]);
-  const [draft, setDraft] = useState(null);
+  const draftRef = useRef(null);
+  const [tick, setTick] = useState(0); // bumps to redraw while a stroke is in progress
   const [textAt, setTextAt] = useState(null);
   const [textValue, setTextValue] = useState("");
 
@@ -8755,8 +8759,8 @@ function PhotoEditor({ src, onCancel, onSave, t }) {
     ctx.clearRect(0, 0, c.width, c.height);
     ctx.drawImage(img, 0, 0, c.width, c.height);
     shapes.forEach((sh) => drawShape(ctx, c, sh));
-    if (draft) drawShape(ctx, c, draft);
-  }, [shapes, draft, ready]);
+    if (draftRef.current) drawShape(ctx, c, draftRef.current);
+  }, [shapes, tick, ready]);
 
   const toCanvas = (e) => {
     const c = canvasRef.current; const r = c.getBoundingClientRect();
@@ -8767,19 +8771,22 @@ function PhotoEditor({ src, onCancel, onSave, t }) {
     try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     const p = toCanvas(e); const c = canvasRef.current; const width = strokeFor(c);
     if (tool === "text") { setTextAt(p); setTextValue(""); return; }
-    if (tool === "pen") setDraft({ tool, colour, width, points: [p] });
-    else setDraft({ tool, colour, width, from: p, to: p });
+    draftRef.current = tool === "pen" ? { tool, colour, width, points: [p] } : { tool, colour, width, from: p, to: p };
+    setTick((n) => n + 1);
   };
   const onMove = (e) => {
-    if (!draft) return;
+    const d = draftRef.current;
+    if (!d) return;
     const p = toCanvas(e);
-    setDraft((d) => (d.tool === "pen" ? { ...d, points: [...d.points, p] } : { ...d, to: p }));
+    if (d.tool === "pen") d.points.push(p); else d.to = p;
+    setTick((n) => n + 1);
   };
   const onUp = () => {
-    if (!draft) return;
-    const d = draft; setDraft(null);
+    const d = draftRef.current;
+    if (!d) return;
+    draftRef.current = null;
     const moved = d.tool === "pen" ? d.points.length > 1 : Math.hypot(d.to.x - d.from.x, d.to.y - d.from.y) > 3;
-    if (moved) setShapes((s) => [...s, d]);
+    if (moved) setShapes((s) => [...s, d]); else setTick((n) => n + 1);
   };
   const commitText = () => {
     if (textAt && textValue.trim()) {
