@@ -12,6 +12,7 @@ import {
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
 import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
+import { sanitiseBackup, sanitiseProjectCode } from "./import-guard.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -2457,25 +2458,26 @@ export default function SiteManager() {
   async function restoreFullBackup(file) {
     try {
       const text = await file.text();
-      const data = JSON.parse(text);
-      if (!data || !Array.isArray(data.projects)) { showToast(t.invalidBackupCode); return; }
+      // Checked and cut to shape before anything lands: known fields, capped
+      // sizes, fresh ids, photos re-keyed and only if they are images. A file
+      // from a stranger cannot plant a record or overwrite a signature.
+      const data = sanitiseBackup(JSON.parse(text), { makeId: uid, userId: user?.uid || null });
+      if (!data) { showToast(t.invalidBackupCode); return; }
 
       // Photos first: records reference them, and a half-restored backup with
       // missing pictures is worse than a slow one.
-      if (data.photos) {
-        for (const [id, value] of Object.entries(data.photos)) {
-          try { await window.storage.set(`photo-${id}`, value); } catch (e) {}
-        }
+      for (const [id, value] of Object.entries(data.photos)) {
+        try { await window.storage.set(`photo-${id}`, value); } catch (e) {}
       }
       await persist({
-        projects: data.projects || [],
-        entries: (data.entries || []).map((e) => ({ ...e, userId: e.userId || user?.uid || null })),
-        customers: data.customers || [],
-        documents: data.documents || [],
-        assignments: data.assignments || [],
-        leaveRequests: data.leaveRequests || [],
-        sentReports: data.sentReports || [],
-        siteReports: data.siteReports || [],
+        projects: data.projects,
+        entries: data.entries,
+        customers: data.customers,
+        documents: data.documents,
+        assignments: data.assignments,
+        leaveRequests: data.leaveRequests,
+        sentReports: data.sentReports,
+        siteReports: data.siteReports,
       });
       if (data.profile) {
         setProfile(data.profile);
@@ -2519,7 +2521,9 @@ export default function SiteManager() {
   }
 
   async function submitBackupImport() {
-    const data = decodeBackup(backupCodeInput);
+    // Same rule as the file restore: checked, cut to shape, fresh ids. A
+    // pasted photo id can never land on a signature's key.
+    const data = sanitiseBackup(decodeBackup(backupCodeInput), { makeId: uid, userId: user?.uid || null });
     if (!data) {
       setBackupError(t.invalidBackupCode);
       return;
@@ -2527,14 +2531,12 @@ export default function SiteManager() {
     // Must go through persist(): writing the old site-data blob restored the
     // screen but nothing else, so a "restored" backup vanished on reload.
     await persist({
-      projects: data.projects || [],
-      // Older backups predate attribution; without a userId the rules would
-      // refuse every restored entry.
-      entries: (data.entries || []).map((e) => ({ ...e, userId: e.userId || user?.uid || null })),
-      customers: data.customers || [],
-      documents: data.documents || [],
-      leaveRequests: data.leaveRequests || [],
-      sentReports: data.sentReports || [],
+      projects: data.projects,
+      entries: data.entries,
+      customers: data.customers,
+      documents: data.documents,
+      leaveRequests: data.leaveRequests,
+      sentReports: data.sentReports,
       activeClock: null,
     });
     if (data.profile) {
@@ -3440,20 +3442,16 @@ export default function SiteManager() {
   }
 
   function submitImportProject() {
-    const obj = decodeProjectCode(importCodeInput);
-    if (!obj) {
+    // A code is JSON somebody else made. It is checked and cut to shape
+    // before anything of it lands: known fields only, fresh ids, entries
+    // attributed to the importer.
+    const clean = sanitiseProjectCode(decodeProjectCode(importCodeInput), { makeId: uid, userId: user?.uid || null });
+    if (!clean) {
       setImportError(t.invalidCode);
       return;
     }
-    const p = { id: uid(), name: obj.name, client: obj.client || "", address: obj.address || "", category: obj.category || "flat", createdAt: Date.now() };
-    const newEntries = (obj.entries || []).map((e) => newEntry({
-      date: e.date || todayKey(),
-      type: e.type,
-      projectId: p.id,
-      description: e.description,
-      qty: e.qty,
-      unit: e.unit,
-    }));
+    const { entries: imported, ...p } = clean;
+    const newEntries = imported.map((e) => ({ ...e, projectId: p.id }));
     persist({ projects: [p, ...projects], entries: [...newEntries, ...entries] });
     setImportModalOpen(false);
     setImportCodeInput("");

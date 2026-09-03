@@ -9,6 +9,7 @@ import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
+import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-guard.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -269,6 +270,52 @@ t("two breaks a day: nine and noon", BREAKS.map((b) => `${b.key}@${b.start}/${b.
 }
 t("a break before any clock entry does not read as negative work", netHours([{ type: "break", breakKey: "znuni", qty: "0.5" }]), 0);
 t("a break of unknown kind falls back to its stored hours", breakHours([{ type: "break", breakKey: "kaffee", qty: "0.25" }]), 0.25);
+
+// --- what a pasted code or a backup may bring in ----------------------------
+// The importer used to spread whatever JSON it was handed straight into state.
+{
+  let n = 0;
+  const makeId = () => `new-${++n}`;
+  const PNG = "data:image/png;base64,iVBORw0KGgo=";
+  const hostile = {
+    projects: [{ id: "p1", name: "Dach", client: "Sutter", address: "Lettenring 21", category: "pitched", status: "construction", __proto__polluted: true, evil: "<script>" }],
+    entries: [
+      { id: "e1", type: "photo", projectId: "p1", photoId: "sig-of-a-real-rapport", description: "x", date: "2026-09-01" },
+      { id: "e2", type: "time", projectId: "p1", qty: "8", date: "2026-09-01", userId: "somebody-else" },
+      { id: "e3", type: "material", projectId: "p-unknown", description: "Lattung", date: "bad-date" },
+      "not an object",
+    ],
+    photos: { "sig-of-a-real-rapport": PNG, "html": "data:text/html;base64,PHNjcmlwdD4=", "js": "javascript:alert(1)" },
+    siteReports: [{ id: "r1", projectId: "p1", date: "2026-09-01", hours: "8", signatureId: "sig-of-a-real-rapport", signerName: "Kunde", signedAt: 1 }],
+    customers: [{ id: "c1", name: "Sutter" }, { id: "c2" }],
+  };
+  const out = sanitiseBackup(hostile, { makeId, userId: "me" });
+  t("a pasted photo id is never adopted", Object.keys(out.photos).includes("sig-of-a-real-rapport"), false);
+  t("a photo comes in under a fresh id", Object.keys(out.photos).length, 1);
+  const photoEntry = out.entries.find((e) => e.type === "photo");
+  t("the entry follows the photo to its new id", photoEntry.photoId, Object.keys(out.photos)[0]);
+  t("the signed report follows its signature to the new id", out.siteReports[0].signatureId, Object.keys(out.photos)[0]);
+  t("html and javascript 'photos' are dropped", out.dropped.photos, 2);
+  t("entries are attributed to the importer, not to whoever the file says", out.entries.every((e) => e.userId === "me"), true);
+  t("entries get fresh ids", out.entries.every((e) => e.id.startsWith("new-")), true);
+  t("an entry whose project is not in the backup loses the reference", out.entries.find((e) => e.description === "Lattung").projectId, null);
+  t("a bad date becomes today", /^\d{4}-\d{2}-\d{2}$/.test(out.entries.find((e) => e.description === "Lattung").date), true);
+  t("a non-object entry is dropped", out.entries.length, 3);
+  t("unknown project fields do not travel", "evil" in out.projects[0] || "__proto__polluted" in out.projects[0], false);
+  t("a customer without a name is dropped", out.customers.length, 1);
+  t("project references are remapped everywhere", out.siteReports[0].projectId, out.projects[0].id);
+}
+t("a jpeg data url is a photo", isPhotoDataUrl("data:image/jpeg;base64,/9j/4AAQ"), true);
+t("an html data url is not", isPhotoDataUrl("data:text/html;base64,PHNjcmlwdD4="), false);
+t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
+{
+  let n = 0;
+  const code = sanitiseProjectCode({ name: "Dach Muster", client: "Sutter", address: "Lettenring 21", category: "pitched", entries: [{ type: "material", description: "Siga", qty: "8", unit: "m", date: "2026-08-20", photoId: "sneaky" }], other: "x" }, { makeId: () => `id-${++n}`, userId: "me" });
+  t("a share code keeps name, client, address and category", [code.name, code.client, code.address, code.category], ["Dach Muster", "Sutter", "Lettenring 21", "pitched"]);
+  t("its entries are cleaned and attributed to the importer", [code.entries.length, code.entries[0].userId, "photoId" in code.entries[0]], [1, "me", false]);
+  t("a code without a name is refused", sanitiseProjectCode({ entries: [] }, { makeId: () => "x", userId: "me" }), null);
+  t("a backup that is not a backup is refused", sanitiseBackup({ hello: 1 }, { makeId: () => "x", userId: "me" }), null);
+}
 {
 }
 
