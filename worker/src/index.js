@@ -1,8 +1,8 @@
 import { handleFiles, firestoreMember } from "./files.js";
+import { checkLimits } from "./limits.js";
 
 const MODEL = "claude-sonnet-5";
 const MAX_IMAGE_BLOCKS = 4;
-const DAILY_LIMIT = 200; // scans per account per day, when KV is bound
 
 const FIREBASE_PROJECT_ID = "site-log-ab6a9";
 const FIREBASE_API_KEY = "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw";
@@ -52,20 +52,6 @@ async function verifyUser(request) {
   return { ok: true, uid: user.localId, token };
 }
 
-// Per-account daily cap. A valid account is now required, but sign-up is open,
-// so a determined abuser could still register and hammer the endpoint.
-// Enforced only when a KV namespace is bound, so the Worker stays deployable
-// without one; add the binding to turn the cap on.
-async function overDailyLimit(env, uid) {
-  if (!env.RATE_LIMIT) return false;
-  const key = `${uid}:${new Date().toISOString().slice(0, 10)}`;
-  const used = parseInt((await env.RATE_LIMIT.get(key)) || "0", 10);
-  if (used >= DAILY_LIMIT) return true;
-  // Expires a day after the window it counts, so old counters clean themselves.
-  await env.RATE_LIMIT.put(key, String(used + 1), { expirationTtl: 172800 });
-  return false;
-}
-
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -87,16 +73,22 @@ export default {
     const auth = await verifyUser(request);
     if (!auth.ok) return json({ error: auth.error }, auth.status, headers);
 
-    if (await overDailyLimit(env, auth.uid)) {
-      return json({ error: "daily scan limit reached — try again tomorrow" }, 429, headers);
-    }
-
     let body;
     try {
       body = await request.json();
     } catch {
       return json({ error: "invalid JSON body" }, 400, headers);
     }
+
+    // The call is charged to a company, and only a member of that company
+    // may make it. Sign-up is open, so a cap per account is a cap per
+    // throwaway account; the cap that protects the bill is the company's.
+    const cid = typeof body.companyId === "string" ? body.companyId.trim() : "";
+    if (!cid) return json({ error: "company missing" }, 400, headers);
+    const membership = await firestoreMember(FIREBASE_PROJECT_ID, cid, auth.uid, auth.token);
+    if (!membership.member) return json({ error: "not a member of this company" }, 403, headers);
+    const limited = await checkLimits(env.RATE_LIMIT, { uid: auth.uid, cid });
+    if (limited) return json({ error: limited.error }, limited.status, headers);
 
     const content = body && body.content;
     if (!Array.isArray(content) || content.length === 0) {

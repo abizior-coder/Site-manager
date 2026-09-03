@@ -389,6 +389,10 @@ await check("owner CAN delete an invite", () =>
   assertSucceeds(deleteDoc(doc(owner, "invites", "NEWCODE"))));
 
 // --- legacy paths --------------------------------------------------------
+await check("a personal kv document over 256 KB is refused", () =>
+  assertFails(setDoc(doc(owner, "users", OWNER, "kv", "big"), { value: "x".repeat(262145) })));
+await check("a personal kv document under 256 KB is fine", () =>
+  assertSucceeds(setDoc(doc(owner, "users", OWNER, "kv", "small"), { value: "x".repeat(1000) })));
 await check("old public local/* stays denied", () =>
   assertFails(getDoc(doc(anon, "local", "site-data"))));
 await check("owner CAN still read their personal kv (migration source)", () =>

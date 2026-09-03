@@ -41,7 +41,14 @@ service cloud.firestore {
       // The old personal key/value store. Still readable by its owner so the
       // migration can copy it, and so it remains a rollback path.
       match /kv/{key} {
-        allow read, write: if signedIn() && request.auth.uid == uid;
+        allow read: if signedIn() && request.auth.uid == uid;
+        // 256 KB per document: enough for any preference, not enough to fill
+        // the free tier from a throwaway account.
+        allow write: if signedIn() && request.auth.uid == uid
+                     && (request.method == 'delete'
+                         || !('value' in request.resource.data)
+                         || !(request.resource.data.value is string)
+                         || request.resource.data.value.size() <= 262144);
       }
     }
 

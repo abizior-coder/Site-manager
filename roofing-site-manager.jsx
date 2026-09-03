@@ -3886,7 +3886,7 @@ export default function SiteManager() {
       const res = await fetch(CLAUDE_PROXY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, companyId: getCompanyId() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `proxy error ${res.status}`);
