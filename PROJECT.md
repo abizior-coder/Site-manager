@@ -37,6 +37,7 @@ surface only; the office screens fall back to English by design.
 | App | `roofing-site-manager.jsx` | The whole app — one ~7,800-line React component tree |
 | Translations | `i18n/<lang>.json`, `i18n/index.js` | One file per language; non-English falls back to English per key |
 | Price lists | `price-list.js` | Parses supplier CSV / DATANORM into the article master |
+| Import guard | `import-guard.js` | Cuts a pasted share code or a restored backup to shape: known fields, capped sizes, fresh ids, photos re-keyed and image-only |
 | Mount | `entry.jsx` | Build entry; mounts `SiteManager` into `#root` |
 | Shell | `index.html` | Tailwind CDN only — deliberately no app logic |
 | Firebase | `firebase-client.js` | SDK boot, auth, offline cache |
@@ -46,7 +47,7 @@ surface only; the office screens fall back to English by design.
 | Tests | `logic.test.mjs`, `render.test.mjs`, `order-flow.test.mjs`, `rules.test.mjs` | `npm test` runs all four |
 | Bundle | `bundle.js` | **Generated — never edit by hand** |
 | Cache-bust | `scripts/stamp.mjs` | Stamps `bundle.js?v=<hash>` into `index.html` |
-| AI proxy + files | `worker/src/index.js`, `worker/src/files.js` | Cloudflare Worker holding the Anthropic key; `/files/*` serves plans from R2. `node worker/files.test.mjs` runs it against an in-memory bucket |
+| AI proxy + files | `worker/src/index.js`, `worker/src/files.js`, `worker/src/limits.js` | Cloudflare Worker holding the Anthropic key; `/files/*` serves plans from R2. Every proxy call names the company it is charged to; membership is checked as the caller and three KV caps apply (20/min/account, 200/day/account, **600/day/company** — the one that protects the bill, since a company takes an invite to enter). `npm run test:worker` |
 
 **Build and deploy:**
 
@@ -106,10 +107,10 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/assignments/{id}` | Who works where on a given day — members read, managers write. **Several per person and day are normal** (morning on one roof, afternoon on another); a drop adds, a click on a chip removes that one. The day is started *inside the job* (`startDayOn`), not from a list on Today — the Polier assigns, the worker opens the job and taps. |
 | `companies/{cid}/leave/{id}` | Absences — anyone raises their own, only a manager decides |
 | `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
-| `companies/{cid}/members/{uid}` | `role: owner \| supervisor \| crew` |
-| `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>`, `xl-<projectId>` (note translations, `{entryId: {lang: text}}`, shared so a note is translated once for the crew) |
+| `companies/{cid}/members/{uid}` | `role: owner \| supervisor \| crew`, `active` — **`active: false` is not a member** (rules, Worker and `loadMembership` agree); the owner removes people from the Team tab, the document stays so their entries keep a name |
+| `companies/{cid}/kv/{key}` | Flat keys, **rules by prefix and caller** (since the 2026-09-03 audit): `site-profile-<uid>`, `site-docs-<uid>`, `site-dock-pins-<uid>`, `site-lang-<uid>`, `clock-<uid>` are the person's alone (managers may *read* clocks); `photo-<id>` carries `by` (creator) and only they or a manager may change/delete it, `kind: 'signature'` is immutable; `site-material-catalog`, `site-tech-library`, `site-langs` (`{uid: lang}`, translation targets), `xl-<projectId>` (note translations) are member-written; anything else is managers'. Values ≤ 1 MB. **Listing the collection is refused** — read keys by name (the dashboard reads `clock-<uid>` per member). |
 | `users/{uid}` | Which company the account belongs to |
-| `invites/{code}` | Short-lived join codes |
+| `invites/{code}` | Join codes, **3 days, one person each**: joining is one batch (membership + `users` record + `usedBy`), and the rules check it as one — `getAfter` on the invite, `existsAfter` on the membership. Nothing else can mark a code used. |
 
 The app still holds `projects`, `entries`, `customers` and `documents` as
 arrays in React state. `persist()` **diffs each array against the last known
