@@ -627,5 +627,9 @@
   "break_znuni": "Znüni",
   "break_mittag": "Obiad",
   "typeBreak": "Przerwa",
-  "breaksDeducted": "Przerwy odjęte"
+  "breaksDeducted": "Przerwy odjęte",
+  "translateBtn": "Przetłumacz",
+  "translateAll": "Przetłumacz wszystko",
+  "translationLabel": "Tłumaczenie",
+  "translateFailed": "Tłumaczenie nie powiodło się — sprawdź połączenie i spróbuj ponownie."
 }

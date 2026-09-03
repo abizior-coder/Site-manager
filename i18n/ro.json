@@ -627,5 +627,9 @@
   "break_znuni": "Pauza de la nouă",
   "break_mittag": "Prânz",
   "typeBreak": "Pauză",
-  "breaksDeducted": "Pauze scăzute"
+  "breaksDeducted": "Pauze scăzute",
+  "translateBtn": "Tradu",
+  "translateAll": "Tradu tot",
+  "translationLabel": "Traducere",
+  "translateFailed": "Traducerea a eșuat — verifică conexiunea și încearcă din nou."
 }

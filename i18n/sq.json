@@ -627,5 +627,9 @@
   "break_znuni": "Pushimi i nëntës",
   "break_mittag": "Dreka",
   "typeBreak": "Pushim",
-  "breaksDeducted": "Pushimet e zbritura"
+  "breaksDeducted": "Pushimet e zbritura",
+  "translateBtn": "Përkthe",
+  "translateAll": "Përkthe të gjitha",
+  "translationLabel": "Përkthim",
+  "translateFailed": "Përkthimi dështoi — kontrollo lidhjen dhe provo sërish."
 }

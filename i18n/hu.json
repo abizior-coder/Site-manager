@@ -627,5 +627,9 @@
   "break_znuni": "Kilencórai szünet",
   "break_mittag": "Ebéd",
   "typeBreak": "Szünet",
-  "breaksDeducted": "Levont szünetek"
+  "breaksDeducted": "Levont szünetek",
+  "translateBtn": "Fordítás",
+  "translateAll": "Összes fordítása",
+  "translationLabel": "Fordítás",
+  "translateFailed": "A fordítás nem sikerült — ellenőrizd a kapcsolatot és próbáld újra."
 }

@@ -665,5 +665,9 @@
   "break_znuni": "Znüni",
   "break_mittag": "Mittag",
   "typeBreak": "Pause",
-  "breaksDeducted": "Pausen abgezogen"
+  "breaksDeducted": "Pausen abgezogen",
+  "translateBtn": "Übersetzen",
+  "translateAll": "Alle übersetzen",
+  "translationLabel": "Übersetzung",
+  "translateFailed": "Übersetzung fehlgeschlagen — Verbindung prüfen und nochmals versuchen."
 }

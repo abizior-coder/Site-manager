@@ -65,7 +65,8 @@ async function renderAs(role) {
   window.addEventListener("error", (e) => errors.push(String(e.error || e.message)));
   window.console.error = (...a) => errors.push(a.map(String).join(" "));
   window.matchMedia = window.matchMedia || (() => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }));
-  window.fetch = async () => ({ ok: true, json: async () => ({ current: {} }) });
+  // Weather reads `current`; the AI proxy (scans, translations) reads `text`.
+  window.fetch = async () => ({ ok: true, json: async () => ({ current: {}, text: "ÜBERSETZT: Regen" }) });
   window.scrollTo = () => {};
   window.HTMLCanvasElement.prototype.getContext = () => null;
   window.navigator.geolocation = { getCurrentPosition: () => {} };
@@ -145,6 +146,26 @@ async function renderAs(role) {
       check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
       check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
       check("owner: job view offers plans and documents", /Pläne & Dokumente|Plans & documents/.test(text()), "no files section in the job view");
+      // A note in one language is read in another: one tap, and the
+      // translation sits under the original.
+      {
+        // The stub job has no note yet: write one through the composer first.
+        const ta = window.document.querySelector('textarea[placeholder*="Notiz"], textarea[placeholder*="note"]');
+        if (ta) {
+          const set = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+          set.call(ta, "Shi nga ora 14, puna u ndërpre");
+          ta.dispatchEvent(new window.Event("input", { bubbles: true }));
+          const sendBtns = ta.parentElement.querySelectorAll("button");
+          sendBtns[sendBtns.length - 1]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 250));
+        }
+        const tr = window.document.querySelector("[data-translate]");
+        check("owner: a note offers a translation", !!tr, "no translate button on a note");
+        tr?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 300));
+        check("owner: the translation appears under the note", text().includes("ÜBERSETZT: Regen"), "translation not shown");
+      }
+
       // The day starts inside the job now, not from a list on Today.
       {
         const start = window.document.querySelector("[data-day-start]");

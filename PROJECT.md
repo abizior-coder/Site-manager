@@ -107,7 +107,7 @@ bundle (`firebase-client.js`, `company-store.js`), never in `index.html`.
 | `companies/{cid}/leave/{id}` | Absences — anyone raises their own, only a manager decides |
 | `companies/{cid}/private/finance` | Labour rate, IBAN, billing — **owner only** |
 | `companies/{cid}/members/{uid}` | `role: owner \| supervisor \| crew` |
-| `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>` |
+| `companies/{cid}/kv/{key}` | Photos (`photo-<id>`), prefs, tech library, `site-meta`, `clock-<uid>`, `xl-<projectId>` (note translations, `{entryId: {lang: text}}`, shared so a note is translated once for the crew) |
 | `users/{uid}` | Which company the account belongs to |
 | `invites/{code}` | Short-lived join codes |
 
@@ -232,10 +232,17 @@ These are real and currently unfixed. Ordered by how much damage they do.
    against Google, and emulator tokens are not real, so plans can only be
    tested end to end in the live app with a real account. The Worker's own
    suite covers routing, limits and who-may-delete with a fake bucket.
-11. **No merge for duplicate customers.** Migrated client strings produced
+11. **Note translation goes through the Claude proxy, not DeepL.** DeepL's free
+   API could not be relied on (its Free plan is reported closed to new
+   sign-ups, and Albanian/Swiss German support was uncertain); the Worker we
+   already run handles all 14 UI languages, is signed-in and rate-limited
+   (200 calls/day/account, shared with scans), and costs about a tenth of a
+   Rappen per note. Swap the backend inside `translateNote` if DeepL is ever
+   wanted; the cache and UI do not care.
+12. **No merge for duplicate customers.** Migrated client strings produced
    spelling variants as separate records. Deliberately not auto-merged,
    because two similar names can be two different people.
-12. `roofing-site-manager.html` was an unused stale duplicate and has been
+13. `roofing-site-manager.html` was an unused stale duplicate and has been
    deleted.
 
 ### Data safety

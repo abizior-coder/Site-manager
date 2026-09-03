@@ -627,5 +627,9 @@
   "break_znuni": "Desiata",
   "break_mittag": "Obed",
   "typeBreak": "Prestávka",
-  "breaksDeducted": "Odpočítané prestávky"
+  "breaksDeducted": "Odpočítané prestávky",
+  "translateBtn": "Preložiť",
+  "translateAll": "Preložiť všetko",
+  "translationLabel": "Preklad",
+  "translateFailed": "Preklad zlyhal — skontrolujte pripojenie a skúste znova."
 }

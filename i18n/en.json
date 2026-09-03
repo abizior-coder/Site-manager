@@ -665,5 +665,9 @@
   "break_znuni": "Morning break",
   "break_mittag": "Lunch",
   "typeBreak": "Break",
-  "breaksDeducted": "Breaks deducted"
+  "breaksDeducted": "Breaks deducted",
+  "translateBtn": "Translate",
+  "translateAll": "Translate all",
+  "translationLabel": "Translation",
+  "translateFailed": "Translation failed — check your connection and try again."
 }

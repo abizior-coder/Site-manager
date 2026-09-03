@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -861,6 +861,14 @@ const TRADES = [
 ];
 const DEFAULT_TRADE = "other";
 
+// How each UI language is named to the translator. Swiss German gets a hint,
+// because "German" alone comes back as Hochdeutsch.
+const LANG_NAMES = {
+  de: "German", gsw: "Swiss German (Schwiizerdütsch, written the way it is spoken in Zürich)", fr: "French", it: "Italian",
+  en: "English", sq: "Albanian", ro: "Romanian", bg: "Bulgarian", hu: "Hungarian", pl: "Polish", pt: "Portuguese",
+  es: "Spanish", sk: "Slovak", cs: "Czech",
+};
+
 // A material request is not a delivery. It is asked for on the roof, ordered
 // in the office, and only becomes consumed material when it actually turns up
 // -- which is the point where it may count towards the job's cost.
@@ -1336,6 +1344,10 @@ export default function SiteManager() {
   const [dockOver, setDockOver] = useState(null);
   const [dockDragOver, setDockDragOver] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Translations of site notes, per project: { [entryId]: { [lang]: text } }.
+  // Shared through kv so a note is translated once for the whole crew.
+  const [noteTranslations, setNoteTranslations] = useState({});
+  const [translatingIds, setTranslatingIds] = useState([]);
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
     try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
@@ -1597,6 +1609,18 @@ export default function SiteManager() {
 
   useEffect(() => { customersRef.current = customers; }, [customers]);
   useEffect(() => { projectFilesRef.current = projectFiles; }, [projectFiles]);
+
+  useEffect(() => {
+    if (!selectedProject || !membership) return;
+    let alive = true;
+    companyStorage.get(`xl-${selectedProject}`)
+      .then((res) => {
+        if (!alive || !res || !res.value) return;
+        try { const map = JSON.parse(res.value); setNoteTranslations((m) => ({ ...m, [selectedProject]: { ...(m[selectedProject] || {}), ...map } })); } catch (e) {}
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [selectedProject, membership]);
 
   // Everyone needs the roster once: the Team tab lists it, and the crew shown
   // on a job are looked up by uid in it. It used to load only for managers and
@@ -3772,6 +3796,38 @@ export default function SiteManager() {
       console.error("callClaude failed:", err);
       throw err;
     }
+  }
+
+  // A note written in Albanian on the roof, read in German at the desk -- or
+  // the other way round. Goes through the same proxy as the scans (signed in,
+  // rate-limited, key stays on the Worker). The result is only ever shown as
+  // text, never parsed into anything.
+  async function translateNote(entry, projectId) {
+    const target = lang;
+    const have = noteTranslations[projectId]?.[entry.id]?.[target];
+    if (have || translatingIds.includes(entry.id)) return;
+    const text = String(entry.description || "").trim();
+    if (!text) return;
+    setTranslatingIds((ids) => [...ids, entry.id]);
+    try {
+      const prompt = `Translate the following note from a construction site into ${LANG_NAMES[target] || target}. Output only the translation, nothing else. If the note is already in that language, output it unchanged. Keep names, numbers and units as they are.\n\n<note>\n${text}\n</note>`;
+      const out = String((await callClaude([{ type: "text", text: prompt }])) || "").trim().replace(/^["«»„“”']+|["«»„“”']+$/g, "");
+      if (!out) throw new Error("empty");
+      setNoteTranslations((m) => {
+        const forProject = { ...(m[projectId] || {}), [entry.id]: { ...((m[projectId] || {})[entry.id] || {}), [target]: out } };
+        companyStorage.set(`xl-${projectId}`, JSON.stringify(forProject)).catch(() => {});
+        return { ...m, [projectId]: forProject };
+      });
+    } catch (e) {
+      showToast(t.translateFailed);
+    } finally {
+      setTranslatingIds((ids) => ids.filter((x) => x !== entry.id));
+    }
+  }
+
+  async function translateAllNotes(projectId) {
+    const list = entries.filter((e) => e.projectId === projectId && e.type === "note");
+    for (const n of list) await translateNote(n, projectId);
   }
 
   function parseJsonSafe(text, fallback) {
@@ -6893,6 +6949,11 @@ export default function SiteManager() {
           activeClock={activeClock}
           onStartDay={startDayOn}
           onStopDay={clockOut}
+          translations={noteTranslations[selectedProject] || {}}
+          onTranslate={(n) => translateNote(n, selectedProject)}
+          onTranslateAll={() => translateAllNotes(selectedProject)}
+          translatingIds={translatingIds}
+          lang={lang}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -7910,7 +7971,7 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -8320,20 +8381,42 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
 
         {notes.length > 0 && (
           <div className="mb-3">
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.typeNote} ({notes.length})</div>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.typeNote} ({notes.length})</div>
+              {/* The crew writes in five languages; the desk reads in one.
+                  One tap per note, or all at once; done once per language
+                  and shared, so the next reader pays nothing. */}
+              <button data-translate-all onClick={onTranslateAll} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 shrink-0">
+                <Languages size={12} /> {t.translateAll}
+              </button>
+            </div>
             <div className="flex flex-col gap-1.5">
-              {notes.map((n) => (
+              {notes.map((n) => {
+                const xl = translations?.[n.id]?.[lang];
+                const busy = (translatingIds || []).includes(n.id);
+                return (
                 <div key={n.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start justify-between gap-2">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm break-words">{n.description}</div>
+                    {xl && xl !== String(n.description || "").trim() && (
+                      <div data-translation style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
+                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{t.translationLabel}</span>{xl}
+                      </div>
+                    )}
                     <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">{n.date}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    {!xl && (
+                      <button data-translate onClick={() => onTranslate(n)} title={t.translateBtn} style={{ color: busy ? COLORS.accent : COLORS.muted }} disabled={busy}>
+                        {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
+                      </button>
+                    )}
                     <button onClick={() => onEditEntry(n)} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
                     <button onClick={() => onDeleteEntry(n)} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

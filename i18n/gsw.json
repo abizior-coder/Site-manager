@@ -627,5 +627,9 @@
   "break_znuni": "Znüni",
   "break_mittag": "Zmittag",
   "typeBreak": "Pause",
-  "breaksDeducted": "Pause abzoge"
+  "breaksDeducted": "Pause abzoge",
+  "translateBtn": "Übersetze",
+  "translateAll": "Alli übersetze",
+  "translationLabel": "Übersetzig",
+  "translateFailed": "Übersetzig fehlgschlage — Verbindig prüefe und nomal probiere."
 }

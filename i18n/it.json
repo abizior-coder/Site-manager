@@ -627,5 +627,9 @@
   "break_znuni": "Pausa delle nove",
   "break_mittag": "Pranzo",
   "typeBreak": "Pausa",
-  "breaksDeducted": "Pause dedotte"
+  "breaksDeducted": "Pause dedotte",
+  "translateBtn": "Traduci",
+  "translateAll": "Traduci tutto",
+  "translationLabel": "Traduzione",
+  "translateFailed": "Traduzione fallita — controlla la connessione e riprova."
 }

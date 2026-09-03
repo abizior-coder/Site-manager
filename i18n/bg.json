@@ -627,5 +627,9 @@
   "break_znuni": "Почивка в девет",
   "break_mittag": "Обяд",
   "typeBreak": "Почивка",
-  "breaksDeducted": "Приспаднати почивки"
+  "breaksDeducted": "Приспаднати почивки",
+  "translateBtn": "Преведи",
+  "translateAll": "Преведи всичко",
+  "translationLabel": "Превод",
+  "translateFailed": "Преводът не успя — проверете връзката и опитайте отново."
 }
