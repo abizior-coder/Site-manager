@@ -357,5 +357,21 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   }
 }
 
+{
+  // The first paint must stay under budget: the entry plus every chunk it
+  // imports statically. Languages, the job view, the catalogues and the
+  // manager tabs are loaded on demand and do not count. Runs only when a
+  // build exists, so the pure suite still runs on a fresh checkout.
+  const { existsSync, readFileSync, statSync } = await import("node:fs");
+  if (existsSync("build/bundle.js")) {
+    const entry = readFileSync("build/bundle.js", "utf8");
+    const chunks = [...new Set([...entry.matchAll(/(?:from|import)\s*["']\.\/(chunk-[A-Z0-9]+\.js)["']/g)].map((m) => m[1]))];
+    const bytes = statSync("build/bundle.js").size + chunks.reduce((sum, c) => sum + statSync(`build/${c}`).size, 0);
+    t(`first-paint JS stays under 350 KB (${Math.round(bytes / 1024)} KB: bundle.js + ${chunks.length} static chunk${chunks.length === 1 ? "" : "s"})`, bytes < 350 * 1024, true);
+    t("tailwind.css is built and small", existsSync("tailwind.css") && statSync("tailwind.css").size < 60 * 1024, true);
+    t("index.html no longer loads Tailwind from a CDN", !readFileSync("index.html", "utf8").includes("cdn.tailwindcss.com"), true);
+  }
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

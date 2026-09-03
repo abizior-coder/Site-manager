@@ -2,7 +2,7 @@
   "name": "site-manager",
   "private": true,
   "scripts": {
-    "build": "esbuild entry.jsx --bundle --format=esm --minify --jsx=automatic --outfile=bundle.js && node scripts/stamp.mjs",
+    "build": "node -e \"require('fs').rmSync('build',{recursive:true,force:true})\" && esbuild entry.jsx --bundle --splitting --format=esm --minify --jsx=automatic --alias:react=preact/compat --alias:react-dom/client=preact/compat/client --alias:react-dom=preact/compat --alias:react/jsx-runtime=preact/jsx-runtime --loader:.json=text --outdir=build --entry-names=bundle --chunk-names=chunk-[hash] && tailwindcss -i tailwind.src.css -o tailwind.css --minify && node scripts/stamp.mjs",
     "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore \"node rules.test.mjs\"",
     "test:logic": "node logic.test.mjs",
     "test": "npm run test:logic && npm run test:worker && npm run test:render && npm run test:order && npm run test:dock && npm run test:rules",
@@ -11,16 +11,19 @@
     "emulators": "firebase emulators:start --only auth,firestore",
     "test:order": "node order-flow.test.mjs",
     "test:dock": "node dock.test.mjs",
-    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs"
+    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs",
+    "build:css": "tailwindcss -i tailwind.src.css -o tailwind.css --minify"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",
     "esbuild": "^0.23.0",
     "firebase": "^12.18.0",
-    "jsdom": "^30.0.1"
+    "jsdom": "^30.0.1",
+    "tailwindcss": "^3.4.17"
   },
   "dependencies": {
     "lucide-react": "^0.436.0",
+    "preact": "^10.29.8",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

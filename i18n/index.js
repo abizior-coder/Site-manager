@@ -1,21 +1,30 @@
 // One file per language, so adding one is adding a file rather than editing a
 // 500-line object inside an 8,000-line component. The order here is the order
 // of the language picker.
+//
+// Languages load on demand: fourteen dictionaries were half the bundle, and a
+// phone needs one of them. `loadLang` pulls one file as its own chunk; English
+// is the fallback and is loaded with the first language before the app mounts.
 
-import en from "./en.json";
-import de from "./de.json";
-import gsw from "./gsw.json";
-import fr from "./fr.json";
-import it from "./it.json";
-import es from "./es.json";
-import pt from "./pt.json";
-import pl from "./pl.json";
-import sq from "./sq.json";
-import ro from "./ro.json";
-import bg from "./bg.json";
-import hu from "./hu.json";
-import sk from "./sk.json";
-import cs from "./cs.json";
+const LOADERS = {
+  en: () => import("./en.json"),
+  de: () => import("./de.json"),
+  gsw: () => import("./gsw.json"),
+  fr: () => import("./fr.json"),
+  it: () => import("./it.json"),
+  es: () => import("./es.json"),
+  pt: () => import("./pt.json"),
+  pl: () => import("./pl.json"),
+  sq: () => import("./sq.json"),
+  ro: () => import("./ro.json"),
+  bg: () => import("./bg.json"),
+  hu: () => import("./hu.json"),
+  sk: () => import("./sk.json"),
+  cs: () => import("./cs.json"),
+};
+
+const raw = {};
+const pending = {};
 
 // Anything a translation has not caught up with falls back to English rather
 // than rendering the key name at someone on a roof.
@@ -23,27 +32,30 @@ function withFallback(dict) {
   return new Proxy(dict, {
     get(target, key) {
       const own = target[key];
-      return own === undefined || own === "" ? en[key] : own;
+      return own === undefined || own === "" ? (raw.en || {})[key] : own;
     },
   });
 }
 
-export const T = {
-  de: withFallback(de),
-  gsw: withFallback(gsw),
-  fr: withFallback(fr),
-  it: withFallback(it),
-  en,
-  sq: withFallback(sq),
-  ro: withFallback(ro),
-  bg: withFallback(bg),
-  hu: withFallback(hu),
-  pl: withFallback(pl),
-  pt: withFallback(pt),
-  es: withFallback(es),
-  sk: withFallback(sk),
-  cs: withFallback(cs),
-};
+// Loaded dictionaries by code. `T[code]` is undefined until `loadLang(code)`
+// has resolved; callers fall back to `T.de` or `T.en` meanwhile.
+export const T = {};
+
+export function isLang(code) { return Object.prototype.hasOwnProperty.call(LOADERS, code); }
+
+export function loadLang(code) {
+  const c = isLang(code) ? code : "en";
+  if (T[c]) return Promise.resolve(T[c]);
+  if (!pending[c]) {
+    pending[c] = LOADERS[c]().then((mod) => {
+      const d = mod.default !== undefined ? mod.default : mod;
+      raw[c] = typeof d === "string" ? JSON.parse(d) : d;
+      T[c] = c === "en" ? raw.en : withFallback(raw[c]);
+      return T[c];
+    }).catch((e) => { delete pending[c]; throw e; });
+  }
+  return pending[c];
+}
 
 export const LANGS = [
   { code: "de", label: "Deutsch" },

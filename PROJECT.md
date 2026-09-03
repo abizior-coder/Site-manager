@@ -415,6 +415,9 @@ The monolith is being taken apart one tab at a time. What has moved so far:
 | `ui/break-chips.jsx` | `BreakChips` |
 | `tabs/TodayTab.jsx` | the Today tab; state stays in the app and comes in as props |
 | `metrics-client.js` | the usage tracker (batched counts, flushed on hide) |
+| `tabs/MaterialsTab.jsx`, `tabs/BoardTab.jsx`, `tabs/CockpitTab.jsx` | tabs as lazy chunks, props from the app (cut with `scripts/extract-tab.py <tab> <Component>`) |
+| `tabs/ProjectDetail.jsx` | the job view, the photo viewer and editor: one chunk, loaded when a job opens |
+| `data/catalog.js`, `data/logo.js` | the shop catalogues (loaded with the Materials tab) and the printed logo (a few seconds after start) |
 | `worker/src/metrics.js` | `/metrics/<cid>`: POST counts (members), GET 30 days (owner/supervisor); KV keys `m:<cid>:<day>`, 400-day TTL |
 
 Rules for the next cut: a tab component renders only; handlers and state
@@ -426,6 +429,21 @@ the monolith because the logic tests import it from there.
 `open`, `entry.material`, `report.sent`, `rapport.sign`, `file.upload`,
 `translate` — plus a 12-hex hash per active account. No text, no site, no
 name. The owner sees them on the Cockpit ("Nutzung").
+
+**Build (since 2026-09-03 evening):** `npm run build` writes `build/bundle.js`
+plus hashed chunks (esbuild `--splitting`), `tailwind.css` (Tailwind 3.4 CLI
+from the classes the JSX uses, `lg` at 900px) and stamps both into
+`index.html`. The shipped UI runtime is **Preact through `preact/compat`**
+(esbuild aliases in the build script); React stays installed for the
+harnesses' `REACT=1` opt-out. Languages load per file (`loadLang`), English
+and German before the first paint. The first paint is the entry plus its
+static chunks — 319 KB on 2026-09-03 — and a logic test fails the suite
+above 350 KB. `qrcode` loads when a bill is drawn. The old play-CDN Tailwind
+is gone (audit L1 closed).
+
+One Preact difference matters for tests: state set in an input event
+renders a tick later than in React, so a test must wait a moment between
+typing and clicking. A person cannot click that fast.
 
 **CI** (`.github/workflows/ci.yml`) runs every suite, rules included, on
 every push and pull request; the Pages deploy still checks that the

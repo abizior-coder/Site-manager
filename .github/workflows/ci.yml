@@ -51,9 +51,9 @@ jobs:
 
       - name: Bundle matches source
         run: |
-          if [ -n "$(git status --porcelain bundle.js index.html)" ]; then
-            echo "::error::bundle.js is stale — run 'npm run build' and commit the result."
-            git --no-pager diff --stat bundle.js index.html
+          if [ -n "$(git status --porcelain build tailwind.css index.html)" ]; then
+            echo "::error::build/ or tailwind.css is stale — run 'npm run build' and commit the result."
+            git --no-pager status --short build tailwind.css index.html
             exit 1
           fi
 

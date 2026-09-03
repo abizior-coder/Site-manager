@@ -16,8 +16,9 @@ writeFileSync(ENTRY, `
 import { createRoot } from "react-dom/client";
 import SiteManager from "./roofing-site-manager.jsx";
 import { setStubRole } from "./test-stubs/company-store.js";
+import { loadLang } from "./i18n/index.js";
 window.__setRole = setStubRole;
-window.__mount = () => createRoot(document.getElementById("root")).render(<SiteManager />);
+window.__mount = async () => { await Promise.all([loadLang("en"), loadLang("de")]); createRoot(document.getElementById("root")).render(<SiteManager />); };
 `);
 
 await build({
@@ -26,6 +27,7 @@ await build({
   bundle: true,
   format: "iife",
   jsx: "automatic",
+  alias: process.env.REACT ? undefined : { react: "preact/compat", "react-dom/client": "preact/compat/client", "react-dom": "preact/compat", "react/jsx-runtime": "preact/jsx-runtime" },
   logLevel: "silent",
   plugins: [{
     // esbuild's `alias` option rejects relative specifiers, so redirect the
@@ -174,6 +176,7 @@ async function renderAs(role) {
           const set = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
           set.call(ta, "Shi nga ora 14, puna u ndërpre");
           ta.dispatchEvent(new window.Event("input", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 30)); // Preact renders a tick later than React does
           const sendBtns = ta.parentElement.querySelectorAll("button");
           sendBtns[sendBtns.length - 1]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
           await new Promise((r) => setTimeout(r, 250));

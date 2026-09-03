@@ -34,13 +34,13 @@ jobs:
       - name: Check the committed bundle matches the source
         run: |
           npm ci
-          cp bundle.js /tmp/committed-bundle.js
           npm run build
-          if ! diff -q /tmp/committed-bundle.js bundle.js > /dev/null; then
-            echo "::error::bundle.js is stale — run 'npm run build' and commit the result."
+          if [ -n "$(git status --porcelain build tailwind.css index.html)" ]; then
+            echo "::error::build/ or tailwind.css is stale — run 'npm run build' and commit the result."
+            git --no-pager status --short build tailwind.css index.html
             exit 1
           fi
-          echo "bundle.js matches the source."
+          echo "build/ and tailwind.css match the source."
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -6,7 +6,7 @@
 // later field and the bank rejects it — so the empty ultimate-creditor block
 // below is deliberate, not dead weight.
 
-import QRCode from "qrcode";
+// `qrcode` is 23 KB nobody needs until a bill is printed; it loads then.
 
 export const QR_CURRENCIES = ["CHF", "EUR"];
 
@@ -112,6 +112,7 @@ export function buildQrPayload({ iban, creditor, debtor, amount, currency, refer
 // an IBAN plus the customer's name and address, which should not be handed to
 // a third party.
 export async function qrDataUrl(payload) {
+  const QRCode = (await import("qrcode")).default;
   return QRCode.toDataURL(payload, {
     errorCorrectionLevel: "M", // mandated by the standard
     margin: 0,

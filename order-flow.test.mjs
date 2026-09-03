@@ -13,10 +13,12 @@ import { createRoot } from "react-dom/client";
 import SiteManager from "./roofing-site-manager.jsx";
 import { setStubRole } from "./test-stubs/company-store.js";
 window.__setRole = setStubRole;
-window.__mount = () => createRoot(document.getElementById("root")).render(<SiteManager />);
+import { loadLang } from "./i18n/index.js";
+window.__mount = async () => { await Promise.all([loadLang("en"), loadLang("de")]); createRoot(document.getElementById("root")).render(<SiteManager />); };
 `);
 await build({
   entryPoints: [ENTRY], outfile: OUT, bundle: true, format: "iife", jsx: "automatic", logLevel: "silent",
+  alias: process.env.REACT ? undefined : { react: "preact/compat", "react-dom/client": "preact/compat/client", "react-dom": "preact/compat", "react/jsx-runtime": "preact/jsx-runtime" },
   plugins: [{ name: "stub", setup(b) {
     b.onResolve({ filter: /(firebase-client|company-store)\.js$/ }, (a) => {
       if (a.importer.includes("test-stubs")) return null;

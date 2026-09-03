@@ -1,0 +1,1 @@
+import{Z as n,_ as o,e as r,f as e,ia as m,ua as d}from"./chunk-WQHHYP7Q.js";import"./chunk-UJVVLSSD.js";function a(t){return{render:function(u){r(u,t)},unmount:function(){e(t)}}}window.storage=n;await Promise.all([o("en"),o("de")]);a(document.getElementById("root")).render(m(d,{}));
