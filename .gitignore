@@ -13,3 +13,6 @@ docs/security-audit-*.md
 
 # Business plans stay local like the audits
 docs/value-plan-*.md
+
+# The journal holds business decisions; local like the plans
+docs/JOURNAL.md
