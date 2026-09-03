@@ -118,9 +118,16 @@ one and writes only changed documents** (`syncCollection`), which is what
 keeps two phones from overwriting each other. Call sites did not have to
 change; do not "simplify" persist back into a single write.
 
-**Entries** use a `type` discriminator: `time`, `material`, `tool`, `order`,
-`note`, `photo`, `pickup`, `inspection`. Materials and tools shown in a
-project are *filtered slices* of the entries array.
+**Entries** use a `type` discriminator: `time`, `break`, `material`, `tool`,
+`order`, `transport`, `note`, `photo`, `pickup`, `inspection`. Materials and
+tools shown in a project are *filtered slices* of the entries array.
+An `inspection` carries `checklist` (item → `ok`/`mangel`), `tiles[]`
+(`{model, count}` against `roof-tiles.js`), `wasteKg`, `areaM2`; it starts from
+the job view and can be saved without the AI. A `transport` carries the trip
+(`vehicle, from, to, departTime, arriveTime, hours, km, loadKind, weightKg,
+mulde, disposalSite`); its hours are reported apart from worked hours, and a
+waste trip is offered the job's inspection waste not yet carried
+(spec: `docs/specs/2026-09-03_inspection-and-transport.md`).
 
 Every material, tool and hour also carries a **`trade`** (`steildach`,
 `flachdach`, `spengler`, `holz`, `geruest`, `unterhalt`, `other`) and,

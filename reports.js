@@ -39,16 +39,19 @@ export function reportTotals(rows) {
   let toolsCount = 0;
   const projIds = [];
   let breaks = 0;
+  let transportHours = 0;
   for (const r of rows || []) {
     if (r.deleted) continue;
     if (r.type === "time") hours += parseFloat(r.qty || 0) || 0;
     else if (r.type === "break") breaks += parseFloat(r.qty || 0) || 0;
+    // Trips are told apart from worked time: the office decides how travel is paid.
+    else if (r.type === "transport") transportHours += parseFloat(r.hours || r.qty || 0) || 0;
     else if (r.type === "material") materialsCount++;
     else if (r.type === "tool") toolsCount++;
     if (r.projectId && !projIds.includes(r.projectId)) projIds.push(r.projectId);
   }
   // Net of breaks marked that day: what the supervisor is told is worked time.
-  return { hours: Math.max(0, Math.round((hours - breaks) * 100) / 100), breaks: Math.round(breaks * 100) / 100, materialsCount, toolsCount, projIds };
+  return { hours: Math.max(0, Math.round((hours - breaks) * 100) / 100), breaks: Math.round(breaks * 100) / 100, transportHours: Math.round(transportHours * 100) / 100, materialsCount, toolsCount, projIds };
 }
 
 // A short label per entry, stored with the report so a deleted entry can

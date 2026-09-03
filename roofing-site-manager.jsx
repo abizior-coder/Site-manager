@@ -13,6 +13,7 @@ import {
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
 import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode } from "./import-guard.js";
+import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -862,6 +863,16 @@ const TRADES = [
 ];
 const DEFAULT_TRADE = "other";
 
+// What a Polier looks at on a roof, in the order they walk it. Tapped, not
+// typed: none → OK → Mangel → none.
+// Transport: what drives, what it carries, which skip. Plain keys; the
+// labels live in i18n.
+const VEHICLES = ["lieferwagen", "pritsche", "anhaenger", "lkw_kran", "mulden_service", "pw"];
+const LOAD_KINDS = ["material", "waste", "tools", "scaffold", "other"];
+const MULDE_SIZES = ["", "3", "7", "10", "15", "20"];
+
+const INSPECTION_ITEMS = ["eindeckung", "first", "kehle", "anschluesse", "fenster", "rinne", "unterdach", "lattung", "daemmung", "schneefang", "blitzschutz", "kamin", "moos"];
+
 // How each UI language is named to the translator. Swiss German gets a hint,
 // because "German" alone comes back as Hochdeutsch.
 const LANG_NAMES = {
@@ -1223,6 +1234,7 @@ function typeMeta(type, t) {
     inspection: { label: t.typeInspection, icon: ClipboardCheck, color: "#6FB3D9" },
     order: { label: t.typeOrder, icon: Truck, color: "#C68B4F" },
     break: { label: t.typeBreak, icon: Coffee, color: "#B48EAD" },
+    transport: { label: t.typeTransport, icon: Truck, color: "#C68B4F" },
   };
   return map[type];
 }
@@ -1385,6 +1397,8 @@ export default function SiteManager() {
   const [pickupModal, setPickupModal] = useState(null);
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
+  const [tripModal, setTripModal] = useState(null);
+  const [transportFilter, setTransportFilter] = useState("");
   const inspectionFileRef = useRef(null);
   const [weather, setWeather] = useState({ loading: false, error: null, data: null });
   const [weatherLoc, setWeatherLoc] = useState({ name: "Zürich", lat: 47.3769, lon: 8.5417 });
@@ -1972,6 +1986,7 @@ export default function SiteManager() {
     return {
       rows,
       hours: live ? totals.hours : (report.hours ?? totals.hours),
+      transportHours: live ? totals.transportHours : (report.transportHours ?? totals.transportHours),
       materialsCount: live ? totals.materialsCount : (report.materialsCount ?? totals.materialsCount),
       toolsCount: live ? totals.toolsCount : (report.toolsCount ?? totals.toolsCount),
       sites: live ? totals.projIds.map(projectName).filter(Boolean) : (report.sitesVisited || []),
@@ -1982,7 +1997,7 @@ export default function SiteManager() {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const f = reportFigures(report);
     const subject = `${periodLabel} ${t.sendToSupervisor}: ${report.periodLabel}`;
-    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${f.hours}\n${t.materialsLogged}: ${f.materialsCount}\n${t.toolsLogged}: ${f.toolsCount}\n${t.sitesLabel}: ${f.sites.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
+    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${f.hours}${f.transportHours > 0 ? `\n${t.reportTransportHours}: ${f.transportHours}` : ""}\n${t.materialsLogged}: ${f.materialsCount}\n${t.toolsLogged}: ${f.toolsCount}\n${t.sitesLabel}: ${f.sites.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
     return { subject, body };
   }
 
@@ -4139,12 +4154,91 @@ export default function SiteManager() {
     setPickupModal((s) => ({ ...s, step: "code" }));
   }
 
-  function openInspection() {
+  function openInspection(projectId) {
     setInspectionModal({
       step: "form", text: "", startTime: new Date().toTimeString().slice(0, 5), ladderLength: "", psaCount: "",
-      images: [], projectId: activeClock?.projectId || projects[0]?.id || null, progress: 0, agentNote: "",
+      images: [], projectId: projectId || activeClock?.projectId || projects[0]?.id || null, progress: 0, agentNote: "",
       report: null, materials: null, error: null,
+      checklist: {}, tiles: [{ model: "", count: "" }],
     });
+  }
+
+  // Waste this job's inspections produced that no trip has carried yet --
+  // the number offered when a waste trip is logged for the job.
+  function openWasteKg(projectId) {
+    if (!projectId) return 0;
+    const produced = entries.filter((e) => e.type === "inspection" && e.projectId === projectId).reduce((s, e) => s + (parseFloat(e.wasteKg) || 0), 0);
+    const carried = entries.filter((e) => e.type === "transport" && e.projectId === projectId && e.loadKind === "waste").reduce((s, e) => s + (parseFloat(e.weightKg) || 0), 0);
+    return Math.max(0, Math.round(produced - carried));
+  }
+
+  function openTrip(projectId) {
+    const pid = projectId || activeClock?.projectId || "";
+    const pr = projects.find((p) => p.id === pid);
+    setTripModal({
+      projectId: pid, vehicle: VEHICLES[0], from: "", to: pr ? (pr.address || pr.name) : "", departTime: new Date().toTimeString().slice(0, 5), arriveTime: "",
+      km: "", loadKind: "material", weightKg: "", mulde: "", disposalSite: "", notes: "", date: todayKey(),
+    });
+  }
+
+  function setTripField(k, v) {
+    setTripModal((s) => {
+      const n = { ...s, [k]: v };
+      if (k === "projectId") { const pr = projects.find((p) => p.id === v); if (pr && !s.to) n.to = pr.address || pr.name; }
+      if ((k === "loadKind" || k === "projectId") && n.loadKind === "waste" && !n.weightKg) { const w = openWasteKg(n.projectId); if (w) n.weightKg = String(w); }
+      return n;
+    });
+  }
+
+  function saveTrip() {
+    const m = tripModal;
+    if (!m) return;
+    if (!m.from.trim() && !m.to.trim()) { showToast(t.tripNeedsRoute); return; }
+    const hours = tripHours(m.departTime, m.arriveTime);
+    persist({ entries: [newEntry({
+      type: "transport", projectId: m.projectId || null, date: m.date || todayKey(),
+      description: `${m.from.trim() || "?"} → ${m.to.trim() || "?"}`,
+      vehicle: m.vehicle, from: m.from.trim(), to: m.to.trim(), departTime: m.departTime, arriveTime: m.arriveTime, hours,
+      km: parseFloat(m.km) || 0, loadKind: m.loadKind, weightKg: parseFloat(m.weightKg) || 0, mulde: m.mulde || "", disposalSite: m.disposalSite.trim(), notes: m.notes.trim(),
+      qty: hours ? String(hours) : "", unit: hours ? "h" : "",
+    }), ...entries] });
+    showToast(t.tripSaved);
+    setTripModal(null);
+  }
+
+  function cycleInspectionItem(key) {
+    setInspectionModal((s) => {
+      const cur = (s.checklist || {})[key];
+      const next = cur === "ok" ? "mangel" : cur === "mangel" ? undefined : "ok";
+      const checklist = { ...(s.checklist || {}) };
+      if (next) checklist[key] = next; else delete checklist[key];
+      return { ...s, checklist };
+    });
+  }
+
+  function inspectionLabels() {
+    const labels = { __mangel: t.inspectMangel, __ok: t.inspectOk, __replaced: t.inspectReplaced };
+    INSPECTION_ITEMS.forEach((k) => { labels[k] = t[`inspect_${k}`]; });
+    return labels;
+  }
+
+  // Save without the advisers: the entry's text is the checklist, the
+  // replaced tiles and the note, and the structured fields ride along so
+  // Transport can pick up the waste weight.
+  function saveInspectionPlain() {
+    const m = inspectionModal;
+    if (!m || !m.projectId) return;
+    const tiles = (m.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0);
+    const waste = tilesWaste(tiles);
+    const summary = summariseInspection({ checklist: m.checklist, tiles, note: m.text, labels: inspectionLabels() });
+    if (!summary) { showToast(t.inspectNothing); return; }
+    persist({ entries: [newEntry({
+      type: "inspection", projectId: m.projectId, description: summary,
+      checklist: m.checklist || {}, tiles, wasteKg: waste.wasteKg, areaM2: waste.areaM2,
+      startTime: m.startTime || "", ladderLength: m.ladderLength || "", psaCount: m.psaCount || "",
+    }), ...entries] });
+    showToast(t.inspectionLogged);
+    setInspectionModal(null);
   }
 
   async function addInspectionImage(e) {
@@ -4188,8 +4282,14 @@ export default function SiteManager() {
   function confirmInspection() {
     if (!inspectionModal || !inspectionModal.report) return;
     const chosenMaterials = (inspectionModal.materials || []).filter((i) => i.checked);
+    const tiles = (inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0);
+    const waste = tilesWaste(tiles);
     const newEntries = [
-      newEntry({ type: "inspection", projectId: inspectionModal.projectId, description: inspectionModal.report }),
+      newEntry({
+        type: "inspection", projectId: inspectionModal.projectId, description: inspectionModal.report,
+        checklist: inspectionModal.checklist || {}, tiles, wasteKg: waste.wasteKg, areaM2: waste.areaM2,
+        startTime: inspectionModal.startTime || "", ladderLength: inspectionModal.ladderLength || "", psaCount: inspectionModal.psaCount || "",
+      }),
       ...chosenMaterials.map((i) => newEntry({ type: "material", projectId: inspectionModal.projectId, description: i.name, qty: i.qty, unit: i.unit })),
     ];
     persist({ entries: [...newEntries, ...entries] });
@@ -4488,6 +4588,7 @@ export default function SiteManager() {
             { id: "calendar", label: t.navCalendar, icon: CalendarDays },
             { id: "materials", label: t.navMaterials, icon: Package },
             { id: "team", label: t.navTeam, icon: Users },
+            { id: "transport", label: t.navTransport, icon: Truck },
             { id: "reports", label: t.navReports, icon: FileText },
             { id: "safety", label: t.navSafety, icon: ShieldAlert },
           ].map((it) => {
@@ -4497,7 +4598,7 @@ export default function SiteManager() {
             return (
               <button
                 key={it.id}
-                onClick={() => setTab(it.id)}
+                onClick={() => { setTab(it.id); setSelectedProject(null); }}
                 style={{ background: active ? `${accent}1F` : "transparent", color: active ? accent : COLORS.text }}
                 className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2.5 text-left"
               >
@@ -4533,7 +4634,7 @@ export default function SiteManager() {
             {{
               today: t.navToday, materials: t.navMaterials, calendar: t.navCalendar,
               projects: t.navProjects, reports: t.navReports, customers: t.navCustomers,
-              board: t.navBoard, cockpit: t.navCockpit, safety: t.navSafety, team: t.navTeam,
+              board: t.navBoard, cockpit: t.navCockpit, safety: t.navSafety, team: t.navTeam, transport: t.navTransport,
             }[tab] || t.appLabel}
           </div>
         </div>
@@ -4678,10 +4779,7 @@ export default function SiteManager() {
               <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.autoSortHint}</div>
             </div>
 
-            <button onClick={openInspection} disabled={projects.length === 0} style={{ background: COLORS.card, border: `1px dashed #6FB3D9`, opacity: projects.length === 0 ? 0.4 : 1 }} className="w-full rounded-xl p-3 flex items-center justify-center gap-2">
-              <ClipboardCheck size={18} color="#6FB3D9" />
-              <span className="text-sm font-semibold">{t.newInspection}</span>
-            </button>
+            {/* The roof inspection starts from the job now (see the job view). */}
 
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 mt-2">{t.todaysTickets}</div>
@@ -5981,6 +6079,63 @@ export default function SiteManager() {
           );
         })()}
 
+        {tab === "transport" && (() => {
+          const trips = entries
+            .filter((e) => e.type === "transport" && (!transportFilter || e.projectId === transportFilter))
+            .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+          const mk = monthKey();
+          const month = trips.filter((e) => (e.date || "").startsWith(mk));
+          const sum = (list, f) => Math.round(list.reduce((s, e) => s + (parseFloat(e[f]) || 0), 0) * 10) / 10;
+          const byDay = {};
+          trips.forEach((e) => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+          const jobIds = [...new Set(entries.filter((e) => e.type === "transport" && e.projectId).map((e) => e.projectId))];
+          const driverName = (uid) => { const m = team?.members; if (!m || !uid) return ""; const r = Array.isArray(m) ? m.find((x) => x.uid === uid) : m[uid]; return r?.name || ""; };
+          return (
+            <div className="flex flex-col gap-4">
+              <button data-trip-add onClick={() => openTrip()} style={{ background: COLORS.accent }} className="w-full py-3.5 rounded-xl font-bold uppercase text-sm flex items-center justify-center gap-2"><Truck size={18} /> {t.tripAdd}</button>
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
+                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.thisMonth}</div>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  {[[t.tripTrips, String(month.length), COLORS.accent], [t.tripHours, sum(month, "hours").toFixed(1), COLORS.amber], ["km", String(sum(month, "km")), COLORS.success], [t.tripWasteKg, String(sum(month.filter((e) => e.loadKind === "waste"), "weightKg")), "#C68B4F"]].map(([l, v, c]) => (
+                    <div key={l}><div style={{ color: c }} className="text-lg font-black leading-tight">{v}</div><div style={{ color: COLORS.muted }} className="text-[9px] uppercase">{l}</div></div>
+                  ))}
+                </div>
+              </div>
+              {jobIds.length > 1 && (
+                <div className="flex flex-wrap gap-1.5">
+                  <button onClick={() => setTransportFilter("")} style={{ background: !transportFilter ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold">{t.tripAllJobs}</button>
+                  {jobIds.map((id) => <button key={id} onClick={() => setTransportFilter(id)} style={{ background: transportFilter === id ? COLORS.accent : COLORS.card, border: `1px solid ${projectColour(id)}66` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold">{projectName(id)}</button>)}
+                </div>
+              )}
+              {trips.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm text-center py-6">{t.tripEmpty}</div>}
+              {Object.keys(byDay).sort().reverse().map((day) => (
+                <div key={day} className="flex flex-col gap-2">
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{day}{day === todayKey() ? ` · ${t.navToday}` : ""}</div>
+                  {byDay[day].map((e) => (
+                    <div key={e.id} data-trip-row style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Truck size={14} color="#C68B4F" className="shrink-0" />
+                        <span className="text-sm font-bold truncate">{e.from || "?"} → {e.to || "?"}</span>
+                        <span style={{ color: COLORS.muted }} className="ml-auto text-xs shrink-0">{e.departTime}{e.arriveTime ? `–${e.arriveTime}` : ""}</span>
+                      </div>
+                      <div style={{ color: COLORS.muted }} className="text-[11px] flex flex-wrap gap-x-3 gap-y-0.5">
+                        <span>{t[`vehicle_${e.vehicle}`] || e.vehicle}</span>
+                        <span>{t[`load_${e.loadKind}`] || e.loadKind}{e.weightKg ? ` · ${e.weightKg} kg` : ""}</span>
+                        {e.hours ? <span>{e.hours} h</span> : null}
+                        {e.km ? <span>{e.km} km</span> : null}
+                        {e.mulde ? <span>{t.tripMulde} {e.mulde} m³</span> : null}
+                        {e.projectId && <span style={{ color: projectColour(e.projectId) }}>{projectName(e.projectId)}</span>}
+                        {e.disposalSite && <span>→ {e.disposalSite}</span>}
+                        {driverName(e.userId) && <span>{driverName(e.userId)}</span>}
+                      </div>
+                      {e.notes && <div className="text-xs">{e.notes}</div>}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
         {tab === "safety" && (
           <div className="flex flex-col gap-4">
             <button onClick={() => { setSosOpen(true); setCprStep(0); }} style={{ background: COLORS.danger }} className="w-full py-5 rounded-xl font-black uppercase text-lg flex items-center justify-center gap-2">
@@ -7122,6 +7277,7 @@ export default function SiteManager() {
           translatingIds={translatingIds}
           lang={lang}
           onOpenPhoto={openPhoto}
+          onInspect={(pid) => openInspection(pid)}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -7329,6 +7485,7 @@ export default function SiteManager() {
             <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-3">
               <Stat label={t.sitesLabel} value={f.sites.join(", ") || "—"} color={COLORS.text} />
               <Stat label={t.hoursWorked} value={f.hours.toFixed(1)} color={COLORS.accent} />
+              {f.transportHours > 0 && <Stat label={t.reportTransportHours} value={f.transportHours.toFixed(1)} color="#C68B4F" />}
               <Stat label={t.materialsLogged} value={f.materialsCount} color={COLORS.success} />
               <Stat label={t.toolsLogged} value={f.toolsCount} color={COLORS.amber} />
               {(reportViewModal.sends || []).length > 0 && (
@@ -7401,6 +7558,7 @@ export default function SiteManager() {
               { id: "calendar", label: t.navCalendar, icon: CalendarDays },
               { id: "materials", label: t.navMaterials, icon: Package },
               { id: "team", label: t.navTeam, icon: Users },
+              { id: "transport", label: t.navTransport, icon: Truck },
               { id: "reports", label: t.navReports, icon: FileText },
               { id: "safety", label: t.navSafety, icon: ShieldAlert },
             ].map((it) => {
@@ -7410,7 +7568,7 @@ export default function SiteManager() {
               return (
                 <button
                   key={it.id}
-                  onClick={() => { setTab(it.id); setMenuOpen(false); }}
+                  onClick={() => { setTab(it.id); setMenuOpen(false); setSelectedProject(null); }}
                   style={{ background: active ? `${accent}1F` : "transparent", color: active ? accent : COLORS.text }}
                   className="w-full px-3 py-3 rounded-lg text-sm font-semibold flex items-center gap-3 text-left"
                 >
@@ -8013,6 +8171,58 @@ export default function SiteManager() {
         </Modal>
       )}
 
+      {tripModal && (() => {
+          const wasteOpen = tripModal.loadKind === "waste" ? openWasteKg(tripModal.projectId) : 0;
+          const hours = tripHours(tripModal.departTime, tripModal.arriveTime);
+          const field = { background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text };
+          const lbl = (s) => <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{s}</div>;
+          return (
+            <Modal onClose={() => setTripModal(null)} title={t.tripAdd}>
+              <div className="flex flex-col gap-2.5">
+                {lbl(t.tripProject)}
+                <select data-trip-project value={tripModal.projectId || ""} onChange={(e) => setTripField("projectId", e.target.value)} style={field} className="rounded-lg px-2 py-2 text-sm outline-none">
+                  <option value="">—</option>
+                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>{lbl(t.tripVehicle)}<select data-trip-vehicle value={tripModal.vehicle} onChange={(e) => setTripField("vehicle", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none">{VEHICLES.map((v) => <option key={v} value={v}>{t[`vehicle_${v}`]}</option>)}</select></div>
+                  <div>{lbl(t.tripDate)}<input type="date" value={tripModal.date} onChange={(e) => setTripField("date", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>{lbl(t.tripFrom)}<input data-trip-from value={tripModal.from} onChange={(e) => setTripField("from", e.target.value)} placeholder={t.tripFromPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripTo)}<input data-trip-to value={tripModal.to} onChange={(e) => setTripField("to", e.target.value)} placeholder={t.tripToPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>{lbl(t.tripDepart)}<input data-trip-depart type="time" value={tripModal.departTime} onChange={(e) => setTripField("departTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripArrive)}<input data-trip-arrive type="time" value={tripModal.arriveTime} onChange={(e) => setTripField("arriveTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripKm)}<input data-trip-km value={tripModal.km} onChange={(e) => setTripField("km", e.target.value)} inputMode="decimal" placeholder="0" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                </div>
+                {hours > 0 && <div data-trip-hours style={{ color: COLORS.amber }} className="text-xs font-bold">{t.tripHours}: {hours} h</div>}
+                {lbl(t.tripLoad)}
+                <div className="flex flex-wrap gap-1.5">
+                  {LOAD_KINDS.map((k) => (
+                    <button key={k} data-trip-load={k} onClick={() => setTripField("loadKind", k)} style={{ background: tripModal.loadKind === k ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-full text-[11px] font-bold">{t[`load_${k}`]}</button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>{lbl(t.tripWeight)}<input data-trip-weight value={tripModal.weightKg} onChange={(e) => setTripField("weightKg", e.target.value)} inputMode="decimal" placeholder="kg" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  {tripModal.loadKind === "waste" && (
+                    <div>{lbl(t.tripMulde)}<select data-trip-mulde value={tripModal.mulde} onChange={(e) => setTripField("mulde", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none">{MULDE_SIZES.map((m) => <option key={m} value={m}>{m ? `${m} m³` : "—"}</option>)}</select></div>
+                  )}
+                </div>
+                {tripModal.loadKind === "waste" && wasteOpen > 0 && (
+                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-[11px]">{t.tripWasteOpen.replace("{kg}", String(wasteOpen))}</div>
+                )}
+                {tripModal.loadKind === "waste" && (
+                  <div>{lbl(t.tripDisposal)}<input data-trip-disposal value={tripModal.disposalSite} onChange={(e) => setTripField("disposalSite", e.target.value)} placeholder={t.tripDisposalPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                )}
+                {lbl(t.notesLabel)}
+                <textarea value={tripModal.notes} onChange={(e) => setTripField("notes", e.target.value)} rows={2} style={field} className="rounded-lg px-2 py-2 text-sm outline-none resize-none" />
+                <button data-trip-save onClick={saveTrip} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.tripSave}</button>
+              </div>
+            </Modal>
+          );
+      })()}
       {inspectionModal && (
         <Modal onClose={() => setInspectionModal(null)} title={t.inspectionTitle}>
           {inspectionModal.step === "form" && (
@@ -8034,6 +8244,59 @@ export default function SiteManager() {
               <input ref={inspectionFileRef} type="file" accept="image/*" onChange={addInspectionImage} className="hidden" />
               {inspectionModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{inspectionModal.error}</div>}
               {inspectionModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{inspectionModal.detail}</div>}
+              {/* Tiles: what was looked at. Tap cycles none → OK → Mangel. */}
+              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-1">{t.inspectChecklist}</div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {INSPECTION_ITEMS.map((k) => {
+                  const st = (inspectionModal.checklist || {})[k];
+                  const col = st === "ok" ? COLORS.success : st === "mangel" ? COLORS.danger : COLORS.muted;
+                  return (
+                    <button key={k} data-inspect-tile={k} onClick={() => cycleInspectionItem(k)} style={{ background: st ? `${col}22` : COLORS.cardAlt, border: `1px solid ${st ? col : COLORS.border}`, color: st ? col : COLORS.text }} className="rounded-lg px-2 py-2 text-[11px] font-bold leading-tight text-left flex items-center gap-1.5">
+                      <span style={{ background: st ? col : COLORS.border }} className="w-2 h-2 rounded-full shrink-0" />
+                      <span className="truncate">{t[`inspect_${k}`]}</span>
+                      {st && <span className="ml-auto text-[9px] uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Replaced tiles: model from the reference, count, and what that
+                  weighs -- the number the skip is ordered by. */}
+              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-1">{t.inspectReplacedTiles}</div>
+              {(inspectionModal.tiles || []).map((row, i) => {
+                const meta = tileMeta(row.model);
+                const w = tileWaste(row.model, row.count);
+                return (
+                  <div key={i} className="flex flex-col gap-1">
+                    <div className="flex gap-2">
+                      <select
+                        data-tile-model
+                        value={ROOF_TILES.some((x) => x.key === row.model) ? row.model : (row.model ? "__free" : "")}
+                        onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value === "__free" ? " " : e.target.value }; return { ...s, tiles }; })}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="flex-1 min-w-0 rounded-lg px-2 py-2 text-sm outline-none"
+                      >
+                        <option value="">{t.inspectTileModel}</option>
+                        {ROOF_TILES.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
+                        <option value="__free">{t.inspectTileOther}</option>
+                      </select>
+                      <input data-tile-count value={row.count} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], count: e.target.value }; return { ...s, tiles }; })} inputMode="numeric" placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-20 rounded-lg px-2 py-2 text-sm outline-none" />
+                    </div>
+                    {row.model && !meta && (
+                      <input value={row.model.trim()} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value || " " }; return { ...s, tiles }; })} placeholder={t.inspectTileOther} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1.5 text-xs outline-none" />
+                    )}
+                    {meta && (
+                      <div style={{ color: COLORS.muted }} className="text-[10px]">
+                        {meta.kgPerPiece} kg/Stk{meta.perM2 ? ` · ${meta.perM2} Stk/m²` : ""}{parseFloat(row.count) > 0 ? ` → ~${w.wasteKg} kg${w.areaM2 ? ` · ${w.areaM2} m²` : ""}` : ""}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between">
+                <button onClick={() => setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.inspectAddTile}</button>
+                {(() => { const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0)); return w.wasteKg > 0 ? <span data-waste-kg style={{ color: COLORS.amber }} className="text-[11px] font-bold">{t.inspectWaste}: ~{w.wasteKg} kg</span> : null; })()}
+              </div>
+              <button data-inspect-save onClick={saveInspectionPlain} style={{ background: COLORS.accent }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.inspectSave}</button>
               <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>
               <div style={{ color: COLORS.muted }} className="text-[10px]">{t.advisorsHint}</div>
             </div>
@@ -8136,7 +8399,7 @@ function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDelete }) 
   );
 }
 
-const ENTRY_TYPE_ORDER = ["time", "break", "material", "tool", "order", "photo", "pickup", "inspection", "note"];
+const ENTRY_TYPE_ORDER = ["time", "break", "material", "tool", "order", "transport", "photo", "pickup", "inspection", "note"];
 
 function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEntry, onDelete }) {
   const [expanded, setExpanded] = useState({});
@@ -8174,11 +8437,13 @@ function EntryGroups({ entries, projectName, t, emptyLabel, onEditTime, onEditEn
   );
 }
 
-function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, t }) {
+function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, onInspect, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
   const notes = entries.filter((e) => e.type === "note");
+  const inspections = entries.filter((e) => e.type === "inspection").sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const trips = entries.filter((e) => e.type === "transport").sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const [dragOver, setDragOver] = useState(false);
   const [filesOver, setFilesOver] = useState(false);
   const fileInputRef = useRef(null);
@@ -8258,6 +8523,7 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
           <button onClick={() => onAdd("tool")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Wrench size={13} color={COLORS.amber} /> {t.tools}</button>
           <button onClick={() => onAdd("photo")} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Camera size={13} color="#7FA0C7" /> {t.photoLabel}</button>
           <button onClick={() => onScanCompare(project.id)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.success}` }} className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}</button>
+          <button data-inspect-open onClick={() => onInspect(project.id)} style={{ background: COLORS.card, border: `1px dashed #6FB3D9`, color: "#6FB3D9" }} className="col-span-2 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><ClipboardCheck size={13} /> {t.newInspection}</button>
         </div>
         {customer && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 mb-3">
@@ -8550,6 +8816,50 @@ function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, 
             );
           });
         })()}
+
+        {/* What the roof inspections found and what drove to and from this
+            job -- both used to live only on Today. */}
+        {inspections.length > 0 && (
+          <div data-job-inspections style={{ background: COLORS.card, border: `1px solid #6FB3D955` }} className="rounded-xl p-4 mb-4">
+            <div style={{ color: "#6FB3D9" }} className="text-xs font-black uppercase tracking-wide mb-2 flex items-center gap-1.5"><ClipboardCheck size={13} /> {t.jobInspections} ({inspections.length})</div>
+            <div className="flex flex-col gap-2">
+              {inspections.map((e) => (
+                <div key={e.id} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 py-2 flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-[10px]" style={{ color: COLORS.muted }}>
+                    <span>{e.date}{e.startTime ? ` · ${e.startTime}` : ""}</span>
+                    {e.wasteKg > 0 && <span style={{ color: COLORS.amber }} className="ml-auto font-bold">{t.inspectWaste}: ~{e.wasteKg} kg</span>}
+                  </div>
+                  <div style={{ whiteSpace: "pre-wrap" }} className="text-sm">{e.description}</div>
+                  {e.checklist && Object.keys(e.checklist).length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {Object.entries(e.checklist).map(([k, v]) => (
+                        <span key={k} style={{ background: v === "ok" ? `${COLORS.success}22` : `${COLORS.danger}22`, color: v === "ok" ? COLORS.success : COLORS.danger }} className="px-1.5 py-0.5 rounded text-[10px] font-bold">{t[`inspect_${k}`] || k}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2 justify-end">
+                    <button onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }}><Trash2 size={13} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {trips.length > 0 && (
+          <div data-job-trips style={{ background: COLORS.card, border: `1px solid #C68B4F55` }} className="rounded-xl p-4 mb-4">
+            <div style={{ color: "#C68B4F" }} className="text-xs font-black uppercase tracking-wide mb-2 flex items-center gap-1.5"><Truck size={13} /> {t.jobTrips} ({trips.length})</div>
+            <div className="flex flex-col gap-1.5">
+              {trips.map((e) => (
+                <div key={e.id} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 py-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                  <span style={{ color: COLORS.muted }}>{e.date}</span>
+                  <span className="font-bold">{e.from || "?"} → {e.to || "?"}</span>
+                  <span style={{ color: COLORS.muted }}>{t[`load_${e.loadKind}`] || e.loadKind}{e.weightKg ? ` · ${e.weightKg} kg` : ""}{e.hours ? ` · ${e.hours} h` : ""}{e.km ? ` · ${e.km} km` : ""}</span>
+                  <button onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }} className="ml-auto"><Trash2 size={13} /></button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.commentsTitle}</div>

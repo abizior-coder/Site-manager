@@ -226,6 +226,80 @@ async function renderAs(role) {
     check("owner: a second tap unmarks it", !/Pause\s*\(1\)/.test(text()), "break still logged after unmarking");
   }
 
+  // The roof inspection starts from the job: tiles to tap, the replaced
+  // tiles with a model and a count, and a save that needs no AI.
+  {
+    const closeModal = () => window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    const setValue = (el, v) => {
+      if (!el) return;
+      const proto = el.tagName === "SELECT" ? window.HTMLSelectElement.prototype : el.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, "value").set.call(el, v);
+      el.dispatchEvent(new window.Event(el.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
+    };
+    closeModal();
+    await new Promise((r) => setTimeout(r, 150));
+    const heute = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Heute");
+    heute?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: Today no longer carries the inspection button", !/Neue Dachinspektion|New roof inspection/.test(text()), "inspection button still on Today");
+    const projTab = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "PROJEKTE");
+    projTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const jobBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").includes("Trockenbau"));
+    jobBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const open = window.document.querySelector("[data-inspect-open]");
+    check("owner: the job view offers the roof inspection", !!open, "no inspection button in the job view");
+    open?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const tile = () => window.document.querySelector('[data-inspect-tile="first"]');
+    check("owner: the inspection shows checklist tiles", !!tile() && window.document.querySelectorAll("[data-inspect-tile]").length === 13, `${window.document.querySelectorAll("[data-inspect-tile]").length} tiles`);
+    tile()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 100));
+    tile()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    check("owner: two taps mark a tile as a defect", /MANGEL/i.test(tile()?.textContent || ""), (tile()?.textContent || "").slice(0, 40));
+    setValue(window.document.querySelector("[data-tile-model]"), "biber");
+    await new Promise((r) => setTimeout(r, 150));
+    setValue(window.document.querySelector("[data-tile-count]"), "100");
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: replaced tiles show their waste weight", /200 kg/.test(window.document.querySelector("[data-waste-kg]")?.textContent || ""), window.document.querySelector("[data-waste-kg]")?.textContent || "no waste line");
+    const before = errors.length;
+    window.document.querySelector("[data-inspect-save]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const card = window.document.querySelector("[data-job-inspections]");
+    check("owner: saving without the AI logs the inspection in the job view", errors.length === before && !window.document.querySelector("[data-inspect-save]") && /Mangel: First/.test(card?.textContent || "") && /200 kg/.test(card?.textContent || ""), errors.slice(before, before + 1).join(" | ") || (card ? (card.textContent || "").slice(0, 120) : "no inspections card in the job view"));
+
+    // Transport: a trip with times, a load and, for waste, the weight the
+    // inspection left on the roof.
+    const tBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Transport");
+    check("owner: Transport is in the menu", !!tBtn, "no Transport button in the sidebar");
+    tBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    window.document.querySelector("[data-trip-add]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    check("owner: the trip form opens", !!window.document.querySelector("[data-trip-save]"), "no trip form");
+    const sel = window.document.querySelector("[data-trip-project]");
+    const opt = sel ? [...sel.options].find((o) => o.textContent.includes("Trockenbau")) : null;
+    setValue(sel, opt?.value || "");
+    await new Promise((r) => setTimeout(r, 150));
+    setValue(window.document.querySelector("[data-trip-from]"), "Werkhof");
+    setValue(window.document.querySelector("[data-trip-to]"), "Deponie Rümlang");
+    setValue(window.document.querySelector("[data-trip-depart]"), "07:00");
+    setValue(window.document.querySelector("[data-trip-arrive]"), "08:30");
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: the trip's hours come from the two times", /1\.5 h/.test(window.document.querySelector("[data-trip-hours]")?.textContent || ""), window.document.querySelector("[data-trip-hours]")?.textContent || "no hours line");
+    window.document.querySelector('[data-trip-load="waste"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: a waste trip is offered the inspection's weight", window.document.querySelector("[data-trip-weight]")?.value === "200" && /200 kg/.test(window.document.querySelector("[data-trip-waste-hint]")?.textContent || ""), `weight=${window.document.querySelector("[data-trip-weight]")?.value} hint=${window.document.querySelector("[data-trip-waste-hint]")?.textContent}`);
+    const b2 = errors.length;
+    window.document.querySelector("[data-trip-save]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const rows = window.document.querySelectorAll("[data-trip-row]");
+    check("owner: the trip lands in the list", errors.length === b2 && rows.length === 1 && /Werkhof → Deponie Rümlang/.test(rows[0]?.textContent || "") && /1\.5 h/.test(rows[0]?.textContent || ""), errors.slice(b2, b2 + 1).join(" | ") || `${rows.length} rows: ${(rows[0]?.textContent || "").slice(0, 80)}`);
+    check("owner: the month totals count it", /1\.5/.test(text()) && /200/.test(text()), "totals missing");
+  }
+
   // The team roster is a sidebar tab, so the mobile-label walk above never
   // reaches it. It is also where crew get attached to jobs, so a crash here
   // silently costs the Polier the feature.
@@ -282,6 +356,7 @@ async function renderAs(role) {
     const drawer = window.document.querySelector("[data-menu-drawer]");
     const items = [...(drawer?.querySelectorAll("button") || [])].map((b) => (b.textContent || "").trim());
     check("crew: the menu lists Team and Sicherheit", items.includes("Team") && items.includes("Sicherheit"), items.join(" | "));
+    check("crew: the menu lists Transport", items.includes("Transport"), items.join(" | "));
     check("crew: the menu does not offer the Board", !items.includes("Board"), "Board offered to crew");
     const team = [...(drawer?.querySelectorAll("button") || [])].find((b) => (b.textContent || "").trim() === "Team");
     team?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));

@@ -10,6 +10,7 @@ import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rappo
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-guard.js";
+import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -317,6 +318,20 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("a backup that is not a backup is refused", sanitiseBackup({ hello: 1 }, { makeId: () => "x", userId: "me" }), null);
 }
 {
+  // Replaced tiles become a waste weight the skip is ordered by. An unknown
+  // model gives no number rather than a wrong one.
+  t("180 Biber weigh 360 kg and cover 5 m²", tileWaste("biber", 180), { wasteKg: 360, areaM2: 5 });
+  t("a count of zero weighs nothing", tileWaste("jura", 0), { wasteKg: 0, areaM2: 0 });
+  t("an unknown model is null, not a guess", tileWaste("wunderziegel", 50), { wasteKg: null, areaM2: null });
+  t("ridge tiles have a weight but no area", tileWaste("first", 10), { wasteKg: 38, areaM2: 0 });
+  t("rows add up and unknown rows are counted", tilesWaste([{ model: "biber", count: "100" }, { model: "Sonderziegel", count: "20" }, { model: "jura", count: "10" }]), { wasteKg: 229, areaM2: 3.5, unknown: 1 });
+  t("the summary names the defects, the tiles and the note", summariseInspection({ checklist: { first: "mangel", kehle: "ok", rinne: "ok" }, tiles: [{ model: "biber", count: "100" }], note: "Moos", labels: { first: "First", __mangel: "Mangel", __ok: "OK", __replaced: "ersetzt" } }), "Mangel: First · 2 OK · ersetzt: 100 Biberschwanz (~200 kg) · Moos");
+  t("an empty inspection has no summary", summariseInspection({}), "");
+  // Trips: hours from two times, forward over midnight, nothing from garbage.
+  t("07:00 to 08:30 is 1.5 h", tripHours("07:00", "08:30"), 1.5);
+  t("a trip over midnight counts forward", tripHours("23:30", "00:15"), 0.75);
+  t("a missing arrival is 0 h", tripHours("07:00", ""), 0);
+  t("transport hours are told apart from work", reportTotals([{ type: "time", qty: "8" }, { type: "transport", hours: 1.5, qty: "1.5" }, { type: "break", qty: "0.5" }]), { hours: 7.5, breaks: 0.5, transportHours: 1.5, materialsCount: 0, toolsCount: 0, projIds: [] });
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
