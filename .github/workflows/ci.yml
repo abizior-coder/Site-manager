@@ -1,7 +1,7 @@
 # Runs every suite on every push and pull request, so a change that breaks
 # the rules, the render or the pure logic is caught before the Pages deploy
 # publishes it. The rules suite needs the Firestore emulator, which needs
-# Java; the GitHub Ubuntu image ships one.
+# Java. jsdom 30 needs Node 22+, so the runner uses Node 24 like the desk.
 
 name: CI
 
@@ -27,10 +27,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
