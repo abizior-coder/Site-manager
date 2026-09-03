@@ -8,7 +8,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch, updateDoc } from "firebase/firestore";
 import fs from "node:fs";
 
 const CID = "company1";
@@ -103,10 +103,14 @@ await check("anonymous CANNOT read anything", () =>
   assertFails(getDoc(doc(anon, "companies", CID, "projects", "p1"))));
 
 // --- invites -------------------------------------------------------------
-await check("outsider CAN join with a valid invite", () =>
-  assertSucceeds(setDoc(doc(outsider, "companies", CID, "members", OUTSIDER), {
-    role: "crew", inviteCode: "GOODCODE",
-  })));
+// Joining is one batch: the membership and the code's consumption land
+// together, which is what makes a code single-use.
+await check("outsider CAN join with a valid invite", () => {
+  const b = writeBatch(outsider);
+  b.set(doc(outsider, "companies", CID, "members", OUTSIDER), { role: "crew", inviteCode: "GOODCODE" });
+  b.update(doc(outsider, "invites", "GOODCODE"), { usedBy: OUTSIDER });
+  return assertSucceeds(b.commit());
+});
 await check("invite CANNOT be used to grant a higher role than it names", () =>
   assertFails(setDoc(doc(testEnv.authenticatedContext("u2").firestore(), "companies", CID, "members", "u2"), {
     role: "owner", inviteCode: "GOODCODE",
@@ -289,6 +293,31 @@ await check("the owner CAN remove a member", () =>
 await testEnv.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(ctx.firestore(), "companies", CID, "members", CREW), { active: true }, { merge: true });
 });
+
+// --- invites: one code, one person, and only by joining -------------------------
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  const d = ctx.firestore();
+  await setDoc(doc(d, "invites", "JOIN2026"), { companyId: CID, role: "crew", expiresAt: Date.now() + 86400000, createdAt: Date.now(), usedBy: null });
+  await setDoc(doc(d, "invites", "BURN2026"), { companyId: CID, role: "crew", expiresAt: Date.now() + 86400000, createdAt: Date.now(), usedBy: null });
+});
+const joiner = testEnv.authenticatedContext("u-joiner").firestore();
+const joiner2 = testEnv.authenticatedContext("u-joiner2").firestore();
+const burner = testEnv.authenticatedContext("u-burner").firestore();
+function joinBatch(db, uid, code) {
+  const b = writeBatch(db);
+  b.set(doc(db, "companies", CID, "members", uid), { role: "crew", name: "New", email: "", active: true, joinedAt: Date.now(), inviteCode: code });
+  b.set(doc(db, "users", uid), { companyId: CID, displayName: "New" }, { merge: true });
+  b.update(doc(db, "invites", code), { usedBy: uid });
+  return b.commit();
+}
+await check("a newcomer CAN join with a fresh code, consuming it in the same batch", () =>
+  assertSucceeds(joinBatch(joiner, "u-joiner", "JOIN2026")));
+await check("a second person CANNOT join with the same code", () =>
+  assertFails(joinBatch(joiner2, "u-joiner2", "JOIN2026")));
+await check("joining WITHOUT consuming the code is refused", () =>
+  assertFails(setDoc(doc(joiner2, "companies", CID, "members", "u-joiner2"), { role: "crew", name: "Sneak", email: "", active: true, joinedAt: Date.now(), inviteCode: "BURN2026" })));
+await check("a stranger CANNOT burn a code without joining", () =>
+  assertFails(updateDoc(doc(burner, "invites", "BURN2026"), { usedBy: "u-burner" })));
 
 await check("a signed report CANNOT be deleted, even by a manager", () =>
   assertFails(deleteDoc(doc(sup, "companies", CID, "reports", "r-signed"))));

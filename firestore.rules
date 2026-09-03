@@ -56,12 +56,16 @@ service cloud.firestore {
       // Deletes carry no incoming data, so the company must be read from the
       // existing document rather than request.resource.
       allow delete: if signedIn() && isOwner(resource.data.companyId);
-      // Redeeming marks the code used; nothing else about it may change.
+      // Redeeming marks the code used; nothing else about it may change --
+      // and it can only happen as part of actually joining: after this write
+      // lands, the redeemer must be a member of the invite's company. That
+      // is what stops a stranger from burning a code they will not use.
       allow update: if signedIn()
                     && resource.data.usedBy == null
                     && request.resource.data.usedBy == request.auth.uid
                     && request.resource.data.companyId == resource.data.companyId
-                    && request.resource.data.role == resource.data.role;
+                    && request.resource.data.role == resource.data.role
+                    && existsAfter(/databases/$(database)/documents/companies/$(resource.data.companyId)/members/$(request.auth.uid));
     }
 
     match /companies/{cid} {
@@ -93,6 +97,10 @@ service cloud.firestore {
                                 && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.expiresAt > request.time.toMillis()
                                 && get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedBy == null
                                 && request.resource.data.role == get(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.role
+                                // One code, one person: the same write must mark the
+                                // code as used by the joiner. Two joins with one code
+                                // cannot both satisfy this.
+                                && getAfter(/databases/$(database)/documents/invites/$(request.resource.data.inviteCode)).data.usedBy == request.auth.uid
                               )
                          );
       }

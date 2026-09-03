@@ -13,6 +13,7 @@ import {
 } from "firebase/auth";
 import {
   getFirestore, connectFirestoreEmulator, doc, setDoc, collection,
+  writeBatch,
 } from "firebase/firestore";
 
 const app = initializeApp({ projectId: "site-log-ab6a9", apiKey: "fake-api-key" });
@@ -105,11 +106,15 @@ for (const p of PEOPLE.filter((x) => x.key !== "chef")) {
 
   await signOut(auth);
   await signInWithEmailAndPassword(auth, p.email, PASSWORD);
-  await setDoc(doc(db, "companies", CID, "members", uids[p.key]), {
+  // One batch, like the app: the rules let a code be redeemed only together
+  // with the membership it creates.
+  const join = writeBatch(db);
+  join.set(doc(db, "companies", CID, "members", uids[p.key]), {
     role: p.role, name: p.name, email: p.email, active: true, joinedAt: Date.now(), inviteCode: code,
   });
-  await setDoc(doc(db, "users", uids[p.key]), { companyId: CID, displayName: p.name });
-  await updateDoc(doc(db, "invites", code), { usedBy: uids[p.key] });
+  join.set(doc(db, "users", uids[p.key]), { companyId: CID, displayName: p.name });
+  join.update(doc(db, "invites", code), { usedBy: uids[p.key] });
+  await join.commit();
   console.log(`  ${p.email} joined as ${p.role}`);
 }
 

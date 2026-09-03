@@ -123,7 +123,9 @@ function randomCode() {
   return out;
 }
 
-export async function createInvite(inviteRole = "crew", days = 14) {
+// Three days: long enough to hand a code over on Monday and have it used by
+// Thursday, short enough that a leaked one goes stale over a weekend.
+export async function createInvite(inviteRole = "crew", days = 3) {
   await initFirebase();
   const code = randomCode();
   await fs().setDoc(fs().doc(db(), "invites", code), {
@@ -157,12 +159,17 @@ export async function joinCompanyWithCode(uid, code, { displayName, email }) {
   if (data.usedBy) throw new Error("invite-used");
   if (data.expiresAt < Date.now()) throw new Error("invite-expired");
 
-  await fs().setDoc(fs().doc(db(), "companies", data.companyId, "members", uid), {
+  // One batch: the membership, the user record and the code's consumption
+  // land together or not at all. The rules check each write against the
+  // state after the batch, so a code can be redeemed exactly once.
+  const batch = fs().writeBatch(db());
+  batch.set(fs().doc(db(), "companies", data.companyId, "members", uid), {
     role: data.role || "crew", name: displayName || "", email: email || "",
     active: true, joinedAt: Date.now(), inviteCode: clean,
   });
-  await fs().setDoc(fs().doc(db(), "users", uid), { companyId: data.companyId, displayName: displayName || "" }, { merge: true });
-  await fs().updateDoc(inviteRef, { usedBy: uid });
+  batch.set(fs().doc(db(), "users", uid), { companyId: data.companyId, displayName: displayName || "" }, { merge: true });
+  batch.update(inviteRef, { usedBy: uid });
+  await batch.commit();
 
   companyId = data.companyId;
   role = data.role || "crew";
