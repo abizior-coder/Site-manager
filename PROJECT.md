@@ -146,6 +146,13 @@ name, never an index — the basket re-renders between dragstart and drop.
 Touch has no HTML5 drag, so on a phone the tiles are shortcuts and the
 basket picker stays.
 
+**Photos** open full-screen (pinch/scroll zoom) and can be marked up (pen,
+arrow, box, circle, text) in a canvas editor. A marked-up photo is a **new**
+`photo-<id>` document; the entry's `photoId` moves to it and the original is
+kept in `originalPhotoId` so it can be restored. The pen is offered only to
+the entry's author or a manager — the same people the rules let update the
+entry — so nobody draws for a minute and is told "could not save" at the end.
+
 The **article master** (`site-material-catalog` in `kv`) holds what each
 material name knows about itself: unit, price, supplier, article number. It
 replaced two parallel maps (`site-material-units`, `site-material-prices`),
