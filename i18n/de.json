@@ -757,5 +757,14 @@
   "tripProject": "Baustelle",
   "tripDate": "Datum",
   "jobInspections": "Dachinspektionen",
-  "jobTrips": "Fahrten"
+  "jobTrips": "Fahrten",
+  "ccUsage": "Nutzung",
+  "ccUsageActive30": "Personen, 30 Tage",
+  "ccUsageActive7": "Meiste an einem Tag, 7 Tage",
+  "ccUsageEntries30": "Einträge 30 T · 7 T",
+  "ccUsageReports30": "Berichte 30 Tage",
+  "ccUsageTrips30": "Inspektionen & Fahrten 30 T",
+  "ccUsageLoading": "Nutzung wird geladen…",
+  "ccUsageEmpty": "Noch keine Nutzung erfasst — die Zählung beginnt mit den nächsten Einträgen.",
+  "ccUsageFootnote": "Nur Zählungen pro Firma und Tag — keine Namen, keine Texte. 400 Tage aufbewahrt."
 }

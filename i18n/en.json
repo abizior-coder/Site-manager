@@ -757,5 +757,14 @@
   "tripProject": "Job",
   "tripDate": "Date",
   "jobInspections": "Roof inspections",
-  "jobTrips": "Trips"
+  "jobTrips": "Trips",
+  "ccUsage": "Usage",
+  "ccUsageActive30": "People, 30 days",
+  "ccUsageActive7": "Most in a day, 7 days",
+  "ccUsageEntries30": "Entries 30 d · 7 d",
+  "ccUsageReports30": "Reports 30 days",
+  "ccUsageTrips30": "Inspections & trips 30 d",
+  "ccUsageLoading": "Loading usage…",
+  "ccUsageEmpty": "No usage yet — the counts start with the next entries.",
+  "ccUsageFootnote": "Counts per company and day only — no names, no texts. Kept 400 days."
 }
