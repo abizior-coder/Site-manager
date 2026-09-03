@@ -66,7 +66,7 @@ async function renderAs(role) {
   window.console.error = (...a) => errors.push(a.map(String).join(" "));
   window.matchMedia = window.matchMedia || (() => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }));
   // Weather reads `current`; the AI proxy (scans, translations) reads `text`.
-  window.fetch = async () => ({ ok: true, json: async () => ({ current: {}, text: "ÜBERSETZT: Regen" }) });
+  window.fetch = async () => ({ ok: true, json: async () => ({ current: {}, text: '{"de":"ÜBERSETZT: Regen","en":"TRANSLATED: rain","sq":"PËRKTHYER: shi"}' }) });
   window.scrollTo = () => {};
   window.HTMLCanvasElement.prototype.getContext = () => null;
   window.navigator.geolocation = { getCurrentPosition: () => {} };
@@ -159,11 +159,11 @@ async function renderAs(role) {
           sendBtns[sendBtns.length - 1]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
           await new Promise((r) => setTimeout(r, 250));
         }
-        const tr = window.document.querySelector("[data-translate]");
-        check("owner: a note offers a translation", !!tr, "no translate button on a note");
-        tr?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        // Saved in Albanian, read in German: the translation is there before
+        // anyone taps anything.
         await new Promise((r) => setTimeout(r, 300));
-        check("owner: the translation appears under the note", text().includes("ÜBERSETZT: Regen"), "translation not shown");
+        check("owner: a saved note is translated on its own", text().includes("ÜBERSETZT: Regen"), "no automatic translation after saving");
+        check("owner: a translated note needs no button", !window.document.querySelector("[data-translate]"), "translate button still offered although translated");
       }
 
       // The day starts inside the job now, not from a list on Today.

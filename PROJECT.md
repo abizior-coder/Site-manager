@@ -232,7 +232,7 @@ These are real and currently unfixed. Ordered by how much damage they do.
    against Google, and emulator tokens are not real, so plans can only be
    tested end to end in the live app with a real account. The Worker's own
    suite covers routing, limits and who-may-delete with a fake bucket.
-11. **Note translation goes through the Claude proxy, not DeepL.** DeepL's free
+11. **Notes are translated on save, automatically, into the languages the crew reads** — the set of UI languages found in the members' `site-lang-<uid>` kv keys, plus the reader's and German. One proxy call per note returns all of them as JSON; the result is cached in `xl-<projectId>` and shown under the original for every reader. The per-note button remains for a language that joined later. Translation goes through the Claude proxy, not DeepL. DeepL's free
    API could not be relied on (its Free plan is reported closed to new
    sign-ups, and Albanian/Swiss German support was uncertain); the Worker we
    already run handles all 14 UI languages, is signed-in and rate-limited

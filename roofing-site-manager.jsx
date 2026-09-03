@@ -1348,6 +1348,10 @@ export default function SiteManager() {
   // Shared through kv so a note is translated once for the whole crew.
   const [noteTranslations, setNoteTranslations] = useState({});
   const [translatingIds, setTranslatingIds] = useState([]);
+  // The UI languages in use across the company, read from each member's
+  // stored preference. A note is translated into these on save -- not into
+  // all fourteen the app speaks.
+  const [memberLangs, setMemberLangs] = useState([]);
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
     try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
@@ -1609,6 +1613,19 @@ export default function SiteManager() {
 
   useEffect(() => { customersRef.current = customers; }, [customers]);
   useEffect(() => { projectFilesRef.current = projectFiles; }, [projectFiles]);
+
+  useEffect(() => {
+    if (!membership) return;
+    let alive = true;
+    (async () => {
+      try {
+        const { keys } = await companyStorage.list("site-lang-");
+        const vals = await Promise.all((keys || []).map((k) => companyStorage.get(k).then((r) => r && r.value).catch(() => null)));
+        if (alive) setMemberLangs([...new Set(vals.filter((v) => v && T[v]))]);
+      } catch (e) {}
+    })();
+    return () => { alive = false; };
+  }, [membership]);
 
   useEffect(() => {
     if (!selectedProject || !membership) return;
@@ -3433,7 +3450,9 @@ export default function SiteManager() {
   function submitNote() {
     if (!noteText.trim()) return;
     const type = classifyNote(noteText);
-    addEntry({ type, projectId: activeClock?.projectId || null, description: noteText.trim() });
+    const quick = newEntry({ type, projectId: activeClock?.projectId || null, description: noteText.trim() });
+    persist({ entries: [quick, ...entries] });
+    autoTranslateNote(quick);
     showToast(typeMeta(type, t).label);
     setNoteText("");
   }
@@ -3702,6 +3721,17 @@ export default function SiteManager() {
       const unitPrice = form.unitPrice === "" || form.unitPrice === undefined ? undefined : form.unitPrice;
       if (addModal.editingId) {
         persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() } : e)) });
+        // An edited note gets fresh translations; the old ones would lie.
+        if (addModal.type === "note" && addModal.projectId) {
+          const edited = { ...(entries.find((e) => e.id === addModal.editingId) || {}), id: addModal.editingId, type: "note", projectId: addModal.projectId, description: form.description.trim() };
+          setNoteTranslations((m) => {
+            const forProject = { ...(m[addModal.projectId] || {}) };
+            delete forProject[addModal.editingId];
+            companyStorage.set(`xl-${addModal.projectId}`, JSON.stringify(forProject)).catch(() => {});
+            return { ...m, [addModal.projectId]: forProject };
+          });
+          setTimeout(() => autoTranslateNote(edited), 0);
+        }
       } else {
         addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() });
         setLastTrade(form.trade || DEFAULT_TRADE);
@@ -3802,27 +3832,50 @@ export default function SiteManager() {
   // the other way round. Goes through the same proxy as the scans (signed in,
   // rate-limited, key stays on the Worker). The result is only ever shown as
   // text, never parsed into anything.
-  async function translateNote(entry, projectId) {
-    const target = lang;
-    const have = noteTranslations[projectId]?.[entry.id]?.[target];
-    if (have || translatingIds.includes(entry.id)) return;
+  // One call returns every target language as JSON, so a note costs one
+  // request however many languages the crew reads. The result is only ever
+  // shown as text, never parsed into anything but this map.
+  async function translateEntry(entry, projectId, targets, { quiet = false } = {}) {
     const text = String(entry.description || "").trim();
-    if (!text) return;
+    const wanted = [...new Set((targets || []).filter((c) => LANG_NAMES[c]))];
+    if (!text || !projectId || !wanted.length || translatingIds.includes(entry.id)) return;
     setTranslatingIds((ids) => [...ids, entry.id]);
     try {
-      const prompt = `Translate the following note from a construction site into ${LANG_NAMES[target] || target}. Output only the translation, nothing else. If the note is already in that language, output it unchanged. Keep names, numbers and units as they are.\n\n<note>\n${text}\n</note>`;
-      const out = String((await callClaude([{ type: "text", text: prompt }])) || "").trim().replace(/^["«»„“”']+|["«»„“”']+$/g, "");
-      if (!out) throw new Error("empty");
+      const list = wanted.map((c) => `"${c}": ${LANG_NAMES[c]}`).join(", ");
+      const prompt = `Translate the following note from a construction site into each of these languages: ${list}. Answer with a single JSON object whose keys are exactly the language codes given and whose values are the translations, and nothing else. If the note is already in one of the languages, return it unchanged for that code. Keep names, numbers and units as they are.\n\n<note>\n${text}\n</note>`;
+      const raw = String((await callClaude([{ type: "text", text: prompt }])) || "");
+      const parsed = parseJsonSafe(raw, null);
+      const got = {};
+      if (parsed && typeof parsed === "object") {
+        for (const c of wanted) if (typeof parsed[c] === "string" && parsed[c].trim()) got[c] = parsed[c].trim();
+      } else if (wanted.length === 1 && raw.trim()) {
+        got[wanted[0]] = raw.trim().replace(/^["«»„“”']+|["«»„“”']+$/g, "");
+      }
+      if (!Object.keys(got).length) throw new Error("empty");
       setNoteTranslations((m) => {
-        const forProject = { ...(m[projectId] || {}), [entry.id]: { ...((m[projectId] || {})[entry.id] || {}), [target]: out } };
+        const forProject = { ...(m[projectId] || {}), [entry.id]: { ...((m[projectId] || {})[entry.id] || {}), ...got } };
         companyStorage.set(`xl-${projectId}`, JSON.stringify(forProject)).catch(() => {});
         return { ...m, [projectId]: forProject };
       });
     } catch (e) {
-      showToast(t.translateFailed);
+      if (!quiet) showToast(t.translateFailed);
     } finally {
       setTranslatingIds((ids) => ids.filter((x) => x !== entry.id));
     }
+  }
+
+  // The tap on one note: only the reader's language.
+  function translateNote(entry, projectId) {
+    if (noteTranslations[projectId]?.[entry.id]?.[lang]) return;
+    return translateEntry(entry, projectId, [lang]);
+  }
+
+  // On save: every language the crew reads, plus German, the company's own.
+  // Quiet on failure -- the note is saved either way, and a reader can still
+  // tap. A note with no job has nowhere to keep a translation and is skipped.
+  function autoTranslateNote(entry) {
+    if (!entry || entry.type !== "note" || !entry.projectId) return;
+    return translateEntry(entry, entry.projectId, [...memberLangs, lang, "de"], { quiet: true });
   }
 
   async function translateAllNotes(projectId) {
@@ -6964,7 +7017,9 @@ export default function SiteManager() {
           voiceActive={voiceListening && voiceTarget === "projectNote"}
           onSaveNote={() => {
             if (!projectNote.trim()) return;
-            addEntry({ type: "note", projectId: selectedProject, description: projectNote.trim() });
+            const noteEntry = newEntry({ type: "note", projectId: selectedProject, description: projectNote.trim() });
+            persist({ entries: [noteEntry, ...entries] });
+            autoTranslateNote(noteEntry);
             setProjectNote("");
             showToast(t.commentSaved);
           }}
