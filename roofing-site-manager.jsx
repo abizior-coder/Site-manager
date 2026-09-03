@@ -5628,7 +5628,7 @@ export default function SiteManager() {
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{reportView === "daily" ? todayKey() : monthKey()}</div>
                   <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
-                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-[11px] -mt-1 mb-2">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
+                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-[11px] mt-1 mb-2 text-right">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
                   <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
                   <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
                   <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
