@@ -91,7 +91,7 @@ async function renderAs(role) {
   check("owner: shows a project from the store", text().includes("Trockenbau"), text().slice(0, 120));
 
   // Walk the tabs. A crash in any of these is what a blank screen looks like.
-  const tabs = ["MATERIAL", "KUNDEN", "KALENDER", "PROJEKTE", "BERICHTE"];
+  const tabs = ["MATERIAL", "KUNDEN", "KALENDER", "PROJEKTE", "RAPPORT"];
   for (const label of tabs) {
     const btn = [...window.document.querySelectorAll("button")].find((b) => (b.textContent || "").trim().toUpperCase() === label);
     if (!btn) { check(`owner: tab ${label} exists`, false, "button not found"); continue; }
@@ -104,7 +104,7 @@ async function renderAs(role) {
   // Sending the same day twice used to make two reports, both mailed. It is
   // one record now, with a send history.
   {
-    const tabBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "BERICHTE");
+    const tabBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "RAPPORT");
     tabBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 200));
     const send = () => [...window.document.querySelectorAll("button")].find((x) => /An Vorgesetzten senden|Send to supervisor/.test(x.textContent || ""));
@@ -427,6 +427,27 @@ async function renderAs(role) {
     await new Promise((r) => setTimeout(r, 200));
     check("owner: Mehr opens the drawer with the rest", !!window.document.querySelector("[data-menu-drawer]"), "drawer not open");
     window.document.querySelector("[data-menu-drawer] button")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
+  // Rapport: the day split the GAV way, and the week as a table.
+  {
+    const rp = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "RAPPORT");
+    rp?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    window.document.querySelector('[data-rapport-view="daily"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const card = window.document.querySelector("[data-tagesrapport]");
+    check("owner: the Tagesrapport shows the four hour lines", !!card && /Normal/.test(card.textContent || "") && /Überstunden/.test(card.textContent || "") && /Reisezeit/.test(card.textContent || "") && !!card.querySelector("[data-approval]"), (card?.textContent || "no card").slice(0, 100));
+    window.document.querySelector('[data-rapport-view="week"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const rows = window.document.querySelectorAll("[data-week-row]");
+    const label1 = window.document.querySelector("[data-week-label]")?.textContent;
+    window.document.querySelector("[data-week-prev]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const label2 = window.document.querySelector("[data-week-label]")?.textContent;
+    check("owner: the Woche has seven rows and moves by a week", rows.length === 7 && !!label1 && label1 !== label2 && !!window.document.querySelector("[data-week-csv]"), `${rows.length} rows, ${label1} → ${label2}`);
+    window.document.querySelector('[data-rapport-view="daily"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 150));
   }
 

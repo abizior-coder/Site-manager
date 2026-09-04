@@ -56,7 +56,7 @@ await click(btns().find((b) => (b.textContent || "").trim().toUpperCase() === "M
 // put something in the basket
 // The catalog only lists items once a category is open.
 await click(btns().find((b) => (b.textContent || "").trim() === "Holz"));
-const KNOWN = ["Board", "Übersicht", "Heute", "Projekte", "Kunden", "Kalender", "Material", "Team", "Berichte", "Sicherheit", "Mein Profil", "DE", "de", "Preisliste importieren", "Shop", "Werkzeug", "Transport", "Bibliothek", "Nach Typ", "Nach Lieferant", "Holz", "Membranen", "Spenglerarbeiten", "Dämmung", "Befestigungsmaterial", "Dacheindeckung"];
+const KNOWN = ["Board", "Übersicht", "Heute", "Projekte", "Kunden", "Kalender", "Material", "Team", "Rapport", "Sicherheit", "Mein Profil", "DE", "de", "Preisliste importieren", "Shop", "Werkzeug", "Transport", "Bibliothek", "Nach Typ", "Nach Lieferant", "Holz", "Membranen", "Spenglerarbeiten", "Dämmung", "Befestigungsmaterial", "Dacheindeckung"];
 const item = btns().find((b) => { const x = (b.textContent || "").trim(); return x && x.length < 40 && !KNOWN.includes(x); });
 check("a catalog item can be added to the basket", !!item, "no catalog item button found");
 if (item) {

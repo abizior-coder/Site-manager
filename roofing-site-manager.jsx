@@ -3,7 +3,7 @@ import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, 
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
-import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
+import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
@@ -600,6 +600,8 @@ export default function SiteManager() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoPreviewId, setPhotoPreviewId] = useState(null);
   const [reportView, setReportView] = useState("daily");
+  const [rapportWeekAnchor, setRapportWeekAnchor] = useState(() => todayKey());
+  const [rapportPerson, setRapportPerson] = useState(null);
   const [tick, setTick] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
   const [cprStep, setCprStep] = useState(0);
@@ -4301,18 +4303,124 @@ export default function SiteManager() {
           </div>
         )}
 
-        {tab === "reports" && (
+        {tab === "reports" && (() => {
+          // The day as the GAV reads it: the person's own entries, split into
+          // Normal / Überstunden / Reisezeit against the contract day.
+          const weekly = parseFloat(billing.weeklyHours || 0) || 0;
+          const contractDaily = weekly > 0 ? weekly / 5 : 0;
+          const todayMine = entries.filter((e) => e.date === todayKey() && e.userId === user?.uid);
+          const split = splitDayHours(todayMine, contractDaily);
+          const timeToday = todayMine.filter((e) => e.type === "time");
+          const approved = timeToday.length > 0 && timeToday.every((e) => e.approvedBy);
+          const personId = (canManage() && rapportPerson) || user?.uid;
+          const personName = (team.members.find((m) => m.uid === personId) || {}).name || (personId === user?.uid ? profile.name : "") || "";
+          const weekDates = weekOf(rapportWeekAnchor);
+          const week = weekRows(entries, personId, weekDates, weekly);
+          const shiftWeek = (n) => { const d = new Date(`${rapportWeekAnchor}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 7 * n); setRapportWeekAnchor(d.toISOString().slice(0, 10)); };
+          const downloadCsv = () => {
+            const csv = weekCsv(week, personName, { date: t.docDate, normal: t.hoursNormal, overtime: t.overtimeLabel, travel: t.hoursTravel, breaks: t.hoursBreaks, net: t.hoursTotal, total: t.hoursSum, target: t.hoursTarget, diff: t.hoursDiff });
+            const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `woche-${(personName || "rapport").replace(/[^\w-]+/g, "_")}-${weekDates[0]}.csv`;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+          };
+          const fmt = (x) => (Math.round(x * 100) / 100).toFixed(1);
+          const HourLine = ({ label, value, strong }) => (
+            <div className="flex items-center justify-between py-1" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+              <span style={{ color: strong ? COLORS.text : COLORS.muted }} className={strong ? "text-sm font-bold" : "text-sm"}>{label}</span>
+              <span style={{ color: strong ? COLORS.accent : COLORS.text }} className={strong ? "font-black text-lg" : "font-bold"}>{value}</span>
+            </div>
+          );
+          const dayNames = [t.dayMon, t.dayTue, t.dayWed, t.dayThu, t.dayFri, t.daySat, t.daySun];
+          return (
           <div className="flex flex-col gap-4">
             <div className="flex gap-2">
-              <button onClick={() => setReportView("daily")} style={{ background: reportView === "daily" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-sm font-bold uppercase">{t.daily}</button>
-              <button onClick={() => setReportView("monthly")} style={{ background: reportView === "monthly" ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-sm font-bold uppercase">{t.monthly}</button>
+              {[["daily", t.rapportDay], ["week", t.rapportWeek], ["monthly", t.rapportMonth]].map(([v, l]) => (
+                <button key={v} data-rapport-view={v} onClick={() => setReportView(v)} style={{ background: reportView === v ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase">{l}</button>
+              ))}
             </div>
+
+            {reportView === "daily" && (
+              <div data-tagesrapport style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.rapportTitleDay} · {todayKey()}</div>
+                  <span data-approval style={{ color: approved ? COLORS.success : COLORS.muted, border: `1px solid ${approved ? COLORS.success : COLORS.border}` }} className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0">{approved ? t.approvedAll : t.notApproved}</span>
+                </div>
+                {daily.projIds.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {daily.projIds.map((id) => <span key={id} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(id)}66` }} className="px-2 py-0.5 rounded-full text-[11px] font-semibold">{projectName(id)}</span>)}
+                  </div>
+                )}
+                <HourLine label={t.hoursNormal} value={fmt(split.normal)} />
+                <HourLine label={t.overtimeLabel} value={fmt(split.overtime)} />
+                <HourLine label={t.hoursTravel} value={fmt(split.travel)} />
+                <HourLine label={t.hoursBreaks} value={`−${fmt(split.breaks)}`} />
+                <HourLine label={`${t.hoursTotal}${split.target != null ? ` · ${t.hoursTarget} ${fmt(split.target)}` : ""}`} value={fmt(split.net)} strong />
+                <div className="mt-2">
+                  <Stat label={t.materialsLogged} value={daily.materials.length} color={COLORS.success} />
+                  <Stat label={t.tripTrips} value={todayMine.filter((e) => e.type === "transport").length} color="#C68B4F" />
+                  <Stat label={t.typePhoto} value={todayEntries.filter((e) => e.type === "photo").length} color="#7FA0C7" />
+                  <Stat label={t.typeNote} value={todayEntries.filter((e) => e.type === "note").length} color={COLORS.muted} />
+                </div>
+                <button onClick={() => sendReportToSupervisor("daily", daily, todayEntries)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+                  <FileText size={15} /> {t.sendToSupervisor}
+                </button>
+              </div>
+            )}
+
+            {reportView === "week" && (
+              <div data-woche style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <button data-week-prev onClick={() => shiftWeek(-1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-8 h-8 rounded-lg flex items-center justify-center"><ChevronLeft size={16} color={COLORS.muted} /></button>
+                  <div data-week-label style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide text-center">{weekDates[0]} – {weekDates[6]}</div>
+                  <button data-week-next onClick={() => shiftWeek(1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-8 h-8 rounded-lg flex items-center justify-center"><ChevronRight size={16} color={COLORS.muted} /></button>
+                </div>
+                {canManage() && team.members.length > 1 && (
+                  <select data-week-person value={personId || ""} onChange={(e) => setRapportPerson(e.target.value)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-sm outline-none mb-2">
+                    {team.members.map((m) => <option key={m.uid} value={m.uid}>{m.name || m.email || m.uid}</option>)}
+                  </select>
+                )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">
+                        <th className="text-left py-1">{t.docDate}</th><th className="text-right py-1">{t.hoursNormal}</th><th className="text-right py-1">{t.overtimeShort}</th><th className="text-right py-1">{t.hoursTravel}</th><th className="text-right py-1">{t.hoursBreaks}</th><th className="text-right py-1">{t.hoursTotal}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {week.rows.map((r, i) => (
+                        <tr key={r.date} data-week-row style={{ borderTop: `1px solid ${COLORS.border}`, color: r.net > 0 ? COLORS.text : COLORS.muted }}>
+                          <td className="py-1.5"><span className="font-bold">{dayNames[i]}</span> <span style={{ color: COLORS.muted }}>{r.date.slice(8)}.{r.date.slice(5, 7)}.</span></td>
+                          <td className="text-right tabular-nums">{fmt(r.normal)}</td><td className="text-right tabular-nums">{fmt(r.overtime)}</td><td className="text-right tabular-nums">{fmt(r.travel)}</td><td className="text-right tabular-nums">{fmt(r.breaks)}</td><td className="text-right tabular-nums font-bold">{fmt(r.net)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr style={{ borderTop: `2px solid ${COLORS.border}` }} className="font-bold">
+                        <td className="py-1.5">{t.hoursSum}</td><td className="text-right tabular-nums">{fmt(week.total.normal)}</td><td className="text-right tabular-nums">{fmt(week.total.overtime)}</td><td className="text-right tabular-nums">{fmt(week.total.travel)}</td><td className="text-right tabular-nums">{fmt(week.total.breaks)}</td><td className="text-right tabular-nums" style={{ color: COLORS.accent }}>{fmt(week.total.net)}</td>
+                      </tr>
+                      {week.target != null && (
+                        <tr style={{ color: COLORS.muted }}>
+                          <td className="py-1">{t.hoursTarget} / {t.hoursDiff}</td><td colSpan={4}></td><td className="text-right tabular-nums" style={{ color: week.diff >= 0 ? COLORS.success : COLORS.amber }}>{fmt(week.target)} / {week.diff >= 0 ? "+" : ""}{fmt(week.diff)}</td>
+                        </tr>
+                      )}
+                    </tfoot>
+                  </table>
+                </div>
+                {week.target == null && <div style={{ color: COLORS.muted }} className="text-[11px] mt-2">{t.hoursNotConfigured}</div>}
+                <button data-week-csv onClick={downloadCsv} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"><Download size={14} /> {t.weekCsv}</button>
+              </div>
+            )}
+
+            {reportView === "monthly" && (<>
             {(() => {
-              const s = reportView === "daily" ? daily : monthlyUnsent;
-              const list = reportView === "daily" ? todayEntries : monthUnsent.entries;
+              const s = monthlyUnsent;
+              const list = monthUnsent.entries;
               return (
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{reportView === "daily" ? todayKey() : monthKey()}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{monthKey()}</div>
                   <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
                   {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-[11px] mt-1 mb-2 text-right">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
                   <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
@@ -4322,12 +4430,16 @@ export default function SiteManager() {
                   {reportView === "monthly" && monthUnsent.alreadySent > 0 && (
                     <div style={{ color: COLORS.amber }} className="text-[11px] mb-1">{monthUnsent.alreadySent} {t.reportAlreadySentDaily}</div>
                   )}
-                  <button onClick={() => sendReportToSupervisor(reportView, s, list)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+                  <button onClick={() => sendReportToSupervisor("monthly", s, list)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
                     <FileText size={15} /> {t.sendToSupervisor}
                   </button>
                 </div>
               );
             })()}
+            </>)}
+
+            {reportView !== "week" && (
+              <>
             <div>
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.entriesTitle}</div>
               <EntryGroups entries={reportView === "daily" ? todayEntries : monthUnsent.entries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
@@ -4354,8 +4466,11 @@ export default function SiteManager() {
                 </div>
               )}
             </div>
+              </>
+            )}
           </div>
-        )}
+          );
+        })()}
 
         {tab === "team" && (() => {
           const roster = team.members;

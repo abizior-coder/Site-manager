@@ -106,3 +106,60 @@ export function rapportChanged(report, dayEntries) {
   const hoursNow = dayEntries.filter((e) => e.type === "time").reduce((s, e) => s + (parseFloat(e.qty || 0) || 0), 0);
   return Math.abs(hoursNow - (parseFloat(report.hours || 0) || 0)) > 0.01;
 }
+
+// --- the day as the GAV sees it ----------------------------------------------
+
+// Hours of one day split the way a Swiss payroll reads them: net working
+// time up to the contract day is Normal, the rest Überstunden; travel
+// (transport entries) is paid but kept apart; breaks are what was marked.
+// No contract day set → everything is Normal and the target is null.
+export function splitDayHours(dayEntries, contractDaily) {
+  const list = dayEntries || [];
+  const gross = list.filter((e) => e.type === "time").reduce((s, e) => s + (parseFloat(e.qty || 0) || 0), 0);
+  const breaks = list.filter((e) => e.type === "break").reduce((s, e) => s + (parseFloat(e.qty || 0) || 0), 0);
+  const travel = list.filter((e) => e.type === "transport").reduce((s, e) => s + (parseFloat(e.hours || e.qty || 0) || 0), 0);
+  const net = Math.max(0, gross - breaks);
+  const target = contractDaily > 0 ? contractDaily : null;
+  const normal = target == null ? net : Math.min(net, target);
+  const overtime = target == null ? 0 : Math.max(0, net - target);
+  const r = (x) => Math.round(x * 100) / 100;
+  return { normal: r(normal), overtime: r(overtime), travel: r(travel), breaks: r(breaks), net: r(net), target };
+}
+
+// Monday..Sunday of the week that holds `dateStr` (ISO yyyy-mm-dd).
+export function weekOf(dateStr) {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  const day = (d.getUTCDay() + 6) % 7; // Monday = 0
+  d.setUTCDate(d.getUTCDate() - day);
+  return Array.from({ length: 7 }, (_, i) => {
+    const x = new Date(d);
+    x.setUTCDate(d.getUTCDate() + i);
+    return x.toISOString().slice(0, 10);
+  });
+}
+
+// One row per day of the week for one person, plus totals against the
+// weekly contract.
+export function weekRows(entries, userId, weekDates, weeklyHours) {
+  const contractDaily = weeklyHours > 0 ? weeklyHours / 5 : 0;
+  const rows = weekDates.map((date) => {
+    const mine = (entries || []).filter((e) => e.userId === userId && e.date === date);
+    return { date, ...splitDayHours(mine, contractDaily) };
+  });
+  const sum = (k) => Math.round(rows.reduce((s, r) => s + r[k], 0) * 100) / 100;
+  const total = { normal: sum("normal"), overtime: sum("overtime"), travel: sum("travel"), breaks: sum("breaks"), net: sum("net") };
+  const target = weeklyHours > 0 ? weeklyHours : null;
+  const diff = target == null ? null : Math.round((total.net - target) * 100) / 100;
+  return { rows, total, target, diff };
+}
+
+// Semicolon CSV, the way Excel in a Swiss office opens it without asking.
+export function weekCsv(week, personName, labels = {}) {
+  const L = { date: "Datum", normal: "Normal", overtime: "Überstunden", travel: "Reisezeit", breaks: "Pausen", net: "Total", total: "Summe", target: "Soll", diff: "Differenz", ...labels };
+  const f = (x) => (x == null ? "" : String(x).replace(".", ","));
+  const lines = [[personName, "", "", "", "", ""].join(";"), [L.date, L.normal, L.overtime, L.travel, L.breaks, L.net].join(";")];
+  for (const r of week.rows) lines.push([r.date, f(r.normal), f(r.overtime), f(r.travel), f(r.breaks), f(r.net)].join(";"));
+  lines.push([L.total, f(week.total.normal), f(week.total.overtime), f(week.total.travel), f(week.total.breaks), f(week.total.net)].join(";"));
+  if (week.target != null) lines.push([L.target, "", "", "", "", f(week.target)].join(";"), [L.diff, "", "", "", "", f(week.diff)].join(";"));
+  return lines.join("\r\n") + "\r\n";
+}

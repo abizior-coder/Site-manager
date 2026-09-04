@@ -6,7 +6,7 @@
 
 import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
-import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged } from "./reports.js";
+import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-guard.js";
@@ -410,6 +410,23 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   const doc = rf("docs/ERROR_CODES.md", "utf8");
   const undocumented = Object.keys(ERROR_CODES).filter((k) => !new RegExp(`\\| ${k} \\|`).test(doc));
   t("every error code is in docs/ERROR_CODES.md", undocumented, []);
+}
+
+{
+  // The day as the GAV reads it, and the week as a table.
+  const day = [
+    { type: "time", qty: "9.7", userId: "u1", date: "2026-09-02" },
+    { type: "break", qty: "0.5", userId: "u1", date: "2026-09-02" },
+    { type: "transport", hours: 1.5, userId: "u1", date: "2026-09-02" },
+  ];
+  t("9.2 h net against an 8.5 h day is 8.5 normal and 0.7 over, travel apart", splitDayHours(day, 42.5 / 5), { normal: 8.5, overtime: 0.7, travel: 1.5, breaks: 0.5, net: 9.2, target: 8.5 });
+  t("without a contract day everything is normal and the target is null", splitDayHours(day, 0), { normal: 9.2, overtime: 0, travel: 1.5, breaks: 0.5, net: 9.2, target: null });
+  t("a week runs Monday to Sunday", weekOf("2026-09-02"), ["2026-08-31", "2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05", "2026-09-06"]);
+  t("a Sunday belongs to the week before it", weekOf("2026-09-06")[0], "2026-08-31");
+  const week = weekRows(day, "u1", weekOf("2026-09-02"), 42.5);
+  t("the week has seven rows and sums the one worked day", [week.rows.length, week.total.net, week.total.overtime, week.target, week.diff], [7, 9.2, 0.7, 42.5, -33.3]);
+  const csv = weekCsv(week, "Polier Meier");
+  t("the CSV is Excel-friendly: semicolons, decimal commas, a totals line", [csv.split("\r\n").length - 1, csv.includes("2026-09-02;8,5;0,7;1,5;0,5;9,2"), csv.includes("Summe;8,5;0,7;1,5;0,5;9,2"), csv.includes("Soll;;;;;42,5")], [12, true, true, true]);
 }
 
 {
