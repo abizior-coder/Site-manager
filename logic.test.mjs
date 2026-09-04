@@ -405,6 +405,14 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("the Worker is never cached", r("https://site-log-claude-proxy.abizior.workers.dev/metrics/c1"), "network");
   t("the weather is never cached", r("https://api.open-meteo.com/v1/forecast?latitude=1"), "network");
   t("a POST is never cached", r(scope + "build/chunk-ABC123.js", "cors", "POST"), "network");
+  // The photo encoder's budget sits under the rules' kv cap with room for the document's other fields.
+  {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync("roofing-site-manager.jsx", "utf8");
+    const budget = parseInt((src.match(/const MAX_PHOTO_DATA_URL = (\d+);/) || [])[1], 10);
+    const cap = parseInt((readFileSync("firestore.rules", "utf8").match(/value\.size\(\) <= (\d{6,});/) || [])[1], 10);
+    t("the photo budget stays under the rules' kv cap", budget > 0 && cap > 0 && budget < cap, true);
+  }
   t("another site on the same host is not ours", r("https://abizior-coder.github.io/other/index.html", "navigate"), "network");
 }
 

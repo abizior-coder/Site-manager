@@ -3010,8 +3010,9 @@ export default function SiteManager() {
       let photoId;
       try {
         photoId = photoPreviewId || (await savePhoto(photoPreview));
-      } catch {
-        showToast(t.couldntSave);
+      } catch (err) {
+        console.error("photo save:", err);
+        showToast(`${t.couldntSave} (${(err && (err.code || err.message)) || "save"})`);
         return;
       }
       if (addModal.editingId) {
@@ -3023,7 +3024,7 @@ export default function SiteManager() {
         // time so a slow connection loses at most the last one, not all.
         const extraIds = [];
         for (const dataUrl of photoExtra) {
-          try { extraIds.push(await savePhoto(dataUrl)); } catch { showToast(t.couldntSave); }
+          try { extraIds.push(await savePhoto(dataUrl)); } catch (err) { console.error("photo save:", err); showToast(`${t.couldntSave} (${(err && (err.code || err.message)) || "save"})`); }
         }
         const caption = form.description || t.photoLabel;
         const made = [photoId, ...extraIds].map((id) => newEntry({ type: "photo", projectId: addModal.projectId, description: caption, photoId: id }));
@@ -3079,7 +3080,7 @@ export default function SiteManager() {
     // and never render on another device.
     const scaled = [];
     for (const file of list) {
-      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch { showToast(t.couldntSave); }
+      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch (err) { console.error("photo:", err); showToast(`${t.couldntSave} (${(err && err.message) || "image"})`); }
     }
     if (!scaled.length) return;
     if (editing || !photoPreview) {
@@ -3100,18 +3101,55 @@ export default function SiteManager() {
   // document limit. Re-encoding through a canvas also converts HEIC (iPhone) to
   // JPEG, which the API does accept.
   const MAX_IMAGE_EDGE = 1568;
+  // What one photo may weigh as a data URL: Firestore keeps a kv document
+  // under 1 MB and the rules refuse anything larger, so the encoder steps
+  // down in quality and size until it fits. A phone photo of a roof at
+  // 1568 px and 0.85 easily lands above that; on a desk, never.
+  const MAX_PHOTO_DATA_URL = 900000;
+
+  // Decode a picked file into a bitmap. createImageBitmap honours the EXIF
+  // orientation where supported; older phones and some files (HEIC on iOS
+  // before it is converted) throw, and then an <img> does the decoding --
+  // browsers auto-orient those since 2020.
+  async function decodePicked(file) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: "from-image" });
+    } catch (e) {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        img.decoding = "async";
+        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = () => reject(new Error("decode")); img.src = url; });
+        return img;
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+  }
 
   async function fileToScaledImage(file) {
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
-    const w = Math.max(1, Math.round(bitmap.width * scale));
-    const h = Math.max(1, Math.round(bitmap.height * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-    bitmap.close?.();
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    const source = await decodePicked(file);
+    const sw = source.naturalWidth || source.width;
+    const sh = source.naturalHeight || source.height;
+    if (!sw || !sh) throw new Error("decode");
+    let edge = MAX_IMAGE_EDGE;
+    let quality = 0.85;
+    let dataUrl = "";
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const scale = Math.min(1, edge / Math.max(sw, sh));
+      const w = Math.max(1, Math.round(sw * scale));
+      const h = Math.max(1, Math.round(sh * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(source, 0, 0, w, h);
+      dataUrl = canvas.toDataURL("image/jpeg", quality);
+      if (dataUrl.length <= MAX_PHOTO_DATA_URL) break;
+      // Quality first (cheap to lose), then size.
+      if (quality > 0.65) quality -= 0.1; else edge = Math.round(edge * 0.8);
+    }
+    source.close?.();
+    if (!dataUrl.startsWith("data:image/jpeg")) throw new Error("encode");
     return { b64: dataUrl.split(",")[1], mediaType: "image/jpeg", dataUrl };
   }
 
