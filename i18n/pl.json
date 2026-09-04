@@ -809,5 +809,11 @@
   "dayThu": "Cz",
   "dayFri": "Pt",
   "daySat": "So",
-  "daySun": "Nd"
+  "daySun": "Nd",
+  "hubOverview": "Przegląd",
+  "hubTime": "Godziny",
+  "hubPhotos": "Zdjęcia",
+  "hubPlans": "Plany",
+  "hubReports": "Raporty",
+  "hubChat": "Czat"
 }

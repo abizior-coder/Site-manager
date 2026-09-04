@@ -147,12 +147,21 @@ async function renderAs(role) {
       await new Promise((r) => setTimeout(r, 250));
       check("owner: job view renders", errors.length === before, errors.slice(before, before + 1).join(" | "));
       check("owner: job view offers the crew drop zone", /Mannschaft|Crew/i.test(text()), "no crew section in the job view");
+      const hubTabs = window.document.querySelectorAll("[data-hub-tab]");
+      check("owner: the job is a hub with seven tabs", hubTabs.length === 7, `${hubTabs.length} tabs`);
+      const hub = (id) => window.document.querySelector(`[data-hub-tab="${id}"]`)?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      hub("plans");
+      await new Promise((r) => setTimeout(r, 200));
       check("owner: job view offers plans and documents", /Pläne & Dokumente|Plans & documents/.test(text()), "no files section in the job view");
+      hub("photos");
+      await new Promise((r) => setTimeout(r, 200));
       // A photo opens full-screen and can be marked up; the editor's toolbar
       // is there even though jsdom cannot decode the image.
       {
         const thumb = window.document.querySelector("[data-photo-thumb]");
         check("owner: a photo thumbnail is tappable", !!thumb, "no photo thumbnail in the job view");
+        hub("overview");
+        await new Promise((r) => setTimeout(r, 200));
         thumb?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
         await new Promise((r) => setTimeout(r, 300));
         check("owner: tapping opens the photo viewer", !!window.document.querySelector("[data-photo-viewer]"), "viewer did not open");
@@ -183,6 +192,8 @@ async function renderAs(role) {
           return !!c && !!item;
         };
         check("owner: the language can be switched to Albanian", await switchLang("DE", "Shqip"), "no language picker");
+        window.document.querySelector('[data-hub-tab="chat"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 200));
         const ta = window.document.querySelector("[data-note-draft]");
         if (ta) {
           const set = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
@@ -214,7 +225,8 @@ async function renderAs(role) {
           const deCopies = [...window.document.querySelectorAll('[data-translation-lang="de"]')].filter((el) => /Regen am Nachmittag/.test(el.textContent || ""));
           check("owner: German into German is not done", deCopies.length === 0, `${deCopies.length} German copies`);
           const rows = [...window.document.querySelectorAll("[data-translate]")];
-          const btn = rows[0];
+          const btn = rows.find((b) => /Regen am Nachmittag/.test(b.closest("div.rounded-lg")?.textContent || "")) || rows[rows.length - 1];
+          check("owner: chat messages carry author and time", !!window.document.querySelector("[data-chat-author]"), "no author line on a message");
           btn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
           await new Promise((r) => setTimeout(r, 300));
           const chips = [...window.document.querySelectorAll("[data-translate-to]")];
@@ -228,7 +240,7 @@ async function renderAs(role) {
         // The button stays for the languages still missing; the ones already
         // translated are never offered again.
         {
-          const b = window.document.querySelector("[data-translate]");
+          const b = [...window.document.querySelectorAll("[data-translate]")].find((x) => /Shi nga ora/.test(x.closest("div.rounded-lg")?.textContent || ""));
           b?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
           await new Promise((r) => setTimeout(r, 300));
           const offered = [...window.document.querySelectorAll("[data-translate-to]")].map((c) => c.getAttribute("data-translate-to"));
@@ -240,6 +252,8 @@ async function renderAs(role) {
 
       // The day starts inside the job now, not from a list on Today.
       {
+        hub("overview"); // the chat flow above left the hub on Chat
+        await new Promise((r) => setTimeout(r, 200));
         const start = window.document.querySelector("[data-day-start]");
         check("owner: job view offers to start the day here", !!start, "no start button in the job view");
         start?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));

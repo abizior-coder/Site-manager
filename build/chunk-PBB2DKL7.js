@@ -809,6 +809,12 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "dayThu": "Cs",
   "dayFri": "P",
   "daySat": "Szo",
-  "daySun": "V"
+  "daySun": "V",
+  "hubOverview": "\xC1ttekint\xE9s",
+  "hubTime": "\xD3r\xE1k",
+  "hubPhotos": "Fot\xF3k",
+  "hubPlans": "Tervek",
+  "hubReports": "Jelent\xE9sek",
+  "hubChat": "Chat"
 }
 `;export{a as default};

@@ -5802,6 +5802,7 @@ export default function SiteManager() {
           onInspect={(pid) => openInspection(pid)}
           onEditInspection={(entry) => openInspection(entry.projectId, entry)}
           canEditInspection={canEditInspection}
+          currentUid={user?.uid}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}

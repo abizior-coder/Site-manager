@@ -809,5 +809,11 @@
   "dayThu": "Чт",
   "dayFri": "Пт",
   "daySat": "Сб",
-  "daySun": "Нд"
+  "daySun": "Нд",
+  "hubOverview": "Преглед",
+  "hubTime": "Часове",
+  "hubPhotos": "Снимки",
+  "hubPlans": "Планове",
+  "hubReports": "Отчети",
+  "hubChat": "Чат"
 }

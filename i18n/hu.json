@@ -809,5 +809,11 @@
   "dayThu": "Cs",
   "dayFri": "P",
   "daySat": "Szo",
-  "daySun": "V"
+  "daySun": "V",
+  "hubOverview": "Áttekintés",
+  "hubTime": "Órák",
+  "hubPhotos": "Fotók",
+  "hubPlans": "Tervek",
+  "hubReports": "Jelentések",
+  "hubChat": "Chat"
 }

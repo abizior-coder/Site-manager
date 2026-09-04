@@ -5,19 +5,35 @@ import { rapportChanged } from "../reports.js";
 import { StoredImage } from "../ui/entries.jsx";
 import { todayKey, uid } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
-import { Camera, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
+import { Camera, Clock, LayoutGrid, MessageSquare, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { LANGS } from "../i18n/index.js";
 import { DEFAULT_PROJECT_STATUS, DEFAULT_TRADE, PROJECT_CATEGORIES, Section, TRADES, documentState, mapsUrl, statusMeta, telHref } from "../roofing-site-manager.jsx";
 
-export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, langOptions, onOpenPhoto, onInspect, onEditInspection, canEditInspection, t }) {
+export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, langOptions, onOpenPhoto, onInspect, onEditInspection, canEditInspection, currentUid, t }) {
   // Which note has its language chips open.
   const [pickFor, setPickFor] = useState(null);
   const langLabel = (code) => (LANGS.find((l) => l.code === code) || {}).label || code.toUpperCase();
+  const memberName = (uid) => ((roster || []).find((m) => m.uid === uid) || {}).name || "";
+  // The hub: one tab open at a time, Übersicht whenever another job opens.
+  const [hubTab, setHubTab] = useState("overview");
+  useEffect(() => { setHubTab("overview"); }, [project?.id]);
+  // Unread chat: messages by others newer than this reader's last look at
+  // this job's chat, remembered on the device.
+  const seenKey = project ? `site-log-chat-seen-${project.id}` : null;
+  const [seenTick, setSeenTick] = useState(0);
+  const chatSeen = (() => { try { return seenKey ? parseInt(localStorage.getItem(seenKey) || "0", 10) || 0 : 0; } catch { return 0; } })();
+  useEffect(() => {
+    if (hubTab !== "chat" || !seenKey) return;
+    try { localStorage.setItem(seenKey, String(Date.now())); } catch {}
+    setSeenTick((x) => x + 1);
+  }, [hubTab, seenKey, (entries || []).length]);
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
   const notes = entries.filter((e) => e.type === "note");
+  const unreadChat = notes.filter((n) => n.userId && n.userId !== currentUid && (n.createdAt || 0) > chatSeen).length;
+  const timeCount = entries.filter((e) => e.type === "time").length;
   const inspections = entries.filter((e) => e.type === "inspection").sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const trips = entries.filter((e) => e.type === "transport").sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const [dragOver, setDragOver] = useState(false);
@@ -73,6 +89,20 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           </div>
         </div>
         <div className="lg:max-w-4xl lg:mx-auto">
+        {/* The hub: the job's content behind a row of tabs, the way the market
+            lays a site out, instead of one long strip. */}
+        <div data-hub-tabs className="flex gap-1.5 overflow-x-auto mb-4 -mx-1 px-1 pb-1">
+          {[["overview", t.hubOverview, 0], ["time", t.hubTime, timeCount], ["material", t.materials, materials.length + tools.length], ["photos", t.hubPhotos, photos.length], ["plans", t.hubPlans, (files || []).length], ["reports", t.hubReports, (reports || []).length], ["chat", t.hubChat, unreadChat]].map(([id, label, count]) => {
+            const on = hubTab === id;
+            return (
+              <button key={id} data-hub-tab={id} onClick={() => setHubTab(id)} style={{ background: on ? COLORS.accent : COLORS.card, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? "#fff" : COLORS.text }} className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase flex items-center gap-1.5">
+                {label}
+                {count > 0 && <span data-hub-count={id} style={{ background: on ? "#ffffff33" : (id === "chat" ? COLORS.accent : COLORS.cardAlt), color: "#fff" }} className="px-1.5 rounded-full text-[10px] font-bold">{count}</span>}
+              </button>
+            );
+          })}
+        </div>
+        {hubTab === "overview" && (<>
         {/* Each part of a job is its own block, so the eye can find the one it
             wants instead of reading a single long strip. */}
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
@@ -173,7 +203,9 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             </div>
           )}
         </div>
+        </div></>)}
 
+        {hubTab === "plans" && (<div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
         {/* The plan is the one thing a Polier looks for before anything else.
             Files dropped here upload to this job; on a phone the buttons do
             the same. */}
@@ -228,6 +260,9 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           <ClipboardCheck size={14} /> {t.rapportBtn}
         </button>
 
+        </div>)}
+
+        {hubTab === "reports" && (<div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
         {reports && reports.length > 0 && (
           <div className="mb-4 flex flex-col gap-1.5">
             {reports.map((r) => (
@@ -350,8 +385,9 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             )}
           </div>
         )}
-        </div>
+        </div>)}
 
+        {hubTab === "material" && (<>
         {/* Grouped by trade, because "what did the Spengler use" is the
             question actually asked when the job is costed or disputed. With a
             single trade on site the headers would be noise, so they only
@@ -392,7 +428,9 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             );
           });
         })()}
+        </>)}
 
+        {hubTab === "overview" && (<>
         {/* What the roof inspections found and what drove to and from this
             job -- both used to live only on Today. */}
         {inspections.length > 0 && (
@@ -437,10 +475,71 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             </div>
           </div>
         )}
+        </>)}
 
-        <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
+        {hubTab === "chat" && (<div data-hub-chat style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.commentsTitle}</div>
-        <div className="flex gap-2 mb-3">
+        {notes.length > 0 && (
+          <div className="mb-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.typeNote} ({notes.length})</div>
+              {/* The crew writes in five languages; the desk reads in one.
+                  One tap per note, or all at once; done once per language
+                  and shared, so the next reader pays nothing. */}
+              <button data-translate-all onClick={onTranslateAll} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 shrink-0">
+                <Languages size={12} /> {t.translateAll}
+              </button>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {[...notes].reverse().map((n) => {
+                const have = translations?.[n.id] || {};
+                const original = String(n.description || "").trim();
+                // Every translation present, the reader's language first; never
+                // the source language, never a copy of the original.
+                const shown = Object.entries(have)
+                  .filter(([c, v]) => c !== n.srcLang && v && v !== original)
+                  .sort(([a], [b]) => (a === lang ? -1 : b === lang ? 1 : a.localeCompare(b)));
+                const missing = (langOptions || [lang]).filter((c) => c !== n.srcLang && !have[c]);
+                const busy = (translatingIds || []).includes(n.id);
+                return (
+                <div key={n.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div data-chat-author className="flex items-center gap-2 text-[10px] mb-0.5" style={{ color: COLORS.muted }}>
+                      <span className="font-bold" style={{ color: n.userId === currentUid ? COLORS.accent : COLORS.text }}>{memberName(n.userId) || "—"}</span>
+                      <span>{n.date}{n.createdAt ? ` ${new Date(n.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}</span>
+                    </div>
+                    <div className="text-sm break-words">{n.description}</div>
+                    {shown.map(([c, v]) => (
+                      <div key={c} data-translation data-translation-lang={c} style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
+                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{c}</span>{v}
+                      </div>
+                    ))}
+                    {pickFor === n.id && missing.length > 0 && (
+                      <div data-translate-pick className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.translateInto}</span>
+                        {missing.map((c) => (
+                          <button key={c} data-translate-to={c} onClick={() => { setPickFor(null); onTranslate(n, c); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded-full text-[11px] font-bold">{langLabel(c)}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {missing.length > 0 && (
+                      <button data-translate onClick={() => (missing.length === 1 ? onTranslate(n, missing[0]) : setPickFor(pickFor === n.id ? null : n.id))} title={t.translateBtn} style={{ color: busy ? COLORS.accent : COLORS.muted }} disabled={busy}>
+                        {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
+                      </button>
+                    )}
+                    <button onClick={() => onEditEntry(n)} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
+                    <button onClick={() => onDeleteEntry(n)} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
+                  </div>
+                </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2 mt-3">
           <textarea
             data-note-draft
             value={noteDraft}
@@ -470,65 +569,12 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           </div>
         </div>
 
-        {notes.length > 0 && (
-          <div className="mb-3">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.typeNote} ({notes.length})</div>
-              {/* The crew writes in five languages; the desk reads in one.
-                  One tap per note, or all at once; done once per language
-                  and shared, so the next reader pays nothing. */}
-              <button data-translate-all onClick={onTranslateAll} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 shrink-0">
-                <Languages size={12} /> {t.translateAll}
-              </button>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {notes.map((n) => {
-                const have = translations?.[n.id] || {};
-                const original = String(n.description || "").trim();
-                // Every translation present, the reader's language first; never
-                // the source language, never a copy of the original.
-                const shown = Object.entries(have)
-                  .filter(([c, v]) => c !== n.srcLang && v && v !== original)
-                  .sort(([a], [b]) => (a === lang ? -1 : b === lang ? 1 : a.localeCompare(b)));
-                const missing = (langOptions || [lang]).filter((c) => c !== n.srcLang && !have[c]);
-                const busy = (translatingIds || []).includes(n.id);
-                return (
-                <div key={n.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm break-words">{n.description}</div>
-                    {shown.map(([c, v]) => (
-                      <div key={c} data-translation data-translation-lang={c} style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
-                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{c}</span>{v}
-                      </div>
-                    ))}
-                    {pickFor === n.id && missing.length > 0 && (
-                      <div data-translate-pick className="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.translateInto}</span>
-                        {missing.map((c) => (
-                          <button key={c} data-translate-to={c} onClick={() => { setPickFor(null); onTranslate(n, c); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded-full text-[11px] font-bold">{langLabel(c)}</button>
-                        ))}
-                      </div>
-                    )}
-                    <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">{n.date}</div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {missing.length > 0 && (
-                      <button data-translate onClick={() => (missing.length === 1 ? onTranslate(n, missing[0]) : setPickFor(pickFor === n.id ? null : n.id))} title={t.translateBtn} style={{ color: busy ? COLORS.accent : COLORS.muted }} disabled={busy}>
-                        {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
-                      </button>
-                    )}
-                    <button onClick={() => onEditEntry(n)} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
-                    <button onClick={() => onDeleteEntry(n)} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
-                  </div>
-                </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        </div>)}
 
+        {hubTab === "photos" && (<div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
+        {photos.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.nothingLogged}</div>}
         {photos.length > 0 && (
-          <div className="mt-3">
+          <div>
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.photoLabel}</div>
             <div className="grid grid-cols-3 gap-2">
               {photos.map((p) => (
@@ -547,7 +593,38 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             </div>
           </div>
         )}
-        </div>
+        </div>)}
+
+        {hubTab === "time" && (() => {
+          // This job's hours, by day and person; breaks net out. Editing stays
+          // where it was (Today, Kalender).
+          const rows = entries.filter((e) => e.type === "time" || e.type === "break").sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+          const byDay = {};
+          rows.forEach((e) => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+          const hoursOf = (list) => Math.round(list.reduce((s, e) => s + (parseFloat(e.qty) || 0) * (e.type === "break" ? -1 : 1), 0) * 100) / 100;
+          return (
+            <div data-hub-time style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.hubTime}</div>
+                <div style={{ color: COLORS.accent }} className="font-black">{hoursOf(rows).toFixed(1)} h</div>
+              </div>
+              {rows.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.nothingLogged}</div>}
+              {Object.keys(byDay).sort().reverse().map((day) => (
+                <div key={day} className="mb-2">
+                  <div className="flex items-center justify-between text-[11px] py-1" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+                    <span style={{ color: COLORS.muted }}>{day}</span><span className="font-bold">{hoursOf(byDay[day]).toFixed(1)} h</span>
+                  </div>
+                  {byDay[day].map((e) => (
+                    <div key={e.id} className="flex items-center justify-between text-xs py-1">
+                      <span>{memberName(e.userId) || "—"}{e.type === "break" ? ` · ${t.typeBreak}` : ""}</span>
+                      <span style={{ color: COLORS.muted }} className="tabular-nums">{e.startTime ? `${e.startTime}–${e.endTime || ""} · ` : ""}{e.type === "break" ? "−" : ""}{(parseFloat(e.qty) || 0).toFixed(2)} h</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
         </div>
       </div>
     </div>

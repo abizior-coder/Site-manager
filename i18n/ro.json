@@ -809,5 +809,11 @@
   "dayThu": "Jo",
   "dayFri": "Vi",
   "daySat": "Sâ",
-  "daySun": "Du"
+  "daySun": "Du",
+  "hubOverview": "Prezentare",
+  "hubTime": "Ore",
+  "hubPhotos": "Fotografii",
+  "hubPlans": "Planuri",
+  "hubReports": "Rapoarte",
+  "hubChat": "Chat"
 }

@@ -809,5 +809,11 @@
   "dayThu": "Čt",
   "dayFri": "Pá",
   "daySat": "So",
-  "daySun": "Ne"
+  "daySun": "Ne",
+  "hubOverview": "Přehled",
+  "hubTime": "Hodiny",
+  "hubPhotos": "Fotky",
+  "hubPlans": "Plány",
+  "hubReports": "Výkazy",
+  "hubChat": "Chat"
 }
