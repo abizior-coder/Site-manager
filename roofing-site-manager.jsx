@@ -4429,14 +4429,8 @@ export default function SiteManager() {
         )}
       </div>
 
-      <button
-        onClick={() => openAdd("photo", activeClock?.projectId || projects[0]?.id)}
-        disabled={projects.length === 0}
-        style={{ background: COLORS.accent, opacity: projects.length === 0 ? 0.4 : 1 }}
-        className={`fixed ${dockShown ? "bottom-[150px] lg:bottom-[132px]" : "bottom-5 lg:bottom-8"} right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-30 transition-all`}
-      >
-        <Camera size={22} color="#fff" />
-      </button>
+      {/* The floating camera button is gone: it covered the dock and the
+          bottom of every list on a phone. Photos are added from the job view. */}
 
       {/* The dock. Active jobs and pinned ones as a tray of tiles, the way a
           game keeps its characters along the bottom: always there, scroll
