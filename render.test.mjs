@@ -332,6 +332,17 @@ async function renderAs(role) {
     check("owner: an update shows the restart bar", !!bar && /Neue Version|New version/.test(bar.textContent || ""), (bar?.textContent || "no bar").slice(0, 80));
   }
 
+  // The privacy notice is one tap away from the profile.
+  {
+    const profileBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Mein Profil");
+    profileBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const link = window.document.querySelector("[data-privacy-link]");
+    check("owner: the profile links the privacy notice", !!link && link.getAttribute("href") === "datenschutz.html" && /Datenschutz/.test(link.textContent || ""), link ? link.outerHTML.slice(0, 120) : "no privacy link");
+    window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");

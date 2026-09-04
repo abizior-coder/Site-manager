@@ -771,6 +771,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "reloadBtn": "Re\u0161tartova\u0165",
   "langOffline": "Tento jazyk potrebuje raz pripojenie. Sk\xFAste online.",
   "inspectEditTitle": "Upravi\u0165 obhliadku",
-  "inspectionUpdated": "Obhliadka aktualizovan\xE1"
+  "inspectionUpdated": "Obhliadka aktualizovan\xE1",
+  "privacyLink": "Ochrana \xFAdajov"
 }
 `;export{o as default};

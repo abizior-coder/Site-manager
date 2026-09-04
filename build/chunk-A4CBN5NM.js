@@ -771,6 +771,7 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "reloadBtn": "\xDAjraind\xEDt\xE1s",
   "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Pr\xF3b\xE1ld online.",
   "inspectEditTitle": "Szemle szerkeszt\xE9se",
-  "inspectionUpdated": "Szemle friss\xEDtve"
+  "inspectionUpdated": "Szemle friss\xEDtve",
+  "privacyLink": "Adatv\xE9delem"
 }
 `;export{a as default};

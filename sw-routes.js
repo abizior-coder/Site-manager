@@ -20,7 +20,11 @@ export function routeFor({ url, mode, method }, scope) {
   if (u.origin === SDK_ORIGIN && u.pathname.startsWith(SDK_PATH)) return "sdk";
   if (u.origin !== s.origin || !u.pathname.startsWith(s.pathname)) return "network";
   const rel = u.pathname.slice(s.pathname.length);
-  if (mode === "navigate" || rel === "" || rel === "index.html") return "shell";
+  // Only the app's own page is the shell. Another page under the scope --
+  // the privacy notice, say -- is a navigation of its own and must not be
+  // answered with the app.
+  if (rel === "" || rel === "index.html") return "shell";
+  if (mode === "navigate") return "network";
   if (rel.startsWith("build/") || rel === "tailwind.css" || rel === "manifest.webmanifest" || rel.endsWith(".svg")) return "immutable";
   return "network";
 }

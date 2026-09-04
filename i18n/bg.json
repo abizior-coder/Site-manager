@@ -771,5 +771,6 @@
   "reloadBtn": "Рестарт",
   "langOffline": "Този език изисква връзка веднъж. Опитайте онлайн.",
   "inspectEditTitle": "Редактирай огледа",
-  "inspectionUpdated": "Огледът е обновен"
+  "inspectionUpdated": "Огледът е обновен",
+  "privacyLink": "Защита на данните"
 }

@@ -3751,7 +3751,10 @@ export default function SiteManager() {
             <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">{t.authForgot}</button>
           </div>
 
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">{t.authPrivacyNote}</div>
+          <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">
+            {t.authPrivacyNote}{" "}
+            <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.amber }} className="underline">{t.privacyLink}</a>
+          </div>
         </div>
       </div>
     );
@@ -3803,6 +3806,7 @@ export default function SiteManager() {
           </button>
 
           <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">{t.signOut}</button>
+          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
         </div>
       </div>
     );
@@ -5241,6 +5245,7 @@ export default function SiteManager() {
               <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
                 <LogOut size={14} /> {t.signOut}
               </button>
+              <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
             </div>
 
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>

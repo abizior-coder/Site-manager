@@ -771,5 +771,6 @@
   "reloadBtn": "Restartovat",
   "langOffline": "Tento jazyk potřebuje jednou připojení. Zkuste online.",
   "inspectEditTitle": "Upravit prohlídku",
-  "inspectionUpdated": "Prohlídka aktualizována"
+  "inspectionUpdated": "Prohlídka aktualizována",
+  "privacyLink": "Ochrana údajů"
 }

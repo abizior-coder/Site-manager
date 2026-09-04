@@ -771,5 +771,6 @@
   "reloadBtn": "Újraindítás",
   "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Próbáld online.",
   "inspectEditTitle": "Szemle szerkesztése",
-  "inspectionUpdated": "Szemle frissítve"
+  "inspectionUpdated": "Szemle frissítve",
+  "privacyLink": "Adatvédelem"
 }

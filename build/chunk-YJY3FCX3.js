@@ -771,6 +771,7 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "reloadBtn": "Rinis",
   "langOffline": "Kjo gjuh\xEB ka nevoj\xEB nj\xEB her\xEB p\xEBr lidhje. Provo online.",
   "inspectEditTitle": "Ndrysho inspektimin",
-  "inspectionUpdated": "Inspektimi u p\xEBrdit\xEBsua"
+  "inspectionUpdated": "Inspektimi u p\xEBrdit\xEBsua",
+  "privacyLink": "Mbrojtja e t\xEB dh\xEBnave"
 }
 `;export{a as default};

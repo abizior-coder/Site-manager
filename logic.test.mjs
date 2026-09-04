@@ -371,6 +371,11 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     t(`first-paint JS stays under 350 KB (${Math.round(bytes / 1024)} KB: bundle.js + ${chunks.length} static chunk${chunks.length === 1 ? "" : "s"})`, bytes < 350 * 1024, true);
     t("tailwind.css is built and small", existsSync("tailwind.css") && statSync("tailwind.css").size < 60 * 1024, true);
     t("index.html no longer loads Tailwind from a CDN", !readFileSync("index.html", "utf8").includes("cdn.tailwindcss.com"), true);
+    // The privacy notice on the site says who is responsible and matches the source document's date.
+    const notice = readFileSync("datenschutz.html", "utf8");
+    const md = readFileSync("docs/legal/datenschutzerklaerung.md", "utf8");
+    t("datenschutz.html names the operator", notice.includes("Andrzej Bizior, Si‑Ma") && notice.includes("a.bizior@pm.me"), true);
+    t("datenschutz.html and the markdown carry the same date", (notice.match(/Stand: ([^<]+)</) || [])[1], (md.match(/^Stand: (.+)$/m) || [])[1]);
     // The service worker precaches exactly the first paint: the shell, the
     // stylesheet, the entry with its static chunks, English and German.
     const sw = readFileSync("sw.js", "utf8");
@@ -392,6 +397,7 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("a navigation is the shell", r(scope + "index.html", "navigate"), "shell");
   t("the scope root is the shell", r(scope), "shell");
   t("a deep link within the scope is the shell", r(scope + "?emulator=1", "navigate"), "shell");
+  t("another page under the scope is not the shell", r(scope + "datenschutz.html", "navigate"), "network");
   t("a hashed chunk is immutable", r(scope + "build/chunk-ABC123.js"), "immutable");
   t("the stamped entry and stylesheet are immutable", [r(scope + "build/bundle.js?v=abc"), r(scope + "tailwind.css?v=abc")], ["immutable", "immutable"]);
   t("the Firebase SDK is cached from Google's CDN", r("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"), "sdk");

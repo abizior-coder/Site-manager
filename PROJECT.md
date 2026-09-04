@@ -460,6 +460,18 @@ refused with a toast and the current language stays. Registration happens
 after the first paint, on https or localhost only. Firestore's own
 persistent cache does the data side, as before.
 
+**DSG paperwork (since 2026-09-04):** `docs/legal/` holds the
+Datenschutzerklärung (also served as `datenschutz.html`, linked from the
+sign-in screen and Mein Profil), the AVV template with Anhänge
+(Gegenstand, Subprozessoren, TOM), the Verzeichnis der
+Bearbeitungstätigkeiten and the Subprozessoren list. Operator named in
+all of them: Andrzej Bizior, Si‑Ma, Birmensdorf. Every fact in them is
+taken from the code (what goes where, how long it stays); when the code
+changes one of those facts, the documents change with it, and a logic
+test keeps the page and the markdown on the same date. Two follow-ups
+sit with the owner: confirm the Firebase region in the console, and have
+a Datenschutzberater read the set before the first pilot.
+
 **CI** (`.github/workflows/ci.yml`) runs every suite, rules included, on
 every push and pull request; the Pages deploy still checks that the
 committed bundle matches the source.

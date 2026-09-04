@@ -771,5 +771,6 @@
   "reloadBtn": "Neu starten",
   "langOffline": "Diese Sprache braucht einmal eine Verbindung. Später nochmals versuchen.",
   "inspectEditTitle": "Inspektion bearbeiten",
-  "inspectionUpdated": "Inspektion aktualisiert"
+  "inspectionUpdated": "Inspektion aktualisiert",
+  "privacyLink": "Datenschutz"
 }

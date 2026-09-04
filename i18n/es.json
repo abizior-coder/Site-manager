@@ -771,5 +771,6 @@
   "reloadBtn": "Reiniciar",
   "langOffline": "Este idioma necesita conexión una vez. Inténtalo en línea.",
   "inspectEditTitle": "Editar inspección",
-  "inspectionUpdated": "Inspección actualizada"
+  "inspectionUpdated": "Inspección actualizada",
+  "privacyLink": "Protección de datos"
 }
