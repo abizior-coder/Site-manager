@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "langOffline": "Tento jazyk pot\u0159ebuje jednou p\u0159ipojen\xED. Zkuste online.",
   "inspectEditTitle": "Upravit prohl\xEDdku",
   "inspectionUpdated": "Prohl\xEDdka aktualizov\xE1na",
-  "privacyLink": "Ochrana \xFAdaj\u016F"
+  "privacyLink": "Ochrana \xFAdaj\u016F",
+  "translateInto": "P\u0159elo\u017Eit do"
 }
 `;export{t as default};

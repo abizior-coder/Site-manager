@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Pr\xF3b\xE1ld online.",
   "inspectEditTitle": "Szemle szerkeszt\xE9se",
   "inspectionUpdated": "Szemle friss\xEDtve",
-  "privacyLink": "Adatv\xE9delem"
+  "privacyLink": "Adatv\xE9delem",
+  "translateInto": "Ford\xEDt\xE1s erre"
 }
 `;export{a as default};

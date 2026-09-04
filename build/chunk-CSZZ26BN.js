@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "langOffline": "Este idioma precisa de liga\xE7\xE3o uma vez. Tente online.",
   "inspectEditTitle": "Editar inspe\xE7\xE3o",
   "inspectionUpdated": "Inspe\xE7\xE3o atualizada",
-  "privacyLink": "Prote\xE7\xE3o de dados"
+  "privacyLink": "Prote\xE7\xE3o de dados",
+  "translateInto": "Traduzir para"
 }
 `;export{o as default};

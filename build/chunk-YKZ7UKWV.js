@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "langOffline": "Tento jazyk potrebuje raz pripojenie. Sk\xFAste online.",
   "inspectEditTitle": "Upravi\u0165 obhliadku",
   "inspectionUpdated": "Obhliadka aktualizovan\xE1",
-  "privacyLink": "Ochrana \xFAdajov"
+  "privacyLink": "Ochrana \xFAdajov",
+  "translateInto": "Prelo\u017Ei\u0165 do"
 }
 `;export{o as default};

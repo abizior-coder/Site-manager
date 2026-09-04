@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "langOffline": "Aceast\u0103 limb\u0103 are nevoie o dat\u0103 de conexiune. \xCEncearc\u0103 online.",
   "inspectEditTitle": "Editeaz\u0103 inspec\u021Bia",
   "inspectionUpdated": "Inspec\u021Bie actualizat\u0103",
-  "privacyLink": "Protec\u021Bia datelor"
+  "privacyLink": "Protec\u021Bia datelor",
+  "translateInto": "Tradu \xEEn"
 }
 `;export{i as default};

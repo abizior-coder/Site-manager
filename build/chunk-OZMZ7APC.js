@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "langOffline": "Ten j\u0119zyk wymaga raz po\u0142\u0105czenia. Spr\xF3buj online.",
   "inspectEditTitle": "Edytuj inspekcj\u0119",
   "inspectionUpdated": "Inspekcja zaktualizowana",
-  "privacyLink": "Ochrona danych"
+  "privacyLink": "Ochrona danych",
+  "translateInto": "Przet\u0142umacz na"
 }
 `;export{o as default};

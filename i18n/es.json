@@ -772,5 +772,6 @@
   "langOffline": "Este idioma necesita conexión una vez. Inténtalo en línea.",
   "inspectEditTitle": "Editar inspección",
   "inspectionUpdated": "Inspección actualizada",
-  "privacyLink": "Protección de datos"
+  "privacyLink": "Protección de datos",
+  "translateInto": "Traducir a"
 }

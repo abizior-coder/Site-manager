@@ -7,9 +7,13 @@ import { todayKey, uid } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { Camera, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { LANGS } from "../i18n/index.js";
 import { DEFAULT_PROJECT_STATUS, DEFAULT_TRADE, PROJECT_CATEGORIES, Section, TRADES, documentState, mapsUrl, statusMeta, telHref } from "../roofing-site-manager.jsx";
 
-export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, onInspect, onEditInspection, canEditInspection, t }) {
+export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, langOptions, onOpenPhoto, onInspect, onEditInspection, canEditInspection, t }) {
+  // Which note has its language chips open.
+  const [pickFor, setPickFor] = useState(null);
+  const langLabel = (code) => (LANGS.find((l) => l.code === code) || {}).label || code.toUpperCase();
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -438,6 +442,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.commentsTitle}</div>
         <div className="flex gap-2 mb-3">
           <textarea
+            data-note-draft
             value={noteDraft}
             onChange={(e) => onNoteDraftChange(e.target.value)}
             placeholder={t.commentPlaceholder}
@@ -478,22 +483,37 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             </div>
             <div className="flex flex-col gap-1.5">
               {notes.map((n) => {
-                const xl = translations?.[n.id]?.[lang];
+                const have = translations?.[n.id] || {};
+                const original = String(n.description || "").trim();
+                // Every translation present, the reader's language first; never
+                // the source language, never a copy of the original.
+                const shown = Object.entries(have)
+                  .filter(([c, v]) => c !== n.srcLang && v && v !== original)
+                  .sort(([a], [b]) => (a === lang ? -1 : b === lang ? 1 : a.localeCompare(b)));
+                const missing = (langOptions || [lang]).filter((c) => c !== n.srcLang && !have[c]);
                 const busy = (translatingIds || []).includes(n.id);
                 return (
                 <div key={n.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <div className="text-sm break-words">{n.description}</div>
-                    {xl && xl !== String(n.description || "").trim() && (
-                      <div data-translation style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
-                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{t.translationLabel}</span>{xl}
+                    {shown.map(([c, v]) => (
+                      <div key={c} data-translation data-translation-lang={c} style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
+                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{c}</span>{v}
+                      </div>
+                    ))}
+                    {pickFor === n.id && missing.length > 0 && (
+                      <div data-translate-pick className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.translateInto}</span>
+                        {missing.map((c) => (
+                          <button key={c} data-translate-to={c} onClick={() => { setPickFor(null); onTranslate(n, c); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded-full text-[11px] font-bold">{langLabel(c)}</button>
+                        ))}
                       </div>
                     )}
                     <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">{n.date}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {!xl && (
-                      <button data-translate onClick={() => onTranslate(n)} title={t.translateBtn} style={{ color: busy ? COLORS.accent : COLORS.muted }} disabled={busy}>
+                    {missing.length > 0 && (
+                      <button data-translate onClick={() => (missing.length === 1 ? onTranslate(n, missing[0]) : setPickFor(pickFor === n.id ? null : n.id))} title={t.translateBtn} style={{ color: busy ? COLORS.accent : COLORS.muted }} disabled={busy}>
                         {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
                       </button>
                     )}

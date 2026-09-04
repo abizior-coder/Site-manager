@@ -2423,7 +2423,8 @@ export default function SiteManager() {
 
   function newEntry(partial) {
     tracker.track(`entry.${(partial && partial.type) || "note"}`);
-    return { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, ...partial };
+    // srcLang: the language the author was using; a note is never translated back into it.
+    return { id: uid(), date: todayKey(), createdAt: Date.now(), userId: user?.uid || null, srcLang: lang, ...partial };
   }
 
   function addEntry(entry) {
@@ -3193,9 +3194,13 @@ export default function SiteManager() {
   }
 
   // The tap on one note: only the reader's language.
-  function translateNote(entry, projectId) {
-    if (noteTranslations[projectId]?.[entry.id]?.[lang]) return;
-    return translateEntry(entry, projectId, [lang]);
+  // The tap on one note: into the language asked for (the reader's by
+  // default), never into the one it was written in, never twice.
+  function translateNote(entry, projectId, target) {
+    const to = target || lang;
+    if (!LANG_NAMES[to] || to === entry.srcLang) return;
+    if (noteTranslations[projectId]?.[entry.id]?.[to]) return;
+    return translateEntry(entry, projectId, [to]);
   }
 
   // On save: every language the crew reads, plus German, the company's own.
@@ -3203,7 +3208,9 @@ export default function SiteManager() {
   // tap. A note with no job has nowhere to keep a translation and is skipped.
   function autoTranslateNote(entry) {
     if (!entry || entry.type !== "note" || !entry.projectId) return;
-    return translateEntry(entry, entry.projectId, [...memberLangs, lang, "de"], { quiet: true });
+    const targets = [...memberLangs, lang, "de"].filter((c) => c !== entry.srcLang);
+    if (!targets.length) return;
+    return translateEntry(entry, entry.projectId, targets, { quiet: true });
   }
 
   async function translateAllNotes(projectId) {
@@ -5541,7 +5548,8 @@ export default function SiteManager() {
           onStartDay={startDayOn}
           onStopDay={clockOut}
           translations={noteTranslations[selectedProject] || {}}
-          onTranslate={(n) => translateNote(n, selectedProject)}
+          onTranslate={(n, code) => translateNote(n, selectedProject, code)}
+          langOptions={[...new Set([lang, "de", "en", ...memberLangs])]}
           onTranslateAll={() => translateAllNotes(selectedProject)}
           translatingIds={translatingIds}
           lang={lang}

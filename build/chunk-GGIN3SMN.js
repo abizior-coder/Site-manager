@@ -772,6 +772,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "langOffline": "This language needs a connection once. Try again when online.",
   "inspectEditTitle": "Edit inspection",
   "inspectionUpdated": "Inspection updated",
-  "privacyLink": "Privacy notice"
+  "privacyLink": "Privacy notice",
+  "translateInto": "Translate into"
 }
 `;export{o as default};

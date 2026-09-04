@@ -171,7 +171,19 @@ async function renderAs(role) {
       // translation sits under the original.
       {
         // The stub job has no note yet: write one through the composer first.
-        const ta = window.document.querySelector('textarea[placeholder*="Notiz"], textarea[placeholder*="note"]');
+        // The writer reads the app in Albanian, so the note's source language
+        // is Albanian and German is a translation target.
+        const switchLang = async (chip, label) => {
+          const c = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === chip);
+          c?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 200));
+          const item = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === label);
+          item?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 400));
+          return !!c && !!item;
+        };
+        check("owner: the language can be switched to Albanian", await switchLang("DE", "Shqip"), "no language picker");
+        const ta = window.document.querySelector("[data-note-draft]");
         if (ta) {
           const set = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
           set.call(ta, "Shi nga ora 14, puna u ndërpre");
@@ -181,11 +193,49 @@ async function renderAs(role) {
           sendBtns[sendBtns.length - 1]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
           await new Promise((r) => setTimeout(r, 250));
         }
-        // Saved in Albanian, read in German: the translation is there before
-        // anyone taps anything.
+        // Saved in Albanian: the German translation is there before anyone
+        // taps anything, and no Albanian "translation" was made.
         await new Promise((r) => setTimeout(r, 300));
         check("owner: a saved note is translated on its own", text().includes("ÜBERSETZT: Regen"), "no automatic translation after saving");
-        check("owner: a translated note needs no button", !window.document.querySelector("[data-translate]"), "translate button still offered although translated");
+        check("owner: a note is never translated into its own language", !window.document.querySelector('[data-translation-lang="sq"]'), "Albanian translation of an Albanian note");
+        check("owner: back to German", await switchLang("SQ", "Deutsch"), "could not switch back");
+
+        // A German note saved by a German reader gets no German translation,
+        // and its translate button offers other languages.
+        {
+          const ta2 = window.document.querySelector("[data-note-draft]");
+          const set2 = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+          set2.call(ta2, "Regen am Nachmittag, Arbeit unterbrochen");
+          ta2.dispatchEvent(new window.Event("input", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 30));
+          const btns = ta2.parentElement.querySelectorAll("button");
+          btns[btns.length - 1]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 500));
+          const deCopies = [...window.document.querySelectorAll('[data-translation-lang="de"]')].filter((el) => /Regen am Nachmittag/.test(el.textContent || ""));
+          check("owner: German into German is not done", deCopies.length === 0, `${deCopies.length} German copies`);
+          const rows = [...window.document.querySelectorAll("[data-translate]")];
+          const btn = rows[0];
+          btn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 300));
+          const chips = [...window.document.querySelectorAll("[data-translate-to]")];
+          if (chips.length) {
+            check("owner: the tap offers other languages, not German", chips.every((c) => c.getAttribute("data-translate-to") !== "de") && chips.some((c) => c.getAttribute("data-translate-to") === "en"), chips.map((c) => c.getAttribute("data-translate-to")).join(","));
+            chips.find((c) => c.getAttribute("data-translate-to") === "en")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+            await new Promise((r) => setTimeout(r, 400));
+          }
+          check("owner: a chosen language is translated into", !!window.document.querySelector('[data-translation-lang="en"]'), "no English translation after choosing English");
+        }
+        // The button stays for the languages still missing; the ones already
+        // translated are never offered again.
+        {
+          const b = window.document.querySelector("[data-translate]");
+          b?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 300));
+          const offered = [...window.document.querySelectorAll("[data-translate-to]")].map((c) => c.getAttribute("data-translate-to"));
+          check("owner: a translated language is not offered again", !offered.includes("de") && !offered.includes("sq"), offered.join(","));
+          window.document.querySelector("[data-translate]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 200));
+        }
       }
 
       // The day starts inside the job now, not from a list on Today.
