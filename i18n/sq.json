@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Kërko artikull ose numër…",
   "sheetArticles": "artikuj",
-  "sheetDemo": "Vetëm artikuj shembull — importo listën e çmimeve të furnitorit për të parë gjithë gamën."
+  "sheetDemo": "Vetëm artikuj shembull — importo listën e çmimeve të furnitorit për të parë gjithë gamën.",
+  "exportTitle": "Kontabiliteti / bexio",
+  "exportInvoices": "Ditari i faturave",
+  "exportPositions": "Pozicionet e faturave",
+  "exportPayroll": "Orët për punonjës (paga)",
+  "exportPayrollDays": "Orët për ditë",
+  "exportContacts": "Klientët si kontakte bexio",
+  "exportEmpty": "asgjë",
+  "exportHint": "CSV me pikëpresje, UTF-8. Për importin e kontakteve në bexio hapeni në Excel dhe ruajeni si .xlsx. Paga: e-maili duhet të përputhet me punonjësin në bexio Lohn. Faturat janë ditari për kontabilistin; bexio i pranon faturat vetëm përmes API."
 }

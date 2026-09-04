@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Artikel oder Nummer suchen…",
   "sheetArticles": "Artikel",
-  "sheetDemo": "Nur Beispielartikel — Preisliste des Lieferanten importieren, um das ganze Sortiment zu sehen."
+  "sheetDemo": "Nur Beispielartikel — Preisliste des Lieferanten importieren, um das ganze Sortiment zu sehen.",
+  "exportTitle": "Buchhaltung / bexio",
+  "exportInvoices": "Rechnungsjournal",
+  "exportPositions": "Rechnungspositionen",
+  "exportPayroll": "Stunden pro Mitarbeiter (Lohn)",
+  "exportPayrollDays": "Stunden pro Tag",
+  "exportContacts": "Kunden als bexio-Kontakte",
+  "exportEmpty": "nichts",
+  "exportHint": "CSV mit Semikolon, UTF-8. Für den bexio-Kontaktimport in Excel öffnen und als .xlsx speichern. Lohn: die E-Mail muss mit dem Mitarbeiter in bexio Lohn übereinstimmen. Rechnungen sind das Journal für den Treuhänder; bexio selbst nimmt Rechnungen nur über die API."
 }

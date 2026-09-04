@@ -504,6 +504,19 @@ async function renderAs(role) {
     const card = window.document.querySelector("[data-usage-card]");
     check("owner: the cockpit shows the usage card without crashing", errors.length === before && !!card, errors.slice(before, before + 1).join(" | ") || "no usage card");
     check("owner: an empty answer reads as no usage yet, not as an error", /Noch keine Nutzung|No usage yet/.test(card?.textContent || ""), (card?.textContent || "").slice(0, 100));
+
+    // The accounting card: a month, five files, each a real download.
+    const exportCard = window.document.querySelector("[data-export-card]");
+    check("owner: the cockpit shows the accounting export card", !!exportCard && !!exportCard.querySelector("[data-export-month]"), "no export card");
+    const got = [];
+    window.addEventListener("site-log:download", (e) => got.push(e.detail));
+    exportCard?.querySelector('[data-export="payroll"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    exportCard?.querySelector('[data-export="contacts"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    exportCard?.querySelector('[data-export="invoices"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 100));
+    check("owner: the payroll button hands the browser a CSV with the bexio e-mail column", got[0]?.name?.startsWith("lohn-stunden-") && /^Mitarbeiter;E-Mail;Arbeitstage;/.test(got[0]?.text || ""), JSON.stringify(got[0]?.name) + " " + (got[0]?.text || "").slice(0, 40));
+    check("owner: the contacts file is in bexio's layout", got[1]?.name === "kunden-bexio.csv" && /^Kontaktart;Name;Vorname;/.test(got[1]?.text || ""), (got[1]?.text || "").slice(0, 40));
+    check("owner: the invoice journal starts with the number and the date", /^Rechnungs-Nr;Datum;Fällig;Kunde;Baustelle;Netto;/.test(got[2]?.text || ""), (got[2]?.text || "").slice(0, 40));
   }
 
   // The team roster is a sidebar tab, so the mobile-label walk above never

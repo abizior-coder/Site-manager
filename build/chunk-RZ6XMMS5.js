@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "hubChat": "Chat",
   "sheetSearch": "K\xEBrko artikull ose num\xEBr\u2026",
   "sheetArticles": "artikuj",
-  "sheetDemo": "Vet\xEBm artikuj shembull \u2014 importo list\xEBn e \xE7mimeve t\xEB furnitorit p\xEBr t\xEB par\xEB gjith\xEB gam\xEBn."
+  "sheetDemo": "Vet\xEBm artikuj shembull \u2014 importo list\xEBn e \xE7mimeve t\xEB furnitorit p\xEBr t\xEB par\xEB gjith\xEB gam\xEBn.",
+  "exportTitle": "Kontabiliteti / bexio",
+  "exportInvoices": "Ditari i faturave",
+  "exportPositions": "Pozicionet e faturave",
+  "exportPayroll": "Or\xEBt p\xEBr punonj\xEBs (paga)",
+  "exportPayrollDays": "Or\xEBt p\xEBr dit\xEB",
+  "exportContacts": "Klient\xEBt si kontakte bexio",
+  "exportEmpty": "asgj\xEB",
+  "exportHint": "CSV me pik\xEBpresje, UTF-8. P\xEBr importin e kontakteve n\xEB bexio hapeni n\xEB Excel dhe ruajeni si .xlsx. Paga: e-maili duhet t\xEB p\xEBrputhet me punonj\xEBsin n\xEB bexio Lohn. Faturat jan\xEB ditari p\xEBr kontabilistin; bexio i pranon faturat vet\xEBm p\xEBrmes API."
 }
 `;export{r as default};

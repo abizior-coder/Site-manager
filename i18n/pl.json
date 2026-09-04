@@ -818,5 +818,13 @@
   "hubChat": "Czat",
   "sheetSearch": "Szukaj artykułu lub numeru…",
   "sheetArticles": "artykułów",
-  "sheetDemo": "Tylko przykładowe artykuły — zaimportuj cennik dostawcy, aby zobaczyć cały asortyment."
+  "sheetDemo": "Tylko przykładowe artykuły — zaimportuj cennik dostawcy, aby zobaczyć cały asortyment.",
+  "exportTitle": "Księgowość / bexio",
+  "exportInvoices": "Dziennik faktur",
+  "exportPositions": "Pozycje faktur",
+  "exportPayroll": "Godziny na pracownika (płace)",
+  "exportPayrollDays": "Godziny na dzień",
+  "exportContacts": "Klienci jako kontakty bexio",
+  "exportEmpty": "nic",
+  "exportHint": "CSV ze średnikiem, UTF-8. Do importu kontaktów w bexio otwórz w Excelu i zapisz jako .xlsx. Płace: e-mail musi zgadzać się z pracownikiem w bexio Lohn. Faktury to dziennik dla księgowego; samo bexio przyjmuje faktury tylko przez API."
 }

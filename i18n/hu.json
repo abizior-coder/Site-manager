@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Cikk vagy szám keresése…",
   "sheetArticles": "cikk",
-  "sheetDemo": "Csak mintacikkek — importáld a beszállító árlistáját a teljes kínálathoz."
+  "sheetDemo": "Csak mintacikkek — importáld a beszállító árlistáját a teljes kínálathoz.",
+  "exportTitle": "Könyvelés / bexio",
+  "exportInvoices": "Számlanapló",
+  "exportPositions": "Számlatételek",
+  "exportPayroll": "Órák dolgozónként (bér)",
+  "exportPayrollDays": "Órák naponta",
+  "exportContacts": "Ügyfelek bexio-kontaktként",
+  "exportEmpty": "semmi",
+  "exportHint": "Pontosvesszős CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben és mentsd .xlsx-ként. Bér: az e-mailnek egyeznie kell a bexio Lohn dolgozójával. A számlák a könyvelő naplója; a bexio számlát csak API-n fogad."
 }

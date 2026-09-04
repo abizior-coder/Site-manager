@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "hubChat": "Chat",
   "sheetSearch": "Cikk vagy sz\xE1m keres\xE9se\u2026",
   "sheetArticles": "cikk",
-  "sheetDemo": "Csak mintacikkek \u2014 import\xE1ld a besz\xE1ll\xEDt\xF3 \xE1rlist\xE1j\xE1t a teljes k\xEDn\xE1lathoz."
+  "sheetDemo": "Csak mintacikkek \u2014 import\xE1ld a besz\xE1ll\xEDt\xF3 \xE1rlist\xE1j\xE1t a teljes k\xEDn\xE1lathoz.",
+  "exportTitle": "K\xF6nyvel\xE9s / bexio",
+  "exportInvoices": "Sz\xE1mlanapl\xF3",
+  "exportPositions": "Sz\xE1mlat\xE9telek",
+  "exportPayroll": "\xD3r\xE1k dolgoz\xF3nk\xE9nt (b\xE9r)",
+  "exportPayrollDays": "\xD3r\xE1k naponta",
+  "exportContacts": "\xDCgyfelek bexio-kontaktk\xE9nt",
+  "exportEmpty": "semmi",
+  "exportHint": "Pontosvessz\u0151s CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben \xE9s mentsd .xlsx-k\xE9nt. B\xE9r: az e-mailnek egyeznie kell a bexio Lohn dolgoz\xF3j\xE1val. A sz\xE1ml\xE1k a k\xF6nyvel\u0151 napl\xF3ja; a bexio sz\xE1ml\xE1t csak API-n fogad."
 }
 `;export{a as default};

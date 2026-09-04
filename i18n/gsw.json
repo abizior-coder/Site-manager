@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Artikel oder Nummere sueche…",
   "sheetArticles": "Artikel",
-  "sheetDemo": "Nur Bispilartikel — d Prislischte vom Lieferant importiere, um s ganze Sortimänt z gseh."
+  "sheetDemo": "Nur Bispilartikel — d Prislischte vom Lieferant importiere, um s ganze Sortimänt z gseh.",
+  "exportTitle": "Buechhaltig / bexio",
+  "exportInvoices": "Rächnigsjournal",
+  "exportPositions": "Rächnigspositione",
+  "exportPayroll": "Stunde pro Mitarbeiter (Lohn)",
+  "exportPayrollDays": "Stunde pro Tag",
+  "exportContacts": "Kunde als bexio-Kontäkt",
+  "exportEmpty": "nüt",
+  "exportHint": "CSV mit Semikolon, UTF-8. Für de bexio-Kontaktimport im Excel öffne und als .xlsx speichere. Lohn: d E-Mail muess mit em Mitarbeiter im bexio Lohn übereinstimme. Rächnige sind s Journal für de Treuhänder; bexio sälber nimmt Rächnige nur über d API."
 }

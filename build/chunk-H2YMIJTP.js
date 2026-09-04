@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Chat",
   "sheetSearch": "Cerca articolo o numero\u2026",
   "sheetArticles": "articoli",
-  "sheetDemo": "Solo articoli di esempio \u2014 importa il listino del fornitore per vedere tutta la gamma."
+  "sheetDemo": "Solo articoli di esempio \u2014 importa il listino del fornitore per vedere tutta la gamma.",
+  "exportTitle": "Contabilit\xE0 / bexio",
+  "exportInvoices": "Giornale fatture",
+  "exportPositions": "Posizioni fatture",
+  "exportPayroll": "Ore per collaboratore (salari)",
+  "exportPayrollDays": "Ore per giorno",
+  "exportContacts": "Clienti come contatti bexio",
+  "exportEmpty": "niente",
+  "exportHint": "CSV con punto e virgola, UTF-8. Per l'import contatti bexio aprire in Excel e salvare come .xlsx. Salari: l'e-mail deve corrispondere al collaboratore in bexio Salari. Le fatture sono il giornale per il fiduciario; bexio accetta fatture solo via API."
 }
 `;export{o as default};

@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Chat",
   "sheetSearch": "Search article or number\u2026",
   "sheetArticles": "articles",
-  "sheetDemo": "Sample articles only \u2014 import the supplier's price list to see the whole range."
+  "sheetDemo": "Sample articles only \u2014 import the supplier's price list to see the whole range.",
+  "exportTitle": "Accounting / bexio",
+  "exportInvoices": "Invoice journal",
+  "exportPositions": "Invoice positions",
+  "exportPayroll": "Hours per employee (payroll)",
+  "exportPayrollDays": "Hours per day",
+  "exportContacts": "Customers as bexio contacts",
+  "exportEmpty": "nothing",
+  "exportHint": "Semicolon CSV, UTF-8. For the bexio contact import open it in Excel and save as .xlsx. Payroll: the e-mail must match the employee in bexio Payroll. Invoices are what the accountant books from; bexio itself takes invoices only through its API."
 }
 `;export{o as default};

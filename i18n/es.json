@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Buscar artículo o número…",
   "sheetArticles": "artículos",
-  "sheetDemo": "Solo artículos de ejemplo — importa la lista de precios del proveedor para ver toda la gama."
+  "sheetDemo": "Solo artículos de ejemplo — importa la lista de precios del proveedor para ver toda la gama.",
+  "exportTitle": "Contabilidad / bexio",
+  "exportInvoices": "Diario de facturas",
+  "exportPositions": "Posiciones de facturas",
+  "exportPayroll": "Horas por empleado (nómina)",
+  "exportPayrollDays": "Horas por día",
+  "exportContacts": "Clientes como contactos bexio",
+  "exportEmpty": "nada",
+  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, ábrelo en Excel y guárdalo como .xlsx. Nómina: el e-mail debe coincidir con el empleado en bexio Nómina. Las facturas son el diario para la gestoría; bexio solo acepta facturas por su API."
 }

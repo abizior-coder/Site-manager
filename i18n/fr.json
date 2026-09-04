@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Rechercher un article ou un numéro…",
   "sheetArticles": "articles",
-  "sheetDemo": "Exemples seulement — importez la liste de prix du fournisseur pour voir toute la gamme."
+  "sheetDemo": "Exemples seulement — importez la liste de prix du fournisseur pour voir toute la gamme.",
+  "exportTitle": "Comptabilité / bexio",
+  "exportInvoices": "Journal des factures",
+  "exportPositions": "Positions des factures",
+  "exportPayroll": "Heures par collaborateur (salaires)",
+  "exportPayrollDays": "Heures par jour",
+  "exportContacts": "Clients en contacts bexio",
+  "exportEmpty": "rien",
+  "exportHint": "CSV point-virgule, UTF-8. Pour l'import de contacts bexio, ouvrir dans Excel et enregistrer en .xlsx. Salaires : l'e-mail doit correspondre au collaborateur dans bexio Salaires. Les factures sont le journal pour la fiduciaire ; bexio n'accepte les factures que par son API."
 }

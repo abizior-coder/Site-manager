@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Chat",
   "sheetSearch": "Buscar art\xEDculo o n\xFAmero\u2026",
   "sheetArticles": "art\xEDculos",
-  "sheetDemo": "Solo art\xEDculos de ejemplo \u2014 importa la lista de precios del proveedor para ver toda la gama."
+  "sheetDemo": "Solo art\xEDculos de ejemplo \u2014 importa la lista de precios del proveedor para ver toda la gama.",
+  "exportTitle": "Contabilidad / bexio",
+  "exportInvoices": "Diario de facturas",
+  "exportPositions": "Posiciones de facturas",
+  "exportPayroll": "Horas por empleado (n\xF3mina)",
+  "exportPayrollDays": "Horas por d\xEDa",
+  "exportContacts": "Clientes como contactos bexio",
+  "exportEmpty": "nada",
+  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, \xE1brelo en Excel y gu\xE1rdalo como .xlsx. N\xF3mina: el e-mail debe coincidir con el empleado en bexio N\xF3mina. Las facturas son el diario para la gestor\xEDa; bexio solo acepta facturas por su API."
 }
 `;export{o as default};

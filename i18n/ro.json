@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Caută articol sau număr…",
   "sheetArticles": "articole",
-  "sheetDemo": "Doar articole exemplu — importă lista de prețuri a furnizorului pentru toată gama."
+  "sheetDemo": "Doar articole exemplu — importă lista de prețuri a furnizorului pentru toată gama.",
+  "exportTitle": "Contabilitate / bexio",
+  "exportInvoices": "Jurnal facturi",
+  "exportPositions": "Poziții facturi",
+  "exportPayroll": "Ore per angajat (salarii)",
+  "exportPayrollDays": "Ore pe zi",
+  "exportContacts": "Clienți ca contacte bexio",
+  "exportEmpty": "nimic",
+  "exportHint": "CSV cu punct și virgulă, UTF-8. Pentru importul de contacte în bexio deschideți în Excel și salvați ca .xlsx. Salarii: e-mailul trebuie să corespundă angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio acceptă facturi doar prin API."
 }

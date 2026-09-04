@@ -15,6 +15,8 @@ import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js
 import { sanitiseBackup, sanitiseProjectCode } from "./import-guard.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { COLORS } from "./ui/theme.js";
+import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
+import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
 import { photoCache, loadPhoto, StoredImage, typeMeta, Stat, EntryRow, ENTRY_TYPE_ORDER, EntryGroups } from "./ui/entries.jsx";
 import { BreakChips } from "./ui/break-chips.jsx";
@@ -301,56 +303,9 @@ export function migrateClientsToCustomers(projects, customers) {
   return { projects: migrated, customers: next, changed };
 }
 
-const DOC_STATUSES = {
-  quote: [
-    { key: "draft", labelKey: "docStatusDraft", color: "#6B7280" },
-    { key: "sent", labelKey: "docStatusSent", color: "#6FB3D9" },
-    { key: "accepted", labelKey: "docStatusAccepted", color: "#7FA65C" },
-    { key: "declined", labelKey: "docStatusDeclined", color: "#E5484D" },
-  ],
-  invoice: [
-    { key: "draft", labelKey: "docStatusDraft", color: "#6B7280" },
-    { key: "open", labelKey: "docStatusOpen", color: "#E8B923" },
-    { key: "partial", labelKey: "docStatusPartial", color: "#D08770" },
-    { key: "paid", labelKey: "docStatusPaid", color: "#7FA65C" },
-  ],
-};
-
-// Quote and invoice totals. Money is computed in one place so the printed
-// document, the on-screen summary and the QR-bill amount can never disagree.
-export function documentTotals(doc) {
-  const net = (doc.lineItems || []).reduce((sum, li) => {
-    const qty = parseFloat(li.qty || 0) || 0;
-    const price = parseFloat(li.unitPrice || 0) || 0;
-    return sum + qty * price;
-  }, 0);
-  const rate = parseFloat(doc.vatRate ?? 0) || 0;
-  const vat = net * (rate / 100);
-  // Swiss invoices are rounded to 0.05 at the total.
-  const gross = Math.round((net + vat) * 20) / 20;
-  return { net, vat, gross, rate };
-}
-
-// Paid / partly paid / overdue is derived from the amount recorded against
-// the invoice rather than stored separately, so a status can never drift out
-// of step with the money actually received.
-export function documentState(doc, today) {
-  const totals = documentTotals(doc);
-  const paid = parseFloat(doc.paidAmount || 0) || 0;
-  const outstanding = Math.max(0, Math.round((totals.gross - paid) * 100) / 100);
-  let key = doc.status || "draft";
-  if (doc.type === "invoice" && key !== "draft") {
-    if (totals.gross > 0 && paid >= totals.gross) key = "paid";
-    else if (paid > 0) key = "partial";
-    else key = "open";
-  }
-  const overdue =
-    doc.type === "invoice" && key !== "paid" && key !== "draft" &&
-    !!doc.dueDate && doc.dueDate < today;
-  const set = DOC_STATUSES[doc.type] || DOC_STATUSES.invoice;
-  const meta = set.find((s) => s.key === key) || set[0];
-  return { key, meta, totals, paid, outstanding, overdue };
-}
+// Document money and status live in documents.js; re-exported so every
+// existing import keeps working.
+export { documentTotals, documentState };
 
 export function nextDocNumber(documents, type, year) {
   const prefix = `${type === "invoice" ? "R" : "O"}-${year}-`;
@@ -4159,7 +4114,7 @@ export default function SiteManager() {
         })()}
 
         {tab === "board" && canManage() && <Suspense fallback={null}><BoardTab assignments={assignments} boardView={boardView} calMonth={calMonth} customers={customers} dragProject={dragProject} entries={entries} lang={lang} leaveRequests={leaveRequests} openBranch={openBranch} printRapport={printRapport} projects={projects} setAssignModal={setAssignModal} setBoardView={setBoardView} setCalMonth={setCalMonth} setDragProject={setDragProject} setOpenBranch={setOpenBranch} setSelectedProject={setSelectedProject} setShowFinishedJobs={setShowFinishedJobs} setTab={setTab} setWeekAnchor={setWeekAnchor} showFinishedJobs={showFinishedJobs} siteReports={siteReports} t={t} team={team} toggleAssignment={toggleAssignment} weekAnchor={weekAnchor} weekDays={weekDays} /></Suspense>}
-        {tab === "cockpit" && canManage() && <Suspense fallback={null}><CockpitTab approveEntry={approveEntry} commandCentre={commandCentre} customers={customers} hoursBalance={hoursBalance} loadUsage={loadUsage} money={money} projects={projects} setDocEditor={setDocEditor} setHoursModalOpen={setHoursModalOpen} setLeaveStatus={setLeaveStatus} setSelectedCustomer={setSelectedCustomer} setTab={setTab} t={t} team={team} usage={usage} /></Suspense>}
+        {tab === "cockpit" && canManage() && <Suspense fallback={null}><CockpitTab approveEntry={approveEntry} billing={billing} commandCentre={commandCentre} customers={customers} documents={documents} entries={entries} leaveRequests={leaveRequests} hoursBalance={hoursBalance} loadUsage={loadUsage} money={money} projects={projects} setDocEditor={setDocEditor} setHoursModalOpen={setHoursModalOpen} setLeaveStatus={setLeaveStatus} setSelectedCustomer={setSelectedCustomer} setTab={setTab} t={t} team={team} usage={usage} /></Suspense>}
         {tab === "customers" && (() => {
           const due = dueFollowUps();
           const q = customerSearch.trim().toLowerCase();
@@ -4320,12 +4275,7 @@ export default function SiteManager() {
           const shiftWeek = (n) => { const d = new Date(`${rapportWeekAnchor}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 7 * n); setRapportWeekAnchor(d.toISOString().slice(0, 10)); };
           const downloadCsv = () => {
             const csv = weekCsv(week, personName, { date: t.docDate, normal: t.hoursNormal, overtime: t.overtimeLabel, travel: t.hoursTravel, breaks: t.hoursBreaks, net: t.hoursTotal, total: t.hoursSum, target: t.hoursTarget, diff: t.hoursDiff });
-            const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `woche-${(personName || "rapport").replace(/[^\w-]+/g, "_")}-${weekDates[0]}.csv`;
-            a.click();
-            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            downloadText(`woche-${(personName || "rapport").replace(/[^\w-]+/g, "_")}-${weekDates[0]}.csv`, csv);
           };
           const fmt = (x) => (Math.round(x * 100) / 100).toFixed(1);
           const HourLine = ({ label, value, strong }) => (

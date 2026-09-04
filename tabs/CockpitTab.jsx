@@ -4,8 +4,51 @@ import { isOwner } from "../company-store.js";
 import { fmtHM, monthKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { UsageCard } from "../roofing-site-manager.jsx";
+import { useState } from "react";
+import { Download } from "lucide-react";
+import { downloadText } from "../ui/download.js";
+import { CONTACT_HEADERS, JOURNAL_HEADERS, PAYROLL_DAY_HEADERS, POSITION_HEADERS, contactRows, invoiceJournal, invoicePositions, payrollCsv, payrollDays, payrollRows, previousMonth, toCsv } from "../accounting-export.js";
 
-export function CockpitTab({ approveEntry, commandCentre, customers, hoursBalance, loadUsage, money, projects, setDocEditor, setHoursModalOpen, setLeaveStatus, setSelectedCustomer, setTab, t, team, usage }) {
+// The owner's files for the Treuhänder and for bexio: pick a month, tap.
+function ExportCard({ t, documents, customers, projects, entries, team, billing, leaveRequests }) {
+  const [month, setMonth] = useState(previousMonth());
+  const weekly = parseFloat((billing || {}).weeklyHours) || 0;
+  const members = (team && team.members) || [];
+  const journal = invoiceJournal(documents, customers, projects, month);
+  const people = payrollRows(entries, members, month, weekly, leaveRequests);
+  const contacts = contactRows(customers);
+  const files = {
+    invoices: () => [`rechnungen-${month}.csv`, toCsv(JOURNAL_HEADERS, journal), journal.length],
+    positions: () => [`rechnungspositionen-${month}.csv`, toCsv(POSITION_HEADERS, invoicePositions(documents, customers, month)), journal.length],
+    payroll: () => [`lohn-stunden-${month}.csv`, payrollCsv(people), people.length],
+    "payroll-days": () => { const rows = payrollDays(entries, members, projects, month, weekly); return [`lohn-stunden-tage-${month}.csv`, toCsv(PAYROLL_DAY_HEADERS, rows), rows.length]; },
+    contacts: () => [`kunden-bexio.csv`, toCsv(CONTACT_HEADERS, contacts), contacts.length],
+  };
+  const Btn = ({ kind, label, count }) => (
+    <button data-export={kind} onClick={() => { const [name, text] = files[kind](); downloadText(name, text); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-2.5 px-3 rounded-lg text-xs font-bold flex items-center justify-between gap-2">
+      <span className="flex items-center gap-2 min-w-0"><Download size={14} color={COLORS.accent} /><span className="truncate">{label}</span></span>
+      <span style={{ color: count ? COLORS.muted : COLORS.amber }} className="text-[10px] shrink-0">{count ? count : t.exportEmpty}</span>
+    </button>
+  );
+  return (
+    <div data-export-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.exportTitle}</div>
+        <input data-export-month type="month" value={month} onChange={(e) => setMonth(e.target.value || month)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1 text-xs outline-none" />
+      </div>
+      <div className="grid gap-2 lg:grid-cols-2">
+        <Btn kind="invoices" label={t.exportInvoices} count={journal.length} />
+        <Btn kind="positions" label={t.exportPositions} count={journal.length} />
+        <Btn kind="payroll" label={t.exportPayroll} count={people.filter((p) => p.worked > 0).length} />
+        <Btn kind="payroll-days" label={t.exportPayrollDays} count={people.reduce((s, p) => s + p.worked, 0)} />
+        <Btn kind="contacts" label={t.exportContacts} count={contacts.length} />
+      </div>
+      <div style={{ color: COLORS.muted }} className="text-[10px] mt-2 leading-relaxed">{t.exportHint}</div>
+    </div>
+  );
+}
+
+export function CockpitTab({ approveEntry, billing, commandCentre, customers, documents, entries, hoursBalance, leaveRequests, loadUsage, money, projects, setDocEditor, setHoursModalOpen, setLeaveStatus, setSelectedCustomer, setTab, t, team, usage }) {
   const c = commandCentre();
   // On a desk the point is seeing it all at once; on a phone it stays a
   // single column.
@@ -30,6 +73,7 @@ export function CockpitTab({ approveEntry, commandCentre, customers, hoursBalanc
       ) : null}
 
       {isOwner() && <UsageCard t={t} usage={usage} onLoad={loadUsage} />}
+      {isOwner() && <ExportCard t={t} documents={documents} customers={customers} projects={projects} entries={entries} team={team} billing={billing} leaveRequests={leaveRequests} />}
 
       <div className="grid grid-cols-2 gap-2 lg:col-span-3">
         <Tile label={t.ccHoursToApprove} value={String(c.pendingHours.length)} color={c.pendingHours.length ? COLORS.amber : COLORS.success} />

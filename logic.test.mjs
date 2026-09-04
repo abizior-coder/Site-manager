@@ -6,6 +6,8 @@
 
 import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog, supplierMatches, articlesFor, filterArticles, sortArticles } from "./price-list.js";
+import { toCsv, workingDays, invoiceJournal, invoicePositions, payrollRows, payrollDays, contactRows, splitAddress, previousMonth } from "./accounting-export.js";
+import { documentTotals as docTotalsPure } from "./documents.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -427,6 +429,47 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("the week has seven rows and sums the one worked day", [week.rows.length, week.total.net, week.total.overtime, week.target, week.diff], [7, 9.2, 0.7, 42.5, -33.3]);
   const csv = weekCsv(week, "Polier Meier");
   t("the CSV is Excel-friendly: semicolons, decimal commas, a totals line", [csv.split("\r\n").length - 1, csv.includes("2026-09-02;8,5;0,7;1,5;0,5;9,2"), csv.includes("Summe;8,5;0,7;1,5;0,5;9,2"), csv.includes("Soll;;;;;42,5")], [12, true, true, true]);
+}
+
+{
+  // Accounting export: what the Treuhänder and bexio get for a month.
+  t("csv quotes only what needs it", toCsv(["A", "B"], [["x;y", 'say "hi"'], ["plain", ""]]), 'A;B
+"x;y";"say ""hi"""
+plain;
+');
+  t("working days of September 2026", workingDays("2026-09"), 22);
+  t("the previous month rolls over the year", previousMonth(new Date(2026, 0, 15)), "2025-12");
+  const docs = [
+    { id: "i1", type: "invoice", number: "R-2026-002", date: "2026-08-20", dueDate: "2026-09-19", status: "open", customerId: "c1", projectId: "p1", vatRate: 8.1, lineItems: [{ description: "Arbeit", qty: "10", unit: "h", unitPrice: "10" }], paidAmount: "50" },
+    { id: "i2", type: "invoice", number: "R-2026-001", date: "2026-08-02", status: "draft", customerId: "c1", vatRate: 8.1, lineItems: [{ description: "x", qty: "1", unitPrice: "100" }] },
+    { id: "i3", type: "invoice", number: "R-2026-003", date: "2026-09-01", status: "open", customerId: "c1", vatRate: 8.1, lineItems: [{ description: "x", qty: "1", unitPrice: "100" }] },
+    { id: "q1", type: "quote", number: "O-2026-001", date: "2026-08-05", status: "sent", customerId: "c1", vatRate: 8.1, lineItems: [{ description: "x", qty: "1", unitPrice: "100" }] },
+  ];
+  const custs = [{ id: "c1", name: "Hans Muster", company: "Muster AG", address: "Dorfstrasse 5\n8903 Birmensdorf", phone: "044 000 00 00", email: "hans@muster.ch" }, { id: "c2", name: "Anna Meier", address: "Seeweg 3, 8001 Zürich" }];
+  const journal = invoiceJournal(docs, custs, [{ id: "p1", name: "Steildach Lettenring" }], "2026-08");
+  t("the journal holds the month's sent invoices only", journal.map((r) => r[0]), ["R-2026-002"]);
+  t("journal money equals the printed invoice: net, VAT, gross to 0.05, paid, open", journal[0].slice(5, 12), ["100.00", "8.10", "8.10", "108.10", "50.00", "58.10", "teilbezahlt"]);
+  t("the journal names customer and site", [journal[0][3], journal[0][4]], ["Muster AG", "Steildach Lettenring"]);
+  t("gross in the journal is the same function the invoice prints", docTotalsPure(docs[0]).gross, 108.1);
+  t("positions carry the invoice number on every row", invoicePositions(docs, custs, "2026-08").map((r) => [r[0], r[3], r[8]]), [["R-2026-002", 1, "100.00"]]);
+  const entries = [
+    { userId: "u1", date: "2026-09-01", type: "time", qty: 10 }, { userId: "u1", date: "2026-09-01", type: "break", qty: 0.5 },
+    { userId: "u1", date: "2026-09-02", type: "time", qty: 8, projectId: "p1" }, { userId: "u1", date: "2026-09-02", type: "transport", hours: 1 },
+    { userId: "u2", date: "2026-09-01", type: "time", qty: 4 },
+  ];
+  const members = [{ uid: "u1", name: "Ali", email: "ali@firma.ch" }, { uid: "u2", name: "Bo", email: "bo@firma.ch" }, { uid: "u3", name: "Cy", email: "" }];
+  const leave = [{ userId: "u1", date: "2026-09-03", type: "vacation", status: "approved" }, { userId: "u1", date: "2026-09-04", type: "vacation", status: "pending" }, { userId: "u1", date: "2026-09-05", type: "sick", status: "approved" }];
+  const pay = payrollRows(entries, members, "2026-09", 42, leave);
+  t("payroll splits the month the GAV way (42 h → 8.4 h/day)", [pay[0].normal, pay[0].overtime, pay[0].travel, pay[0].breaks, pay[0].net, pay[0].worked], [16.4, 1.1, 1, 0.5, 17.5, 2]);
+  t("the target counts Mon–Fri minus approved weekday absences", [pay[0].target, pay[0].vacation, pay[0].sick, pay[0].other], [8.4 * 21, 1, 1, 0]);
+  t("payroll rows carry the login e-mail bexio matches on", pay.map((r) => r.email), ["ali@firma.ch", "bo@firma.ch", ""]);
+  t("everyone is on the sheet, also with zero hours", pay.map((r) => r.worked), [2, 1, 0]);
+  const days = payrollDays(entries, members, [{ id: "p1", name: "Lettenring" }], "2026-09", 42);
+  t("the day sheet names the sites of that day", days.map((r) => [r[0], r[2], r[7], r[8]]), [["Ali", "2026-09-01", "9.50", ""], ["Ali", "2026-09-02", "8.00", "Lettenring"], ["Bo", "2026-09-01", "4.00", ""]]);
+  t("a Swiss address splits into street, PLZ and Ort", [splitAddress("Dorfstrasse 5\n8903 Birmensdorf"), splitAddress("Seeweg 3, CH-8001 Zürich")], [{ street: "Dorfstrasse 5", postalCode: "8903", town: "Birmensdorf" }, { street: "Seeweg 3", postalCode: "8001", town: "Zürich" }]);
+  const contacts = contactRows(custs);
+  t("a company is a Firma with the person as Kontaktperson 1", contacts[0], ["Firma", "Muster AG", "", "Dorfstrasse 5", "8903", "Birmensdorf", "CH", "044 000 00 00", "hans@muster.ch", "Hans Muster", ""]);
+  t("a person is Privat with the whole name in Name (both Swiss orders exist)", contacts[1].slice(0, 6), ["Privat", "Anna Meier", "", "Seeweg 3", "8001", "Zürich"]);
 }
 
 {

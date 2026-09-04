@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "hubChat": "Chat",
   "sheetSearch": "Hledat polo\u017Eku nebo \u010D\xEDslo\u2026",
   "sheetArticles": "polo\u017Eek",
-  "sheetDemo": "Jen uk\xE1zkov\xE9 polo\u017Eky \u2014 importujte cen\xEDk dodavatele pro cel\xFD sortiment."
+  "sheetDemo": "Jen uk\xE1zkov\xE9 polo\u017Eky \u2014 importujte cen\xEDk dodavatele pro cel\xFD sortiment.",
+  "exportTitle": "\xDA\u010Detnictv\xED / bexio",
+  "exportInvoices": "Den\xEDk faktur",
+  "exportPositions": "Polo\u017Eky faktur",
+  "exportPayroll": "Hodiny na zam\u011Bstnance (mzdy)",
+  "exportPayrollDays": "Hodiny na den",
+  "exportContacts": "Z\xE1kazn\xEDci jako kontakty bexio",
+  "exportEmpty": "nic",
+  "exportHint": "CSV se st\u0159edn\xEDkem, UTF-8. Pro import kontakt\u016F do bexio otev\u0159ete v Excelu a ulo\u017Ete jako .xlsx. Mzdy: e-mail se mus\xED shodovat se zam\u011Bstnancem v bexio Lohn. Faktury jsou den\xEDk pro \xFA\u010Detn\xEDho; samotn\xE9 bexio p\u0159ij\xEDm\xE1 faktury jen p\u0159es API."
 }
 `;export{t as default};

@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Czat",
   "sheetSearch": "Szukaj artyku\u0142u lub numeru\u2026",
   "sheetArticles": "artyku\u0142\xF3w",
-  "sheetDemo": "Tylko przyk\u0142adowe artyku\u0142y \u2014 zaimportuj cennik dostawcy, aby zobaczy\u0107 ca\u0142y asortyment."
+  "sheetDemo": "Tylko przyk\u0142adowe artyku\u0142y \u2014 zaimportuj cennik dostawcy, aby zobaczy\u0107 ca\u0142y asortyment.",
+  "exportTitle": "Ksi\u0119gowo\u015B\u0107 / bexio",
+  "exportInvoices": "Dziennik faktur",
+  "exportPositions": "Pozycje faktur",
+  "exportPayroll": "Godziny na pracownika (p\u0142ace)",
+  "exportPayrollDays": "Godziny na dzie\u0144",
+  "exportContacts": "Klienci jako kontakty bexio",
+  "exportEmpty": "nic",
+  "exportHint": "CSV ze \u015Brednikiem, UTF-8. Do importu kontakt\xF3w w bexio otw\xF3rz w Excelu i zapisz jako .xlsx. P\u0142ace: e-mail musi zgadza\u0107 si\u0119 z pracownikiem w bexio Lohn. Faktury to dziennik dla ksi\u0119gowego; samo bexio przyjmuje faktury tylko przez API."
 }
 `;export{o as default};

@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "hubChat": "Chat",
   "sheetSearch": "Caut\u0103 articol sau num\u0103r\u2026",
   "sheetArticles": "articole",
-  "sheetDemo": "Doar articole exemplu \u2014 import\u0103 lista de pre\u021Buri a furnizorului pentru toat\u0103 gama."
+  "sheetDemo": "Doar articole exemplu \u2014 import\u0103 lista de pre\u021Buri a furnizorului pentru toat\u0103 gama.",
+  "exportTitle": "Contabilitate / bexio",
+  "exportInvoices": "Jurnal facturi",
+  "exportPositions": "Pozi\u021Bii facturi",
+  "exportPayroll": "Ore per angajat (salarii)",
+  "exportPayrollDays": "Ore pe zi",
+  "exportContacts": "Clien\u021Bi ca contacte bexio",
+  "exportEmpty": "nimic",
+  "exportHint": "CSV cu punct \u0219i virgul\u0103, UTF-8. Pentru importul de contacte \xEEn bexio deschide\u021Bi \xEEn Excel \u0219i salva\u021Bi ca .xlsx. Salarii: e-mailul trebuie s\u0103 corespund\u0103 angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio accept\u0103 facturi doar prin API."
 }
 `;export{i as default};

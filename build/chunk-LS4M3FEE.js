@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Chat",
   "sheetSearch": "Procurar artigo ou n\xFAmero\u2026",
   "sheetArticles": "artigos",
-  "sheetDemo": "Apenas artigos de exemplo \u2014 importe a lista de pre\xE7os do fornecedor para ver toda a gama."
+  "sheetDemo": "Apenas artigos de exemplo \u2014 importe a lista de pre\xE7os do fornecedor para ver toda a gama.",
+  "exportTitle": "Contabilidade / bexio",
+  "exportInvoices": "Di\xE1rio de faturas",
+  "exportPositions": "Posi\xE7\xF5es das faturas",
+  "exportPayroll": "Horas por colaborador (sal\xE1rios)",
+  "exportPayrollDays": "Horas por dia",
+  "exportContacts": "Clientes como contactos bexio",
+  "exportEmpty": "nada",
+  "exportHint": "CSV com ponto e v\xEDrgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Sal\xE1rios: o e-mail tem de corresponder ao colaborador no bexio Sal\xE1rios. As faturas s\xE3o o di\xE1rio para o contabilista; o bexio s\xF3 aceita faturas pela API."
 }
 `;export{o as default};

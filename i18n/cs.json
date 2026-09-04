@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Hledat položku nebo číslo…",
   "sheetArticles": "položek",
-  "sheetDemo": "Jen ukázkové položky — importujte ceník dodavatele pro celý sortiment."
+  "sheetDemo": "Jen ukázkové položky — importujte ceník dodavatele pro celý sortiment.",
+  "exportTitle": "Účetnictví / bexio",
+  "exportInvoices": "Deník faktur",
+  "exportPositions": "Položky faktur",
+  "exportPayroll": "Hodiny na zaměstnance (mzdy)",
+  "exportPayrollDays": "Hodiny na den",
+  "exportContacts": "Zákazníci jako kontakty bexio",
+  "exportEmpty": "nic",
+  "exportHint": "CSV se středníkem, UTF-8. Pro import kontaktů do bexio otevřete v Excelu a uložte jako .xlsx. Mzdy: e-mail se musí shodovat se zaměstnancem v bexio Lohn. Faktury jsou deník pro účetního; samotné bexio přijímá faktury jen přes API."
 }

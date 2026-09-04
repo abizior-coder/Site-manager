@@ -818,6 +818,14 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubChat": "Chat",
   "sheetSearch": "H\u013Eada\u0165 \u010Dl\xE1nok alebo \u010D\xEDslo\u2026",
   "sheetArticles": "polo\u017Eiek",
-  "sheetDemo": "Len vzorov\xE9 polo\u017Eky \u2014 importujte cenn\xEDk dod\xE1vate\u013Ea pre cel\xFD sortiment."
+  "sheetDemo": "Len vzorov\xE9 polo\u017Eky \u2014 importujte cenn\xEDk dod\xE1vate\u013Ea pre cel\xFD sortiment.",
+  "exportTitle": "\xDA\u010Dtovn\xEDctvo / bexio",
+  "exportInvoices": "Denn\xEDk fakt\xFAr",
+  "exportPositions": "Polo\u017Eky fakt\xFAr",
+  "exportPayroll": "Hodiny na zamestnanca (mzdy)",
+  "exportPayrollDays": "Hodiny na de\u0148",
+  "exportContacts": "Z\xE1kazn\xEDci ako kontakty bexio",
+  "exportEmpty": "ni\u010D",
+  "exportHint": "CSV s bodko\u010Diarkou, UTF-8. Pre import kontaktov do bexio otvorte v Exceli a ulo\u017Ete ako .xlsx. Mzdy: e-mail sa mus\xED zhodova\u0165 so zamestnancom v bexio Lohn. Fakt\xFAry s\xFA denn\xEDk pre \xFA\u010Dtovn\xEDka; samotn\xE9 bexio prij\xEDma fakt\xFAry len cez API."
 }
 `;export{o as default};

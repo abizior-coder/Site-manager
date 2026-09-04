@@ -818,5 +818,13 @@
   "hubChat": "Chat",
   "sheetSearch": "Procurar artigo ou número…",
   "sheetArticles": "artigos",
-  "sheetDemo": "Apenas artigos de exemplo — importe a lista de preços do fornecedor para ver toda a gama."
+  "sheetDemo": "Apenas artigos de exemplo — importe a lista de preços do fornecedor para ver toda a gama.",
+  "exportTitle": "Contabilidade / bexio",
+  "exportInvoices": "Diário de faturas",
+  "exportPositions": "Posições das faturas",
+  "exportPayroll": "Horas por colaborador (salários)",
+  "exportPayrollDays": "Horas por dia",
+  "exportContacts": "Clientes como contactos bexio",
+  "exportEmpty": "nada",
+  "exportHint": "CSV com ponto e vírgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Salários: o e-mail tem de corresponder ao colaborador no bexio Salários. As faturas são o diário para o contabilista; o bexio só aceita faturas pela API."
 }
