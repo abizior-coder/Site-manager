@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "errClose": "OK",
   "errReportHint": "Quote the code when reporting",
   "versionLabel": "Version",
-  "forceReloadBtn": "Reload app"
+  "forceReloadBtn": "Reload app",
+  "navSites": "Sites",
+  "navMore": "More",
+  "quickAddTitle": "Quick add",
+  "quickPickSite": "Which site?"
 }
 `;export{o as default};

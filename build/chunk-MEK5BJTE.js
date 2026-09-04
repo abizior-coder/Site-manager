@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "errClose": "OK",
   "errReportHint": "Jep kodin kur raporton",
   "versionLabel": "Versioni",
-  "forceReloadBtn": "Ringarko aplikacionin"
+  "forceReloadBtn": "Ringarko aplikacionin",
+  "navSites": "Kantieret",
+  "navMore": "M\xEB shum\xEB",
+  "quickAddTitle": "Regjistrim i shpejt\xEB",
+  "quickPickSite": "Cili kantier?"
 }
 `;export{r as default};

@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Pri otázkach uveďte kód",
   "versionLabel": "Verzia",
-  "forceReloadBtn": "Znovu načítať aplikáciu"
+  "forceReloadBtn": "Znovu načítať aplikáciu",
+  "navSites": "Stavby",
+  "navMore": "Viac",
+  "quickAddTitle": "Rýchly záznam",
+  "quickPickSite": "Ktorá stavba?"
 }

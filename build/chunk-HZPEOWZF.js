@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "errClose": "OK",
   "errReportHint": "Men\u021Bioneaz\u0103 codul la raportare",
   "versionLabel": "Versiune",
-  "forceReloadBtn": "Re\xEEncarc\u0103 aplica\u021Bia"
+  "forceReloadBtn": "Re\xEEncarc\u0103 aplica\u021Bia",
+  "navSites": "\u0218antiere",
+  "navMore": "Mai mult",
+  "quickAddTitle": "\xCEnregistrare rapid\u0103",
+  "quickPickSite": "Care \u0219antier?"
 }
 `;export{i as default};

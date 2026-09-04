@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "errClose": "OK",
   "errReportHint": "Bejelent\xE9skor add meg a k\xF3dot",
   "versionLabel": "Verzi\xF3",
-  "forceReloadBtn": "App \xFAjrat\xF6lt\xE9se"
+  "forceReloadBtn": "App \xFAjrat\xF6lt\xE9se",
+  "navSites": "Munk\xE1k",
+  "navMore": "T\xF6bb",
+  "quickAddTitle": "Gyors r\xF6gz\xEDt\xE9s",
+  "quickPickSite": "Melyik munka?"
 }
 `;export{a as default};

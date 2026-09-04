@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "errClose": "OK",
   "errReportHint": "Pri ot\xE1zkach uve\u010Fte k\xF3d",
   "versionLabel": "Verzia",
-  "forceReloadBtn": "Znovu na\u010D\xEDta\u0165 aplik\xE1ciu"
+  "forceReloadBtn": "Znovu na\u010D\xEDta\u0165 aplik\xE1ciu",
+  "navSites": "Stavby",
+  "navMore": "Viac",
+  "quickAddTitle": "R\xFDchly z\xE1znam",
+  "quickPickSite": "Ktor\xE1 stavba?"
 }
 `;export{o as default};

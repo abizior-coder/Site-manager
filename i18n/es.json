@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Indica el código al consultar",
   "versionLabel": "Versión",
-  "forceReloadBtn": "Recargar app"
+  "forceReloadBtn": "Recargar app",
+  "navSites": "Obras",
+  "navMore": "Más",
+  "quickAddTitle": "Registro rápido",
+  "quickPickSite": "¿Qué obra?"
 }

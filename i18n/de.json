@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Bei Rückfragen den Code angeben",
   "versionLabel": "Version",
-  "forceReloadBtn": "App neu laden"
+  "forceReloadBtn": "App neu laden",
+  "navSites": "Baustellen",
+  "navMore": "Mehr",
+  "quickAddTitle": "Schnell erfassen",
+  "quickPickSite": "Welche Baustelle?"
 }

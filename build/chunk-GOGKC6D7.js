@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "errClose": "OK",
   "errReportHint": "Indica il codice in caso di domande",
   "versionLabel": "Versione",
-  "forceReloadBtn": "Ricarica app"
+  "forceReloadBtn": "Ricarica app",
+  "navSites": "Cantieri",
+  "navMore": "Altro",
+  "quickAddTitle": "Inserimento rapido",
+  "quickPickSite": "Quale cantiere?"
 }
 `;export{o as default};

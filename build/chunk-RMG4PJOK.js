@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "errClose": "OK",
   "errReportHint": "P\u0159i dotazech uve\u010Fte k\xF3d",
   "versionLabel": "Verze",
-  "forceReloadBtn": "Znovu na\u010D\xEDst aplikaci"
+  "forceReloadBtn": "Znovu na\u010D\xEDst aplikaci",
+  "navSites": "Stavby",
+  "navMore": "V\xEDce",
+  "quickAddTitle": "Rychl\xFD z\xE1znam",
+  "quickPickSite": "Kter\xE1 stavba?"
 }
 `;export{t as default};

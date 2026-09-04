@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "errClose": "OK",
   "errReportHint": "Podaj kod przy zg\u0142oszeniu",
   "versionLabel": "Wersja",
-  "forceReloadBtn": "Prze\u0142aduj aplikacj\u0119"
+  "forceReloadBtn": "Prze\u0142aduj aplikacj\u0119",
+  "navSites": "Budowy",
+  "navMore": "Wi\u0119cej",
+  "quickAddTitle": "Szybki wpis",
+  "quickPickSite": "Kt\xF3ra budowa?"
 }
 `;export{o as default};

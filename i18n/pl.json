@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Podaj kod przy zgłoszeniu",
   "versionLabel": "Wersja",
-  "forceReloadBtn": "Przeładuj aplikację"
+  "forceReloadBtn": "Przeładuj aplikację",
+  "navSites": "Budowy",
+  "navMore": "Więcej",
+  "quickAddTitle": "Szybki wpis",
+  "quickPickSite": "Która budowa?"
 }

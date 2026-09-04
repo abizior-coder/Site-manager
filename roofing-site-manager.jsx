@@ -610,6 +610,8 @@ export default function SiteManager() {
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
   const [tripModal, setTripModal] = useState(null);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [quickAddSite, setQuickAddSite] = useState(null);
   // The one place a failure is shown: a panel in the middle with a code.
   const [errorBox, setErrorBox] = useState(null);
   function showError(e, context) {
@@ -4027,14 +4029,6 @@ export default function SiteManager() {
             <Globe size={13} color={COLORS.muted} />
             <span style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{lang}</span>
           </button>
-          {/* The bottom bar holds six tabs; the sidebar has ten. On a phone
-              the rest -- Team, Sicherheit, Board -- live behind this. Its own
-              container, so it never competes with the status chips. */}
-          <div style={{ borderLeft: `1px solid ${COLORS.border}` }} className="lg:hidden pl-2 ml-0.5 shrink-0">
-            <button data-menu-button onClick={() => setMenuOpen(true)} title={t.navMenu} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center justify-center w-8 h-8 rounded-lg">
-              <Menu size={16} color={COLORS.text} />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -4082,7 +4076,7 @@ export default function SiteManager() {
         </div>
       )}
 
-      <div className="relative flex-1 overflow-y-auto px-5 pb-20 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+      <div className="relative flex-1 overflow-y-auto px-5 pb-6 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
         {tab === "today" && <TodayTab t={t} projects={projects} entries={entries} user={user} activeClock={activeClock} todayEntries={todayEntries} myAssignments={myAssignments} projectName={projectName} setTab={setTab} setSelectedProject={setSelectedProject} weather={weather} weatherLoc={weatherLoc} wCond={wCond} weatherEditOpen={weatherEditOpen} setWeatherEditOpen={setWeatherEditOpen} weatherCityInput={weatherCityInput} setWeatherCityInput={setWeatherCityInput} submitWeatherCity={submitWeatherCity} fetchWeather={fetchWeather} toggleBreak={toggleBreak} clockOut={clockOut} noteText={noteText} setNoteText={setNoteText} submitNote={submitNote} toggleVoiceInput={toggleVoiceInput} voiceListening={voiceListening} voiceTarget={voiceTarget} openEditTime={openEditTime} openEditEntry={openEditEntry} deleteEntryFn={deleteEntryFn} />}
         {tab === "materials" && <Suspense fallback={null}><MaterialsTab materialDragProps={materialDragProps} addToBasket={addToBasket} articleMaster={articleMaster} basket={basket} catalogs={catalogs} deleteEntryFn={deleteEntryFn} deleteLibraryItem={deleteLibraryItem} entries={entries} lang={lang} librarySearch={librarySearch} materialSearch={materialSearch} materialsCatalogFor={materialsCatalogFor} materialsSubTab={materialsSubTab} openLibraryEdit={openLibraryEdit} openLibraryScan={openLibraryScan} openPickup={openPickup} openScan={openScan} priceFileRef={priceFileRef} projectName={projectName} projects={projects} removeBasketItem={removeBasketItem} setBasket={setBasket} setBasketMode={setBasketMode} setBasketProjectModalOpen={setBasketProjectModalOpen} setLibrarySearch={setLibrarySearch} setMaterialSearch={setMaterialSearch} setMaterialsSubTab={setMaterialsSubTab} setOrderStatus={setOrderStatus} setShopCat={setShopCat} setSortMode={setSortMode} shopCat={shopCat} sortMode={sortMode} stagePriceList={stagePriceList} t={t} techLibrary={techLibrary} toolsCatalogFor={toolsCatalogFor} updateBasketItem={updateBasketItem} user={user} /></Suspense>}
         {tab === "calendar" && (() => {
@@ -4664,6 +4658,38 @@ export default function SiteManager() {
           </div>
         );
       })()}
+
+      {/* The phone's main navigation: four tabs and a «+» under the thumb, the
+          way every site app on the market does it. Real height in the column
+          like the dock above it, so nothing ever scrolls underneath. */}
+      {membership && (
+        <nav data-tab-bar style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="lg:hidden shrink-0 grid grid-cols-5 items-end px-1 pt-1 pb-[max(6px,env(safe-area-inset-bottom))]">
+          {[
+            { id: "today", label: t.navToday, icon: Clock },
+            { id: "projects", label: t.navSites, icon: MapPin },
+            null,
+            { id: "reports", label: t.navReports, icon: FileText },
+            { id: "more", label: t.navMore, icon: Menu },
+          ].map((it, idx) => {
+            if (!it) {
+              return (
+                <button key="plus" data-quick-add-button onClick={() => setQuickAddOpen(true)} title={t.quickAddTitle} className="flex flex-col items-center justify-end pb-0.5">
+                  <span style={{ background: COLORS.accent }} className="w-12 h-12 -mt-5 rounded-full flex items-center justify-center shadow-lg"><Plus size={24} color="#fff" /></span>
+                </button>
+              );
+            }
+            const Icon = it.icon;
+            const active = it.id === "more" ? menuOpen : tab === it.id && !selectedProject;
+            const onClick = it.id === "more" ? () => setMenuOpen(true) : () => { setTab(it.id); setSelectedProject(null); setMenuOpen(false); };
+            return (
+              <button key={it.id} data-tab={it.id} {...(it.id === "more" ? { "data-menu-button": true } : {})} onClick={onClick} style={{ color: active ? COLORS.accent : COLORS.muted }} className="flex flex-col items-center gap-0.5 py-1.5 text-[10px] font-bold uppercase tracking-wide">
+                <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
+                <span className="truncate max-w-full">{it.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       </div>
 
@@ -5923,6 +5949,57 @@ export default function SiteManager() {
         );
       })()}
 
+      {quickAddOpen && (() => {
+          // The site the action is for: clocked in, else the open job, else the
+          // only active one; otherwise the sheet asks.
+          const candidates = dockProjects.length ? dockProjects : projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
+          const pid = activeClock?.projectId || selectedProject || (candidates.length === 1 ? candidates[0].id : quickAddSite) || null;
+          const site = projects.find((p) => p.id === pid);
+          const close = () => { setQuickAddOpen(false); setQuickAddSite(null); };
+          const actions = [
+            activeClock
+              ? { key: "stop", label: t.clockOut, icon: Square, color: COLORS.danger, run: () => { clockOut(); } }
+              : { key: "start", label: t.startYourDay, icon: Play, color: COLORS.success, run: () => { if (pid) startDayOn(pid); } },
+            { key: "material", label: t.materials, icon: Package, color: COLORS.success, run: () => openAdd("material", pid) },
+            { key: "photo", label: t.photoLabel, icon: Camera, color: "#7FA0C7", run: () => openAdd("photo", pid) },
+            { key: "note", label: t.typeNote, icon: MessageSquare, color: COLORS.muted, run: () => openAdd("note", pid) },
+            { key: "trip", label: t.tripAdd, icon: Truck, color: "#C68B4F", run: () => openTrip(pid) },
+            { key: "inspection", label: t.newInspection, icon: ClipboardCheck, color: "#6FB3D9", run: () => { if (pid) openInspection(pid); } },
+          ];
+          return (
+            <div className="fixed inset-0 z-50 flex items-end lg:hidden">
+              <div onClick={close} className="absolute inset-0 bg-black/60" />
+              <div data-quick-add style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="relative w-full rounded-t-2xl px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+                <div className="flex items-center justify-between mb-2">
+                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.quickAddTitle}{site ? ` · ${site.name}` : ""}</div>
+                  <button onClick={close}><X size={18} color={COLORS.muted} /></button>
+                </div>
+                {!pid && candidates.length > 1 && (
+                  <div className="mb-3">
+                    <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.quickPickSite}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {candidates.map((p) => (
+                        <button key={p.id} data-quick-site={p.id} onClick={() => setQuickAddSite(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(p.id)}66` }} className="px-2.5 py-1.5 rounded-full text-[11px] font-bold">{p.name}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  {actions.map((a) => {
+                    const Icon = a.icon;
+                    const needsSite = a.key !== "stop" && !pid;
+                    return (
+                      <button key={a.key} data-quick-action={a.key} disabled={needsSite} onClick={() => { close(); a.run(); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, opacity: needsSite ? 0.4 : 1 }} className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-[11px] font-bold">
+                        <Icon size={20} color={a.color} />
+                        <span className="truncate max-w-full">{a.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+      })()}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/60" />

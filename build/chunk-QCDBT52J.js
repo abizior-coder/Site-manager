@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var n=`{
   "errClose": "OK",
   "errReportHint": "Bi R\xFCckfrage de Code aag\xE4h",
   "versionLabel": "Version",
-  "forceReloadBtn": "App neu lade"
+  "forceReloadBtn": "App neu lade",
+  "navSites": "Bauschtelle",
+  "navMore": "Meh",
+  "quickAddTitle": "Schn\xE4ll erfasse",
+  "quickPickSite": "Weli Bauschtell?"
 }
 `;export{n as default};

@@ -784,6 +784,10 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "errClose": "OK",
   "errReportHint": "Indique o c\xF3digo ao reportar",
   "versionLabel": "Vers\xE3o",
-  "forceReloadBtn": "Recarregar app"
+  "forceReloadBtn": "Recarregar app",
+  "navSites": "Obras",
+  "navMore": "Mais",
+  "quickAddTitle": "Registo r\xE1pido",
+  "quickPickSite": "Qual obra?"
 }
 `;export{o as default};

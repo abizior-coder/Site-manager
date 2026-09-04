@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Bejelentéskor add meg a kódot",
   "versionLabel": "Verzió",
-  "forceReloadBtn": "App újratöltése"
+  "forceReloadBtn": "App újratöltése",
+  "navSites": "Munkák",
+  "navMore": "Több",
+  "quickAddTitle": "Gyors rögzítés",
+  "quickPickSite": "Melyik munka?"
 }

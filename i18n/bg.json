@@ -784,5 +784,9 @@
   "errClose": "OK",
   "errReportHint": "Посочете кода при запитване",
   "versionLabel": "Версия",
-  "forceReloadBtn": "Презареди приложението"
+  "forceReloadBtn": "Презареди приложението",
+  "navSites": "Обекти",
+  "navMore": "Още",
+  "quickAddTitle": "Бърз запис",
+  "quickPickSite": "Кой обект?"
 }

@@ -405,6 +405,31 @@ async function renderAs(role) {
     check("owner: OK closes the error panel", !window.document.querySelector("[data-error-panel]"), "panel still open");
   }
 
+  // The phone's bar: four tabs and a «+» whose sheet opens the composers.
+  {
+    const bar = window.document.querySelector("[data-tab-bar]");
+    check("owner: the phone bar has four tabs and a plus", !!bar && bar.querySelectorAll("[data-tab]").length === 4 && !!bar.querySelector("[data-quick-add-button]"), bar ? `${bar.querySelectorAll("[data-tab]").length} tabs` : "no bar");
+    bar?.querySelector('[data-tab="today"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    bar?.querySelector("[data-quick-add-button]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const sheet = window.document.querySelector("[data-quick-add]");
+    check("owner: the plus opens the quick-add sheet", !!sheet && sheet.querySelectorAll("[data-quick-action]").length === 6, sheet ? `${sheet.querySelectorAll("[data-quick-action]").length} actions` : "no sheet");
+    // Two active sites, none clocked in: the sheet asks which first.
+    const sitePick = sheet?.querySelector("[data-quick-site]");
+    if (sitePick) { sitePick.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); await new Promise((r) => setTimeout(r, 150)); }
+    window.document.querySelector('[data-quick-action="material"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check("owner: plus → Material opens the composer for the site", !window.document.querySelector("[data-quick-add]") && text().includes("Lieferant"), "composer not open");
+    window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    bar?.querySelector('[data-tab="more"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: Mehr opens the drawer with the rest", !!window.document.querySelector("[data-menu-drawer]"), "drawer not open");
+    window.document.querySelector("[data-menu-drawer] button")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");
