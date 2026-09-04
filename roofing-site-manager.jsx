@@ -985,14 +985,14 @@ export default function SiteManager() {
       await createInvite(inviteRole);
       const invites = await listInvites();
       setTeam((s) => ({ ...s, invites }));
-    } catch (e) { showToast(t.couldntSave); }
+    } catch (e) { saveFailed(e, "makeInvite"); }
   }
 
   async function dropInvite(code) {
     try {
       await revokeInvite(code);
       setTeam((s) => ({ ...s, invites: s.invites.filter((i) => i.code !== code) }));
-    } catch (e) { showToast(t.couldntSave); }
+    } catch (e) { saveFailed(e, "dropInvite"); }
   }
 
   async function runCompanyMigration() {
@@ -1005,7 +1005,7 @@ export default function SiteManager() {
       setCompanyMigration((s) => ({ ...s, busy: false, result: counts }));
     } catch (err) {
       setCompanyMigration((s) => ({ ...s, busy: false }));
-      showToast(t.couldntSave);
+      saveFailed(err, "runCompanyMigration");
     }
   }
 
@@ -1018,7 +1018,7 @@ export default function SiteManager() {
       window.location.reload();
     } catch (err) {
       setLegacyImport((s) => ({ ...s, busy: false }));
-      showToast(t.couldntSave);
+      saveFailed(err, "runLegacyImport");
     }
   }
 
@@ -1052,7 +1052,7 @@ export default function SiteManager() {
 
   async function saveTechLibrary(next) {
     setTechLibrary(next);
-    try { await window.storage.set("site-tech-library", JSON.stringify(next)); } catch (e) { showToast(t.couldntSave); }
+    try { await window.storage.set("site-tech-library", JSON.stringify(next)); } catch (e) { saveFailed(e, "saveTechLibrary"); }
   }
 
   // Moves a freshly picked image out of the record and into its own document,
@@ -1560,7 +1560,7 @@ export default function SiteManager() {
       const blob = new Blob([html], { type: "text/html" });
       window.open(URL.createObjectURL(blob), "_blank");
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "printDocument");
     }
   }
 
@@ -1619,7 +1619,7 @@ export default function SiteManager() {
       const blob = new Blob([html], { type: "text/html" });
       window.open(URL.createObjectURL(blob), "_blank");
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "printRapport");
     }
   }
 
@@ -1634,7 +1634,7 @@ export default function SiteManager() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "generateProjectsReport");
     }
   }
 
@@ -1645,7 +1645,7 @@ export default function SiteManager() {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "saveReportAsPdf");
     }
   }
 
@@ -1687,7 +1687,7 @@ export default function SiteManager() {
       setTimeout(() => URL.revokeObjectURL(a.href), 10000);
       showToast(t.backupSaved);
     } catch (err) {
-      showToast(t.couldntSave);
+      saveFailed(err, "downloadFullBackup");
     }
   }
 
@@ -1886,8 +1886,16 @@ export default function SiteManager() {
       }
       if (next.leaveRequests) await syncCollection("leave", next.leaveRequests);
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "persist");
     }
+  }
+
+  // A failed save names its reason -- the Firestore code, the error text or
+  // at least where it happened -- so a toast read off a phone can be acted on.
+  function saveFailed(e, where) {
+    console.error("save failed:", where, e);
+    const why = (e && (e.code || e.message)) || where || "";
+    showToast(why ? `${t.couldntSave} (${String(why).slice(0, 60)})` : t.couldntSave);
   }
 
   function showToast(msg) {
@@ -1975,7 +1983,7 @@ export default function SiteManager() {
       showToast(t.sigSaved);
     } catch (err) {
       setRapportModal((r) => ({ ...r, busy: false }));
-      showToast(t.couldntSave);
+      saveFailed(err, "saveRapport");
     }
   }
 
@@ -2331,7 +2339,7 @@ export default function SiteManager() {
       await openTeamRefresh();
       showToast(t.teamRemoved);
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "removeMember");
     }
   }
   async function openTeamRefresh() {
@@ -2499,7 +2507,7 @@ export default function SiteManager() {
   async function saveBilling() {
     setBilling(billingDraft);
     setBillingModalOpen(false);
-    try { await saveFinance(billingDraft); } catch (e) { showToast(t.couldntSave); }
+    try { await saveFinance(billingDraft); } catch (e) { saveFailed(e, "saveBilling"); }
   }
 
   // A quote starts from what was actually logged on site — hours at the
@@ -3259,7 +3267,7 @@ export default function SiteManager() {
   // --- photos: look, zoom, mark up ----------------------------------------------
   async function openPhoto(entry) {
     const src = entry.photo || (await loadPhoto(entry.photoId));
-    if (!src) { showToast(t.couldntSave); return; }
+    if (!src) { saveFailed(null, "openPhoto"); return; }
     setPhotoView({ entry, src });
   }
 
@@ -3274,14 +3282,14 @@ export default function SiteManager() {
       setPhotoView({ entry: updated, src: dataUrl });
       showToast(t.photoSaved);
     } catch (e) {
-      showToast(t.couldntSave);
+      saveFailed(e, "savePhotoEdit");
     }
   }
 
   async function restorePhotoOriginal(entry) {
     if (!entry.originalPhotoId) return;
     const src = await loadPhoto(entry.originalPhotoId);
-    if (!src) { showToast(t.couldntSave); return; }
+    if (!src) { saveFailed(null, "restorePhotoOriginal"); return; }
     const edited = entry.photoId;
     const updated = { ...entry, photoId: entry.originalPhotoId, originalPhotoId: null, editedAt: null };
     persist({ entries: entries.map((e) => (e.id === entry.id ? updated : e)) });
