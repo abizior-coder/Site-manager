@@ -16,3 +16,6 @@ docs/value-plan-*.md
 
 # The journal holds business decisions; local like the plans
 docs/JOURNAL.md
+
+# throwaway patch scripts
+.*.py
