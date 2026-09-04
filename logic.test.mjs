@@ -433,10 +433,7 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
 
 {
   // Accounting export: what the Treuhänder and bexio get for a month.
-  t("csv quotes only what needs it", toCsv(["A", "B"], [["x;y", 'say "hi"'], ["plain", ""]]), 'A;B
-"x;y";"say ""hi"""
-plain;
-');
+  t("csv quotes only what needs it", toCsv(["A", "B"], [["x;y", 'say "hi"'], ["plain", ""]]), 'A;B\r\n"x;y";"say ""hi"""\r\nplain;\r\n');
   t("working days of September 2026", workingDays("2026-09"), 22);
   t("the previous month rolls over the year", previousMonth(new Date(2026, 0, 15)), "2025-12");
   const docs = [
