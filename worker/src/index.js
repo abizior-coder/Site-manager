@@ -124,6 +124,10 @@ export default {
 
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text().catch(() => "");
+      // Anthropic's error carries no user content; logging it is what makes a
+      // 502 diagnosable from `wrangler tail` without asking the person to
+      // read a toast aloud.
+      console.error(`anthropic ${anthropicRes.status} for ${cid}: ${errText.slice(0, 300)}`);
       return json({ error: `Anthropic API error ${anthropicRes.status}: ${errText.slice(0, 300)}` }, 502, headers);
     }
 
