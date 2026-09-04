@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageTrips30": "Inspections & trips 30 d",
   "ccUsageLoading": "Loading usage\u2026",
   "ccUsageEmpty": "No usage yet \u2014 the counts start with the next entries.",
-  "ccUsageFootnote": "Counts per company and day only \u2014 no names, no texts. Kept 400 days."
+  "ccUsageFootnote": "Counts per company and day only \u2014 no names, no texts. Kept 400 days.",
+  "updateReady": "New version loaded \u2014 restart when convenient.",
+  "reloadBtn": "Restart",
+  "langOffline": "This language needs a connection once. Try again when online."
 }
 `;export{o as default};

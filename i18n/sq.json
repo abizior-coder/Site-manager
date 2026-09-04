@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspektime & udhëtime 30 d",
   "ccUsageLoading": "Po ngarkohet përdorimi…",
   "ccUsageEmpty": "Ende pa përdorim — numërimi fillon me regjistrimet e ardhshme.",
-  "ccUsageFootnote": "Vetëm numra për firmë dhe ditë — pa emra, pa tekste. Ruhen 400 ditë."
+  "ccUsageFootnote": "Vetëm numra për firmë dhe ditë — pa emra, pa tekste. Ruhen 400 ditë.",
+  "updateReady": "Versioni i ri u ngarkua — rinise kur të kesh mundësi.",
+  "reloadBtn": "Rinis",
+  "langOffline": "Kjo gjuhë ka nevojë një herë për lidhje. Provo online."
 }

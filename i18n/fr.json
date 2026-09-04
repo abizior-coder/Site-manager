@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspections & trajets 30 j",
   "ccUsageLoading": "Chargement de l'utilisation…",
   "ccUsageEmpty": "Pas encore d'utilisation — le comptage commence avec les prochaines saisies.",
-  "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour — ni noms ni textes. Conservés 400 jours."
+  "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour — ni noms ni textes. Conservés 400 jours.",
+  "updateReady": "Nouvelle version chargée — redémarrez quand vous voulez.",
+  "reloadBtn": "Redémarrer",
+  "langOffline": "Cette langue a besoin d'une connexion une fois. Réessayez en ligne."
 }

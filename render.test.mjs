@@ -303,6 +303,16 @@ async function renderAs(role) {
     check("owner: the month totals count it", /1\.5/.test(text()) && /200/.test(text()), "totals missing");
   }
 
+  // A new build taking over the page is announced with a restart button,
+  // never a silent reload under someone's fingers.
+  {
+    check("owner: no restart bar before an update", !window.document.querySelector("[data-update-bar]"), "bar shown without an update");
+    window.dispatchEvent(new window.Event("site-log:update"));
+    await new Promise((r) => setTimeout(r, 150));
+    const bar = window.document.querySelector("[data-update-bar]");
+    check("owner: an update shows the restart bar", !!bar && /Neue Version|New version/.test(bar.textContent || ""), (bar?.textContent || "no bar").slice(0, 80));
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");

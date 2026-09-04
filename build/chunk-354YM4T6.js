@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageTrips30": "Inspe\xE7\xF5es e viagens 30 d",
   "ccUsageLoading": "A carregar utiliza\xE7\xE3o\u2026",
   "ccUsageEmpty": "Ainda sem utiliza\xE7\xE3o \u2014 a contagem come\xE7a com os pr\xF3ximos registos.",
-  "ccUsageFootnote": "Apenas contagens por empresa e dia \u2014 sem nomes nem textos. Guardadas 400 dias."
+  "ccUsageFootnote": "Apenas contagens por empresa e dia \u2014 sem nomes nem textos. Guardadas 400 dias.",
+  "updateReady": "Nova vers\xE3o carregada \u2014 reinicie quando quiser.",
+  "reloadBtn": "Reiniciar",
+  "langOffline": "Este idioma precisa de liga\xE7\xE3o uma vez. Tente online."
 }
 `;export{o as default};

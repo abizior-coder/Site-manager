@@ -589,6 +589,16 @@ export default function SiteManager() {
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
   const [tripModal, setTripModal] = useState(null);
+  // A new build has taken over the page (service worker); offer a restart.
+  const [updateReady, setUpdateReady] = useState(() => typeof window !== "undefined" && !!window.__siteLogUpdateReady);
+  useEffect(() => {
+    const onUpdate = () => setUpdateReady(true);
+    window.addEventListener("site-log:update", onUpdate);
+    // The announcement can land between the first render and this effect;
+    // the flag catches what the event missed.
+    if (window.__siteLogUpdateReady) setUpdateReady(true);
+    return () => window.removeEventListener("site-log:update", onUpdate);
+  }, []);
   const [transportFilter, setTransportFilter] = useState("");
   const inspectionFileRef = useRef(null);
   const [weather, setWeather] = useState({ loading: false, error: null, data: null });
@@ -1834,6 +1844,9 @@ export default function SiteManager() {
   }
 
   async function changeLang(code) {
+    // The language file is a chunk of its own; offline it cannot come, and
+    // then the current language stays rather than the app going English.
+    try { await loadLang(code); } catch (e) { showToast(t.langOffline); return; }
     setLang(code);
     setLangPickerOpen(false);
     try { await window.storage.set(personalKey("site-lang"), code); } catch (e) {}
@@ -3638,6 +3651,15 @@ export default function SiteManager() {
     return { hours, breaks, materials, tools, projIds };
   }
 
+  // A newer build is live: offer a restart, on the sign-in screen as much as
+  // inside the app, and never reload on our own.
+  const updateBar = updateReady ? (
+    <div data-update-bar style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="fixed left-3 right-3 bottom-3 lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3">
+      <span className="text-sm font-semibold flex-1">{t.updateReady}</span>
+      <button onClick={() => window.location.reload()} style={{ background: COLORS.accent }} className="px-3 py-2 rounded-lg text-xs font-bold uppercase">{t.reloadBtn}</button>
+    </div>
+  ) : null;
+
   if (!authChecked) {
     return (
       <div style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }} className="w-full h-screen flex items-center justify-center text-sm">
@@ -3650,6 +3672,7 @@ export default function SiteManager() {
     return (
       <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
         <MountainBackground />
+        {updateBar}
         <div className="relative w-full max-w-sm">
           <div className="flex items-center gap-2 mb-1">
             <SwissCross size={18} />
@@ -3713,6 +3736,7 @@ export default function SiteManager() {
     return (
       <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
         <MountainBackground />
+        {updateBar}
         <div className="relative w-full max-w-sm">
           <div className="flex items-center gap-2 mb-1">
             <SwissCross size={18} />
@@ -3909,6 +3933,7 @@ export default function SiteManager() {
         </div>
       )}
 
+      {updateBar}
       {toast && (
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold z-50 shadow-lg">
           {toast}

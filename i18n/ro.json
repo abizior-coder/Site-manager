@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspecții și curse 30 z",
   "ccUsageLoading": "Se încarcă utilizarea…",
   "ccUsageEmpty": "Nicio utilizare încă — numărarea începe cu următoarele înregistrări.",
-  "ccUsageFootnote": "Doar numere pe firmă și zi — fără nume, fără texte. Păstrate 400 de zile."
+  "ccUsageFootnote": "Doar numere pe firmă și zi — fără nume, fără texte. Păstrate 400 de zile.",
+  "updateReady": "Versiune nouă încărcată — repornește când e convenabil.",
+  "reloadBtn": "Repornește",
+  "langOffline": "Această limbă are nevoie o dată de conexiune. Încearcă online."
 }

@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspeções e viagens 30 d",
   "ccUsageLoading": "A carregar utilização…",
   "ccUsageEmpty": "Ainda sem utilização — a contagem começa com os próximos registos.",
-  "ccUsageFootnote": "Apenas contagens por empresa e dia — sem nomes nem textos. Guardadas 400 dias."
+  "ccUsageFootnote": "Apenas contagens por empresa e dia — sem nomes nem textos. Guardadas 400 dias.",
+  "updateReady": "Nova versão carregada — reinicie quando quiser.",
+  "reloadBtn": "Reiniciar",
+  "langOffline": "Este idioma precisa de ligação uma vez. Tente online."
 }

@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "ccUsageTrips30": "Inspec\u021Bii \u0219i curse 30 z",
   "ccUsageLoading": "Se \xEEncarc\u0103 utilizarea\u2026",
   "ccUsageEmpty": "Nicio utilizare \xEEnc\u0103 \u2014 num\u0103rarea \xEEncepe cu urm\u0103toarele \xEEnregistr\u0103ri.",
-  "ccUsageFootnote": "Doar numere pe firm\u0103 \u0219i zi \u2014 f\u0103r\u0103 nume, f\u0103r\u0103 texte. P\u0103strate 400 de zile."
+  "ccUsageFootnote": "Doar numere pe firm\u0103 \u0219i zi \u2014 f\u0103r\u0103 nume, f\u0103r\u0103 texte. P\u0103strate 400 de zile.",
+  "updateReady": "Versiune nou\u0103 \xEEnc\u0103rcat\u0103 \u2014 reporne\u0219te c\xE2nd e convenabil.",
+  "reloadBtn": "Reporne\u0219te",
+  "langOffline": "Aceast\u0103 limb\u0103 are nevoie o dat\u0103 de conexiune. \xCEncearc\u0103 online."
 }
 `;export{i as default};

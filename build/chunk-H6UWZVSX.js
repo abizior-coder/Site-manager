@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageTrips30": "Inspecciones y viajes 30 d",
   "ccUsageLoading": "Cargando uso\u2026",
   "ccUsageEmpty": "Sin uso todav\xEDa \u2014 el recuento empieza con los pr\xF3ximos registros.",
-  "ccUsageFootnote": "Solo recuentos por empresa y d\xEDa \u2014 sin nombres ni textos. Se guardan 400 d\xEDas."
+  "ccUsageFootnote": "Solo recuentos por empresa y d\xEDa \u2014 sin nombres ni textos. Se guardan 400 d\xEDas.",
+  "updateReady": "Nueva versi\xF3n cargada \u2014 reinicia cuando quieras.",
+  "reloadBtn": "Reiniciar",
+  "langOffline": "Este idioma necesita conexi\xF3n una vez. Int\xE9ntalo en l\xEDnea."
 }
 `;export{o as default};

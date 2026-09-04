@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspektionen & Fahrten 30 T",
   "ccUsageLoading": "Nutzung wird geladen…",
   "ccUsageEmpty": "Noch keine Nutzung erfasst — die Zählung beginnt mit den nächsten Einträgen.",
-  "ccUsageFootnote": "Nur Zählungen pro Firma und Tag — keine Namen, keine Texte. 400 Tage aufbewahrt."
+  "ccUsageFootnote": "Nur Zählungen pro Firma und Tag — keine Namen, keine Texte. 400 Tage aufbewahrt.",
+  "updateReady": "Neue Version geladen — bei Gelegenheit neu starten.",
+  "reloadBtn": "Neu starten",
+  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Später nochmals versuchen."
 }

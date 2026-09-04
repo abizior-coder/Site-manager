@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "ccUsageTrips30": "Szeml\xE9k \xE9s fuvarok 30 n",
   "ccUsageLoading": "Haszn\xE1lat bet\xF6lt\xE9se\u2026",
   "ccUsageEmpty": "M\xE9g nincs haszn\xE1lat \u2014 a sz\xE1ml\xE1l\xE1s a k\xF6vetkez\u0151 bejegyz\xE9sekkel indul.",
-  "ccUsageFootnote": "Csak c\xE9genk\xE9nti \xE9s naponk\xE9nti sz\xE1mok \u2014 nevek \xE9s sz\xF6vegek n\xE9lk\xFCl. 400 napig \u0151rizve."
+  "ccUsageFootnote": "Csak c\xE9genk\xE9nti \xE9s naponk\xE9nti sz\xE1mok \u2014 nevek \xE9s sz\xF6vegek n\xE9lk\xFCl. 400 napig \u0151rizve.",
+  "updateReady": "\xDAj verzi\xF3 bet\xF6ltve \u2014 ind\xEDtsd \xFAjra, ha alkalmas.",
+  "reloadBtn": "\xDAjraind\xEDt\xE1s",
+  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Pr\xF3b\xE1ld online."
 }
 `;export{a as default};

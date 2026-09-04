@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspections & trips 30 d",
   "ccUsageLoading": "Loading usage…",
   "ccUsageEmpty": "No usage yet — the counts start with the next entries.",
-  "ccUsageFootnote": "Counts per company and day only — no names, no texts. Kept 400 days."
+  "ccUsageFootnote": "Counts per company and day only — no names, no texts. Kept 400 days.",
+  "updateReady": "New version loaded — restart when convenient.",
+  "reloadBtn": "Restart",
+  "langOffline": "This language needs a connection once. Try again when online."
 }

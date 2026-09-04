@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "ccUsageTrips30": "Prohl\xEDdky a j\xEDzdy 30 d",
   "ccUsageLoading": "Na\u010D\xEDt\xE1 se pou\u017E\xEDv\xE1n\xED\u2026",
   "ccUsageEmpty": "Zat\xEDm \u017E\xE1dn\xE9 pou\u017E\xEDv\xE1n\xED \u2014 po\u010D\xEDt\xE1n\xED za\u010Dne s dal\u0161\xEDmi z\xE1znamy.",
-  "ccUsageFootnote": "Jen po\u010Dty na firmu a den \u2014 \u017E\xE1dn\xE1 jm\xE9na, \u017E\xE1dn\xE9 texty. Uchov\xE1no 400 dn\xED."
+  "ccUsageFootnote": "Jen po\u010Dty na firmu a den \u2014 \u017E\xE1dn\xE1 jm\xE9na, \u017E\xE1dn\xE9 texty. Uchov\xE1no 400 dn\xED.",
+  "updateReady": "Nov\xE1 verze na\u010Dtena \u2014 restartujte, a\u017E se to hod\xED.",
+  "reloadBtn": "Restartovat",
+  "langOffline": "Tento jazyk pot\u0159ebuje jednou p\u0159ipojen\xED. Zkuste online."
 }
 `;export{t as default};

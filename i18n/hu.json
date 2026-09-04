@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Szemlék és fuvarok 30 n",
   "ccUsageLoading": "Használat betöltése…",
   "ccUsageEmpty": "Még nincs használat — a számlálás a következő bejegyzésekkel indul.",
-  "ccUsageFootnote": "Csak cégenkénti és naponkénti számok — nevek és szövegek nélkül. 400 napig őrizve."
+  "ccUsageFootnote": "Csak cégenkénti és naponkénti számok — nevek és szövegek nélkül. 400 napig őrizve.",
+  "updateReady": "Új verzió betöltve — indítsd újra, ha alkalmas.",
+  "reloadBtn": "Újraindítás",
+  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Próbáld online."
 }

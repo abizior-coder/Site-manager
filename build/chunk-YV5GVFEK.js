@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "ccUsageTrips30": "Inspections & trajets 30 j",
   "ccUsageLoading": "Chargement de l'utilisation\u2026",
   "ccUsageEmpty": "Pas encore d'utilisation \u2014 le comptage commence avec les prochaines saisies.",
-  "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour \u2014 ni noms ni textes. Conserv\xE9s 400 jours."
+  "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour \u2014 ni noms ni textes. Conserv\xE9s 400 jours.",
+  "updateReady": "Nouvelle version charg\xE9e \u2014 red\xE9marrez quand vous voulez.",
+  "reloadBtn": "Red\xE9marrer",
+  "langOffline": "Cette langue a besoin d'une connexion une fois. R\xE9essayez en ligne."
 }
 `;export{r as default};

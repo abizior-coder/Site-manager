@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspektione & Fahrte 30 T",
   "ccUsageLoading": "Nutzig wird glade…",
   "ccUsageEmpty": "No kei Nutzig erfasst — d Zählig fangt mit de nächschte Iiträg aa.",
-  "ccUsageFootnote": "Nur Zählige pro Firma und Tag — kei Näme, kei Text. 400 Tag ufbewahrt."
+  "ccUsageFootnote": "Nur Zählige pro Firma und Tag — kei Näme, kei Text. 400 Tag ufbewahrt.",
+  "updateReady": "Neui Version glade — bi Glägeheit neu starte.",
+  "reloadBtn": "Neu starte",
+  "langOffline": "Die Sprach bruucht eimal e Verbindig. Spöter nomal probiere."
 }

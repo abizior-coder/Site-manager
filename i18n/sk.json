@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Obhliadky a jazdy 30 d",
   "ccUsageLoading": "Načítava sa používanie…",
   "ccUsageEmpty": "Zatiaľ žiadne používanie — počítanie začne s ďalšími záznamami.",
-  "ccUsageFootnote": "Len počty na firmu a deň — žiadne mená, žiadne texty. Uchované 400 dní."
+  "ccUsageFootnote": "Len počty na firmu a deň — žiadne mená, žiadne texty. Uchované 400 dní.",
+  "updateReady": "Nová verzia načítaná — reštartujte, keď sa vám hodí.",
+  "reloadBtn": "Reštartovať",
+  "langOffline": "Tento jazyk potrebuje raz pripojenie. Skúste online."
 }

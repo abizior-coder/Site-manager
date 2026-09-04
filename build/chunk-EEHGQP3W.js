@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "ccUsageTrips30": "Inspektionen & Fahrten 30 T",
   "ccUsageLoading": "Nutzung wird geladen\u2026",
   "ccUsageEmpty": "Noch keine Nutzung erfasst \u2014 die Z\xE4hlung beginnt mit den n\xE4chsten Eintr\xE4gen.",
-  "ccUsageFootnote": "Nur Z\xE4hlungen pro Firma und Tag \u2014 keine Namen, keine Texte. 400 Tage aufbewahrt."
+  "ccUsageFootnote": "Nur Z\xE4hlungen pro Firma und Tag \u2014 keine Namen, keine Texte. 400 Tage aufbewahrt.",
+  "updateReady": "Neue Version geladen \u2014 bei Gelegenheit neu starten.",
+  "reloadBtn": "Neu starten",
+  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Sp\xE4ter nochmals versuchen."
 }
 `;export{t as default};

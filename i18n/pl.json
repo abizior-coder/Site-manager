@@ -766,5 +766,8 @@
   "ccUsageTrips30": "Inspekcje i przejazdy 30 d",
   "ccUsageLoading": "Ładowanie użycia…",
   "ccUsageEmpty": "Brak użycia — liczenie zacznie się od następnych wpisów.",
-  "ccUsageFootnote": "Tylko liczby na firmę i dzień — bez nazwisk i treści. Przechowywane 400 dni."
+  "ccUsageFootnote": "Tylko liczby na firmę i dzień — bez nazwisk i treści. Przechowywane 400 dni.",
+  "updateReady": "Nowa wersja załadowana — uruchom ponownie, gdy wygodnie.",
+  "reloadBtn": "Uruchom ponownie",
+  "langOffline": "Ten język wymaga raz połączenia. Spróbuj online."
 }

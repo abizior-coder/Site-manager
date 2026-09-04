@@ -11,6 +11,7 @@ import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPL
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-guard.js";
 import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
+import { routeFor, precacheAllowed } from "./sw-routes.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -370,7 +371,35 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     t(`first-paint JS stays under 350 KB (${Math.round(bytes / 1024)} KB: bundle.js + ${chunks.length} static chunk${chunks.length === 1 ? "" : "s"})`, bytes < 350 * 1024, true);
     t("tailwind.css is built and small", existsSync("tailwind.css") && statSync("tailwind.css").size < 60 * 1024, true);
     t("index.html no longer loads Tailwind from a CDN", !readFileSync("index.html", "utf8").includes("cdn.tailwindcss.com"), true);
+    // The service worker precaches exactly the first paint: the shell, the
+    // stylesheet, the entry with its static chunks, English and German.
+    const sw = readFileSync("sw.js", "utf8");
+    const pre = JSON.parse(sw.match(/const PRECACHE = (\[[\s\S]*?\]);/)[1]);
+    t("sw.js precaches the entry and every static chunk", ["index.html", ...chunks.map((c) => `build/${c}`)].every((f) => pre.some((p) => p === f || p.startsWith(f + "?"))), true);
+    t("sw.js precaches the stylesheet and the two first-paint languages", pre.some((p) => p.startsWith("tailwind.css?v=")) && pre.filter((p) => /build\/chunk-/.test(p)).length >= chunks.length + 2, true);
+    t("sw.js precaches nothing that talks to a server", pre.every(precacheAllowed), true);
+    t("sw.js carries a version that changes with the build", /const VERSION = "[a-f0-9]{10}"/.test(sw), true);
+    const swVersion = sw.match(/const VERSION = "([a-f0-9]{10})"/)[1];
+    t("index.html names the same build as sw.js", (readFileSync("index.html", "utf8").match(/<meta name="site-log-build" content="([a-f0-9]+)"/) || [])[1], swVersion);
+    t("sw.js answers the page's version question", sw.includes('event.data.type === "version"'), true);
   }
+}
+
+{
+  // Routing decisions the worker makes, from the URL alone.
+  const scope = "https://abizior-coder.github.io/Site-manager/";
+  const r = (url, mode = "no-cors", method = "GET") => routeFor({ url, mode, method }, scope);
+  t("a navigation is the shell", r(scope + "index.html", "navigate"), "shell");
+  t("the scope root is the shell", r(scope), "shell");
+  t("a deep link within the scope is the shell", r(scope + "?emulator=1", "navigate"), "shell");
+  t("a hashed chunk is immutable", r(scope + "build/chunk-ABC123.js"), "immutable");
+  t("the stamped entry and stylesheet are immutable", [r(scope + "build/bundle.js?v=abc"), r(scope + "tailwind.css?v=abc")], ["immutable", "immutable"]);
+  t("the Firebase SDK is cached from Google's CDN", r("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"), "sdk");
+  t("Firestore itself is never cached", r("https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel"), "network");
+  t("the Worker is never cached", r("https://site-log-claude-proxy.abizior.workers.dev/metrics/c1"), "network");
+  t("the weather is never cached", r("https://api.open-meteo.com/v1/forecast?latitude=1"), "network");
+  t("a POST is never cached", r(scope + "build/chunk-ABC123.js", "cors", "POST"), "network");
+  t("another site on the same host is not ours", r("https://abizior-coder.github.io/other/index.html", "navigate"), "network");
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var n=`{
   "ccUsageTrips30": "Inspektione & Fahrte 30 T",
   "ccUsageLoading": "Nutzig wird glade\u2026",
   "ccUsageEmpty": "No kei Nutzig erfasst \u2014 d Z\xE4hlig fangt mit de n\xE4chschte Iitr\xE4g aa.",
-  "ccUsageFootnote": "Nur Z\xE4hlige pro Firma und Tag \u2014 kei N\xE4me, kei Text. 400 Tag ufbewahrt."
+  "ccUsageFootnote": "Nur Z\xE4hlige pro Firma und Tag \u2014 kei N\xE4me, kei Text. 400 Tag ufbewahrt.",
+  "updateReady": "Neui Version glade \u2014 bi Gl\xE4geheit neu starte.",
+  "reloadBtn": "Neu starte",
+  "langOffline": "Die Sprach bruucht eimal e Verbindig. Sp\xF6ter nomal probiere."
 }
 `;export{n as default};

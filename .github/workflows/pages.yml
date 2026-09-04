@@ -35,9 +35,9 @@ jobs:
         run: |
           npm ci
           npm run build
-          if [ -n "$(git status --porcelain build tailwind.css index.html)" ]; then
+          if [ -n "$(git status --porcelain build tailwind.css index.html sw.js)" ]; then
             echo "::error::build/ or tailwind.css is stale — run 'npm run build' and commit the result."
-            git --no-pager status --short build tailwind.css index.html
+            git --no-pager status --short build tailwind.css index.html sw.js
             exit 1
           fi
           echo "build/ and tailwind.css match the source."

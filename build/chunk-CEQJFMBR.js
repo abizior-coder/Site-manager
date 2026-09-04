@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageTrips30": "Inspekcje i przejazdy 30 d",
   "ccUsageLoading": "\u0141adowanie u\u017Cycia\u2026",
   "ccUsageEmpty": "Brak u\u017Cycia \u2014 liczenie zacznie si\u0119 od nast\u0119pnych wpis\xF3w.",
-  "ccUsageFootnote": "Tylko liczby na firm\u0119 i dzie\u0144 \u2014 bez nazwisk i tre\u015Bci. Przechowywane 400 dni."
+  "ccUsageFootnote": "Tylko liczby na firm\u0119 i dzie\u0144 \u2014 bez nazwisk i tre\u015Bci. Przechowywane 400 dni.",
+  "updateReady": "Nowa wersja za\u0142adowana \u2014 uruchom ponownie, gdy wygodnie.",
+  "reloadBtn": "Uruchom ponownie",
+  "langOffline": "Ten j\u0119zyk wymaga raz po\u0142\u0105czenia. Spr\xF3buj online."
 }
 `;export{o as default};

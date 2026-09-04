@@ -766,6 +766,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageTrips30": "Ispezioni e viaggi 30 g",
   "ccUsageLoading": "Caricamento utilizzo\u2026",
   "ccUsageEmpty": "Nessun utilizzo ancora \u2014 il conteggio inizia con le prossime registrazioni.",
-  "ccUsageFootnote": "Solo conteggi per azienda e giorno \u2014 nessun nome, nessun testo. Conservati 400 giorni."
+  "ccUsageFootnote": "Solo conteggi per azienda e giorno \u2014 nessun nome, nessun testo. Conservati 400 giorni.",
+  "updateReady": "Nuova versione caricata \u2014 riavvia quando vuoi.",
+  "reloadBtn": "Riavvia",
+  "langOffline": "Questa lingua richiede una connessione una volta. Riprova online."
 }
 `;export{o as default};
