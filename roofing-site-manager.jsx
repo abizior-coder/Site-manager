@@ -3183,7 +3183,10 @@ export default function SiteManager() {
         return { ...m, [projectId]: forProject };
       });
     } catch (e) {
-      if (!quiet) showToast(t.translateFailed);
+      // The reason travels with the toast: "proxy error 502", "not a member",
+      // "empty" -- a person can report it, and it names the side that failed.
+      const why = e && e.message && e.message !== "empty" ? ` (${String(e.message).slice(0, 80)})` : "";
+      if (!quiet) showToast(`${t.translateFailed}${why}`);
     } finally {
       setTranslatingIds((ids) => ids.filter((x) => x !== entry.id));
     }
