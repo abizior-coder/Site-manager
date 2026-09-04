@@ -88,6 +88,7 @@ if (item) {
           const itemName = (item.textContent || "").trim();
           await click(btns().find((b) => (b.textContent || "").trim().toUpperCase() === "PROJEKTE"));
           await click(btns().find((b) => (b.textContent || "").includes("Trockenbau")), 350);
+          await click(window.document.querySelector('[data-hub-tab="material"]'), 250); // materials sit on the hub's Material tab
           check("delivered material lands on the job", txt().includes(itemName), `${itemName} not in the job view`);
         }
       }

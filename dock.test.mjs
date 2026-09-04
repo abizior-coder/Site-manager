@@ -110,6 +110,8 @@ check("dropping a person adds them to the crew", crewAfter === crewBefore + 1, `
 // --- the tile is also the shortcut ----------------------------------------------
 await click(tile(), 300);
 check("tapping a tile opens the job", /Mannschaft auf dieser Baustelle/i.test(txt()), "job view did not open");
+window.document.querySelector('[data-hub-tab="material"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); // materials sit on the hub's Material tab
+await new Promise((r) => setTimeout(r, 250));
 check("the job now lists the dropped material", txt().includes((chip?.textContent || "").trim()), "dropped item missing from the job view");
 
 // --- search: one box, every hit draggable -------------------------------------
