@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "inspectEditTitle": "Szemle szerkeszt\xE9se",
   "inspectionUpdated": "Szemle friss\xEDtve",
   "privacyLink": "Adatv\xE9delem",
-  "translateInto": "Ford\xEDt\xE1s erre"
+  "translateInto": "Ford\xEDt\xE1s erre",
+  "errGroupSave": "A ment\xE9s nem siker\xFClt",
+  "errGroupPhoto": "Probl\xE9ma a fot\xF3val",
+  "errGroupAi": "Probl\xE9ma az AI-szolg\xE1ltat\xE1ssal",
+  "errGroupLang": "A nyelv nem \xE9rhet\u0151 el",
+  "errGroupFile": "Probl\xE9ma a f\xE1jllal",
+  "errGroupOther": "Hiba",
+  "errCopy": "K\xF3d m\xE1sol\xE1sa",
+  "errClose": "OK",
+  "errReportHint": "Bejelent\xE9skor add meg a k\xF3dot",
+  "versionLabel": "Verzi\xF3",
+  "forceReloadBtn": "App \xFAjrat\xF6lt\xE9se"
 }
 `;export{a as default};

@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "inspectEditTitle": "Edit inspection",
   "inspectionUpdated": "Inspection updated",
   "privacyLink": "Privacy notice",
-  "translateInto": "Translate into"
+  "translateInto": "Translate into",
+  "errGroupSave": "Could not save",
+  "errGroupPhoto": "Photo problem",
+  "errGroupAi": "AI service problem",
+  "errGroupLang": "Language not available",
+  "errGroupFile": "File problem",
+  "errGroupOther": "Error",
+  "errCopy": "Copy code",
+  "errClose": "OK",
+  "errReportHint": "Quote the code when reporting",
+  "versionLabel": "Version",
+  "forceReloadBtn": "Reload app"
 }
 `;export{o as default};

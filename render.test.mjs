@@ -389,8 +389,20 @@ async function renderAs(role) {
     await new Promise((r) => setTimeout(r, 250));
     const link = window.document.querySelector("[data-privacy-link]");
     check("owner: the profile links the privacy notice", !!link && link.getAttribute("href") === "datenschutz.html" && /Datenschutz/.test(link.textContent || ""), link ? link.outerHTML.slice(0, 120) : "no privacy link");
+    check("owner: the profile shows the build and offers a hard reload", /Version/.test(window.document.querySelector("[data-app-version]")?.textContent || "") && !!window.document.querySelector("[data-force-reload]"), "no version line or reload button");
     window.document.querySelector("div.fixed.inset-0 > div.absolute.inset-0")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 150));
+  }
+
+  // A failure is a panel in the middle with a code, not a toast at the top.
+  {
+    window.dispatchEvent(new window.CustomEvent("site-log:error", { detail: { error: { code: "permission-denied", message: "Missing or insufficient permissions." }, context: "save" } }));
+    await new Promise((r) => setTimeout(r, 200));
+    const panel = window.document.querySelector("[data-error-panel]");
+    check("owner: a refused save shows E10 in the error panel", !!panel && window.document.querySelector("[data-error-code]")?.textContent === "E10" && /permission-denied/.test(panel.textContent || ""), (panel?.textContent || "no panel").slice(0, 120));
+    window.document.querySelector("[data-error-close]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 150));
+    check("owner: OK closes the error panel", !window.document.querySelector("[data-error-panel]"), "panel still open");
   }
 
   // The owner's usage card must render on a Cockpit that has no numbers yet.

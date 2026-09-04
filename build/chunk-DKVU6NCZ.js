@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "inspectEditTitle": "Modifica ispezione",
   "inspectionUpdated": "Ispezione aggiornata",
   "privacyLink": "Protezione dei dati",
-  "translateInto": "Traduci in"
+  "translateInto": "Traduci in",
+  "errGroupSave": "Salvataggio non riuscito",
+  "errGroupPhoto": "Problema con la foto",
+  "errGroupAi": "Problema del servizio IA",
+  "errGroupLang": "Lingua non disponibile",
+  "errGroupFile": "Problema con il file",
+  "errGroupOther": "Errore",
+  "errCopy": "Copia codice",
+  "errClose": "OK",
+  "errReportHint": "Indica il codice in caso di domande",
+  "versionLabel": "Versione",
+  "forceReloadBtn": "Ricarica app"
 }
 `;export{o as default};

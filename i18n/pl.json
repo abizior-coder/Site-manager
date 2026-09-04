@@ -773,5 +773,16 @@
   "inspectEditTitle": "Edytuj inspekcję",
   "inspectionUpdated": "Inspekcja zaktualizowana",
   "privacyLink": "Ochrona danych",
-  "translateInto": "Przetłumacz na"
+  "translateInto": "Przetłumacz na",
+  "errGroupSave": "Nie udało się zapisać",
+  "errGroupPhoto": "Problem ze zdjęciem",
+  "errGroupAi": "Problem z usługą AI",
+  "errGroupLang": "Język niedostępny",
+  "errGroupFile": "Problem z plikiem",
+  "errGroupOther": "Błąd",
+  "errCopy": "Kopiuj kod",
+  "errClose": "OK",
+  "errReportHint": "Podaj kod przy zgłoszeniu",
+  "versionLabel": "Wersja",
+  "forceReloadBtn": "Przeładuj aplikację"
 }

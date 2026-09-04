@@ -472,6 +472,16 @@ test keeps the page and the markdown on the same date. Two follow-ups
 sit with the owner: confirm the Firebase region in the console, and have
 a Datenschutzberater read the set before the first pilot.
 
+**Errors (since 2026-09-04):** every failure a person sees goes through
+`showError(e, context)` and appears as one panel in the middle of the
+screen with a code (E1x save, E2x photo, E3x AI, E4x language, E5x files,
+E9x other), the meaning in German or English, the raw detail and the
+build. `errors.js` classifies by the error's shape; `docs/ERROR_CODES.md`
+explains every code and a logic test keeps the two in step. The toast at
+the top is for successes. Mein Profil shows the build and has "App neu
+laden" (unregister workers, drop caches, reload) for a phone stuck on an
+old version.
+
 **CI** (`.github/workflows/ci.yml`) runs every suite, rules included, on
 every push and pull request; the Pages deploy still checks that the
 committed bundle matches the source.

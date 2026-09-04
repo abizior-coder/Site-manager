@@ -773,5 +773,16 @@
   "inspectEditTitle": "Editează inspecția",
   "inspectionUpdated": "Inspecție actualizată",
   "privacyLink": "Protecția datelor",
-  "translateInto": "Tradu în"
+  "translateInto": "Tradu în",
+  "errGroupSave": "Salvarea a eșuat",
+  "errGroupPhoto": "Problemă cu fotografia",
+  "errGroupAi": "Problemă cu serviciul AI",
+  "errGroupLang": "Limba nu este disponibilă",
+  "errGroupFile": "Problemă cu fișierul",
+  "errGroupOther": "Eroare",
+  "errCopy": "Copiază codul",
+  "errClose": "OK",
+  "errReportHint": "Menționează codul la raportare",
+  "versionLabel": "Versiune",
+  "forceReloadBtn": "Reîncarcă aplicația"
 }

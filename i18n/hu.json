@@ -773,5 +773,16 @@
   "inspectEditTitle": "Szemle szerkesztése",
   "inspectionUpdated": "Szemle frissítve",
   "privacyLink": "Adatvédelem",
-  "translateInto": "Fordítás erre"
+  "translateInto": "Fordítás erre",
+  "errGroupSave": "A mentés nem sikerült",
+  "errGroupPhoto": "Probléma a fotóval",
+  "errGroupAi": "Probléma az AI-szolgáltatással",
+  "errGroupLang": "A nyelv nem érhető el",
+  "errGroupFile": "Probléma a fájllal",
+  "errGroupOther": "Hiba",
+  "errCopy": "Kód másolása",
+  "errClose": "OK",
+  "errReportHint": "Bejelentéskor add meg a kódot",
+  "versionLabel": "Verzió",
+  "forceReloadBtn": "App újratöltése"
 }

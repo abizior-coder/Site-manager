@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "inspectEditTitle": "Editeaz\u0103 inspec\u021Bia",
   "inspectionUpdated": "Inspec\u021Bie actualizat\u0103",
   "privacyLink": "Protec\u021Bia datelor",
-  "translateInto": "Tradu \xEEn"
+  "translateInto": "Tradu \xEEn",
+  "errGroupSave": "Salvarea a e\u0219uat",
+  "errGroupPhoto": "Problem\u0103 cu fotografia",
+  "errGroupAi": "Problem\u0103 cu serviciul AI",
+  "errGroupLang": "Limba nu este disponibil\u0103",
+  "errGroupFile": "Problem\u0103 cu fi\u0219ierul",
+  "errGroupOther": "Eroare",
+  "errCopy": "Copiaz\u0103 codul",
+  "errClose": "OK",
+  "errReportHint": "Men\u021Bioneaz\u0103 codul la raportare",
+  "versionLabel": "Versiune",
+  "forceReloadBtn": "Re\xEEncarc\u0103 aplica\u021Bia"
 }
 `;export{i as default};

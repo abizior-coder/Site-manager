@@ -773,5 +773,16 @@
   "inspectEditTitle": "Upraviť obhliadku",
   "inspectionUpdated": "Obhliadka aktualizovaná",
   "privacyLink": "Ochrana údajov",
-  "translateInto": "Preložiť do"
+  "translateInto": "Preložiť do",
+  "errGroupSave": "Uloženie zlyhalo",
+  "errGroupPhoto": "Problém s fotkou",
+  "errGroupAi": "Problém so službou AI",
+  "errGroupLang": "Jazyk nie je dostupný",
+  "errGroupFile": "Problém so súborom",
+  "errGroupOther": "Chyba",
+  "errCopy": "Kopírovať kód",
+  "errClose": "OK",
+  "errReportHint": "Pri otázkach uveďte kód",
+  "versionLabel": "Verzia",
+  "forceReloadBtn": "Znovu načítať aplikáciu"
 }

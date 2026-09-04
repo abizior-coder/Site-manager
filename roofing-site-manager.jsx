@@ -21,6 +21,27 @@ import { BreakChips } from "./ui/break-chips.jsx";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
+import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
+
+// Which build this page is: the shell names it, and a phone that shows an
+// old number is a phone that has not restarted since the last deploy.
+const SHELL_BUILD = (typeof document !== "undefined" && document.querySelector('meta[name="site-log-build"]')?.content) || "dev";
+
+// The hard way out of a stale app: forget every worker and cache, then load
+// afresh from the server. For the profile's "App neu laden" button.
+async function forceReload() {
+  try {
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if (typeof caches !== "undefined") {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch (e) { console.warn("force reload:", e); }
+  window.location.reload();
+}
 
 // The job view and the photo tools are a chunk of their own, fetched the
 // first time a job or a photo is opened.
@@ -589,6 +610,19 @@ export default function SiteManager() {
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
   const [tripModal, setTripModal] = useState(null);
+  // The one place a failure is shown: a panel in the middle with a code.
+  const [errorBox, setErrorBox] = useState(null);
+  function showError(e, context) {
+    const c = classifyError(e, context);
+    console.error(`[${c.code} ${c.tag}]`, context, e);
+    setErrorBox(c);
+  }
+  useEffect(() => {
+    const onErr = (ev) => { const d = ev.detail || {}; setErrorBox(d.code && ERROR_CODES[d.code] ? { code: d.code, tag: ERROR_CODES[d.code].tag, group: ERROR_CODES[d.code].group, detail: String(d.detail || "") } : classifyError(d.error || d, d.context || "other")); };
+    window.addEventListener("site-log:error", onErr);
+    return () => window.removeEventListener("site-log:error", onErr);
+  }, []);
+
   // A new build has taken over the page (service worker); offer a restart.
   const [updateReady, setUpdateReady] = useState(() => typeof window !== "undefined" && !!window.__siteLogUpdateReady);
   useEffect(() => {
@@ -1846,7 +1880,7 @@ export default function SiteManager() {
   async function changeLang(code) {
     // The language file is a chunk of its own; offline it cannot come, and
     // then the current language stays rather than the app going English.
-    try { await loadLang(code); } catch (e) { showToast(t.langOffline); return; }
+    try { await loadLang(code); } catch (e) { showError(e, "lang"); return; }
     setLang(code);
     setLangPickerOpen(false);
     try { await window.storage.set(personalKey("site-lang"), code); } catch (e) {}
@@ -1893,9 +1927,7 @@ export default function SiteManager() {
   // A failed save names its reason -- the Firestore code, the error text or
   // at least where it happened -- so a toast read off a phone can be acted on.
   function saveFailed(e, where) {
-    console.error("save failed:", where, e);
-    const why = (e && (e.code || e.message)) || where || "";
-    showToast(why ? `${t.couldntSave} (${String(why).slice(0, 60)})` : t.couldntSave);
+    showError(e || new Error(where || "save"), where && /photo|Photo|image/i.test(where) && e && /decode|encode/i.test(String(e.message)) ? "photo" : "save");
   }
 
   function showToast(msg) {
@@ -2237,7 +2269,7 @@ export default function SiteManager() {
         if (res.status === 413) { showToast(`${file.name}: ${t.filesTooLarge}`); continue; }
         if (res.status === 415) { showToast(`${file.name}: ${t.filesTypeRefused}`); continue; }
         if (res.status === 503) { showToast(t.filesNotConfigured); continue; }
-        if (!res.ok) { showToast(t.filesFailed); continue; }
+        if (!res.ok) { showError({ status: res.status, message: `upload ${res.status}` }, "file"); continue; }
         const meta = await res.json();
         const record = { id: meta.id, name: meta.name, size: meta.size, type: meta.type, kind: meta.kind, projectId, uploadedBy: user?.uid || null, createdAt: Date.now() };
         current = [record, ...current];
@@ -2245,7 +2277,7 @@ export default function SiteManager() {
         await persist({ projectFiles: current });
         showToast(`${meta.name} ${t.filesUploaded}`);
       } catch (e) {
-        showToast(t.filesFailed);
+        showError(new Error("upload"), "file");
       } finally {
         setFileBusy((n) => Math.max(0, n - 1));
       }
@@ -2284,7 +2316,7 @@ export default function SiteManager() {
         setTimeout(() => URL.revokeObjectURL(url), 60000);
       }
     } catch (e) {
-      showToast(t.filesFailed);
+      showError(new Error("upload"), "file");
     } finally {
       setFileBusy((n) => Math.max(0, n - 1));
     }
@@ -2306,8 +2338,8 @@ export default function SiteManager() {
         const cid = getCompanyId();
         const token = await getIdToken();
         const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok && res.status !== 404) { showToast(t.filesFailed); return; }
-      } catch (e) { showToast(t.filesFailed); return; }
+        if (!res.ok && res.status !== 404) { showError({ status: res.status, message: `file ${res.status}` }, "file"); return; }
+      } catch (e) { showError(e, "file"); return; }
     }
     persist({ projectFiles: projectFilesRef.current.filter((x) => x.id !== f.id) });
     showToast(t.filesDeleted);
@@ -3088,7 +3120,7 @@ export default function SiteManager() {
     // and never render on another device.
     const scaled = [];
     for (const file of list) {
-      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch (err) { console.error("photo:", err); showToast(`${t.couldntSave} (${(err && err.message) || "image"})`); }
+      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch (err) { showError(err, "photo"); }
     }
     if (!scaled.length) return;
     if (editing || !photoPreview) {
@@ -3232,8 +3264,7 @@ export default function SiteManager() {
     } catch (e) {
       // The reason travels with the toast: "proxy error 502", "not a member",
       // "empty" -- a person can report it, and it names the side that failed.
-      const why = e && e.message && e.message !== "empty" ? ` (${String(e.message).slice(0, 80)})` : "";
-      if (!quiet) showToast(`${t.translateFailed}${why}`);
+      if (!quiet) showError(e, "ai");
     } finally {
       setTranslatingIds((ids) => ids.filter((x) => x !== entry.id));
     }
@@ -3807,6 +3838,7 @@ export default function SiteManager() {
           <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">
             {t.authPrivacyNote}{" "}
             <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.amber }} className="underline">{t.privacyLink}</a>
+            {" · "}<span data-app-version>{SHELL_BUILD}</span>
           </div>
         </div>
       </div>
@@ -4019,6 +4051,30 @@ export default function SiteManager() {
         </div>
       )}
 
+      {errorBox && (() => {
+          const meta = ERROR_CODES[errorBox.code] || ERROR_CODES.E90;
+          const groupTitle = { save: t.errGroupSave, photo: t.errGroupPhoto, ai: t.errGroupAi, lang: t.errGroupLang, file: t.errGroupFile, other: t.errGroupOther }[meta.group] || t.errGroupOther;
+          const meaning = lang === "de" || lang === "gsw" ? meta.de : meta.en;
+          const report = errorReport(errorBox, SHELL_BUILD);
+          return (
+            <div data-error-panel className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.65)" }}>
+              <div style={{ background: COLORS.card, border: `2px solid ${COLORS.danger}`, color: COLORS.text }} className="w-full max-w-md rounded-2xl p-5 shadow-2xl">
+                <div className="flex items-baseline gap-3">
+                  <div data-error-code style={{ color: COLORS.danger }} className="text-4xl font-black tracking-tight">{errorBox.code}</div>
+                  <div style={{ color: COLORS.muted }} className="font-mono text-xs">{errorBox.tag}</div>
+                </div>
+                <div className="text-lg font-bold mt-2">{groupTitle}</div>
+                <div className="text-sm mt-1 leading-relaxed">{meaning}</div>
+                {errorBox.detail && <div style={{ background: COLORS.shell, color: COLORS.muted }} className="font-mono text-[11px] mt-3 p-2 rounded-lg break-all">{errorBox.detail}</div>}
+                <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.errReportHint} · {t.versionLabel} {SHELL_BUILD}</div>
+                <div className="flex gap-2 mt-4">
+                  <button onClick={() => { try { navigator.clipboard.writeText(report); showToast(t.copyBtn); } catch (e) {} }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errCopy}</button>
+                  <button data-error-close onClick={() => setErrorBox(null)} style={{ background: COLORS.accent }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errClose}</button>
+                </div>
+              </div>
+            </div>
+          );
+      })()}
       {updateBar}
       {toast && (
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold z-50 shadow-lg">
@@ -5298,7 +5354,9 @@ export default function SiteManager() {
               <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
                 <LogOut size={14} /> {t.signOut}
               </button>
-              <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
+              <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-[10px]">{t.versionLabel} {SHELL_BUILD}</div>
+          <button data-force-reload onClick={forceReload} style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="w-full mt-2 py-2 rounded-lg text-[11px] font-bold uppercase">{t.forceReloadBtn}</button>
+          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
             </div>
 
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>

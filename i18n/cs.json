@@ -773,5 +773,16 @@
   "inspectEditTitle": "Upravit prohlídku",
   "inspectionUpdated": "Prohlídka aktualizována",
   "privacyLink": "Ochrana údajů",
-  "translateInto": "Přeložit do"
+  "translateInto": "Přeložit do",
+  "errGroupSave": "Uložení selhalo",
+  "errGroupPhoto": "Problém s fotkou",
+  "errGroupAi": "Problém se službou AI",
+  "errGroupLang": "Jazyk není dostupný",
+  "errGroupFile": "Problém se souborem",
+  "errGroupOther": "Chyba",
+  "errCopy": "Kopírovat kód",
+  "errClose": "OK",
+  "errReportHint": "Při dotazech uveďte kód",
+  "versionLabel": "Verze",
+  "forceReloadBtn": "Znovu načíst aplikaci"
 }

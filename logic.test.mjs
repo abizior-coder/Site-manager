@@ -12,6 +12,7 @@ import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
 import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-guard.js";
 import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { routeFor, precacheAllowed } from "./sw-routes.js";
+import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
 import { writeFileSync, unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -388,6 +389,27 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     t("index.html names the same build as sw.js", (readFileSync("index.html", "utf8").match(/<meta name="site-log-build" content="([a-f0-9]+)"/) || [])[1], swVersion);
     t("sw.js answers the page's version question", sw.includes('event.data.type === "version"'), true);
   }
+}
+
+{
+  // Every failure gets a code from its shape, and every code is documented.
+  const c = (e, ctx) => classifyError(e, ctx).code;
+  t("a refused write is E10", c({ code: "permission-denied", message: "Missing or insufficient permissions." }, "save"), "E10");
+  t("no network is E11", c({ code: "unavailable", message: "Failed to get document because the client is offline." }, "save"), "E11");
+  t("an oversized document is E12", c({ code: "invalid-argument", message: "Document exceeds maximum size" }, "save"), "E12");
+  t("an undecodable photo is E20", c(new Error("decode"), "photo"), "E20");
+  t("an invalid AI key is E30", c(new Error('Anthropic API error 401: {"type":"error","error":{"type":"authentication_error","message":"API key is invalid."}}'), "ai"), "E30");
+  t("the daily AI limit is E31", c(new Error("daily scan limit reached — try again tomorrow"), "ai"), "E31");
+  t("a non-member is E32", c(new Error("not a member of this company"), "ai"), "E32");
+  t("an unparseable answer is E34", c(new Error("empty"), "ai"), "E34");
+  t("a dead proxy is E35", c(new Error("Failed to fetch"), "ai"), "E35");
+  t("a refused file type is E50", c({ status: 415, message: "upload 415" }, "file"), "E50");
+  t("a language that cannot load is E40", c(new Error("Failed to fetch dynamically imported module"), "lang"), "E40");
+  t("the report line reads out", errorReport(classifyError({ code: "permission-denied", message: "Missing" }, "save"), "abc"), "E10 SAVE-DENIED · permission-denied: Missing · build abc");
+  const { readFileSync: rf } = await import("node:fs");
+  const doc = rf("docs/ERROR_CODES.md", "utf8");
+  const undocumented = Object.keys(ERROR_CODES).filter((k) => !new RegExp(`\\| ${k} \\|`).test(doc));
+  t("every error code is in docs/ERROR_CODES.md", undocumented, []);
 }
 
 {

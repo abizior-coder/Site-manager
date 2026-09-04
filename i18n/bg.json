@@ -773,5 +773,16 @@
   "inspectEditTitle": "Редактирай огледа",
   "inspectionUpdated": "Огледът е обновен",
   "privacyLink": "Защита на данните",
-  "translateInto": "Преведи на"
+  "translateInto": "Преведи на",
+  "errGroupSave": "Записът не успя",
+  "errGroupPhoto": "Проблем със снимката",
+  "errGroupAi": "Проблем с AI услугата",
+  "errGroupLang": "Езикът не е наличен",
+  "errGroupFile": "Проблем с файла",
+  "errGroupOther": "Грешка",
+  "errCopy": "Копирай кода",
+  "errClose": "OK",
+  "errReportHint": "Посочете кода при запитване",
+  "versionLabel": "Версия",
+  "forceReloadBtn": "Презареди приложението"
 }

@@ -773,5 +773,16 @@
   "inspectEditTitle": "Inspektion bearbeite",
   "inspectionUpdated": "Inspektion aktualisiert",
   "privacyLink": "Datenschutz",
-  "translateInto": "Übersetze uf"
+  "translateInto": "Übersetze uf",
+  "errGroupSave": "Speichere fehlgschlage",
+  "errGroupPhoto": "Problem mit em Foto",
+  "errGroupAi": "Problem mit em KI-Dienscht",
+  "errGroupLang": "Sprach nöd verfüegbar",
+  "errGroupFile": "Problem mit de Datei",
+  "errGroupOther": "Fehler",
+  "errCopy": "Code kopiere",
+  "errClose": "OK",
+  "errReportHint": "Bi Rückfrage de Code aagäh",
+  "versionLabel": "Version",
+  "forceReloadBtn": "App neu lade"
 }

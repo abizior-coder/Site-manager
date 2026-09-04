@@ -773,5 +773,16 @@
   "inspectEditTitle": "Editar inspeção",
   "inspectionUpdated": "Inspeção atualizada",
   "privacyLink": "Proteção de dados",
-  "translateInto": "Traduzir para"
+  "translateInto": "Traduzir para",
+  "errGroupSave": "Não foi possível guardar",
+  "errGroupPhoto": "Problema com a foto",
+  "errGroupAi": "Problema no serviço de IA",
+  "errGroupLang": "Idioma indisponível",
+  "errGroupFile": "Problema com o ficheiro",
+  "errGroupOther": "Erro",
+  "errCopy": "Copiar código",
+  "errClose": "OK",
+  "errReportHint": "Indique o código ao reportar",
+  "versionLabel": "Versão",
+  "forceReloadBtn": "Recarregar app"
 }

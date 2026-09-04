@@ -1,4 +1,4 @@
-import"./chunk-UJVVLSSD.js";var a=`{
+import"./chunk-UJVVLSSD.js";var r=`{
   "appLabel": "Site Log",
   "onSite": "N\xEB punishte",
   "navToday": "Sot",
@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "inspectEditTitle": "Ndrysho inspektimin",
   "inspectionUpdated": "Inspektimi u p\xEBrdit\xEBsua",
   "privacyLink": "Mbrojtja e t\xEB dh\xEBnave",
-  "translateInto": "P\xEBrkthe n\xEB"
+  "translateInto": "P\xEBrkthe n\xEB",
+  "errGroupSave": "Nuk u ruajt",
+  "errGroupPhoto": "Problem me foton",
+  "errGroupAi": "Problem me sh\xEBrbimin AI",
+  "errGroupLang": "Gjuha nuk \xEBsht\xEB e disponueshme",
+  "errGroupFile": "Problem me skedarin",
+  "errGroupOther": "Gabim",
+  "errCopy": "Kopjo kodin",
+  "errClose": "OK",
+  "errReportHint": "Jep kodin kur raporton",
+  "versionLabel": "Versioni",
+  "forceReloadBtn": "Ringarko aplikacionin"
 }
-`;export{a as default};
+`;export{r as default};

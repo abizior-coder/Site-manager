@@ -773,6 +773,17 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "inspectEditTitle": "Edytuj inspekcj\u0119",
   "inspectionUpdated": "Inspekcja zaktualizowana",
   "privacyLink": "Ochrona danych",
-  "translateInto": "Przet\u0142umacz na"
+  "translateInto": "Przet\u0142umacz na",
+  "errGroupSave": "Nie uda\u0142o si\u0119 zapisa\u0107",
+  "errGroupPhoto": "Problem ze zdj\u0119ciem",
+  "errGroupAi": "Problem z us\u0142ug\u0105 AI",
+  "errGroupLang": "J\u0119zyk niedost\u0119pny",
+  "errGroupFile": "Problem z plikiem",
+  "errGroupOther": "B\u0142\u0105d",
+  "errCopy": "Kopiuj kod",
+  "errClose": "OK",
+  "errReportHint": "Podaj kod przy zg\u0142oszeniu",
+  "versionLabel": "Wersja",
+  "forceReloadBtn": "Prze\u0142aduj aplikacj\u0119"
 }
 `;export{o as default};

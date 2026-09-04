@@ -773,5 +773,16 @@
   "inspectEditTitle": "Ndrysho inspektimin",
   "inspectionUpdated": "Inspektimi u përditësua",
   "privacyLink": "Mbrojtja e të dhënave",
-  "translateInto": "Përkthe në"
+  "translateInto": "Përkthe në",
+  "errGroupSave": "Nuk u ruajt",
+  "errGroupPhoto": "Problem me foton",
+  "errGroupAi": "Problem me shërbimin AI",
+  "errGroupLang": "Gjuha nuk është e disponueshme",
+  "errGroupFile": "Problem me skedarin",
+  "errGroupOther": "Gabim",
+  "errCopy": "Kopjo kodin",
+  "errClose": "OK",
+  "errReportHint": "Jep kodin kur raporton",
+  "versionLabel": "Versioni",
+  "forceReloadBtn": "Ringarko aplikacionin"
 }
