@@ -815,5 +815,8 @@
   "hubPhotos": "Fotky",
   "hubPlans": "Plány",
   "hubReports": "Výkazy",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Hľadať článok alebo číslo…",
+  "sheetArticles": "položiek",
+  "sheetDemo": "Len vzorové položky — importujte cenník dodávateľa pre celý sortiment."
 }

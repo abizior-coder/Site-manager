@@ -4,6 +4,62 @@ import { canManage, isOwner } from "../company-store.js";
 import { COLORS } from "../ui/theme.js";
 import { BookOpen, ExternalLink, GripVertical, ImagePlus, Pencil, Plus, QrCode, ScanLine, Search, ShoppingCart, Trash2, Truck, Wrench, X } from "lucide-react";
 import { ORDER_STATES } from "../roofing-site-manager.jsx";
+import { useState } from "react";
+import { articlesFor, filterArticles, sortArticles } from "../price-list.js";
+
+
+// The supplier's whole list as a sheet: search, sortable columns, a virtual
+// window of rows so thousands scroll on a phone, «+» into the basket, and
+// every row draggable onto a job or a dock tile.
+function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
+  const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState("name");
+  const [dir, setDir] = useState("asc");
+  const [top, setTop] = useState(0);
+  const ROW = 44, VIEW = 420;
+  const shown = sortArticles(filterArticles(rows, q), sortKey, dir);
+  const first = Math.max(0, Math.floor(top / ROW) - 10);
+  const last = Math.min(shown.length, first + Math.ceil(VIEW / ROW) + 20);
+  const demo = rows.length > 0 && !!rows[0].demo;
+  const head = (key, label, align) => (
+    <button data-sort-col={key} onClick={() => { if (sortKey === key) setDir(dir === "asc" ? "desc" : "asc"); else { setSortKey(key); setDir("asc"); } }} style={{ color: sortKey === key ? COLORS.accent : COLORS.muted }} className={`text-[10px] uppercase tracking-wide font-bold truncate ${align === "right" ? "text-right" : "text-left"}`}>
+      {label}{sortKey === key ? (dir === "asc" ? " ▲" : " ▼") : ""}
+    </button>
+  );
+  const cols = "5.5rem minmax(0,1fr) 3.5rem 4.5rem 2rem";
+  return (
+    <div data-article-sheet style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <Search size={14} color={COLORS.muted} className="shrink-0" />
+        <input data-sheet-search value={q} onChange={(e) => { setQ(e.target.value); setTop(0); }} placeholder={t.sheetSearch} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded-lg px-3 py-2 text-sm outline-none" />
+        <span data-sheet-count style={{ color: COLORS.muted }} className="text-[10px] shrink-0 tabular-nums">{q ? `${shown.length} / ${rows.length}` : `${rows.length} ${t.sheetArticles}`}</span>
+      </div>
+      {demo && (
+        <div style={{ color: COLORS.amber }} className="text-[11px] mb-2 flex flex-wrap items-center gap-x-2">
+          <span>{t.sheetDemo}</span>
+          {onImport && <button onClick={onImport} style={{ color: COLORS.accent }} className="underline font-bold">{t.importPriceList}</button>}
+        </div>
+      )}
+      <div className="grid gap-2 px-1 pb-1" style={{ gridTemplateColumns: cols, borderBottom: `1px solid ${COLORS.border}` }}>
+        {head("artNo", t.artNoShort)}{head("name", t.itemNameLabel)}{head("unit", t.sortUnit)}{head("price", t.unitPriceLabel, "right")}<span />
+      </div>
+      <div data-sheet-scroll onScroll={(e) => setTop(e.currentTarget.scrollTop)} style={{ maxHeight: VIEW, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ height: first * ROW }} />
+        {shown.slice(first, last).map((a) => (
+          <div key={`${a.artNo}|${a.name}`} data-article-row {...dragProps(a.name, "material", { unit: a.unit, artNo: a.artNo, supplier: a.supplier })} style={{ height: ROW, borderBottom: `1px solid ${COLORS.border}`, gridTemplateColumns: cols }} className="grid items-center gap-2 px-1 text-xs cursor-grab">
+            <span style={{ color: COLORS.muted }} className="font-mono truncate">{a.artNo || "—"}</span>
+            <span className="truncate font-semibold" title={a.name}>{a.name}</span>
+            <span style={{ color: COLORS.muted }} className="truncate">{a.unit || ""}</span>
+            <span className="tabular-nums text-right truncate">{a.price || ""}</span>
+            <button data-sheet-add onClick={() => onAdd(a)} title={t.basketLabel} style={{ background: COLORS.accent }} className="w-7 h-7 rounded-full flex items-center justify-center"><Plus size={14} color="#fff" /></button>
+          </div>
+        ))}
+        <div style={{ height: Math.max(0, (shown.length - last) * ROW) }} />
+      </div>
+      {shown.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm py-3 text-center">{t.nothingLogged}</div>}
+    </div>
+  );
+}
 
 export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, basket, catalogs, deleteEntryFn, deleteLibraryItem, entries, lang, librarySearch, materialSearch, materialsCatalogFor, materialsSubTab, openLibraryEdit, openLibraryScan, openPickup, openScan, priceFileRef, projectName, projects, removeBasketItem, setBasket, setBasketMode, setBasketProjectModalOpen, setLibrarySearch, setMaterialSearch, setMaterialsSubTab, setOrderStatus, setShopCat, setSortMode, shopCat, sortMode, stagePriceList, t, techLibrary, toolsCatalogFor, updateBasketItem, user }) {
   const catalog = materialsCatalogFor(lang);
@@ -189,13 +245,24 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
               </button>
             ))}
           </div>
-          {shopCat && (
+          {shopCat && sortMode === "supplier" && (
             <div className="flex flex-col gap-2">
-              {sortMode === "supplier" && catalog.links[shopCat] && (
+              {catalog.links[shopCat] && (
                 <a href={catalog.links[shopCat]} target="_blank" rel="noreferrer" style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 underline">
                   <ExternalLink size={13} /> {t.openShopBtn}
                 </a>
               )}
+              <ArticleSheet
+                rows={articlesFor(articleMaster, catalog, shopCat)}
+                t={t}
+                onAdd={(a) => addToBasket(a.name, "material", { unit: a.unit, price: a.price, artNo: a.artNo, supplier: a.supplier })}
+                dragProps={materialDragProps}
+                onImport={priceFileRef ? () => priceFileRef.current?.click() : null}
+              />
+            </div>
+          )}
+          {shopCat && sortMode === "type" && (
+            <div className="flex flex-col gap-2">
               {catalog.items[shopCat].map((grp) => (
                 <div key={grp.group}>
                   <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>

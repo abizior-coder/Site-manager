@@ -5,7 +5,7 @@
 // had exercised since they were written.
 
 import { build } from "esbuild";
-import { parsePriceList, parsePrice, mergeIntoCatalog } from "./price-list.js";
+import { parsePriceList, parsePrice, mergeIntoCatalog, supplierMatches, articlesFor, filterArticles, sortArticles } from "./price-list.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -427,6 +427,27 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("the week has seven rows and sums the one worked day", [week.rows.length, week.total.net, week.total.overtime, week.target, week.diff], [7, 9.2, 0.7, 42.5, -33.3]);
   const csv = weekCsv(week, "Polier Meier");
   t("the CSV is Excel-friendly: semicolons, decimal commas, a totals line", [csv.split("\r\n").length - 1, csv.includes("2026-09-02;8,5;0,7;1,5;0,5;9,2"), csv.includes("Summe;8,5;0,7;1,5;0,5;9,2"), csv.includes("Soll;;;;;42,5")], [12, true, true, true]);
+}
+
+{
+  // The supplier sheet: the imported list when there is one, the demo groups
+  // when there is none; search by words; sort by column.
+  const master = {
+    "siga majvest": { name: "Siga Majvest", unit: "Rolle", price: "189.50", artNo: "SG-1001", supplier: "HGC" },
+    "konterlatte 30/50": { name: "Konterlatte 30/50", unit: "m", price: "2.10", artNo: "HL-30", supplier: "HG Commerciale AG" },
+    "velux ggl mk06": { name: "Velux GGL MK06", unit: "Stk", price: "890", artNo: "V-MK06", supplier: "Velux" },
+    "dachrinne halbrund": { name: "Dachrinne halbrund", unit: "m", price: "", artNo: "", supplier: "gabs" },
+  };
+  t("a supplier key matches the free text an import wrote", [supplierMatches("HG Commerciale AG", "hgc"), supplierMatches("HGC", "hgc"), supplierMatches("Velux", "hgc")], [true, true, false]);
+  const hgc = articlesFor(master, { items: { hgc: [{ group: "Demo", items: ["A", "B"] }] } }, "hgc");
+  t("with an imported list the sheet holds the supplier's own articles", hgc.map((a) => a.name), ["Siga Majvest", "Konterlatte 30/50"]);
+  const demo = articlesFor({}, { items: { hgc: [{ group: "Holz", items: ["Konterlatte", "Dachlatte"] }] } }, "hgc");
+  t("without a list the demo groups fill it, marked as such", [demo.length, demo[0].demo, demo[0].group], [2, true, "Holz"]);
+  const rows = Object.values(master);
+  t("search matches every word in name or number", filterArticles(rows, "velux mk06").map((a) => a.name), ["Velux GGL MK06"]);
+  t("search by article number", filterArticles(rows, "hl-30").map((a) => a.artNo), ["HL-30"]);
+  t("sort by price puts blanks last", sortArticles(rows, "price", "asc").map((a) => a.price), ["2.10", "189.50", "890", ""]);
+  t("sort by name descending", sortArticles(rows, "name", "desc").map((a) => a.name)[0], "Velux GGL MK06");
 }
 
 {

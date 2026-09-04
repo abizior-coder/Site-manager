@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "hubPhotos": "Fot\xF3k",
   "hubPlans": "Tervek",
   "hubReports": "Jelent\xE9sek",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Cikk vagy sz\xE1m keres\xE9se\u2026",
+  "sheetArticles": "cikk",
+  "sheetDemo": "Csak mintacikkek \u2014 import\xE1ld a besz\xE1ll\xEDt\xF3 \xE1rlist\xE1j\xE1t a teljes k\xEDn\xE1lathoz."
 }
 `;export{a as default};

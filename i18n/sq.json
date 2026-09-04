@@ -815,5 +815,8 @@
   "hubPhotos": "Fotot",
   "hubPlans": "Planet",
   "hubReports": "Raportet",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Kërko artikull ose numër…",
+  "sheetArticles": "artikuj",
+  "sheetDemo": "Vetëm artikuj shembull — importo listën e çmimeve të furnitorit për të parë gjithë gamën."
 }

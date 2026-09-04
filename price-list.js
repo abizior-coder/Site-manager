@@ -168,3 +168,55 @@ export function mergeIntoCatalog(catalog, rows, defaultSupplier) {
   }
   return { catalog: next, added, updated, repriced };
 }
+
+// --- the supplier sheet ---------------------------------------------------------
+
+// A supplier key ("hgc") against the free text an import wrote ("HGC",
+// "HG Commerciale AG"): letters only, either contains the other.
+export function supplierMatches(supplierText, key) {
+  const a = String(supplierText || "").toLowerCase().replace(/[^a-z]/g, "");
+  const b = String(key || "").toLowerCase().replace(/[^a-z]/g, "");
+  return !!a && !!b && (a.includes(b) || b.includes(a));
+}
+
+// Every article the firm has for a supplier: the imported price list, or,
+// while there is none, the catalogue's demo groups for it, marked as such.
+export function articlesFor(master, catalogue, key) {
+  const own = Object.values(master || {}).filter((a) => supplierMatches(a.supplier, key))
+    .map((a) => ({ name: a.name, unit: a.unit || "", price: a.price || "", artNo: a.artNo || "", supplier: a.supplier || key, demo: false }));
+  if (own.length) return own;
+  const groups = ((catalogue && catalogue.items && catalogue.items[key]) || []);
+  return groups.flatMap((g) => (g.items || []).map((name) => ({ name, unit: "", price: "", artNo: "", supplier: key, group: g.group, demo: true })));
+}
+
+// Every word of the query must appear in the name or the article number.
+export function filterArticles(rows, query) {
+  const words = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (!words.length) return rows;
+  return rows.filter((r) => {
+    const hay = `${r.name} ${r.artNo}`.toLowerCase();
+    return words.every((w) => hay.includes(w));
+  });
+}
+
+const PRICE_NUM = (p) => { const n = parseFloat(String(p || "").replace(/'/g, "").replace(",", ".")); return Number.isFinite(n) ? n : null; };
+
+// Sort by a column; prices numerically with blanks last, the rest by text.
+export function sortArticles(rows, key = "name", dir = "asc") {
+  const sign = dir === "desc" ? -1 : 1;
+  const out = rows.slice();
+  out.sort((a, b) => {
+    if (key === "price") {
+      const x = PRICE_NUM(a.price), y = PRICE_NUM(b.price);
+      if (x == null && y == null) return 0;
+      if (x == null) return 1;
+      if (y == null) return -1;
+      return (x - y) * sign;
+    }
+    const x = String(a[key] || ""), y = String(b[key] || "");
+    if (!x && y) return 1;
+    if (x && !y) return -1;
+    return x.localeCompare(y, undefined, { numeric: true, sensitivity: "base" }) * sign;
+  });
+  return out;
+}

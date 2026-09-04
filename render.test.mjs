@@ -465,6 +465,35 @@ async function renderAs(role) {
     await new Promise((r) => setTimeout(r, 150));
   }
 
+  // A supplier opens as a sheet: every article, search, sort, basket.
+  {
+    const mat = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "MATERIAL");
+    mat?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    [...window.document.querySelectorAll("button")].find((x) => /Nach Lieferant|By supplier/.test(x.textContent || ""))?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    [...window.document.querySelectorAll("button")].find((x) => /^HGC/.test((x.textContent || "").trim()))?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const sheet = window.document.querySelector("[data-article-sheet]");
+    const rowsAll = sheet ? sheet.querySelectorAll("[data-article-row]").length : 0;
+    check("owner: a supplier opens the article sheet with its rows", !!sheet && rowsAll >= 5, sheet ? `${rowsAll} rows` : "no sheet");
+    const setVal = (el, v) => { if (!el) return; Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set.call(el, v); el.dispatchEvent(new window.Event("input", { bubbles: true })); };
+    setVal(sheet?.querySelector("[data-sheet-search]"), "kvh");
+    await new Promise((r) => setTimeout(r, 200));
+    const rowsFound = sheet ? sheet.querySelectorAll("[data-article-row]").length : 0;
+    check("owner: the sheet search narrows the rows", rowsFound >= 1 && rowsFound < rowsAll, `${rowsFound} of ${rowsAll}`);
+    setVal(sheet?.querySelector("[data-sheet-search]"), "");
+    await new Promise((r) => setTimeout(r, 200));
+    const firstBefore = sheet?.querySelector("[data-article-row]")?.textContent;
+    sheet?.querySelector('[data-sort-col="name"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    const firstAfter = sheet?.querySelector("[data-article-row]")?.textContent;
+    check("owner: a header tap re-sorts the sheet", !!firstBefore && firstBefore !== firstAfter, `${(firstBefore || "").slice(0, 30)} → ${(firstAfter || "").slice(0, 30)}`);
+    sheet?.querySelector("[data-sheet-add]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check("owner: «+» puts the article in the basket", /Zum Warenkorb hinzugefügt|Added to basket/.test(text()), "no basket toast");
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");

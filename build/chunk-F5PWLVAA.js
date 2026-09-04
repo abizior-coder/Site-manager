@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubPhotos": "Fotky",
   "hubPlans": "Pl\xE1ny",
   "hubReports": "V\xFDkazy",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "H\u013Eada\u0165 \u010Dl\xE1nok alebo \u010D\xEDslo\u2026",
+  "sheetArticles": "polo\u017Eiek",
+  "sheetDemo": "Len vzorov\xE9 polo\u017Eky \u2014 importujte cenn\xEDk dod\xE1vate\u013Ea pre cel\xFD sortiment."
 }
 `;export{o as default};

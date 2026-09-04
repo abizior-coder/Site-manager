@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "hubPhotos": "Fotos",
   "hubPlans": "Pl\xE4ne",
   "hubReports": "Rapporte",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Artikel oder Nummer suchen\u2026",
+  "sheetArticles": "Artikel",
+  "sheetDemo": "Nur Beispielartikel \u2014 Preisliste des Lieferanten importieren, um das ganze Sortiment zu sehen."
 }
 `;export{t as default};

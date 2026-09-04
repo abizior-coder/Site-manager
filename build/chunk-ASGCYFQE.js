@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "hubPhotos": "Fotot",
   "hubPlans": "Planet",
   "hubReports": "Raportet",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "K\xEBrko artikull ose num\xEBr\u2026",
+  "sheetArticles": "artikuj",
+  "sheetDemo": "Vet\xEBm artikuj shembull \u2014 importo list\xEBn e \xE7mimeve t\xEB furnitorit p\xEBr t\xEB par\xEB gjith\xEB gam\xEBn."
 }
 `;export{r as default};

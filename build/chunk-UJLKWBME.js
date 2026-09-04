@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubPhotos": "Fotos",
   "hubPlans": "Planos",
   "hubReports": "Partes",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Buscar art\xEDculo o n\xFAmero\u2026",
+  "sheetArticles": "art\xEDculos",
+  "sheetDemo": "Solo art\xEDculos de ejemplo \u2014 importa la lista de precios del proveedor para ver toda la gama."
 }
 `;export{o as default};

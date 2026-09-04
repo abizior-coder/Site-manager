@@ -815,5 +815,8 @@
   "hubPhotos": "Fotografii",
   "hubPlans": "Planuri",
   "hubReports": "Rapoarte",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Caută articol sau număr…",
+  "sheetArticles": "articole",
+  "sheetDemo": "Doar articole exemplu — importă lista de prețuri a furnizorului pentru toată gama."
 }

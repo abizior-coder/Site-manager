@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var n=`{
   "hubPhotos": "Fotene",
   "hubPlans": "Pl\xE4n",
   "hubReports": "Rapport",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Artikel oder Nummere sueche\u2026",
+  "sheetArticles": "Artikel",
+  "sheetDemo": "Nur Bispilartikel \u2014 d Prislischte vom Lieferant importiere, um s ganze Sortim\xE4nt z gseh."
 }
 `;export{n as default};

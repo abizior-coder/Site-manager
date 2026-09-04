@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "hubPhotos": "Fotos",
   "hubPlans": "Plantas",
   "hubReports": "Relat\xF3rios",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Procurar artigo ou n\xFAmero\u2026",
+  "sheetArticles": "artigos",
+  "sheetDemo": "Apenas artigos de exemplo \u2014 importe a lista de pre\xE7os do fornecedor para ver toda a gama."
 }
 `;export{o as default};

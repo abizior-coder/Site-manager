@@ -815,6 +815,9 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "hubPhotos": "Fotografii",
   "hubPlans": "Planuri",
   "hubReports": "Rapoarte",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Caut\u0103 articol sau num\u0103r\u2026",
+  "sheetArticles": "articole",
+  "sheetDemo": "Doar articole exemplu \u2014 import\u0103 lista de pre\u021Buri a furnizorului pentru toat\u0103 gama."
 }
 `;export{i as default};

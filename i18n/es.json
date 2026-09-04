@@ -815,5 +815,8 @@
   "hubPhotos": "Fotos",
   "hubPlans": "Planos",
   "hubReports": "Partes",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Buscar artículo o número…",
+  "sheetArticles": "artículos",
+  "sheetDemo": "Solo artículos de ejemplo — importa la lista de precios del proveedor para ver toda la gama."
 }

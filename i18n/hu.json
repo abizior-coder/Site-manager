@@ -815,5 +815,8 @@
   "hubPhotos": "Fotók",
   "hubPlans": "Tervek",
   "hubReports": "Jelentések",
-  "hubChat": "Chat"
+  "hubChat": "Chat",
+  "sheetSearch": "Cikk vagy szám keresése…",
+  "sheetArticles": "cikk",
+  "sheetDemo": "Csak mintacikkek — importáld a beszállító árlistáját a teljes kínálathoz."
 }

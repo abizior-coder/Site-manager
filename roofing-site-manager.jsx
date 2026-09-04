@@ -2842,13 +2842,14 @@ export default function SiteManager() {
     }
   }
 
-  function addToBasket(name, kind) {
+  function addToBasket(name, kind, extra = {}) {
     setBasket((b) => {
       const existing = b.find((i) => i.name === name && i.kind === kind);
       if (existing) {
         return b.map((i) => (i === existing ? { ...i, qty: (parseFloat(i.qty) || 0) + 1 } : i));
       }
-      return [...b, { id: uid(), name, kind, qty: 1, unit: materialUnits[name.trim().toLowerCase()] || "" }];
+      // The sheet knows the article's unit, price and number; a chip knows only the name.
+      return [...b, { id: uid(), name, kind, qty: 1, unit: extra.unit || materialUnits[name.trim().toLowerCase()] || "", price: extra.price || "", artNo: extra.artNo || "", supplier: extra.supplier || "" }];
     });
     showToast(t.addedToBasketToast);
   }
