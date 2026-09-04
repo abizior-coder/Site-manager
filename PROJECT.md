@@ -482,6 +482,16 @@ the top is for successes. Mein Profil shows the build and has "App neu
 laden" (unregister workers, drop caches, reload) for a phone stuck on an
 old version.
 
+**Layout since 2026-09-04 (from `docs/research/2026-09-04_competitor-ux.md`):**
+on a phone a bottom bar `Heute · Baustellen · + · Rapport · Mehr`
+(`data-tab-bar`); the «+» sheet (`data-quick-add`) opens the composers
+for the current site; «Mehr» is the drawer. The Rapport tab has Tag
+(hours split Normal / Überstunden / Reisezeit against weeklyHours/5,
+`reports.js: splitDayHours`), Woche (`weekRows`, CSV via `weekCsv`) and
+Monat. The job view is a hub (`data-hub-tab`): Übersicht · Zeiten ·
+Material · Fotos · Pläne · Rapporte · Chat; tests that look for a job's
+materials, plans or photos must open that tab first.
+
 **CI** (`.github/workflows/ci.yml`) runs every suite, rules included, on
 every push and pull request; the Pages deploy still checks that the
 committed bundle matches the source.
