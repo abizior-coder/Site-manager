@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Solo recuentos por empresa y d\xEDa \u2014 sin nombres ni textos. Se guardan 400 d\xEDas.",
   "updateReady": "Nueva versi\xF3n cargada \u2014 reinicia cuando quieras.",
   "reloadBtn": "Reiniciar",
-  "langOffline": "Este idioma necesita conexi\xF3n una vez. Int\xE9ntalo en l\xEDnea."
+  "langOffline": "Este idioma necesita conexi\xF3n una vez. Int\xE9ntalo en l\xEDnea.",
+  "inspectEditTitle": "Editar inspecci\xF3n",
+  "inspectionUpdated": "Inspecci\xF3n actualizada"
 }
 `;export{o as default};

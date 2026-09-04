@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "ccUsageFootnote": "Vet\xEBm numra p\xEBr firm\xEB dhe dit\xEB \u2014 pa emra, pa tekste. Ruhen 400 dit\xEB.",
   "updateReady": "Versioni i ri u ngarkua \u2014 rinise kur t\xEB kesh mund\xEBsi.",
   "reloadBtn": "Rinis",
-  "langOffline": "Kjo gjuh\xEB ka nevoj\xEB nj\xEB her\xEB p\xEBr lidhje. Provo online."
+  "langOffline": "Kjo gjuh\xEB ka nevoj\xEB nj\xEB her\xEB p\xEBr lidhje. Provo online.",
+  "inspectEditTitle": "Ndrysho inspektimin",
+  "inspectionUpdated": "Inspektimi u p\xEBrdit\xEBsua"
 }
 `;export{a as default};

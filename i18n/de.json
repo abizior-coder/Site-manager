@@ -769,5 +769,7 @@
   "ccUsageFootnote": "Nur Zählungen pro Firma und Tag — keine Namen, keine Texte. 400 Tage aufbewahrt.",
   "updateReady": "Neue Version geladen — bei Gelegenheit neu starten.",
   "reloadBtn": "Neu starten",
-  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Später nochmals versuchen."
+  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Später nochmals versuchen.",
+  "inspectEditTitle": "Inspektion bearbeiten",
+  "inspectionUpdated": "Inspektion aktualisiert"
 }

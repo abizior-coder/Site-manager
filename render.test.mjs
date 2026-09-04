@@ -273,6 +273,24 @@ async function renderAs(role) {
     const card = window.document.querySelector("[data-job-inspections]");
     check("owner: saving without the AI logs the inspection in the job view", errors.length === before && !window.document.querySelector("[data-inspect-save]") && /Mangel: First/.test(card?.textContent || "") && /200 kg/.test(card?.textContent || ""), errors.slice(before, before + 1).join(" | ") || (card ? (card.textContent || "").slice(0, 120) : "no inspections card in the job view"));
 
+    // An inspection can be corrected: reopened with everything as it was,
+    // saved into the same entry, no duplicate.
+    {
+      const pencil = window.document.querySelector("[data-inspect-edit]");
+      check("owner: an inspection offers editing", !!pencil, "no edit button on the inspection card");
+      pencil?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 250));
+      const firstTile = window.document.querySelector('[data-inspect-tile="first"]');
+      check("owner: the edit form comes back prefilled", /MANGEL/i.test(firstTile?.textContent || "") && window.document.querySelector("[data-tile-count]")?.value === "100", `tile=${(firstTile?.textContent || "").slice(0, 30)} count=${window.document.querySelector("[data-tile-count]")?.value}`);
+      setValue(window.document.querySelector("[data-tile-count]"), "120");
+      await new Promise((r) => setTimeout(r, 150));
+      const b3 = errors.length;
+      window.document.querySelector("[data-inspect-save]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 300));
+      const card2 = window.document.querySelector("[data-job-inspections]");
+      check("owner: saving the edit changes the same inspection", errors.length === b3 && /240 kg/.test(card2?.textContent || "") && /\(1\)/.test(card2?.textContent || ""), errors.slice(b3, b3 + 1).join(" | ") || (card2?.textContent || "").slice(0, 100));
+    }
+
     // Transport: a trip with times, a load and, for waste, the weight the
     // inspection left on the roof.
     const tBtn = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Transport");
@@ -294,13 +312,14 @@ async function renderAs(role) {
     check("owner: the trip's hours come from the two times", /1\.5 h/.test(window.document.querySelector("[data-trip-hours]")?.textContent || ""), window.document.querySelector("[data-trip-hours]")?.textContent || "no hours line");
     window.document.querySelector('[data-trip-load="waste"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 200));
-    check("owner: a waste trip is offered the inspection's weight", window.document.querySelector("[data-trip-weight]")?.value === "200" && /200 kg/.test(window.document.querySelector("[data-trip-waste-hint]")?.textContent || ""), `weight=${window.document.querySelector("[data-trip-weight]")?.value} hint=${window.document.querySelector("[data-trip-waste-hint]")?.textContent}`);
+    // 120 Biber after the edit above: 240 kg still on the roof.
+    check("owner: a waste trip is offered the inspection's weight", window.document.querySelector("[data-trip-weight]")?.value === "240" && /240 kg/.test(window.document.querySelector("[data-trip-waste-hint]")?.textContent || ""), `weight=${window.document.querySelector("[data-trip-weight]")?.value} hint=${window.document.querySelector("[data-trip-waste-hint]")?.textContent}`);
     const b2 = errors.length;
     window.document.querySelector("[data-trip-save]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 300));
     const rows = window.document.querySelectorAll("[data-trip-row]");
     check("owner: the trip lands in the list", errors.length === b2 && rows.length === 1 && /Werkhof → Deponie Rümlang/.test(rows[0]?.textContent || "") && /1\.5 h/.test(rows[0]?.textContent || ""), errors.slice(b2, b2 + 1).join(" | ") || `${rows.length} rows: ${(rows[0]?.textContent || "").slice(0, 80)}`);
-    check("owner: the month totals count it", /1\.5/.test(text()) && /200/.test(text()), "totals missing");
+    check("owner: the month totals count it", /1\.5/.test(text()) && /240/.test(text()), "totals missing");
   }
 
   // A new build taking over the page is announced with a restart button,

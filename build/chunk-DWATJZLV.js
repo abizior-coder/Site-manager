@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var n=`{
   "ccUsageFootnote": "Nur Z\xE4hlige pro Firma und Tag \u2014 kei N\xE4me, kei Text. 400 Tag ufbewahrt.",
   "updateReady": "Neui Version glade \u2014 bi Gl\xE4geheit neu starte.",
   "reloadBtn": "Neu starte",
-  "langOffline": "Die Sprach bruucht eimal e Verbindig. Sp\xF6ter nomal probiere."
+  "langOffline": "Die Sprach bruucht eimal e Verbindig. Sp\xF6ter nomal probiere.",
+  "inspectEditTitle": "Inspektion bearbeite",
+  "inspectionUpdated": "Inspektion aktualisiert"
 }
 `;export{n as default};

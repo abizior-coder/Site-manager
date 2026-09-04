@@ -3398,13 +3398,32 @@ export default function SiteManager() {
     setPickupModal((s) => ({ ...s, step: "code" }));
   }
 
-  function openInspection(projectId) {
+  function openInspection(projectId, entry) {
+    if (entry) {
+      // Editing: the note comes back as typed; an old entry without a stored
+      // note (an AI report, say) offers its text so nothing is lost on save.
+      setInspectionModal({
+        step: "form", editingId: entry.id,
+        text: entry.note != null ? entry.note : (entry.checklist ? "" : String(entry.description || "")),
+        startTime: entry.startTime || "", ladderLength: entry.ladderLength || "", psaCount: entry.psaCount || "",
+        images: [], projectId: entry.projectId || projectId, progress: 0, agentNote: "",
+        report: null, materials: null, error: null,
+        checklist: { ...(entry.checklist || {}) },
+        tiles: (entry.tiles && entry.tiles.length ? entry.tiles.map((r) => ({ model: r.model || "", count: String(r.count || "") })) : [{ model: "", count: "" }]),
+      });
+      return;
+    }
     setInspectionModal({
       step: "form", text: "", startTime: new Date().toTimeString().slice(0, 5), ladderLength: "", psaCount: "",
       images: [], projectId: projectId || activeClock?.projectId || projects[0]?.id || null, progress: 0, agentNote: "",
       report: null, materials: null, error: null,
       checklist: {}, tiles: [{ model: "", count: "" }],
     });
+  }
+
+  // Who may change an inspection: its author, or anyone who manages.
+  function canEditInspection(entry) {
+    return !!entry && (canManage() || entry.userId === user?.uid);
   }
 
   // Waste this job's inspections produced that no trip has carried yet --
@@ -3476,12 +3495,19 @@ export default function SiteManager() {
     const waste = tilesWaste(tiles);
     const summary = summariseInspection({ checklist: m.checklist, tiles, note: m.text, labels: inspectionLabels() });
     if (!summary) { showToast(t.inspectNothing); return; }
-    persist({ entries: [newEntry({
-      type: "inspection", projectId: m.projectId, description: summary,
+    const fields = {
+      description: summary, note: m.text || "",
       checklist: m.checklist || {}, tiles, wasteKg: waste.wasteKg, areaM2: waste.areaM2,
       startTime: m.startTime || "", ladderLength: m.ladderLength || "", psaCount: m.psaCount || "",
-    }), ...entries] });
-    showToast(t.inspectionLogged);
+    };
+    if (m.editingId) {
+      // The same entry, changed: the rules keep userId as it was.
+      persist({ entries: entries.map((e) => (e.id === m.editingId ? { ...e, ...fields, updatedAt: Date.now() } : e)) });
+      showToast(t.inspectionUpdated);
+    } else {
+      persist({ entries: [newEntry({ type: "inspection", projectId: m.projectId, ...fields }), ...entries] });
+      showToast(t.inspectionLogged);
+    }
     setInspectionModal(null);
   }
 
@@ -5516,6 +5542,8 @@ export default function SiteManager() {
           lang={lang}
           onOpenPhoto={openPhoto}
           onInspect={(pid) => openInspection(pid)}
+          onEditInspection={(entry) => openInspection(entry.projectId, entry)}
+          canEditInspection={canEditInspection}
           onTogglePin={() => togglePin(selectedProject)}
           roster={team.members}
           canManageCrew={canManage()}
@@ -6467,7 +6495,7 @@ export default function SiteManager() {
           );
       })()}
       {inspectionModal && (
-        <Modal onClose={() => setInspectionModal(null)} title={t.inspectionTitle}>
+        <Modal onClose={() => setInspectionModal(null)} title={inspectionModal.editingId ? t.inspectEditTitle : t.inspectionTitle}>
           {inspectionModal.step === "form" && (
             <div className="flex flex-col gap-2">
               <textarea value={inspectionModal.text} onChange={(e) => setInspectionModal((s) => ({ ...s, text: e.target.value }))} placeholder={t.inspectionPlaceholder} rows={4} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
@@ -6540,7 +6568,7 @@ export default function SiteManager() {
                 {(() => { const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0)); return w.wasteKg > 0 ? <span data-waste-kg style={{ color: COLORS.amber }} className="text-[11px] font-bold">{t.inspectWaste}: ~{w.wasteKg} kg</span> : null; })()}
               </div>
               <button data-inspect-save onClick={saveInspectionPlain} style={{ background: COLORS.accent }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.inspectSave}</button>
-              <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>
+              {!inspectionModal.editingId && <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>}
               <div style={{ color: COLORS.muted }} className="text-[10px]">{t.advisorsHint}</div>
             </div>
           )}

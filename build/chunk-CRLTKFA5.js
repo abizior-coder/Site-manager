@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour \u2014 ni noms ni textes. Conserv\xE9s 400 jours.",
   "updateReady": "Nouvelle version charg\xE9e \u2014 red\xE9marrez quand vous voulez.",
   "reloadBtn": "Red\xE9marrer",
-  "langOffline": "Cette langue a besoin d'une connexion une fois. R\xE9essayez en ligne."
+  "langOffline": "Cette langue a besoin d'une connexion une fois. R\xE9essayez en ligne.",
+  "inspectEditTitle": "Modifier l'inspection",
+  "inspectionUpdated": "Inspection mise \xE0 jour"
 }
 `;export{r as default};

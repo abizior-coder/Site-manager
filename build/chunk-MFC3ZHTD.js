@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Apenas contagens por empresa e dia \u2014 sem nomes nem textos. Guardadas 400 dias.",
   "updateReady": "Nova vers\xE3o carregada \u2014 reinicie quando quiser.",
   "reloadBtn": "Reiniciar",
-  "langOffline": "Este idioma precisa de liga\xE7\xE3o uma vez. Tente online."
+  "langOffline": "Este idioma precisa de liga\xE7\xE3o uma vez. Tente online.",
+  "inspectEditTitle": "Editar inspe\xE7\xE3o",
+  "inspectionUpdated": "Inspe\xE7\xE3o atualizada"
 }
 `;export{o as default};

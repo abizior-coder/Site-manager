@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Tylko liczby na firm\u0119 i dzie\u0144 \u2014 bez nazwisk i tre\u015Bci. Przechowywane 400 dni.",
   "updateReady": "Nowa wersja za\u0142adowana \u2014 uruchom ponownie, gdy wygodnie.",
   "reloadBtn": "Uruchom ponownie",
-  "langOffline": "Ten j\u0119zyk wymaga raz po\u0142\u0105czenia. Spr\xF3buj online."
+  "langOffline": "Ten j\u0119zyk wymaga raz po\u0142\u0105czenia. Spr\xF3buj online.",
+  "inspectEditTitle": "Edytuj inspekcj\u0119",
+  "inspectionUpdated": "Inspekcja zaktualizowana"
 }
 `;export{o as default};

@@ -769,5 +769,7 @@
   "ccUsageFootnote": "Tylko liczby na firmę i dzień — bez nazwisk i treści. Przechowywane 400 dni.",
   "updateReady": "Nowa wersja załadowana — uruchom ponownie, gdy wygodnie.",
   "reloadBtn": "Uruchom ponownie",
-  "langOffline": "Ten język wymaga raz połączenia. Spróbuj online."
+  "langOffline": "Ten język wymaga raz połączenia. Spróbuj online.",
+  "inspectEditTitle": "Edytuj inspekcję",
+  "inspectionUpdated": "Inspekcja zaktualizowana"
 }

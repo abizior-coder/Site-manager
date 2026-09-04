@@ -769,5 +769,7 @@
   "ccUsageFootnote": "Csak cégenkénti és naponkénti számok — nevek és szövegek nélkül. 400 napig őrizve.",
   "updateReady": "Új verzió betöltve — indítsd újra, ha alkalmas.",
   "reloadBtn": "Újraindítás",
-  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Próbáld online."
+  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Próbáld online.",
+  "inspectEditTitle": "Szemle szerkesztése",
+  "inspectionUpdated": "Szemle frissítve"
 }

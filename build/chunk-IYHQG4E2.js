@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Len po\u010Dty na firmu a de\u0148 \u2014 \u017Eiadne men\xE1, \u017Eiadne texty. Uchovan\xE9 400 dn\xED.",
   "updateReady": "Nov\xE1 verzia na\u010D\xEDtan\xE1 \u2014 re\u0161tartujte, ke\u010F sa v\xE1m hod\xED.",
   "reloadBtn": "Re\u0161tartova\u0165",
-  "langOffline": "Tento jazyk potrebuje raz pripojenie. Sk\xFAste online."
+  "langOffline": "Tento jazyk potrebuje raz pripojenie. Sk\xFAste online.",
+  "inspectEditTitle": "Upravi\u0165 obhliadku",
+  "inspectionUpdated": "Obhliadka aktualizovan\xE1"
 }
 `;export{o as default};

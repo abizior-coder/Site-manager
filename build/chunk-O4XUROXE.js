@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Counts per company and day only \u2014 no names, no texts. Kept 400 days.",
   "updateReady": "New version loaded \u2014 restart when convenient.",
   "reloadBtn": "Restart",
-  "langOffline": "This language needs a connection once. Try again when online."
+  "langOffline": "This language needs a connection once. Try again when online.",
+  "inspectEditTitle": "Edit inspection",
+  "inspectionUpdated": "Inspection updated"
 }
 `;export{o as default};

@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "ccUsageFootnote": "Solo conteggi per azienda e giorno \u2014 nessun nome, nessun testo. Conservati 400 giorni.",
   "updateReady": "Nuova versione caricata \u2014 riavvia quando vuoi.",
   "reloadBtn": "Riavvia",
-  "langOffline": "Questa lingua richiede una connessione una volta. Riprova online."
+  "langOffline": "Questa lingua richiede una connessione una volta. Riprova online.",
+  "inspectEditTitle": "Modifica ispezione",
+  "inspectionUpdated": "Ispezione aggiornata"
 }
 `;export{o as default};

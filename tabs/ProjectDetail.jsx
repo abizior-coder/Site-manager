@@ -9,7 +9,7 @@ import { Camera, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, Fil
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_PROJECT_STATUS, DEFAULT_TRADE, PROJECT_CATEGORIES, Section, TRADES, documentState, mapsUrl, statusMeta, telHref } from "../roofing-site-manager.jsx";
 
-export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, onInspect, t }) {
+export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, onOpenPhoto, onInspect, onEditInspection, canEditInspection, t }) {
   const materials = entries.filter((e) => e.type === "material");
   const tools = entries.filter((e) => e.type === "tool");
   const photos = entries.filter((e) => e.type === "photo");
@@ -410,6 +410,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                     </div>
                   )}
                   <div className="flex gap-2 justify-end">
+                    {canEditInspection && canEditInspection(e) && <button data-inspect-edit onClick={() => onEditInspection(e)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>}
                     <button onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }}><Trash2 size={13} /></button>
                   </div>
                 </div>

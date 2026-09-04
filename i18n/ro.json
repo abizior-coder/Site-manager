@@ -769,5 +769,7 @@
   "ccUsageFootnote": "Doar numere pe firmă și zi — fără nume, fără texte. Păstrate 400 de zile.",
   "updateReady": "Versiune nouă încărcată — repornește când e convenabil.",
   "reloadBtn": "Repornește",
-  "langOffline": "Această limbă are nevoie o dată de conexiune. Încearcă online."
+  "langOffline": "Această limbă are nevoie o dată de conexiune. Încearcă online.",
+  "inspectEditTitle": "Editează inspecția",
+  "inspectionUpdated": "Inspecție actualizată"
 }

@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "ccUsageFootnote": "Nur Z\xE4hlungen pro Firma und Tag \u2014 keine Namen, keine Texte. 400 Tage aufbewahrt.",
   "updateReady": "Neue Version geladen \u2014 bei Gelegenheit neu starten.",
   "reloadBtn": "Neu starten",
-  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Sp\xE4ter nochmals versuchen."
+  "langOffline": "Diese Sprache braucht einmal eine Verbindung. Sp\xE4ter nochmals versuchen.",
+  "inspectEditTitle": "Inspektion bearbeiten",
+  "inspectionUpdated": "Inspektion aktualisiert"
 }
 `;export{t as default};

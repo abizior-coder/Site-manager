@@ -769,5 +769,7 @@
   "ccUsageFootnote": "Uniquement des comptages par entreprise et par jour — ni noms ni textes. Conservés 400 jours.",
   "updateReady": "Nouvelle version chargée — redémarrez quand vous voulez.",
   "reloadBtn": "Redémarrer",
-  "langOffline": "Cette langue a besoin d'une connexion une fois. Réessayez en ligne."
+  "langOffline": "Cette langue a besoin d'une connexion une fois. Réessayez en ligne.",
+  "inspectEditTitle": "Modifier l'inspection",
+  "inspectionUpdated": "Inspection mise à jour"
 }

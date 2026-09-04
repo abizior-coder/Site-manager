@@ -68,3 +68,13 @@ dachówka z modelem i ilością … trzeba dodać zakładkę transport z czasem"
 - Route/km from a maps API.
 - Disposal-site price lists (a free text and an optional cost for now).
 - Charging transport into job costing (later, with the Bexio export).
+
+## Amendment 2026-09-04: an inspection can be corrected
+
+Owner: "sekcja roof inspection musi byc edytowalna". The pencil on an
+inspection in the job view reopens it with the checklist, the replaced
+tiles, the times and the note as they were; saving changes the same entry
+(summary regenerated, `updatedAt` set), never a duplicate. Its author or a
+manager may edit (the rules keep `userId` as it was). The AI advisers are
+offered for new inspections only. The note is stored as `note` from now
+on; an old entry without one offers its text for editing.

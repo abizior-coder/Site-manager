@@ -769,6 +769,8 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "ccUsageFootnote": "Csak c\xE9genk\xE9nti \xE9s naponk\xE9nti sz\xE1mok \u2014 nevek \xE9s sz\xF6vegek n\xE9lk\xFCl. 400 napig \u0151rizve.",
   "updateReady": "\xDAj verzi\xF3 bet\xF6ltve \u2014 ind\xEDtsd \xFAjra, ha alkalmas.",
   "reloadBtn": "\xDAjraind\xEDt\xE1s",
-  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Pr\xF3b\xE1ld online."
+  "langOffline": "Ehhez a nyelvhez egyszer kapcsolat kell. Pr\xF3b\xE1ld online.",
+  "inspectEditTitle": "Szemle szerkeszt\xE9se",
+  "inspectionUpdated": "Szemle friss\xEDtve"
 }
 `;export{a as default};
