@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "Nasleduj\xFAci mesiac",
   "a11yReorder": "Presun\xFA\u0165",
   "customerDeleteConfirm": "Vymaza\u0165 z\xE1kazn\xEDka? Z\xE1kazky zostan\xFA, bez prepojenia.",
-  "languageLabel": "Jazyk"
+  "languageLabel": "Jazyk",
+  "inviteDeleteConfirm": "Vymaza\u0165 tento k\xF3d?",
+  "rosterToday": "Dnes:",
+  "plannerHintTouch": "Pl\xE1nujte v kalend\xE1ri. \u0164uknut\xEDm na obsaden\xE9 pole ho vypr\xE1zdnite.",
+  "bexioErrAuth": "Prihl\xE1senie vypr\u0161alo \u2014 na\u010D\xEDtaj aplik\xE1ciu znova a sk\xFAs to znova.",
+  "bexioErrNotConfigured": "bexio e\u0161te nie je na serveri nastaven\xE9.",
+  "bexioErrOwnersOnly": "Len majite\u013E m\xF4\u017Ee pripoji\u0165 bexio.",
+  "bexioErrTokenMissing": "Token ch\xFDba alebo je pr\xEDli\u0161 kr\xE1tky.",
+  "bexioErrTokenRefused": "bexio token odmietlo \u2014 vytvor nov\xFD na developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nie je pripojen\xE9.",
+  "bexioErrTaxes": "Sadzby DPH sa z bexio nepodarilo na\u010D\xEDta\u0165.",
+  "bexioErrNoTax": "V bexio ch\xFDba akt\xEDvna sadzba s touto DPH.",
+  "bexioErrNoCustomer": "Fakt\xFAra nem\xE1 z\xE1kazn\xEDka.",
+  "bexioErrNetwork": "\u017Diadne spojenie so serverom.",
+  "bexioStCreated": "vytvoren\xE9",
+  "bexioStExists": "u\u017E existuje",
+  "bexioStError": "chyba",
+  "bexioStDryRun": "sk\xFA\u0161ka"
 }
 `;export{o as default};

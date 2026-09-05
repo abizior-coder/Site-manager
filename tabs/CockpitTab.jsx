@@ -260,6 +260,35 @@ function UsageCard({ t }) {
 
 // bexio: connect with a Personal Access Token (kept only in the Worker),
 // push customers and a month's invoices; every answer from bexio is shown.
+// The Worker answers in English with a stable code; the card shows the
+// sentence in the reader's language and keeps bexio's own detail after it.
+const BEXIO_ERR_KEYS = {
+  auth_required: "bexioErrAuth",
+  auth_expired: "bexioErrAuth",
+  auth_invalid: "bexioErrAuth",
+  not_configured: "bexioErrNotConfigured",
+  owners_only: "bexioErrOwnersOnly",
+  token_missing: "bexioErrTokenMissing",
+  token_refused: "bexioErrTokenRefused",
+  not_connected: "bexioErrNotConnected",
+  taxes: "bexioErrTaxes",
+  no_tax: "bexioErrNoTax",
+  no_customer: "bexioErrNoCustomer",
+};
+const BEXIO_STATUS_KEYS = {
+  created: "bexioStCreated",
+  exists: "bexioStExists",
+  error: "bexioStError",
+  "dry-run": "bexioStDryRun",
+};
+function bexioText(t, e) {
+  if (!e) return "";
+  const key = e.code && BEXIO_ERR_KEYS[e.code];
+  if (key && t[key]) return t[key];
+  if (/Failed to fetch|NetworkError|Load failed/i.test(e.message || "")) return t.bexioErrNetwork || e.message;
+  return e.message || String(e);
+}
+
 function BexioCard({ t, lang, customers, documents, projects }) {
   const [status, setStatus] = useState(null);
   const [token, setToken] = useState("");
@@ -277,14 +306,18 @@ function BexioCard({ t, lang, customers, documents, projects }) {
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || `bexio ${res.status}`);
+    if (!res.ok) {
+      const err = new Error(data.error || `bexio ${res.status}`);
+      err.code = data.code;
+      throw err;
+    }
     return data;
   };
   useEffect(() => {
     let alive = true;
     call("GET", "status")
       .then((s) => alive && setStatus(s))
-      .catch((e) => alive && setStatus({ connected: false, unavailable: e.message }));
+      .catch((e) => alive && setStatus({ connected: false, unavailable: bexioText(t, e) }));
     return () => {
       alive = false;
     };
@@ -295,7 +328,7 @@ function BexioCard({ t, lang, customers, documents, projects }) {
     try {
       await fn();
     } catch (e) {
-      setError(e.message);
+      setError(bexioText(t, e));
     } finally {
       setBusy(false);
     }
@@ -432,9 +465,9 @@ function BexioCard({ t, lang, customers, documents, projects }) {
                   className="font-mono truncate"
                   style={{ color: r.status === "error" ? COLORS.dangerText : COLORS.text }}
                 >
-                  {r.number || r.id} · {r.status}
+                  {r.number || r.id} · {(BEXIO_STATUS_KEYS[r.status] && t[BEXIO_STATUS_KEYS[r.status]]) || r.status}
                   {r.bexioId ? ` · #${r.bexioId}` : ""}
-                  {r.error ? ` · ${r.error}` : ""}
+                  {r.error ? ` · ${(r.code && BEXIO_ERR_KEYS[r.code] && t[BEXIO_ERR_KEYS[r.code]]) || r.error}` : ""}
                 </div>
               ))}
             </div>

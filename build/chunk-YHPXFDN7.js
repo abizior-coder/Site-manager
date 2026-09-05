@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "Mese successivo",
   "a11yReorder": "Sposta",
   "customerDeleteConfirm": "Eliminare il cliente? I lavori restano, senza collegamento.",
-  "languageLabel": "Lingua"
+  "languageLabel": "Lingua",
+  "inviteDeleteConfirm": "Eliminare questo codice?",
+  "rosterToday": "Oggi:",
+  "plannerHintTouch": "Pianifica nel calendario. Tocca una cella piena per svuotarla.",
+  "bexioErrAuth": "Accesso scaduto \u2014 ricarica l'app e riprova.",
+  "bexioErrNotConfigured": "bexio non \xE8 ancora configurato sul server.",
+  "bexioErrOwnersOnly": "Solo il titolare pu\xF2 collegare bexio.",
+  "bexioErrTokenMissing": "Il token manca o \xE8 troppo corto.",
+  "bexioErrTokenRefused": "bexio ha rifiutato il token \u2014 creane uno nuovo su developer.bexio.com.",
+  "bexioErrNotConnected": "bexio non \xE8 collegato.",
+  "bexioErrTaxes": "Le aliquote non sono state lette da bexio.",
+  "bexioErrNoTax": "In bexio manca un'aliquota attiva con questa IVA.",
+  "bexioErrNoCustomer": "La fattura non ha un cliente.",
+  "bexioErrNetwork": "Nessuna connessione al server.",
+  "bexioStCreated": "creato",
+  "bexioStExists": "gi\xE0 presente",
+  "bexioStError": "errore",
+  "bexioStDryRun": "prova"
 }
 `;export{o as default};

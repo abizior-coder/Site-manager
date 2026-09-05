@@ -41,18 +41,18 @@ function json(body, status, headers) {
 async function verifyUser(request) {
   const header = request.headers.get("Authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  if (!token) return { ok: false, status: 401, error: "sign-in required" };
+  if (!token) return { ok: false, status: 401, error: "sign-in required", code: "auth_required" };
 
   const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken: token }),
   });
-  if (!res.ok) return { ok: false, status: 401, error: "invalid or expired sign-in" };
+  if (!res.ok) return { ok: false, status: 401, error: "invalid or expired sign-in", code: "auth_expired" };
 
   const data = await res.json().catch(() => null);
   const user = data && data.users && data.users[0];
-  if (!user || !user.localId) return { ok: false, status: 401, error: "invalid sign-in" };
+  if (!user || !user.localId) return { ok: false, status: 401, error: "invalid sign-in", code: "auth_invalid" };
   // The token travels on so the files routes can read Firestore as this user.
   return { ok: true, uid: user.localId, token };
 }

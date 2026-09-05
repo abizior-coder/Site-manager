@@ -936,5 +936,22 @@
   "a11yNextMonth": "Nöchschte Monet",
   "a11yReorder": "Verschiebe",
   "customerDeleteConfirm": "Chund lösche? D Ufträg bliibed, ohni Verchnüpfig.",
-  "languageLabel": "Sprach"
+  "languageLabel": "Sprach",
+  "inviteDeleteConfirm": "Code lösche?",
+  "rosterToday": "Hüt:",
+  "plannerHintTouch": "Iiteile im Kaländer. Uf es belegts Fäld tippe, zum es leere.",
+  "bexioErrAuth": "Aamäldig abgloffe — App neu lade und nomal probiere.",
+  "bexioErrNotConfigured": "bexio isch ufem Server na nid iigrichtet.",
+  "bexioErrOwnersOnly": "Nur de Inhaber cha bexio verbinde.",
+  "bexioErrTokenMissing": "Token fählt oder isch z churz.",
+  "bexioErrTokenRefused": "bexio hät de Token abglehnt — uf developer.bexio.com en neue erstelle.",
+  "bexioErrNotConnected": "bexio isch nid verbunde.",
+  "bexioErrTaxes": "D Stüürsätz händ nid us bexio gläse werde chöne.",
+  "bexioErrNoTax": "In bexio fählt en aktive Stüürsatz mit dem MWST-Satz.",
+  "bexioErrNoCustomer": "D Rächnig hät kei Chund.",
+  "bexioErrNetwork": "Kei Verbindig zum Server.",
+  "bexioStCreated": "aagleit",
+  "bexioStExists": "scho da",
+  "bexioStError": "Fähler",
+  "bexioStDryRun": "Probelauf"
 }

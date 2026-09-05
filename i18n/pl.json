@@ -936,5 +936,22 @@
   "a11yNextMonth": "Następny miesiąc",
   "a11yReorder": "Przenieś",
   "customerDeleteConfirm": "Usunąć klienta? Zlecenia zostają, bez powiązania.",
-  "languageLabel": "Język"
+  "languageLabel": "Język",
+  "inviteDeleteConfirm": "Usunąć ten kod?",
+  "rosterToday": "Dziś:",
+  "plannerHintTouch": "Planuj w kalendarzu. Dotknij wypełnionej komórki, aby ją wyczyścić.",
+  "bexioErrAuth": "Sesja wygasła — załaduj aplikację ponownie i spróbuj jeszcze raz.",
+  "bexioErrNotConfigured": "bexio nie jest jeszcze skonfigurowane na serwerze.",
+  "bexioErrOwnersOnly": "Tylko właściciel może połączyć bexio.",
+  "bexioErrTokenMissing": "Brak tokenu lub jest za krótki.",
+  "bexioErrTokenRefused": "bexio odrzuciło token — utwórz nowy na developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nie jest połączone.",
+  "bexioErrTaxes": "Nie udało się odczytać stawek VAT z bexio.",
+  "bexioErrNoTax": "W bexio brakuje aktywnej stawki z tym VAT.",
+  "bexioErrNoCustomer": "Faktura nie ma klienta.",
+  "bexioErrNetwork": "Brak połączenia z serwerem.",
+  "bexioStCreated": "utworzono",
+  "bexioStExists": "już istnieje",
+  "bexioStError": "błąd",
+  "bexioStDryRun": "próba"
 }

@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "a11yNextMonth": "K\xF6vetkez\u0151 h\xF3nap",
   "a11yReorder": "\xC1thelyez\xE9s",
   "customerDeleteConfirm": "T\xF6rl\xF6d az \xFCgyfelet? A munk\xE1k megmaradnak, kapcsolat n\xE9lk\xFCl.",
-  "languageLabel": "Nyelv"
+  "languageLabel": "Nyelv",
+  "inviteDeleteConfirm": "T\xF6rl\xF6d ezt a k\xF3dot?",
+  "rosterToday": "Ma:",
+  "plannerHintTouch": "Tervezz a napt\xE1rban. Koppints egy foglalt cell\xE1ra a t\xF6rl\xE9shez.",
+  "bexioErrAuth": "A bejelentkez\xE9s lej\xE1rt \u2014 t\xF6ltsd \xFAjra az alkalmaz\xE1st \xE9s pr\xF3b\xE1ld \xFAjra.",
+  "bexioErrNotConfigured": "A bexio m\xE9g nincs be\xE1ll\xEDtva a szerveren.",
+  "bexioErrOwnersOnly": "Csak a tulajdonos kapcsolhatja \xF6ssze a bexi\xF3t.",
+  "bexioErrTokenMissing": "A token hi\xE1nyzik vagy t\xFAl r\xF6vid.",
+  "bexioErrTokenRefused": "A bexio elutas\xEDtotta a tokent \u2014 k\xE9sz\xEDts \xFAjat a developer.bexio.com oldalon.",
+  "bexioErrNotConnected": "A bexio nincs \xF6sszekapcsolva.",
+  "bexioErrTaxes": "Az \xE1fakulcsokat nem siker\xFClt beolvasni a bexi\xF3b\xF3l.",
+  "bexioErrNoTax": "A bexi\xF3ban nincs akt\xEDv kulcs ezzel az \xE1f\xE1val.",
+  "bexioErrNoCustomer": "A sz\xE1ml\xE1nak nincs \xFCgyfele.",
+  "bexioErrNetwork": "Nincs kapcsolat a szerverrel.",
+  "bexioStCreated": "l\xE9trehozva",
+  "bexioStExists": "m\xE1r l\xE9tezik",
+  "bexioStError": "hiba",
+  "bexioStDryRun": "pr\xF3ba"
 }
 `;export{a as default};

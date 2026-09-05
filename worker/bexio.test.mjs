@@ -46,7 +46,7 @@ const verify = async (req) => {
   const token = (req.headers.get("Authorization") || "").replace("Bearer ", "");
   return TOKENS[token]
     ? { ok: true, uid: TOKENS[token], token }
-    : { ok: false, status: 401, error: "sign-in required" };
+    : { ok: false, status: 401, error: "sign-in required", code: "auth_required" };
 };
 const isMember = async (cid, uid) =>
   MEMBERS[`${cid}:${uid}`] ? { member: true, role: MEMBERS[`${cid}:${uid}`] } : { member: false };
@@ -389,6 +389,35 @@ t(
   (await call(env, "POST", "/bexio/c1/push", "tok-chef", { contacts: customers }, bexio)).status,
   409,
 );
+
+// --- every refusal carries a stable code the app can translate ----------------------
+{
+  const code = async (env, method, path, token, body) => {
+    const r = await call(env, method, path, token, body, bexio);
+    return [r.status, r.body.code];
+  };
+  t("no sign-in: 401 auth_required", await code(env, "GET", "/bexio/c1/status", "", null), [401, "auth_required"]);
+  t("crew: 403 owners_only", await code(env, "GET", "/bexio/c1/status", "tok-crew", null), [403, "owners_only"]);
+  t("a short token: 400 token_missing", await code(env, "PUT", "/bexio/c1/token", "tok-chef", { token: "short" }), [
+    400,
+    "token_missing",
+  ]);
+  t(
+    "a token bexio rejects: 401 token_refused",
+    await code(env, "PUT", "/bexio/c1/token", "tok-chef", { token: "pat-wrong-token-1234567890" }),
+    [401, "token_refused"],
+  );
+  t(
+    "push without a connection: 409 not_connected",
+    await code(env, "POST", "/bexio/c1/push", "tok-chef", { contacts: [] }),
+    [409, "not_connected"],
+  );
+  t(
+    "no key on the server: 503 not_configured",
+    await code({ RATE_LIMIT: fakeKv() }, "GET", "/bexio/c1/status", "tok-chef", null),
+    [503, "not_configured"],
+  );
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

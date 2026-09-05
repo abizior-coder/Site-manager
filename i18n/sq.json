@@ -936,5 +936,22 @@
   "a11yNextMonth": "Muaji tjetër",
   "a11yReorder": "Zhvendos",
   "customerDeleteConfirm": "Të fshihet klienti? Punishtet mbeten, pa lidhje.",
-  "languageLabel": "Gjuha"
+  "languageLabel": "Gjuha",
+  "inviteDeleteConfirm": "Ta fshij këtë kod?",
+  "rosterToday": "Sot:",
+  "plannerHintTouch": "Planifiko në kalendar. Prek një kuti të mbushur për ta zbrazur.",
+  "bexioErrAuth": "Hyrja ka skaduar — ringarko aplikacionin dhe provo përsëri.",
+  "bexioErrNotConfigured": "bexio nuk është konfiguruar ende në server.",
+  "bexioErrOwnersOnly": "Vetëm pronari mund të lidhë bexio.",
+  "bexioErrTokenMissing": "Tokeni mungon ose është shumë i shkurtër.",
+  "bexioErrTokenRefused": "bexio e refuzoi tokenin — krijo një të ri në developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nuk është i lidhur.",
+  "bexioErrTaxes": "Normat e TVSH-së nuk u lexuan nga bexio.",
+  "bexioErrNoTax": "Në bexio mungon një normë aktive me këtë TVSH.",
+  "bexioErrNoCustomer": "Fatura nuk ka klient.",
+  "bexioErrNetwork": "Nuk ka lidhje me serverin.",
+  "bexioStCreated": "u krijua",
+  "bexioStExists": "ekziston tashmë",
+  "bexioStError": "gabim",
+  "bexioStDryRun": "provë"
 }

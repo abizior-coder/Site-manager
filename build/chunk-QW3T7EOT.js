@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "M\xEAs seguinte",
   "a11yReorder": "Mover",
   "customerDeleteConfirm": "Eliminar o cliente? As obras ficam, sem a liga\xE7\xE3o.",
-  "languageLabel": "Idioma"
+  "languageLabel": "Idioma",
+  "inviteDeleteConfirm": "Eliminar este c\xF3digo?",
+  "rosterToday": "Hoje:",
+  "plannerHintTouch": "Planeie no calend\xE1rio. Toque numa c\xE9lula preenchida para a limpar.",
+  "bexioErrAuth": "Sess\xE3o expirada \u2014 recarregue a app e tente novamente.",
+  "bexioErrNotConfigured": "O bexio ainda n\xE3o est\xE1 configurado no servidor.",
+  "bexioErrOwnersOnly": "S\xF3 o propriet\xE1rio pode ligar o bexio.",
+  "bexioErrTokenMissing": "O token est\xE1 em falta ou \xE9 demasiado curto.",
+  "bexioErrTokenRefused": "O bexio recusou o token \u2014 crie um novo em developer.bexio.com.",
+  "bexioErrNotConnected": "O bexio n\xE3o est\xE1 ligado.",
+  "bexioErrTaxes": "N\xE3o foi poss\xEDvel ler as taxas de IVA do bexio.",
+  "bexioErrNoTax": "No bexio falta uma taxa ativa com este IVA.",
+  "bexioErrNoCustomer": "A fatura n\xE3o tem cliente.",
+  "bexioErrNetwork": "Sem liga\xE7\xE3o ao servidor.",
+  "bexioStCreated": "criado",
+  "bexioStExists": "j\xE1 existe",
+  "bexioStError": "erro",
+  "bexioStDryRun": "ensaio"
 }
 `;export{o as default};

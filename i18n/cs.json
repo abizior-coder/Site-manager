@@ -936,5 +936,22 @@
   "a11yNextMonth": "Následující měsíc",
   "a11yReorder": "Přesunout",
   "customerDeleteConfirm": "Smazat zákazníka? Zakázky zůstanou, bez propojení.",
-  "languageLabel": "Jazyk"
+  "languageLabel": "Jazyk",
+  "inviteDeleteConfirm": "Smazat tento kód?",
+  "rosterToday": "Dnes:",
+  "plannerHintTouch": "Plánujte v kalendáři. Klepnutím na obsazené pole ho vyprázdníte.",
+  "bexioErrAuth": "Přihlášení vypršelo — načti aplikaci znovu a zkus to znovu.",
+  "bexioErrNotConfigured": "bexio ještě není na serveru nastaveno.",
+  "bexioErrOwnersOnly": "Jen majitel může připojit bexio.",
+  "bexioErrTokenMissing": "Token chybí nebo je příliš krátký.",
+  "bexioErrTokenRefused": "bexio token odmítlo — vytvoř nový na developer.bexio.com.",
+  "bexioErrNotConnected": "bexio není připojeno.",
+  "bexioErrTaxes": "Sazby DPH se z bexio nepodařilo načíst.",
+  "bexioErrNoTax": "V bexio chybí aktivní sazba s touto DPH.",
+  "bexioErrNoCustomer": "Faktura nemá zákazníka.",
+  "bexioErrNetwork": "Žádné spojení se serverem.",
+  "bexioStCreated": "vytvořeno",
+  "bexioStExists": "už existuje",
+  "bexioStError": "chyba",
+  "bexioStDryRun": "zkouška"
 }

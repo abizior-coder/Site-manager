@@ -47,7 +47,7 @@ password `test1234` (`scripts/seed-emulator.mjs`).
 | File | Holds |
 |---|---|
 | `entry.jsx` | crash capture install (`installCrashCapture`, stale-chunk reload-once), preload of en/de + the device language (`localStorage` `site-log-lang`), mount, service-worker registration with version compare (`site-log:update`). |
-| `roofing-site-manager.jsx` (~12.7k lines) | **the app**: constants (TRADES, SAFETY_*, PROJECT_CATEGORIES, PROJECT_STATUSES, VAT_RATES, ORDER_STATES), pure helpers (`encodeProjectCode`/`decodeProjectCode`, `encodeBackup`/`decodeBackup`, `nextDocNumber`, `migrateClientsToCustomers`, `classifyNote`), lazy tab imports, `SiteManager()` = all state + handlers + screens, then `MountainBackground`, `SwissCross`, `Section`, `ReorderList`, `SignaturePad`, `Modal`. |
+| `roofing-site-manager.jsx` (~12.7k lines) | **the app**: constants (TRADES, SAFETY_*, PROJECT_CATEGORIES, PROJECT_STATUSES, VAT_RATES, ORDER_STATES), pure helpers (`encodeProjectCode`/`decodeProjectCode`, `encodeBackup`/`decodeBackup`, `nextDocNumber`, `migrateClientsToCustomers`, `classifyNote`), lazy tab imports, `SiteManager()` = all state + handlers + screens, then `MountainBackground`, `SwissCross`, `Section`, `ReorderList`, `SignaturePad`, `Modal`, `Field` (a `<label>` with visible text above a control). |
 
 Inside `SiteManager()` (grep the name):
 
@@ -62,7 +62,7 @@ Inside `SiteManager()` (grep the name):
 | documents (Offerte/Rechnung) | `newDocumentFor`, `saveDocument`, `convertQuoteToInvoice`, `printDocument` (QR-bill via lazy `swiss-qr-bill.js`), `saveBilling`, `createRegieDocument`, money helpers from `documents.js` |
 | customers / contacts | `openCustomerForm`, `submitCustomer`, `deleteCustomer` (two-step), `submitContact`, `dueFollowUps`, import via `customers-import.js` (`stageCustomersFile`, `applyCustomersImport`) |
 | projects / dock | `addProject`, `saveProjectEdit`, `reorderProjects`, `togglePin`, `cycleDockSort`, `dropOnProject`, `projectCosting`, `commandCentre`, `dailySummary` |
-| team | `openTeam`, `makeInvite`/`shareInvite`/`dropInvite`, `removeMember`, `toggleAssignment`, leave (`submitLeaveRequest`, `submitRangeLeave`, `setLeaveStatus`) |
+| team | `openTeam`, `makeInvite`/`shareInvite`/`dropInvite` (two-step `[data-invite-delete]`/`-yes`, state `inviteDeleteAsk`), roster today group `[data-roster-today]`, `removeMember`, `toggleAssignment`, leave (`submitLeaveRequest`, `submitRangeLeave`, `setLeaveStatus`) |
 | files / photos | `uploadFiles` (queue from `upload-queue.js`), `postFile`, `openFile`, `deleteFile`, `addFileLink`, `openPhoto`, `savePhotoEdit`, `handleFile`, `fileToScaledImage` |
 | materials / orders | `addToBasket`, `transferBasketToProject`, `requestBasketForProject`, `setOrderStatus`, `stagePriceList`/`applyPriceList` (`price-list.js`), `openPickup`/`generatePickupCode` (lazy `barcode.js` + `swiss-qr-bill.js`) |
 | AI (Worker `/`) | `callClaude`, `translateEntry`/`translateNote`/`autoTranslateNote`, `runScan`/`confirmScan` (delivery notes), library scans, `runInspection` |
@@ -81,7 +81,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | File | Component(s) | Notes |
 |---|---|---|
 | `tabs/TodayTab.jsx` | `TodayTab` | day card `[data-day-card]`, `[data-today-date]`, `[data-day-action]`, first steps `[data-first-steps]` |
-| `tabs/BoardTab.jsx` | `BoardTab` | Board/Übersicht, month dots `[data-board-dots]`, week `[data-woche]` |
+| `tabs/BoardTab.jsx` | `BoardTab` | Board/Übersicht, month dots `[data-board-dots]`, week `[data-woche]` (pinned name column, today `[data-woche-today]` scrolled into view, touch hint `[data-woche-hint-touch]` under `(hover: none)`) |
 | `tabs/MaterialsTab.jsx` | `MaterialsTab`, `ArticleSheet` | supplier sheet `[data-article-sheet]`, catalogues from `data/catalog.js` |
 | `tabs/CockpitTab.jsx` | `CockpitTab`, `ExportCard`, `UsageCard`, `ErrorsCard`, `BexioCard`, `BackupCard`, `useWorkerData`, `WORKER_URL` | owner cards; each card fetches its own Worker data |
 | `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]` |
@@ -137,7 +137,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `worker/src/files.js` | `/files/<cid>/…` R2 upload/get/delete with membership check |
 | `worker/src/metrics.js` | `/metrics/<cid>` counts per day (KV `m:<cid>:<day>`) |
 | `worker/src/errors.js` | `/errors/<cid>` crash reports (200/day, 30 days) |
-| `worker/src/bexio.js` | `/bexio/<cid>/token|status|push`: PAT encrypted with `BEXIO_TOKEN_KEY` (AES-GCM) in KV, contacts + invoices push, dry run |
+| `worker/src/bexio.js` | `/bexio/<cid>/token|status|push`: PAT encrypted with `BEXIO_TOKEN_KEY` (AES-GCM) in KV, contacts + invoices push, dry run; every refusal carries a stable `code` (`auth_*`, `owners_only`, `token_missing`, `token_refused`, `not_connected`, `not_configured`, `taxes`, `no_tax`, `no_customer`) that `BexioCard` maps to `bexioErr*` i18n keys |
 | `worker/src/plan.js` | **uncommitted draft**: `/plan/<cid>` state + `/plan/<cid>/order` (Abo invoice in the operator bexio, secret `BEXIO_OPERATOR_TOKEN`); spec `docs/specs/2026-09-06_self-service-plan-billing.md` (proposed) |
 | `worker/src/limits.js` | per-account/company daily and minute limits |
 | Secrets | `ANTHROPIC_API_KEY` (owner sets), `BEXIO_TOKEN_KEY` (set, random), `BEXIO_OPERATOR_TOKEN` (not yet) |

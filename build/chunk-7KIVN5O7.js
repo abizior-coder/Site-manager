@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "Nast\u0119pny miesi\u0105c",
   "a11yReorder": "Przenie\u015B",
   "customerDeleteConfirm": "Usun\u0105\u0107 klienta? Zlecenia zostaj\u0105, bez powi\u0105zania.",
-  "languageLabel": "J\u0119zyk"
+  "languageLabel": "J\u0119zyk",
+  "inviteDeleteConfirm": "Usun\u0105\u0107 ten kod?",
+  "rosterToday": "Dzi\u015B:",
+  "plannerHintTouch": "Planuj w kalendarzu. Dotknij wype\u0142nionej kom\xF3rki, aby j\u0105 wyczy\u015Bci\u0107.",
+  "bexioErrAuth": "Sesja wygas\u0142a \u2014 za\u0142aduj aplikacj\u0119 ponownie i spr\xF3buj jeszcze raz.",
+  "bexioErrNotConfigured": "bexio nie jest jeszcze skonfigurowane na serwerze.",
+  "bexioErrOwnersOnly": "Tylko w\u0142a\u015Bciciel mo\u017Ce po\u0142\u0105czy\u0107 bexio.",
+  "bexioErrTokenMissing": "Brak tokenu lub jest za kr\xF3tki.",
+  "bexioErrTokenRefused": "bexio odrzuci\u0142o token \u2014 utw\xF3rz nowy na developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nie jest po\u0142\u0105czone.",
+  "bexioErrTaxes": "Nie uda\u0142o si\u0119 odczyta\u0107 stawek VAT z bexio.",
+  "bexioErrNoTax": "W bexio brakuje aktywnej stawki z tym VAT.",
+  "bexioErrNoCustomer": "Faktura nie ma klienta.",
+  "bexioErrNetwork": "Brak po\u0142\u0105czenia z serwerem.",
+  "bexioStCreated": "utworzono",
+  "bexioStExists": "ju\u017C istnieje",
+  "bexioStError": "b\u0142\u0105d",
+  "bexioStDryRun": "pr\xF3ba"
 }
 `;export{o as default};

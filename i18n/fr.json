@@ -936,5 +936,22 @@
   "a11yNextMonth": "Mois suivant",
   "a11yReorder": "Déplacer",
   "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien.",
-  "languageLabel": "Langue"
+  "languageLabel": "Langue",
+  "inviteDeleteConfirm": "Supprimer ce code ?",
+  "rosterToday": "Aujourd'hui :",
+  "plannerHintTouch": "Planifiez dans le calendrier. Touchez une case remplie pour la vider.",
+  "bexioErrAuth": "Session expirée — rechargez l'application et réessayez.",
+  "bexioErrNotConfigured": "bexio n'est pas encore configuré sur le serveur.",
+  "bexioErrOwnersOnly": "Seul le propriétaire peut connecter bexio.",
+  "bexioErrTokenMissing": "Le jeton manque ou est trop court.",
+  "bexioErrTokenRefused": "bexio a refusé le jeton — créez-en un nouveau sur developer.bexio.com.",
+  "bexioErrNotConnected": "bexio n'est pas connecté.",
+  "bexioErrTaxes": "Les taux de TVA n'ont pas pu être lus depuis bexio.",
+  "bexioErrNoTax": "bexio n'a pas de taux actif pour cette TVA.",
+  "bexioErrNoCustomer": "La facture n'a pas de client.",
+  "bexioErrNetwork": "Pas de connexion au serveur.",
+  "bexioStCreated": "créé",
+  "bexioStExists": "déjà présent",
+  "bexioStError": "erreur",
+  "bexioStDryRun": "essai"
 }

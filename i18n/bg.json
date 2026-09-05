@@ -936,5 +936,22 @@
   "a11yNextMonth": "Следващ месец",
   "a11yReorder": "Премести",
   "customerDeleteConfirm": "Изтриване на клиента? Обектите остават, без връзка.",
-  "languageLabel": "Език"
+  "languageLabel": "Език",
+  "inviteDeleteConfirm": "Изтриване на този код?",
+  "rosterToday": "Днес:",
+  "plannerHintTouch": "Планирайте в календара. Докоснете заето поле, за да го изчистите.",
+  "bexioErrAuth": "Сесията е изтекла — презаредете приложението и опитайте отново.",
+  "bexioErrNotConfigured": "bexio още не е настроен на сървъра.",
+  "bexioErrOwnersOnly": "Само собственикът може да свърже bexio.",
+  "bexioErrTokenMissing": "Токенът липсва или е твърде кратък.",
+  "bexioErrTokenRefused": "bexio отхвърли токена — създайте нов на developer.bexio.com.",
+  "bexioErrNotConnected": "bexio не е свързан.",
+  "bexioErrTaxes": "Ставките на ДДС не можаха да бъдат прочетени от bexio.",
+  "bexioErrNoTax": "В bexio липсва активна ставка с този ДДС.",
+  "bexioErrNoCustomer": "Фактурата няма клиент.",
+  "bexioErrNetwork": "Няма връзка със сървъра.",
+  "bexioStCreated": "създаден",
+  "bexioStExists": "вече съществува",
+  "bexioStError": "грешка",
+  "bexioStDryRun": "проба"
 }

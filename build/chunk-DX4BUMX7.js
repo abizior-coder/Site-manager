@@ -1,4 +1,4 @@
-import"./chunk-6ATBPRIA.js";var r=`{
+import"./chunk-6ATBPRIA.js";var t=`{
   "appLabel": "Journal de chantier",
   "onSite": "Sur site",
   "navToday": "Aujourd'hui",
@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "a11yNextMonth": "Mois suivant",
   "a11yReorder": "D\xE9placer",
   "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien.",
-  "languageLabel": "Langue"
+  "languageLabel": "Langue",
+  "inviteDeleteConfirm": "Supprimer ce code ?",
+  "rosterToday": "Aujourd'hui :",
+  "plannerHintTouch": "Planifiez dans le calendrier. Touchez une case remplie pour la vider.",
+  "bexioErrAuth": "Session expir\xE9e \u2014 rechargez l'application et r\xE9essayez.",
+  "bexioErrNotConfigured": "bexio n'est pas encore configur\xE9 sur le serveur.",
+  "bexioErrOwnersOnly": "Seul le propri\xE9taire peut connecter bexio.",
+  "bexioErrTokenMissing": "Le jeton manque ou est trop court.",
+  "bexioErrTokenRefused": "bexio a refus\xE9 le jeton \u2014 cr\xE9ez-en un nouveau sur developer.bexio.com.",
+  "bexioErrNotConnected": "bexio n'est pas connect\xE9.",
+  "bexioErrTaxes": "Les taux de TVA n'ont pas pu \xEAtre lus depuis bexio.",
+  "bexioErrNoTax": "bexio n'a pas de taux actif pour cette TVA.",
+  "bexioErrNoCustomer": "La facture n'a pas de client.",
+  "bexioErrNetwork": "Pas de connexion au serveur.",
+  "bexioStCreated": "cr\xE9\xE9",
+  "bexioStExists": "d\xE9j\xE0 pr\xE9sent",
+  "bexioStError": "erreur",
+  "bexioStDryRun": "essai"
 }
-`;export{r as default};
+`;export{t as default};

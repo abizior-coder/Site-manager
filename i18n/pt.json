@@ -936,5 +936,22 @@
   "a11yNextMonth": "Mês seguinte",
   "a11yReorder": "Mover",
   "customerDeleteConfirm": "Eliminar o cliente? As obras ficam, sem a ligação.",
-  "languageLabel": "Idioma"
+  "languageLabel": "Idioma",
+  "inviteDeleteConfirm": "Eliminar este código?",
+  "rosterToday": "Hoje:",
+  "plannerHintTouch": "Planeie no calendário. Toque numa célula preenchida para a limpar.",
+  "bexioErrAuth": "Sessão expirada — recarregue a app e tente novamente.",
+  "bexioErrNotConfigured": "O bexio ainda não está configurado no servidor.",
+  "bexioErrOwnersOnly": "Só o proprietário pode ligar o bexio.",
+  "bexioErrTokenMissing": "O token está em falta ou é demasiado curto.",
+  "bexioErrTokenRefused": "O bexio recusou o token — crie um novo em developer.bexio.com.",
+  "bexioErrNotConnected": "O bexio não está ligado.",
+  "bexioErrTaxes": "Não foi possível ler as taxas de IVA do bexio.",
+  "bexioErrNoTax": "No bexio falta uma taxa ativa com este IVA.",
+  "bexioErrNoCustomer": "A fatura não tem cliente.",
+  "bexioErrNetwork": "Sem ligação ao servidor.",
+  "bexioStCreated": "criado",
+  "bexioStExists": "já existe",
+  "bexioStError": "erro",
+  "bexioStDryRun": "ensaio"
 }

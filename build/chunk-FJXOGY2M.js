@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "a11yNextMonth": "Luna urm\u0103toare",
   "a11yReorder": "Mut\u0103",
   "customerDeleteConfirm": "\u0218tergi clientul? Lucr\u0103rile r\u0103m\xE2n, f\u0103r\u0103 leg\u0103tur\u0103.",
-  "languageLabel": "Limba"
+  "languageLabel": "Limba",
+  "inviteDeleteConfirm": "\u0218tergi acest cod?",
+  "rosterToday": "Azi:",
+  "plannerHintTouch": "Planific\u0103 \xEEn calendar. Atinge o celul\u0103 ocupat\u0103 pentru a o goli.",
+  "bexioErrAuth": "Sesiune expirat\u0103 \u2014 re\xEEncarc\u0103 aplica\u021Bia \u0219i \xEEncearc\u0103 din nou.",
+  "bexioErrNotConfigured": "bexio nu este \xEEnc\u0103 configurat pe server.",
+  "bexioErrOwnersOnly": "Doar proprietarul poate conecta bexio.",
+  "bexioErrTokenMissing": "Tokenul lipse\u0219te sau este prea scurt.",
+  "bexioErrTokenRefused": "bexio a refuzat tokenul \u2014 creeaz\u0103 unul nou pe developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nu este conectat.",
+  "bexioErrTaxes": "Cotele de TVA nu au putut fi citite din bexio.",
+  "bexioErrNoTax": "\xCEn bexio lipse\u0219te o cot\u0103 activ\u0103 cu acest TVA.",
+  "bexioErrNoCustomer": "Factura nu are client.",
+  "bexioErrNetwork": "Nu exist\u0103 conexiune cu serverul.",
+  "bexioStCreated": "creat",
+  "bexioStExists": "exist\u0103 deja",
+  "bexioStError": "eroare",
+  "bexioStDryRun": "prob\u0103"
 }
 `;export{i as default};

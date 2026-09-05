@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "a11yNextMonth": "N\xE1sleduj\xEDc\xED m\u011Bs\xEDc",
   "a11yReorder": "P\u0159esunout",
   "customerDeleteConfirm": "Smazat z\xE1kazn\xEDka? Zak\xE1zky z\u016Fstanou, bez propojen\xED.",
-  "languageLabel": "Jazyk"
+  "languageLabel": "Jazyk",
+  "inviteDeleteConfirm": "Smazat tento k\xF3d?",
+  "rosterToday": "Dnes:",
+  "plannerHintTouch": "Pl\xE1nujte v kalend\xE1\u0159i. Klepnut\xEDm na obsazen\xE9 pole ho vypr\xE1zdn\xEDte.",
+  "bexioErrAuth": "P\u0159ihl\xE1\u0161en\xED vypr\u0161elo \u2014 na\u010Dti aplikaci znovu a zkus to znovu.",
+  "bexioErrNotConfigured": "bexio je\u0161t\u011B nen\xED na serveru nastaveno.",
+  "bexioErrOwnersOnly": "Jen majitel m\u016F\u017Ee p\u0159ipojit bexio.",
+  "bexioErrTokenMissing": "Token chyb\xED nebo je p\u0159\xEDli\u0161 kr\xE1tk\xFD.",
+  "bexioErrTokenRefused": "bexio token odm\xEDtlo \u2014 vytvo\u0159 nov\xFD na developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nen\xED p\u0159ipojeno.",
+  "bexioErrTaxes": "Sazby DPH se z bexio nepoda\u0159ilo na\u010D\xEDst.",
+  "bexioErrNoTax": "V bexio chyb\xED aktivn\xED sazba s touto DPH.",
+  "bexioErrNoCustomer": "Faktura nem\xE1 z\xE1kazn\xEDka.",
+  "bexioErrNetwork": "\u017D\xE1dn\xE9 spojen\xED se serverem.",
+  "bexioStCreated": "vytvo\u0159eno",
+  "bexioStExists": "u\u017E existuje",
+  "bexioStError": "chyba",
+  "bexioStDryRun": "zkou\u0161ka"
 }
 `;export{t as default};

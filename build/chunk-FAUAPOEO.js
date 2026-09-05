@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "Mes siguiente",
   "a11yReorder": "Mover",
   "customerDeleteConfirm": "\xBFEliminar el cliente? Los trabajos se conservan, sin el v\xEDnculo.",
-  "languageLabel": "Idioma"
+  "languageLabel": "Idioma",
+  "inviteDeleteConfirm": "\xBFEliminar este c\xF3digo?",
+  "rosterToday": "Hoy:",
+  "plannerHintTouch": "Planifica en el calendario. Toca una celda llena para vaciarla.",
+  "bexioErrAuth": "Sesi\xF3n caducada \u2014 recarga la app e int\xE9ntalo de nuevo.",
+  "bexioErrNotConfigured": "bexio a\xFAn no est\xE1 configurado en el servidor.",
+  "bexioErrOwnersOnly": "Solo el propietario puede conectar bexio.",
+  "bexioErrTokenMissing": "Falta el token o es demasiado corto.",
+  "bexioErrTokenRefused": "bexio rechaz\xF3 el token \u2014 crea uno nuevo en developer.bexio.com.",
+  "bexioErrNotConnected": "bexio no est\xE1 conectado.",
+  "bexioErrTaxes": "No se pudieron leer los tipos de IVA de bexio.",
+  "bexioErrNoTax": "En bexio falta un tipo activo con este IVA.",
+  "bexioErrNoCustomer": "La factura no tiene cliente.",
+  "bexioErrNetwork": "Sin conexi\xF3n con el servidor.",
+  "bexioStCreated": "creado",
+  "bexioStExists": "ya existe",
+  "bexioStError": "fallo",
+  "bexioStDryRun": "prueba"
 }
 `;export{o as default};

@@ -936,5 +936,22 @@
   "a11yNextMonth": "Nächster Monat",
   "a11yReorder": "Verschieben",
   "customerDeleteConfirm": "Kunde löschen? Die Aufträge bleiben, ohne Verknüpfung.",
-  "languageLabel": "Sprache"
+  "languageLabel": "Sprache",
+  "inviteDeleteConfirm": "Code löschen?",
+  "rosterToday": "Heute:",
+  "plannerHintTouch": "Einteilen im Kalender. Auf ein belegtes Feld tippen, um es zu leeren.",
+  "bexioErrAuth": "Anmeldung abgelaufen — App neu laden und erneut versuchen.",
+  "bexioErrNotConfigured": "bexio ist auf dem Server noch nicht eingerichtet.",
+  "bexioErrOwnersOnly": "Nur der Inhaber kann bexio verbinden.",
+  "bexioErrTokenMissing": "Token fehlt oder ist zu kurz.",
+  "bexioErrTokenRefused": "bexio hat den Token abgelehnt — auf developer.bexio.com einen neuen erstellen.",
+  "bexioErrNotConnected": "bexio ist nicht verbunden.",
+  "bexioErrTaxes": "Die Steuersätze konnten nicht aus bexio gelesen werden.",
+  "bexioErrNoTax": "In bexio fehlt ein aktiver Steuersatz mit diesem MWST-Satz.",
+  "bexioErrNoCustomer": "Die Rechnung hat keinen Kunden.",
+  "bexioErrNetwork": "Keine Verbindung zum Server.",
+  "bexioStCreated": "angelegt",
+  "bexioStExists": "bereits vorhanden",
+  "bexioStError": "Fehler",
+  "bexioStDryRun": "Probelauf"
 }

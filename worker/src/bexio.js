@@ -153,13 +153,15 @@ export async function handleBexio({ request, env, headers, verify, isMember, fet
   const [, cid, action] = parts;
   if (!SAFE_SEGMENT.test(cid)) return json({ error: "bad id" }, 400, headers);
   const kv = env.RATE_LIMIT;
-  if (!kv) return json({ error: "storage is not configured" }, 503, headers);
-  if (!env.BEXIO_TOKEN_KEY) return json({ error: "bexio is not configured: BEXIO_TOKEN_KEY missing" }, 503, headers);
+  if (!kv) return json({ error: "storage is not configured", code: "not_configured" }, 503, headers);
+  if (!env.BEXIO_TOKEN_KEY)
+    return json({ error: "bexio is not configured: BEXIO_TOKEN_KEY missing", code: "not_configured" }, 503, headers);
 
   const auth = await verify(request);
-  if (!auth.ok) return json({ error: auth.error }, auth.status, headers);
+  if (!auth.ok) return json({ error: auth.error, code: auth.code || "auth_invalid" }, auth.status, headers);
   const membership = await isMember(cid, auth.uid, auth.token);
-  if (!membership.member || membership.role !== "owner") return json({ error: "owners only" }, 403, headers);
+  if (!membership.member || membership.role !== "owner")
+    return json({ error: "owners only", code: "owners_only" }, 403, headers);
 
   const stored = JSON.parse((await kv.get(kvKey(cid))) || "null");
 
@@ -171,10 +173,10 @@ export async function handleBexio({ request, env, headers, verify, isMember, fet
       return json({ error: "invalid JSON body" }, 400, headers);
     }
     const token = String((body && body.token) || "").trim();
-    if (token.length < 20) return json({ error: "token missing" }, 400, headers);
+    if (token.length < 20) return json({ error: "token missing", code: "token_missing" }, 400, headers);
     const me = await bx(fetchImpl, token, "GET", "/3.0/users/me");
     if (!me.ok || !me.data || !me.data.id)
-      return json({ error: `bexio refused the token: ${errText(me)}` }, 401, headers);
+      return json({ error: `bexio refused the token: ${errText(me)}`, code: "token_refused" }, 401, headers);
     const sealed = await encryptToken(env.BEXIO_TOKEN_KEY, token);
     const record = {
       ...sealed,
@@ -193,7 +195,7 @@ export async function handleBexio({ request, env, headers, verify, isMember, fet
     return json(stored ? statusOf(stored, now) : { connected: false }, 200, headers);
   }
   if (action === "push" && request.method === "POST") {
-    if (!stored) return json({ error: "not connected" }, 409, headers);
+    if (!stored) return json({ error: "not connected", code: "not_connected" }, 409, headers);
     let body;
     try {
       body = await request.json();
@@ -208,11 +210,12 @@ export async function handleBexio({ request, env, headers, verify, isMember, fet
     for (const c of (body.contacts || []).slice(0, 200)) {
       const r = await pushContact({ fetchImpl, token, kv, cid, customer: c, userId: stored.userId, dryRun });
       results.contacts.push(r);
-      if (r.status === "error" && r.auth) return json({ error: "bexio refused the token", results }, 401, headers);
+      if (r.status === "error" && r.auth)
+        return json({ error: "bexio refused the token", code: "token_refused", results }, 401, headers);
     }
     if ((body.invoices || []).length) {
       const taxes = dryRun ? { ok: true, data: [] } : await bx(fetchImpl, token, "GET", "/3.0/taxes?scope=active");
-      if (!taxes.ok) return json({ error: `taxes: ${errText(taxes)}`, results }, 502, headers);
+      if (!taxes.ok) return json({ error: `taxes: ${errText(taxes)}`, code: "taxes", results }, 502, headers);
       for (const inv of body.invoices.slice(0, 100)) {
         const customer = (body.contacts || []).find((c) => c.id === inv.customerId) || inv.customer || null;
         const r = await pushInvoice({
@@ -294,6 +297,7 @@ async function pushInvoice({ fetchImpl, token, kv, cid, doc, customer, userId, t
       number: doc.number,
       status: "error",
       error: `no active sales tax with ${doc.vatRate}% in bexio`,
+      code: "no_tax",
     };
   const known = await kv.get(mapKey(cid, "invoice", doc.id));
   if (known) return { id: doc.id, number: doc.number, bexioId: Number(known), status: "exists" };
@@ -312,7 +316,14 @@ async function pushInvoice({ fetchImpl, token, kv, cid, doc, customer, userId, t
     if (r.status === "error") return { id: doc.id, number: doc.number, status: "error", error: `contact: ${r.error}` };
     contactId = r.bexioId;
   }
-  if (!contactId) return { id: doc.id, number: doc.number, status: "error", error: "no customer on the invoice" };
+  if (!contactId)
+    return {
+      id: doc.id,
+      number: doc.number,
+      status: "error",
+      code: "no_customer",
+      error: "no customer on the invoice",
+    };
   const created = await bx(
     fetchImpl,
     token,

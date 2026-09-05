@@ -3,8 +3,12 @@
 import { todayKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { Camera, ChevronLeft, ChevronRight, ClipboardCheck, Clock, Hammer, Package, Wrench } from "lucide-react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import { DEFAULT_PROJECT_STATUS, projectColour, statusMeta } from "../roofing-site-manager.jsx";
+
+// The week grid's pinned name column and the gap after it (gap-1.5).
+const PIN_W = 140;
+const PIN_GAP = 6;
 
 export function BoardTab({
   assignments,
@@ -47,6 +51,14 @@ export function BoardTab({
     cs: "cs-CZ",
   };
   const locale = localeMap[lang] || "en-US";
+  // On a phone the week is wider than the screen: it opens on today's column
+  // (the name column stays pinned), not on Monday.
+  const weekScroll = useRef(null);
+  useEffect(() => {
+    const box = weekScroll.current;
+    const today = box && box.querySelector("[data-woche-today]");
+    if (today) box.scrollLeft = Math.max(0, today.offsetLeft - PIN_W - PIN_GAP);
+  }, [boardView, weekAnchor]);
   const year = calMonth.getFullYear();
   const month = calMonth.getMonth();
   const pad = (n) => String(n).padStart(2, "0");
@@ -144,6 +156,7 @@ export function BoardTab({
         (() => {
           const days = weekDays(weekAnchor);
           const dayName = (js) => js.toLocaleDateString(locale, { weekday: "short" });
+          const pinned = { background: COLORS.card, boxShadow: `${PIN_GAP}px 0 0 ${COLORS.card}` };
           const crew = team.members;
           const assignable = showFinishedJobs
             ? projects
@@ -196,10 +209,19 @@ export function BoardTab({
                 </div>
               </div>
 
-              <div style={{ color: COLORS.muted }} className="text-xs mb-2">
+              {/* Drag needs a pointer that hovers; on touch the hint sends
+              people to the Kalender and the drag strip stays out of the way. */}
+              <div data-woche-hint style={{ color: COLORS.muted }} className="text-xs mb-2 [@media(hover:none)]:hidden">
                 {t.plannerHint}
               </div>
-              <div className="flex flex-wrap gap-1.5 mb-4">
+              <div
+                data-woche-hint-touch
+                style={{ color: COLORS.muted }}
+                className="text-xs mb-2 hidden [@media(hover:none)]:block"
+              >
+                {t.plannerHintTouch}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-4 [@media(hover:none)]:hidden">
                 {assignable.map((pr) => (
                   <div
                     key={pr.id}
@@ -223,13 +245,14 @@ export function BoardTab({
                 )}
               </div>
 
-              <div className="overflow-x-auto">
+              <div ref={weekScroll} data-woche className="overflow-x-auto relative">
                 <div style={{ minWidth: "760px" }}>
-                  <div className="grid gap-1.5" style={{ gridTemplateColumns: "140px repeat(7, 1fr)" }}>
-                    <div />
+                  <div className="grid gap-1.5" style={{ gridTemplateColumns: `${PIN_W}px repeat(7, 1fr)` }}>
+                    <div style={pinned} className="sticky left-0 z-10" />
                     {days.map((d) => (
                       <div
                         key={d.date}
+                        data-woche-today={d.date === todayKey() ? "" : undefined}
                         style={{ color: d.date === todayKey() ? COLORS.accentText : COLORS.muted }}
                         className="text-center text-xs font-bold uppercase pb-1"
                       >
@@ -246,8 +269,8 @@ export function BoardTab({
                     {crew.map((m) => (
                       <Fragment key={m.uid}>
                         <div
-                          style={{ background: COLORS.cardAlt }}
-                          className="rounded-lg px-2.5 py-2 text-xs font-semibold truncate flex items-center"
+                          style={{ ...pinned, background: COLORS.cardAlt }}
+                          className="sticky left-0 z-10 rounded-lg px-2.5 py-2 text-xs font-semibold truncate flex items-center"
                         >
                           {m.name || m.email || m.uid}
                         </div>

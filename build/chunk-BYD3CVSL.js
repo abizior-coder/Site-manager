@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yNextMonth": "Next month",
   "a11yReorder": "Reorder",
   "customerDeleteConfirm": "Delete this customer? The jobs stay, unlinked.",
-  "languageLabel": "Language"
+  "languageLabel": "Language",
+  "inviteDeleteConfirm": "Delete this code?",
+  "rosterToday": "Today:",
+  "plannerHintTouch": "Plan in the calendar. Tap a filled cell to clear it.",
+  "bexioErrAuth": "Sign-in expired \u2014 reload the app and try again.",
+  "bexioErrNotConfigured": "bexio is not set up on the server yet.",
+  "bexioErrOwnersOnly": "Only the owner can connect bexio.",
+  "bexioErrTokenMissing": "The token is missing or too short.",
+  "bexioErrTokenRefused": "bexio refused the token \u2014 create a new one on developer.bexio.com.",
+  "bexioErrNotConnected": "bexio is not connected.",
+  "bexioErrTaxes": "The tax rates could not be read from bexio.",
+  "bexioErrNoTax": "bexio has no active tax with this VAT rate.",
+  "bexioErrNoCustomer": "The invoice has no customer.",
+  "bexioErrNetwork": "No connection to the server.",
+  "bexioStCreated": "created",
+  "bexioStExists": "already there",
+  "bexioStError": "error",
+  "bexioStDryRun": "dry run"
 }
 `;export{o as default};

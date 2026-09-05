@@ -936,5 +936,22 @@
   "a11yNextMonth": "Következő hónap",
   "a11yReorder": "Áthelyezés",
   "customerDeleteConfirm": "Törlöd az ügyfelet? A munkák megmaradnak, kapcsolat nélkül.",
-  "languageLabel": "Nyelv"
+  "languageLabel": "Nyelv",
+  "inviteDeleteConfirm": "Törlöd ezt a kódot?",
+  "rosterToday": "Ma:",
+  "plannerHintTouch": "Tervezz a naptárban. Koppints egy foglalt cellára a törléshez.",
+  "bexioErrAuth": "A bejelentkezés lejárt — töltsd újra az alkalmazást és próbáld újra.",
+  "bexioErrNotConfigured": "A bexio még nincs beállítva a szerveren.",
+  "bexioErrOwnersOnly": "Csak a tulajdonos kapcsolhatja össze a bexiót.",
+  "bexioErrTokenMissing": "A token hiányzik vagy túl rövid.",
+  "bexioErrTokenRefused": "A bexio elutasította a tokent — készíts újat a developer.bexio.com oldalon.",
+  "bexioErrNotConnected": "A bexio nincs összekapcsolva.",
+  "bexioErrTaxes": "Az áfakulcsokat nem sikerült beolvasni a bexióból.",
+  "bexioErrNoTax": "A bexióban nincs aktív kulcs ezzel az áfával.",
+  "bexioErrNoCustomer": "A számlának nincs ügyfele.",
+  "bexioErrNetwork": "Nincs kapcsolat a szerverrel.",
+  "bexioStCreated": "létrehozva",
+  "bexioStExists": "már létezik",
+  "bexioStError": "hiba",
+  "bexioStDryRun": "próba"
 }

@@ -695,6 +695,16 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       true,
     );
   }
+  // UI audit pass 3: the invite-code confirm, the roster's «Heute:» prefix and
+  // the touch hint on Board › Woche exist in every language and none of them
+  // is the English text under another flag.
+  for (const key of ["inviteDeleteConfirm", "rosterToday", "plannerHintTouch"]) {
+    const gaps = files.filter((f) => {
+      const d = JSON.parse(readFileSync(`i18n/${f}`, "utf8"));
+      return !d[key] || d[key] === en[key];
+    });
+    t(`${key} is translated in every language`, gaps.join(","), "");
+  }
 }
 
 {

@@ -1106,7 +1106,8 @@ async function renderAs(role) {
         i.type !== "file" &&
         !i.getAttribute("aria-label") &&
         !i.getAttribute("aria-labelledby") &&
-        !i.id,
+        !i.id &&
+        !(i.labels && i.labels.length),
     );
     check(
       "owner: every rendered input has a label",
@@ -1327,6 +1328,14 @@ async function renderAs(role) {
         [...(topDialog()?.querySelectorAll("button") || [])].find((b) => (b.textContent || "").trim() === "Bearbeiten"),
       );
       await wait(300);
+      {
+        const fields = [...(topDialog()?.querySelectorAll("input, textarea") || [])];
+        check(
+          "owner: the customer form shows a visible label above every field, no placeholder-as-label",
+          fields.length >= 6 && fields.every((f) => f.labels && f.labels.length === 1 && !f.placeholder),
+          fields.map((f) => `${f.tagName}:${f.labels?.length}:${f.placeholder}`).join(",") || "no dialog",
+        );
+      }
       click(window.document.querySelector("[data-customer-delete]"));
       await wait(300);
       const confirm = window.document.querySelector("[data-customer-delete-confirm]");
@@ -1355,6 +1364,14 @@ async function renderAs(role) {
     // Team: the invite row's icons are boxes, not overlapping hit areas.
     click(tabByName("TEAM"));
     await wait(300);
+    {
+      const today = window.document.querySelector("[data-roster-today]");
+      check(
+        "owner: the roster labels today's assignment «Heute:» (not the job's crew list)",
+        !!today && (today.textContent || "").startsWith("Heute:"),
+        today ? today.textContent : "no [data-roster-today]",
+      );
+    }
     click(buttonByText("Einladen"));
     await wait(400);
     {
@@ -1364,12 +1381,40 @@ async function renderAs(role) {
         !!share && share.classList.contains("w-9") && !share.classList.contains("tap"),
         share ? share.className : "no invite row",
       );
+      click(window.document.querySelector("[data-invite-delete]"));
+      await wait(300);
+      check(
+        "owner: the first tap on an invite code's Löschen asks instead of deleting",
+        !!window.document.querySelector("[data-invite-delete-confirm]") && text().includes("ABCD2345"),
+        window.document.querySelector("[data-invite-delete-confirm]") ? "code gone" : "no confirm row",
+      );
+      click(window.document.querySelector("[data-invite-delete-yes]"));
+      await wait(300);
+      check("owner: the second tap deletes the invite code", !text().includes("ABCD2345"), "code still listed");
     }
     await closeTop();
 
     // Board › Monat: dots on a phone.
     click(tabByName("BOARD"));
     await wait(700);
+    {
+      const week = window.document.querySelector("[data-woche]");
+      const hint = window.document.querySelector("[data-woche-hint]");
+      const touch = window.document.querySelector("[data-woche-hint-touch]");
+      check(
+        "owner: Board › Woche marks today's column and pins the name column",
+        !!week && !!week.querySelector("[data-woche-today]") && !!week.querySelector(".sticky.left-0"),
+        week ? "no [data-woche-today] or no pinned cell" : "no [data-woche]",
+      );
+      check(
+        "owner: Board › Woche swaps the drag hint for a touch hint under (hover: none)",
+        !!hint &&
+          hint.className.includes("[@media(hover:none)]:hidden") &&
+          !!touch &&
+          touch.className.includes("[@media(hover:none)]:block"),
+        `${hint && hint.className} / ${touch && touch.className}`,
+      );
+    }
     click(buttonByText("Monat"));
     await wait(400);
     check(

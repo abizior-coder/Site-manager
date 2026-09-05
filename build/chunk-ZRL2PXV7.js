@@ -936,6 +936,23 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "a11yNextMonth": "Muaji tjet\xEBr",
   "a11yReorder": "Zhvendos",
   "customerDeleteConfirm": "T\xEB fshihet klienti? Punishtet mbeten, pa lidhje.",
-  "languageLabel": "Gjuha"
+  "languageLabel": "Gjuha",
+  "inviteDeleteConfirm": "Ta fshij k\xEBt\xEB kod?",
+  "rosterToday": "Sot:",
+  "plannerHintTouch": "Planifiko n\xEB kalendar. Prek nj\xEB kuti t\xEB mbushur p\xEBr ta zbrazur.",
+  "bexioErrAuth": "Hyrja ka skaduar \u2014 ringarko aplikacionin dhe provo p\xEBrs\xEBri.",
+  "bexioErrNotConfigured": "bexio nuk \xEBsht\xEB konfiguruar ende n\xEB server.",
+  "bexioErrOwnersOnly": "Vet\xEBm pronari mund t\xEB lidh\xEB bexio.",
+  "bexioErrTokenMissing": "Tokeni mungon ose \xEBsht\xEB shum\xEB i shkurt\xEBr.",
+  "bexioErrTokenRefused": "bexio e refuzoi tokenin \u2014 krijo nj\xEB t\xEB ri n\xEB developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nuk \xEBsht\xEB i lidhur.",
+  "bexioErrTaxes": "Normat e TVSH-s\xEB nuk u lexuan nga bexio.",
+  "bexioErrNoTax": "N\xEB bexio mungon nj\xEB norm\xEB aktive me k\xEBt\xEB TVSH.",
+  "bexioErrNoCustomer": "Fatura nuk ka klient.",
+  "bexioErrNetwork": "Nuk ka lidhje me serverin.",
+  "bexioStCreated": "u krijua",
+  "bexioStExists": "ekziston tashm\xEB",
+  "bexioStError": "gabim",
+  "bexioStDryRun": "prov\xEB"
 }
 `;export{r as default};

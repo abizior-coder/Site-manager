@@ -19,6 +19,34 @@ is added, moved or changes its job.
 - **Lesson:** never trust the working copy's line endings after a git
   checkout/stash on Windows; the attributes file now makes that moot.
 
+## 2026-09-06 — UI audit pass 3 fixes; bexio card in the reader's language
+
+- **Why:** the two-role gate for the language picker commit (audit after
+  the fact), the open pass-2 findings 19/23/24/25, and finding 26 (English
+  Worker text under every flag). Maintenance for the owner's own use; no
+  new product work (see the competitor research entry below).
+- **Interface engineer (subagent), `docs/ui-audit-2026-09-06-pass3.md`:**
+  picker 47 px with a visible focus ring and dark native list; `tap` on
+  the onboarding mode switch and both Datenschutz links; invite delete
+  two-step (`[data-invite-delete]`, `[data-invite-delete-yes]`, key
+  `inviteDeleteConfirm`); roster «Heute:» group (`[data-roster-today]`,
+  key `rosterToday`); Board › Woche on phone: pinned name column, today
+  scrolled into view, touch hint instead of the drag hint (key
+  `plannerHintTouch`); `Field` helper gives Kunden, Kontakt and Profil
+  fields visible labels (no placeholder-as-label). Open: app-wide input
+  focus ring (`outline-none` everywhere) → spec; sign-in labels → product;
+  crew seeing Bearbeiten on a customer → permissions decision.
+- **Software engineer:** Worker refusals carry a stable `code`
+  (`worker/src/index.js` verify, `worker/src/bexio.js`; 6 tests, 29
+  green; Worker 7db33cac live); `BexioCard` maps codes and push statuses
+  to `bexioErr*`/`bexioSt*` keys (14 new keys × 14 files); network
+  failure → `bexioErrNetwork`; bexio's own detail stays after the
+  sentence.
+- **Tests:** render 156, logic 308 (+ key guards), order 11, dock 21,
+  worker 30+6, e2e 3. First paint 357 919 bytes (481 under budget).
+  Emulator: Worker answers 401 `auth_invalid` for emulator tokens and the
+  card shows the German sentence instead of the English one.
+
 ## 2026-09-06 — Swiss competitor research (correction of 2026-09-04)
 
 - **Why:** the owner pointed out that the 2026-09-04 research covered

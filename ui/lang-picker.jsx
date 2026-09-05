@@ -1,5 +1,7 @@
 // The language picker shown before anyone is signed in: a crew member's own
-// choice, in a native select with an accessible name.
+// choice, in a native select with an accessible name. The select is as tall
+// as the inputs above it (a 44 px target), keeps the base focus ring (no
+// `outline-none`) and opens a dark native list on the desktop.
 import { Globe } from "lucide-react";
 import { LANGS } from "../i18n/index.js";
 import { COLORS } from "./theme.js";
@@ -14,8 +16,13 @@ export function AuthLangPicker({ lang, onChange, label }) {
         aria-label={label}
         value={lang}
         onChange={(e) => onChange(e.target.value)}
-        style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-        className="flex-1 rounded-lg px-2 py-2 text-sm outline-none"
+        style={{
+          background: COLORS.card,
+          border: `1px solid ${COLORS.border}`,
+          color: COLORS.text,
+          colorScheme: "dark",
+        }}
+        className="flex-1 min-w-0 rounded-lg px-2 py-3 text-sm"
       >
         {LANGS.map((l) => (
           <option key={l.code} value={l.code}>

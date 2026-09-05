@@ -756,6 +756,7 @@ export default function SiteManager() {
   });
   const [customerForm, setCustomerForm] = useState(null);
   const [customerDeleteAsk, setCustomerDeleteAsk] = useState(false); // the two-step Löschen in the form
+  const [inviteDeleteAsk, setInviteDeleteAsk] = useState(null); // the invite code whose Löschen is asking
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [contactForm, setContactForm] = useState(null);
@@ -1458,6 +1459,7 @@ export default function SiteManager() {
 
   async function openTeam() {
     setTeamModalOpen(true);
+    setInviteDeleteAsk(null);
     setTeam((s) => ({ ...s, busy: true }));
     try {
       const [all, invites] = await Promise.all([listMembers(), listInvites()]);
@@ -1540,6 +1542,7 @@ export default function SiteManager() {
     try {
       await revokeInvite(code);
       setTeam((s) => ({ ...s, invites: s.invites.filter((i) => i.code !== code) }));
+      setInviteDeleteAsk(null);
     } catch (e) {
       saveFailed(e, "dropInvite");
     }
@@ -5415,7 +5418,7 @@ export default function SiteManager() {
               target="_blank"
               rel="noopener"
               style={{ color: COLORS.amber }}
-              className="underline"
+              className="tap underline"
             >
               {t.privacyLink}
             </a>
@@ -5501,7 +5504,7 @@ export default function SiteManager() {
           <button
             onClick={() => setOnboarding((s) => ({ ...s, mode: s.mode === "join" ? "choose" : "join", error: null }))}
             style={{ color: COLORS.accentText }}
-            className="w-full mt-4 text-xs font-bold"
+            className="tap w-full mt-4 text-xs font-bold"
           >
             {onboarding.mode === "join" ? t.onbSwitchCreate : t.onbSwitchJoin}
           </button>
@@ -5516,7 +5519,7 @@ export default function SiteManager() {
             target="_blank"
             rel="noopener"
             style={{ color: COLORS.muted }}
-            className="block w-full mt-3 text-center text-xs underline"
+            className="tap block w-full mt-3 text-center text-xs underline"
           >
             {t.privacyLink}
           </a>
@@ -6914,7 +6917,13 @@ export default function SiteManager() {
                               </div>
                             </div>
                             {todayProjects.length > 0 && (
-                              <span className="shrink-0 flex flex-wrap justify-end gap-1 max-w-[50%]">
+                              <span
+                                data-roster-today
+                                className="shrink-0 flex flex-wrap items-center justify-end gap-1 max-w-[50%]"
+                              >
+                                <span style={{ color: COLORS.muted }} className="text-xs">
+                                  {t.rosterToday}
+                                </span>
                                 {todayProjects.map((tp) => (
                                   <span
                                     key={tp.id}
@@ -8307,52 +8316,76 @@ export default function SiteManager() {
                     {t.teamExpires} {fmtDate(todayKey(new Date(i.expiresAt)), lang)}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    className="w-9 h-9 rounded-lg flex items-center justify-center"
-                    aria-label={t.a11yShare}
-                    data-invite-share
-                    onClick={() => shareInvite(i.code)}
-                    title={t.inviteShare}
-                    style={{ color: COLORS.accentText }}
-                  >
-                    <Share2 size={16} />
-                  </button>
-                  <button
-                    className="w-9 h-9 rounded-lg flex items-center justify-center"
-                    aria-label={t.a11yCopyLink}
-                    data-invite-link
-                    onClick={() => {
-                      navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href));
-                      showToast(t.inviteLinkCopy);
-                    }}
-                    title={t.inviteLinkCopy}
-                    style={{ color: COLORS.muted }}
-                  >
-                    <Link2 size={16} />
-                  </button>
-                  <button
-                    className="w-9 h-9 rounded-lg flex items-center justify-center"
-                    aria-label={t.copyBtn}
-                    onClick={() => {
-                      navigator.clipboard?.writeText(i.code);
-                      showToast(t.copyBtn);
-                    }}
-                    title={t.copyBtn}
-                    style={{ color: COLORS.muted }}
-                  >
-                    <Copy size={16} />
-                  </button>
-                  <button
-                    className="w-9 h-9 rounded-lg flex items-center justify-center"
-                    aria-label={t.a11yDelete}
-                    title={t.a11yDelete}
-                    onClick={() => dropInvite(i.code)}
-                    style={{ color: COLORS.dangerText }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                {inviteDeleteAsk === i.code ? (
+                  <span data-invite-delete-confirm className="flex flex-wrap items-center justify-end gap-1">
+                    <span style={{ color: COLORS.dangerText }} className="text-xs font-bold">
+                      {t.inviteDeleteConfirm}
+                    </span>
+                    <button
+                      data-invite-delete-yes
+                      onClick={() => dropInvite(i.code)}
+                      style={{ background: COLORS.danger }}
+                      className="px-2.5 py-1.5 rounded text-xs font-bold uppercase"
+                    >
+                      {t.deleteLabel}
+                    </button>
+                    <button
+                      onClick={() => setInviteDeleteAsk(null)}
+                      style={{ color: COLORS.muted }}
+                      className="tap px-2 py-1.5 text-xs font-bold uppercase"
+                    >
+                      {t.back}
+                    </button>
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      aria-label={t.a11yShare}
+                      data-invite-share
+                      onClick={() => shareInvite(i.code)}
+                      title={t.inviteShare}
+                      style={{ color: COLORS.accentText }}
+                    >
+                      <Share2 size={16} />
+                    </button>
+                    <button
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      aria-label={t.a11yCopyLink}
+                      data-invite-link
+                      onClick={() => {
+                        navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href));
+                        showToast(t.inviteLinkCopy);
+                      }}
+                      title={t.inviteLinkCopy}
+                      style={{ color: COLORS.muted }}
+                    >
+                      <Link2 size={16} />
+                    </button>
+                    <button
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      aria-label={t.copyBtn}
+                      onClick={() => {
+                        navigator.clipboard?.writeText(i.code);
+                        showToast(t.copyBtn);
+                      }}
+                      title={t.copyBtn}
+                      style={{ color: COLORS.muted }}
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      aria-label={t.a11yDelete}
+                      title={t.a11yDelete}
+                      data-invite-delete
+                      onClick={() => setInviteDeleteAsk(i.code)}
+                      style={{ color: COLORS.dangerText }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
             {team.invites.length === 0 && (
@@ -8614,26 +8647,25 @@ export default function SiteManager() {
             ["email", t.emailLabel],
             ["address", t.addressLabel],
           ].map(([field, label]) => (
-            <input
-              aria-label={label}
-              key={field}
-              value={customerForm[field] || ""}
-              onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
-              placeholder={label}
-              type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
-            />
+            <Field key={field} label={label}>
+              <input
+                value={customerForm[field] || ""}
+                onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
+                type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+              />
+            </Field>
           ))}
-          <textarea
-            aria-label={t.notesLabel}
-            value={customerForm.notes || ""}
-            onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
-            placeholder={t.notesLabel}
-            rows={3}
-            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
-          />
+          <Field label={t.notesLabel}>
+            <textarea
+              value={customerForm.notes || ""}
+              onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
+              rows={3}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+            />
+          </Field>
           <button
             onClick={submitCustomer}
             style={{ background: COLORS.accent }}
@@ -8698,26 +8730,25 @@ export default function SiteManager() {
               );
             })}
           </div>
-          <textarea
-            aria-label={t.contactNotePlaceholder}
-            value={contactForm.note}
-            onChange={(e) => setContactForm((s) => ({ ...s, note: e.target.value }))}
-            placeholder={t.contactNotePlaceholder}
-            rows={4}
-            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
-          />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
-            {t.followUpLabel}
-          </div>
-          <input
-            aria-label={t.followUpLabel}
-            type="date"
-            value={contactForm.followUp}
-            onChange={(e) => setContactForm((s) => ({ ...s, followUp: e.target.value }))}
-            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none"
-          />
+          <Field label={t.notesLabel}>
+            <textarea
+              value={contactForm.note}
+              onChange={(e) => setContactForm((s) => ({ ...s, note: e.target.value }))}
+              placeholder={t.contactNotePlaceholder}
+              rows={4}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+            />
+          </Field>
+          <Field label={t.followUpLabel}>
+            <input
+              type="date"
+              value={contactForm.followUp}
+              onChange={(e) => setContactForm((s) => ({ ...s, followUp: e.target.value }))}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none"
+            />
+          </Field>
           <button
             onClick={submitContact}
             style={{ background: COLORS.accent }}
@@ -8751,82 +8782,82 @@ export default function SiteManager() {
       {profileModalOpen && profileDraft && (
         <Modal t={t} onClose={() => setProfileModalOpen(false)} title={t.profileTitle}>
           <div className="flex flex-col gap-2">
-            <input
-              aria-label={t.yourName}
-              value={profileDraft.name}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))}
-              placeholder={t.yourName}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
-            <input
-              aria-label={t.yourPhone}
-              value={profileDraft.phone}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))}
-              placeholder={t.yourPhone}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
+            <Field label={t.yourName}>
+              <input
+                value={profileDraft.name}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
+            <Field label={t.yourPhone}>
+              <input
+                value={profileDraft.phone}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
             <div
               style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
               className="text-xs uppercase tracking-wide mt-2 pt-3"
             >
               {t.emergencyContact}
             </div>
-            <input
-              aria-label={t.contactName}
-              value={profileDraft.contactName}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))}
-              placeholder={t.contactName}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
-            <input
-              aria-label={t.contactRelationship}
-              value={profileDraft.contactRelationship}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))}
-              placeholder={t.contactRelationship}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
-            <input
-              aria-label={t.contactPhone}
-              value={profileDraft.contactPhone}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))}
-              placeholder={t.contactPhone}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
+            <Field label={t.contactName}>
+              <input
+                value={profileDraft.contactName}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
+            <Field label={t.contactRelationship}>
+              <input
+                value={profileDraft.contactRelationship}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
+            <Field label={t.contactPhone}>
+              <input
+                value={profileDraft.contactPhone}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
             <div
               style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
               className="text-xs uppercase tracking-wide mt-2 pt-3"
             >
               {t.supervisorContactHeading}
             </div>
-            <input
-              aria-label={t.supervisorNameLabel}
-              value={profileDraft.supervisorName}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))}
-              placeholder={t.supervisorNameLabel}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
-            <input
-              aria-label={t.supervisorEmailLabel}
-              value={profileDraft.supervisorEmail}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))}
-              placeholder={t.supervisorEmailLabel}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
-            <input
-              aria-label={t.supervisorPhoneLabel}
-              value={profileDraft.supervisorPhone}
-              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))}
-              placeholder={t.supervisorPhoneLabel}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-            />
+            <Field label={t.supervisorNameLabel}>
+              <input
+                value={profileDraft.supervisorName}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
+            <Field label={t.supervisorEmailLabel}>
+              <input
+                value={profileDraft.supervisorEmail}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
+            <Field label={t.supervisorPhoneLabel}>
+              <input
+                value={profileDraft.supervisorPhone}
+                onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+            </Field>
             <div
               style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
               className="text-xs uppercase tracking-wide mt-2 pt-3"
@@ -8834,7 +8865,7 @@ export default function SiteManager() {
               {t.webhookLabel}
             </div>
             <input
-              aria-label={t.webhookPlaceholder}
+              aria-label={t.webhookLabel}
               value={profileDraft.webhookUrl}
               onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))}
               placeholder={t.webhookPlaceholder}
@@ -12674,6 +12705,19 @@ function SignaturePad({ onChange, t }) {
         {t.sigClear}
       </button>
     </div>
+  );
+}
+
+// A visible label above a form control. The label element names the control,
+// so the field needs neither aria-label nor its label as a placeholder.
+function Field({ label, children }) {
+  return (
+    <label className="block">
+      <span style={{ color: COLORS.muted }} className="block text-xs mb-1">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }
 

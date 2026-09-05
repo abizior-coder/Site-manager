@@ -936,5 +936,22 @@
   "a11yNextMonth": "Mese successivo",
   "a11yReorder": "Sposta",
   "customerDeleteConfirm": "Eliminare il cliente? I lavori restano, senza collegamento.",
-  "languageLabel": "Lingua"
+  "languageLabel": "Lingua",
+  "inviteDeleteConfirm": "Eliminare questo codice?",
+  "rosterToday": "Oggi:",
+  "plannerHintTouch": "Pianifica nel calendario. Tocca una cella piena per svuotarla.",
+  "bexioErrAuth": "Accesso scaduto — ricarica l'app e riprova.",
+  "bexioErrNotConfigured": "bexio non è ancora configurato sul server.",
+  "bexioErrOwnersOnly": "Solo il titolare può collegare bexio.",
+  "bexioErrTokenMissing": "Il token manca o è troppo corto.",
+  "bexioErrTokenRefused": "bexio ha rifiutato il token — creane uno nuovo su developer.bexio.com.",
+  "bexioErrNotConnected": "bexio non è collegato.",
+  "bexioErrTaxes": "Le aliquote non sono state lette da bexio.",
+  "bexioErrNoTax": "In bexio manca un'aliquota attiva con questa IVA.",
+  "bexioErrNoCustomer": "La fattura non ha un cliente.",
+  "bexioErrNetwork": "Nessuna connessione al server.",
+  "bexioStCreated": "creato",
+  "bexioStExists": "già presente",
+  "bexioStError": "errore",
+  "bexioStDryRun": "prova"
 }

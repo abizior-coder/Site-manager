@@ -936,5 +936,22 @@
   "a11yNextMonth": "Luna următoare",
   "a11yReorder": "Mută",
   "customerDeleteConfirm": "Ștergi clientul? Lucrările rămân, fără legătură.",
-  "languageLabel": "Limba"
+  "languageLabel": "Limba",
+  "inviteDeleteConfirm": "Ștergi acest cod?",
+  "rosterToday": "Azi:",
+  "plannerHintTouch": "Planifică în calendar. Atinge o celulă ocupată pentru a o goli.",
+  "bexioErrAuth": "Sesiune expirată — reîncarcă aplicația și încearcă din nou.",
+  "bexioErrNotConfigured": "bexio nu este încă configurat pe server.",
+  "bexioErrOwnersOnly": "Doar proprietarul poate conecta bexio.",
+  "bexioErrTokenMissing": "Tokenul lipsește sau este prea scurt.",
+  "bexioErrTokenRefused": "bexio a refuzat tokenul — creează unul nou pe developer.bexio.com.",
+  "bexioErrNotConnected": "bexio nu este conectat.",
+  "bexioErrTaxes": "Cotele de TVA nu au putut fi citite din bexio.",
+  "bexioErrNoTax": "În bexio lipsește o cotă activă cu acest TVA.",
+  "bexioErrNoCustomer": "Factura nu are client.",
+  "bexioErrNetwork": "Nu există conexiune cu serverul.",
+  "bexioStCreated": "creat",
+  "bexioStExists": "există deja",
+  "bexioStError": "eroare",
+  "bexioStDryRun": "probă"
 }
