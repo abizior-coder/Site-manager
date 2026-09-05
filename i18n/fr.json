@@ -894,5 +894,18 @@
   "deleteReasonHint": "Cette entrée figure sur un rapport envoyé. La modification est enregistrée avec le motif.",
   "changeReasonLabel": "Motif de la modification",
   "histTitle": "Historique",
-  "entryRestored": "Entrée restaurée"
+  "entryRestored": "Entrée restaurée",
+  "accountDeleteBtn": "Supprimer mon compte",
+  "accountDeleteTitle": "Supprimer le compte",
+  "accountDeleteHint": "Profil, documents, dock, langue et pointeuse sont supprimés et la connexion effacée. Saisissez votre mot de passe pour confirmer.",
+  "accountDeleteKeeps": "Les heures, matériaux, photos et signatures que vous avez saisis restent chez l'entreprise comme pièces d'affaires, sous votre nom.",
+  "accountOwnerBlocked": "En tant que propriétaire d'une entreprise, vous ne pouvez pas supprimer votre compte ici. Transmettez d'abord l'entreprise, ou écrivez à",
+  "accountDeleteConfirm": "Supprimer définitivement le compte",
+  "accountDeleted": "Votre compte a été supprimé.",
+  "backupCardTitle": "Sauvegarde",
+  "backupLast": "Dernier export :",
+  "backupNever": "Aucun export enregistré.",
+  "backupOverdue": "En retard — exporter une sauvegarde",
+  "backupOk": "À jour",
+  "backupNowBtn": "Sauvegarder maintenant"
 }

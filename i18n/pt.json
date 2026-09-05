@@ -894,5 +894,18 @@
   "deleteReasonHint": "Esta entrada está num relatório enviado. A alteração fica registada com o motivo.",
   "changeReasonLabel": "Motivo da alteração",
   "histTitle": "Histórico",
-  "entryRestored": "Entrada reposta"
+  "entryRestored": "Entrada reposta",
+  "accountDeleteBtn": "Eliminar a minha conta",
+  "accountDeleteTitle": "Eliminar conta",
+  "accountDeleteHint": "Perfil, documentos, dock, idioma e relógio de ponto são eliminados e o acesso removido. Escreve a palavra-passe para confirmar.",
+  "accountDeleteKeeps": "Horas, materiais, fotos e assinaturas que registaste ficam na empresa como documentos de negócio, com o teu nome.",
+  "accountOwnerBlocked": "Como proprietário de uma empresa não podes eliminar a conta aqui. Primeiro passa a empresa, ou escreve para",
+  "accountDeleteConfirm": "Eliminar a conta definitivamente",
+  "accountDeleted": "A tua conta foi eliminada.",
+  "backupCardTitle": "Cópia de segurança",
+  "backupLast": "Última exportação:",
+  "backupNever": "Nenhuma exportação registada.",
+  "backupOverdue": "Atrasada — exporta uma cópia",
+  "backupOk": "Em dia",
+  "backupNowBtn": "Guardar agora"
 }

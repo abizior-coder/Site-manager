@@ -894,5 +894,18 @@
   "deleteReasonHint": "Dä Iitrag staht uf eme gschickte Rapport. D Änderig wird mit Grund feschtghalte.",
   "changeReasonLabel": "Grund vo de Änderig",
   "histTitle": "Verlauf",
-  "entryRestored": "Iitrag zrugggholt"
+  "entryRestored": "Iitrag zrugggholt",
+  "accountDeleteBtn": "Mis Konto lösche",
+  "accountDeleteTitle": "Konto lösche",
+  "accountDeleteHint": "Profil, Dokumänt, Dock, Sprach und Stämpeluhr wärded glöscht und d Aamäldig entfärnt. Zum Bestätige s Passwort iigäh.",
+  "accountDeleteKeeps": "Stunde, Material, Fotis und Unterschrifte, wo Sie erfasst händ, blibed als Gschäftsunterlage bi de Firma, under Ihrem Name.",
+  "accountOwnerBlocked": "Als Inhaber vo ere Firma chönd Sie s Konto da nöd lösche. Zerscht d Firma übergäh, oder schriibe a",
+  "accountDeleteConfirm": "Konto endgültig lösche",
+  "accountDeleted": "Ihres Konto isch glöscht.",
+  "backupCardTitle": "Backup",
+  "backupLast": "Letschte Export:",
+  "backupNever": "No kei Export feschtghalte.",
+  "backupOverdue": "Überfällig — Sicherig exportiere",
+  "backupOk": "Aktuell",
+  "backupNowBtn": "Jetzt sichere"
 }

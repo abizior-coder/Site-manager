@@ -84,7 +84,14 @@ service cloud.firestore {
       // — otherwise a crew member could simply promote themselves.
       match /members/{uid} {
         allow read: if isMember(cid);
-        allow update, delete: if isOwner(cid);
+        // A person may leave: their own record, set inactive and nothing else
+        // changed, so the entries they logged keep their name. Everything
+        // else about a membership is the owner's.
+        allow update: if isOwner(cid)
+                      || (signedIn() && request.auth.uid == uid
+                          && request.resource.data.active == false
+                          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'leftAt']));
+        allow delete: if isOwner(cid);
         // Joining: a user creates only their own membership, and only against
         // an unexpired invite that names this company. The role comes from the
         // invite, so it cannot be self-assigned.
@@ -132,7 +139,9 @@ service cloud.firestore {
       // else's hours.
       match /entries/{id} {
         allow read: if isMember(cid);
-        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        // One's own record, or a manager filing for someone (the Polier for a
+        // worker, the owner restoring a backup that names the whole crew).
+        allow create: if isMember(cid) && (request.resource.data.userId == request.auth.uid || canManage(cid));
         // Whoever may edit a row may not hand it to someone else: hours stay
         // attributed to the person who logged them.
         allow update: if (canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid))
@@ -158,7 +167,9 @@ service cloud.firestore {
       // anyone may raise and amend their own request, only a manager decides it.
       match /leave/{id} {
         allow read: if isMember(cid);
-        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        // One's own record, or a manager filing for someone (the Polier for a
+        // worker, the owner restoring a backup that names the whole crew).
+        allow create: if isMember(cid) && (request.resource.data.userId == request.auth.uid || canManage(cid));
         allow update, delete: if canManage(cid)
                               || (isMember(cid)
                                   && resource.data.userId == request.auth.uid
@@ -172,7 +183,9 @@ service cloud.firestore {
       // being evidence of what the customer agreed to.
       match /reports/{id} {
         allow read: if isMember(cid);
-        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        // One's own record, or a manager filing for someone (the Polier for a
+        // worker, the owner restoring a backup that names the whole crew).
+        allow create: if isMember(cid) && (request.resource.data.userId == request.auth.uid || canManage(cid));
         allow update: if canManage(cid) && resource.data.signedAt == null;
         // A signed report is evidence. It cannot be edited, and it cannot be
         // deleted and re-created with different figures either.
@@ -184,7 +197,9 @@ service cloud.firestore {
       // could still overwrite each other.
       match /sentReports/{id} {
         allow read: if isMember(cid);
-        allow create: if isMember(cid) && request.resource.data.userId == request.auth.uid;
+        // One's own record, or a manager filing for someone (the Polier for a
+        // worker, the owner restoring a backup that names the whole crew).
+        allow create: if isMember(cid) && (request.resource.data.userId == request.auth.uid || canManage(cid));
         allow update: if (canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid))
                       && request.resource.data.userId == resource.data.userId;
         allow delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);

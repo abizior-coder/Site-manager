@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "deleteReasonHint": "Cette entr\xE9e figure sur un rapport envoy\xE9. La modification est enregistr\xE9e avec le motif.",
   "changeReasonLabel": "Motif de la modification",
   "histTitle": "Historique",
-  "entryRestored": "Entr\xE9e restaur\xE9e"
+  "entryRestored": "Entr\xE9e restaur\xE9e",
+  "accountDeleteBtn": "Supprimer mon compte",
+  "accountDeleteTitle": "Supprimer le compte",
+  "accountDeleteHint": "Profil, documents, dock, langue et pointeuse sont supprim\xE9s et la connexion effac\xE9e. Saisissez votre mot de passe pour confirmer.",
+  "accountDeleteKeeps": "Les heures, mat\xE9riaux, photos et signatures que vous avez saisis restent chez l'entreprise comme pi\xE8ces d'affaires, sous votre nom.",
+  "accountOwnerBlocked": "En tant que propri\xE9taire d'une entreprise, vous ne pouvez pas supprimer votre compte ici. Transmettez d'abord l'entreprise, ou \xE9crivez \xE0",
+  "accountDeleteConfirm": "Supprimer d\xE9finitivement le compte",
+  "accountDeleted": "Votre compte a \xE9t\xE9 supprim\xE9.",
+  "backupCardTitle": "Sauvegarde",
+  "backupLast": "Dernier export :",
+  "backupNever": "Aucun export enregistr\xE9.",
+  "backupOverdue": "En retard \u2014 exporter une sauvegarde",
+  "backupOk": "\xC0 jour",
+  "backupNowBtn": "Sauvegarder maintenant"
 }
 `;export{r as default};

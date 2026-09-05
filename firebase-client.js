@@ -204,6 +204,31 @@ export async function signOutUser() {
   await sdk.authApi.signOut(sdk.auth);
 }
 
+// Firebase wants a fresh sign-in before an account is deleted.
+export async function reauthenticate(password) {
+  await initFirebase();
+  const user = sdk.auth.currentUser;
+  if (!user || !user.email) throw new Error("not signed in");
+  const credential = sdk.authApi.EmailAuthProvider.credential(user.email, password);
+  await sdk.authApi.reauthenticateWithCredential(user, credential);
+}
+
+// The person's own records outside the company, then the account itself.
+export async function deleteOwnAccount() {
+  await initFirebase();
+  const user = sdk.auth.currentUser;
+  if (!user) throw new Error("not signed in");
+  const uid = user.uid;
+  try {
+    const snaps = await sdk.fs.getDocs(sdk.fs.collection(sdk.db, "users", uid, "kv"));
+    for (const d of snaps.docs) await sdk.fs.deleteDoc(d.ref);
+  } catch {}
+  try {
+    await sdk.fs.deleteDoc(sdk.fs.doc(sdk.db, "users", uid));
+  } catch {}
+  await sdk.authApi.deleteUser(user);
+}
+
 export async function sendReset(email) {
   await initFirebase();
   await sdk.authApi.sendPasswordResetEmail(sdk.auth, email.trim());

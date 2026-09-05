@@ -30,6 +30,8 @@ export async function signIn() {
 }
 export async function signOutUser() {}
 export async function sendReset() {}
+export async function reauthenticate() {}
+export async function deleteOwnAccount() {}
 export async function getIdToken() {
   return "token";
 }

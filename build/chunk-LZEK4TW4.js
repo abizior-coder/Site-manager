@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "deleteReasonHint": "Aceast\u0103 intrare e \xEEntr-un raport trimis. Modificarea se \xEEnregistreaz\u0103 cu motivul.",
   "changeReasonLabel": "Motivul modific\u0103rii",
   "histTitle": "Istoric",
-  "entryRestored": "Intrare restaurat\u0103"
+  "entryRestored": "Intrare restaurat\u0103",
+  "accountDeleteBtn": "\u0218terge contul meu",
+  "accountDeleteTitle": "\u0218terge contul",
+  "accountDeleteHint": "Profilul, documentele, dock-ul, limba \u0219i pontajul sunt \u0219terse, iar autentificarea eliminat\u0103. Introdu parola pentru confirmare.",
+  "accountDeleteKeeps": "Orele, materialele, fotografiile \u0219i semn\u0103turile \xEEnregistrate de tine r\u0103m\xE2n la firm\u0103 ca documente de afaceri, pe numele t\u0103u.",
+  "accountOwnerBlocked": "Ca proprietar al unei firme nu po\u021Bi \u0219terge contul aici. Pred\u0103 mai \xEEnt\xE2i firma sau scrie la",
+  "accountDeleteConfirm": "\u0218terge contul definitiv",
+  "accountDeleted": "Contul t\u0103u a fost \u0219ters.",
+  "backupCardTitle": "Backup",
+  "backupLast": "Ultimul export:",
+  "backupNever": "Niciun export \xEEnregistrat.",
+  "backupOverdue": "\xCEnt\xE2rziat \u2014 export\u0103 un backup",
+  "backupOk": "La zi",
+  "backupNowBtn": "Salveaz\u0103 acum"
 }
 `;export{i as default};

@@ -2,6 +2,7 @@
   "name": "site-manager",
   "version": "0.9.0",
   "private": true,
+  "type": "module",
   "license": "UNLICENSED",
   "description": "Site Log / Baustellenprotokoll: a phone-first site log for Swiss roofing crews.",
   "engines": {

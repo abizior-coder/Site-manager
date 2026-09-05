@@ -894,5 +894,18 @@
   "deleteReasonHint": "This entry is on a sent Rapport. The change is recorded with the reason.",
   "changeReasonLabel": "Reason for the change",
   "histTitle": "History",
-  "entryRestored": "Entry restored"
+  "entryRestored": "Entry restored",
+  "accountDeleteBtn": "Delete my account",
+  "accountDeleteTitle": "Delete account",
+  "accountDeleteHint": "Your profile, documents, dock, language and clock are removed and your sign-in is deleted. Type your password to confirm.",
+  "accountDeleteKeeps": "Hours, materials, photos and signatures you logged stay with the firm as its business records, under your name.",
+  "accountOwnerBlocked": "As the owner of a company you cannot delete your account here. Hand the company over first, or write to",
+  "accountDeleteConfirm": "Delete account for good",
+  "accountDeleted": "Your account has been deleted.",
+  "backupCardTitle": "Backup",
+  "backupLast": "Last export:",
+  "backupNever": "No export recorded yet.",
+  "backupOverdue": "Overdue — export a backup",
+  "backupOk": "Up to date",
+  "backupNowBtn": "Export backup now"
 }

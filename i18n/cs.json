@@ -894,5 +894,18 @@
   "deleteReasonHint": "Tento záznam je v odeslaném raportu. Změna se zaznamená s důvodem.",
   "changeReasonLabel": "Důvod změny",
   "histTitle": "Historie",
-  "entryRestored": "Záznam obnoven"
+  "entryRestored": "Záznam obnoven",
+  "accountDeleteBtn": "Smazat můj účet",
+  "accountDeleteTitle": "Smazat účet",
+  "accountDeleteHint": "Profil, dokumenty, dock, jazyk a hodiny se smažou a přihlášení zruší. Pro potvrzení zadejte heslo.",
+  "accountDeleteKeeps": "Hodiny, materiál, fotky a podpisy, které jste zaznamenali, zůstávají firmě jako obchodní doklady, pod vaším jménem.",
+  "accountOwnerBlocked": "Jako majitel firmy zde účet smazat nemůžete. Nejprve firmu předejte, nebo napište na",
+  "accountDeleteConfirm": "Smazat účet natrvalo",
+  "accountDeleted": "Váš účet byl smazán.",
+  "backupCardTitle": "Záloha",
+  "backupLast": "Poslední export:",
+  "backupNever": "Zatím žádný export.",
+  "backupOverdue": "Po termínu — exportujte zálohu",
+  "backupOk": "Aktuální",
+  "backupNowBtn": "Zálohovat teď"
 }

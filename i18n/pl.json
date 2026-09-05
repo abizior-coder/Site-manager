@@ -894,5 +894,18 @@
   "deleteReasonHint": "Ten wpis jest w wysłanym raporcie. Zmiana zostanie zapisana z powodem.",
   "changeReasonLabel": "Powód zmiany",
   "histTitle": "Historia",
-  "entryRestored": "Wpis przywrócony"
+  "entryRestored": "Wpis przywrócony",
+  "accountDeleteBtn": "Usuń moje konto",
+  "accountDeleteTitle": "Usuń konto",
+  "accountDeleteHint": "Profil, dokumenty, dock, język i zegar zostaną usunięte, a logowanie skasowane. Wpisz hasło, aby potwierdzić.",
+  "accountDeleteKeeps": "Godziny, materiały, zdjęcia i podpisy, które wpisałeś, zostają w firmie jako dokumentacja, pod Twoim nazwiskiem.",
+  "accountOwnerBlocked": "Jako właściciel firmy nie możesz tu usunąć konta. Najpierw przekaż firmę albo napisz na",
+  "accountDeleteConfirm": "Usuń konto na stałe",
+  "accountDeleted": "Twoje konto zostało usunięte.",
+  "backupCardTitle": "Kopia zapasowa",
+  "backupLast": "Ostatni eksport:",
+  "backupNever": "Brak zapisanego eksportu.",
+  "backupOverdue": "Zaległa — wyeksportuj kopię",
+  "backupOk": "Aktualna",
+  "backupNowBtn": "Zapisz kopię teraz"
 }

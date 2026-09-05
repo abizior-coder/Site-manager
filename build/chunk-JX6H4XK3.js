@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "deleteReasonHint": "Tento z\xE1znam je v odeslan\xE9m raportu. Zm\u011Bna se zaznamen\xE1 s d\u016Fvodem.",
   "changeReasonLabel": "D\u016Fvod zm\u011Bny",
   "histTitle": "Historie",
-  "entryRestored": "Z\xE1znam obnoven"
+  "entryRestored": "Z\xE1znam obnoven",
+  "accountDeleteBtn": "Smazat m\u016Fj \xFA\u010Det",
+  "accountDeleteTitle": "Smazat \xFA\u010Det",
+  "accountDeleteHint": "Profil, dokumenty, dock, jazyk a hodiny se sma\u017Eou a p\u0159ihl\xE1\u0161en\xED zru\u0161\xED. Pro potvrzen\xED zadejte heslo.",
+  "accountDeleteKeeps": "Hodiny, materi\xE1l, fotky a podpisy, kter\xE9 jste zaznamenali, z\u016Fst\xE1vaj\xED firm\u011B jako obchodn\xED doklady, pod va\u0161\xEDm jm\xE9nem.",
+  "accountOwnerBlocked": "Jako majitel firmy zde \xFA\u010Det smazat nem\u016F\u017Eete. Nejprve firmu p\u0159edejte, nebo napi\u0161te na",
+  "accountDeleteConfirm": "Smazat \xFA\u010Det natrvalo",
+  "accountDeleted": "V\xE1\u0161 \xFA\u010Det byl smaz\xE1n.",
+  "backupCardTitle": "Z\xE1loha",
+  "backupLast": "Posledn\xED export:",
+  "backupNever": "Zat\xEDm \u017E\xE1dn\xFD export.",
+  "backupOverdue": "Po term\xEDnu \u2014 exportujte z\xE1lohu",
+  "backupOk": "Aktu\xE1ln\xED",
+  "backupNowBtn": "Z\xE1lohovat te\u010F"
 }
 `;export{t as default};

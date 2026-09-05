@@ -44,6 +44,7 @@ import {
 } from "./barcode.js";
 import { createCrashGate, crashPayload, installCrashCapture, uaFamily } from "./errors-client.js";
 import { coveredEntryIds, changedFields, reconcileEntries } from "./entries-history.js";
+import { backupDue, backupMeta } from "./backup.js";
 import {
   reportId,
   reportRows,
@@ -809,6 +810,48 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     ],
     [12, true, true, true],
   );
+}
+
+{
+  // The backup nudge: never, recent, overdue; the meta counts exports.
+  const DAY = 86400000;
+  t("no export yet is due", backupDue(null, 10 * DAY), { due: true, never: true, daysAgo: null });
+  {
+    const restored = sanitiseBackup(
+      {
+        projects: [{ id: "p1", name: "Roof" }],
+        entries: [
+          { id: "e1", type: "time", projectId: "p1", date: "2026-09-01", qty: 8, userId: "crew-uid" },
+          { id: "e2", type: "time", projectId: "p1", date: "2026-09-01", qty: 8 },
+        ],
+      },
+      { makeId: () => "x", userId: "owner-uid", members: ["crew-uid", "owner-uid"] },
+    );
+    t(
+      "a backup keeps who logged each entry; one without a person goes to the restorer",
+      restored.entries.map((e) => e.userId),
+      ["crew-uid", "owner-uid"],
+    );
+    const shared = sanitiseProjectCode(
+      {
+        name: "Roof",
+        entries: [{ id: "e1", type: "time", projectId: "p1", date: "2026-09-01", qty: 8, userId: "someone-else" }],
+      },
+      { makeId: () => "x", userId: "receiver" },
+    );
+    t(
+      "a shared job re-attributes its entries to the receiver",
+      shared.entries.map((e) => e.userId),
+      ["receiver"],
+    );
+  }
+  t("three days ago is fine", backupDue(7 * DAY, 10 * DAY), { due: false, never: false, daysAgo: 3 });
+  t("seven days ago is overdue", backupDue(3 * DAY, 10 * DAY), { due: true, never: false, daysAgo: 7 });
+  t("the meta records when, who and how many", backupMeta({ count: 2 }, 5000, "u1"), {
+    lastAt: 5000,
+    lastBy: "u1",
+    count: 3,
+  });
 }
 
 {

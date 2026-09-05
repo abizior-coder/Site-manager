@@ -33,7 +33,7 @@ export function isPhotoDataUrl(v) {
   );
 }
 
-function cleanEntry(e, makeId, photoMap, userId) {
+function cleanEntry(e, makeId, photoMap, userId, members = null) {
   if (!isObj(e)) return null;
   const type = ENTRY_TYPES.has(e.type) ? e.type : "note";
   const out = {
@@ -41,7 +41,11 @@ function cleanEntry(e, makeId, photoMap, userId) {
     type,
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(e.date || "")) ? e.date : new Date().toISOString().slice(0, 10),
     createdAt: NUM(e.createdAt) || Date.now(),
-    userId: userId || null,
+    // A shared job re-attributes to the receiver. A company backup keeps who did
+    // what, but only for people who are members here: a pasted file cannot put
+    // hours under a stranger's id, and a restore into another firm goes to the
+    // restorer.
+    userId: members && typeof e.userId === "string" && members.has(e.userId) ? e.userId : userId || null,
     projectId: STR(e.projectId, 100) || null,
     description: STR(e.description, 2000),
     qty: STR(e.qty, 20),
@@ -106,7 +110,8 @@ function cleanRecord(r, makeId, keep) {
 
 // A full backup. Every collection is a capped array of cleaned records with
 // fresh ids; photos are re-keyed, and every reference follows the new key.
-export function sanitiseBackup(data, { makeId, userId }) {
+export function sanitiseBackup(data, { makeId, userId, members = [] }) {
+  const memberSet = new Set((members || []).filter((m) => typeof m === "string"));
   if (!isObj(data) || !Array.isArray(data.projects)) return null;
   const photoMap = new Map();
   const photos = {};
@@ -143,7 +148,7 @@ export function sanitiseBackup(data, { makeId, userId }) {
   const entries = (Array.isArray(data.entries) ? data.entries : [])
     .slice(0, MAX.entries)
     .map((e) => {
-      const c = cleanEntry(e, makeId, photoMap, userId);
+      const c = cleanEntry(e, makeId, photoMap, userId, memberSet);
       if (c) c.projectId = remapProject(e.projectId);
       return c;
     })

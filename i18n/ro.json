@@ -894,5 +894,18 @@
   "deleteReasonHint": "Această intrare e într-un raport trimis. Modificarea se înregistrează cu motivul.",
   "changeReasonLabel": "Motivul modificării",
   "histTitle": "Istoric",
-  "entryRestored": "Intrare restaurată"
+  "entryRestored": "Intrare restaurată",
+  "accountDeleteBtn": "Șterge contul meu",
+  "accountDeleteTitle": "Șterge contul",
+  "accountDeleteHint": "Profilul, documentele, dock-ul, limba și pontajul sunt șterse, iar autentificarea eliminată. Introdu parola pentru confirmare.",
+  "accountDeleteKeeps": "Orele, materialele, fotografiile și semnăturile înregistrate de tine rămân la firmă ca documente de afaceri, pe numele tău.",
+  "accountOwnerBlocked": "Ca proprietar al unei firme nu poți șterge contul aici. Predă mai întâi firma sau scrie la",
+  "accountDeleteConfirm": "Șterge contul definitiv",
+  "accountDeleted": "Contul tău a fost șters.",
+  "backupCardTitle": "Backup",
+  "backupLast": "Ultimul export:",
+  "backupNever": "Niciun export înregistrat.",
+  "backupOverdue": "Întârziat — exportă un backup",
+  "backupOk": "La zi",
+  "backupNowBtn": "Salvează acum"
 }

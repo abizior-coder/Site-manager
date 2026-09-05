@@ -894,5 +894,18 @@
   "deleteReasonHint": "Ky shënim është në një raport të dërguar. Ndryshimi regjistrohet me arsyen.",
   "changeReasonLabel": "Arsyeja e ndryshimit",
   "histTitle": "Historiku",
-  "entryRestored": "Shënimi u rikthye"
+  "entryRestored": "Shënimi u rikthye",
+  "accountDeleteBtn": "Fshi llogarinë time",
+  "accountDeleteTitle": "Fshi llogarinë",
+  "accountDeleteHint": "Profili, dokumentet, docku, gjuha dhe ora fshihen dhe hyrja hiqet. Shkruaj fjalëkalimin për të konfirmuar.",
+  "accountDeleteKeeps": "Orët, materialet, fotot dhe nënshkrimet që ke regjistruar mbeten te firma si dokumente pune, me emrin tënd.",
+  "accountOwnerBlocked": "Si pronar i një firme nuk mund ta fshish llogarinë këtu. Fillimisht dorëzoje firmën, ose shkruaj te",
+  "accountDeleteConfirm": "Fshi llogarinë përgjithmonë",
+  "accountDeleted": "Llogaria jote u fshi.",
+  "backupCardTitle": "Kopje rezervë",
+  "backupLast": "Eksporti i fundit:",
+  "backupNever": "Asnjë eksport i regjistruar.",
+  "backupOverdue": "Vonuar — eksporto një kopje",
+  "backupOk": "Në rregull",
+  "backupNowBtn": "Ruaj tani"
 }

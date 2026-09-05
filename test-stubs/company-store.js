@@ -239,3 +239,4 @@ export async function personalDataSummary() {
 }
 export function resetCompanyState() {}
 export async function setMemberActive() {}
+export async function leaveCompany() {}

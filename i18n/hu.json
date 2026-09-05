@@ -894,5 +894,18 @@
   "deleteReasonHint": "Ez a bejegyzés egy elküldött jelentésen szerepel. A változás az okkal együtt rögzül.",
   "changeReasonLabel": "A változtatás oka",
   "histTitle": "Előzmények",
-  "entryRestored": "Bejegyzés visszaállítva"
+  "entryRestored": "Bejegyzés visszaállítva",
+  "accountDeleteBtn": "Fiókom törlése",
+  "accountDeleteTitle": "Fiók törlése",
+  "accountDeleteHint": "A profil, a dokumentumok, a dokk, a nyelv és az óra törlődik, a bejelentkezés megszűnik. Megerősítéshez írd be a jelszavad.",
+  "accountDeleteKeeps": "A rögzített órák, anyagok, fotók és aláírások a cégnél maradnak üzleti iratként, a neved alatt.",
+  "accountOwnerBlocked": "Cégtulajdonosként itt nem törölheted a fiókot. Előbb add át a céget, vagy írj ide:",
+  "accountDeleteConfirm": "Fiók végleges törlése",
+  "accountDeleted": "A fiókod törölve lett.",
+  "backupCardTitle": "Biztonsági mentés",
+  "backupLast": "Utolsó export:",
+  "backupNever": "Még nincs rögzített export.",
+  "backupOverdue": "Esedékes — exportálj mentést",
+  "backupOk": "Naprakész",
+  "backupNowBtn": "Mentés most"
 }

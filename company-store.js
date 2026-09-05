@@ -105,6 +105,26 @@ export async function loadMembership(uid) {
 // Offboarding. The member document is kept with active:false rather than
 // deleted, so the person's entries and reports keep their name; the rules
 // and the Worker treat active:false as "not a member".
+// A person leaves the company: their personal keys go, their membership is
+// set inactive (the rules allow exactly that for one's own record), the
+// entries they logged keep their name.
+export async function leaveCompany(uid) {
+  await initFirebase();
+  if (!companyId) throw new Error("no company");
+  for (const key of [
+    `site-profile-${uid}`,
+    `site-docs-${uid}`,
+    `site-dock-pins-${uid}`,
+    `site-lang-${uid}`,
+    `clock-${uid}`,
+  ]) {
+    try {
+      await fs().deleteDoc(docRef("kv", key));
+    } catch {}
+  }
+  await fs().updateDoc(fs().doc(db(), "companies", companyId, "members", uid), { active: false, leftAt: Date.now() });
+}
+
 export async function setMemberActive(uid, active) {
   await initFirebase();
   if (!companyId) throw new Error("no company");

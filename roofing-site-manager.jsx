@@ -72,6 +72,8 @@ import {
   authErrorKey,
   importLegacy,
   getIdToken,
+  reauthenticate,
+  deleteOwnAccount,
 } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
 import {
@@ -117,6 +119,7 @@ import {
   canManage,
   getCompanyId,
   setMemberActive,
+  leaveCompany,
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, guessKind, normaliseLink } from "./files.js";
 import { breakMeta, breakHours, netHours } from "./breaks.js";
@@ -128,6 +131,7 @@ import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
 import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "./ui/entries.jsx";
 import { useDialog } from "./ui/dialog.js";
 import { coveredEntryIds, reconcileEntries } from "./entries-history.js";
+import { BACKUP_KEY, backupMeta } from "./backup.js";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
@@ -752,6 +756,21 @@ export default function SiteManager() {
   const entries = useMemo(() => allEntries.filter((e) => !e.deleted), [allEntries]);
   const changeReasonRef = useRef("");
   const [deleteAsk, setDeleteAsk] = useState(null);
+  const [deleteAccount, setDeleteAccount] = useState(null);
+  const [backupMetaState, setBackupMetaState] = useState(null);
+  useEffect(() => {
+    if (!membership) return;
+    let alive = true;
+    companyStorage
+      .get(BACKUP_KEY)
+      .then((r) => {
+        if (alive && r && r.value) setBackupMetaState(JSON.parse(r.value));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [membership]);
   const [activeClock, setActiveClock] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [noteText, setNoteText] = useState("");
@@ -2318,6 +2337,7 @@ export default function SiteManager() {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 10000);
       showToast(t.backupSaved);
+      recordBackup();
     } catch (err) {
       saveFailed(err, "downloadFullBackup");
     }
@@ -2330,7 +2350,11 @@ export default function SiteManager() {
       // sizes, fresh ids, photos re-keyed and only if they are images. A file
       // from a stranger cannot plant a record or overwrite a signature.
       const { sanitiseBackup } = await import("./import-guard.js");
-      const data = sanitiseBackup(JSON.parse(text), { makeId: uid, userId: user?.uid || null });
+      const data = sanitiseBackup(JSON.parse(text), {
+        makeId: uid,
+        userId: user?.uid || null,
+        members: team.members.map((m) => m.uid),
+      });
       if (!data) {
         showToast(t.invalidBackupCode);
         return;
@@ -2400,6 +2424,7 @@ export default function SiteManager() {
     const code = encodeBackup(payload);
     setBackupCodeOutput(code);
     setBackupModal("export");
+    recordBackup();
   }
 
   function openBackupImport() {
@@ -2412,7 +2437,11 @@ export default function SiteManager() {
     // Same rule as the file restore: checked, cut to shape, fresh ids. A
     // pasted photo id can never land on a signature's key.
     const { sanitiseBackup } = await import("./import-guard.js");
-    const data = sanitiseBackup(decodeBackup(backupCodeInput), { makeId: uid, userId: user?.uid || null });
+    const data = sanitiseBackup(decodeBackup(backupCodeInput), {
+      makeId: uid,
+      userId: user?.uid || null,
+      members: team.members.map((m) => m.uid),
+    });
     if (!data) {
       setBackupError(t.invalidBackupCode);
       return;
@@ -3346,6 +3375,33 @@ export default function SiteManager() {
       setAuthForm((s) => ({ ...s, notice: "authResetSent", error: null }));
     } catch (err) {
       setAuthForm((s) => ({ ...s, error: authErrorKey(err) }));
+    }
+  }
+
+  // Every export is a backup; the Cockpit shows how long ago the last one was.
+  function recordBackup() {
+    const meta = backupMeta(backupMetaState, Date.now(), user?.uid || null);
+    setBackupMetaState(meta);
+    companyStorage.set(BACKUP_KEY, JSON.stringify(meta)).catch(() => {});
+  }
+
+  // The person deletes their own account: password again, personal data
+  // gone, membership inactive so their entries keep a name, Auth user gone.
+  async function deleteOwnAccountFlow() {
+    if (!deleteAccount) return;
+    setDeleteAccount((s) => ({ ...s, busy: true, error: null }));
+    try {
+      await reauthenticate(deleteAccount.password);
+      await leaveCompany(user.uid);
+      await deleteOwnAccount();
+      setDeleteAccount(null);
+      setProfileModalOpen(false);
+      resetCompanyState();
+      setMembership(null);
+      setMembershipChecked(false);
+      setAuthForm((s) => ({ ...s, mode: "signin", notice: "accountDeleted" }));
+    } catch (e) {
+      setDeleteAccount((s) => ({ ...s, busy: false, error: authErrorKey(e) }));
     }
   }
 
@@ -5928,6 +5984,7 @@ export default function SiteManager() {
             <Suspense fallback={null}>
               <CockpitTab
                 approveEntry={approveEntry}
+                backupMeta={backupMetaState}
                 billing={billing}
                 commandCentre={commandCentre}
                 customers={customers}
@@ -5936,6 +5993,7 @@ export default function SiteManager() {
                 leaveRequests={leaveRequests}
                 hoursBalance={hoursBalance}
                 money={money}
+                onBackup={openBackupExport}
                 projects={projects}
                 setDocEditor={setDocEditor}
                 setHoursModalOpen={setHoursModalOpen}
@@ -8599,6 +8657,14 @@ export default function SiteManager() {
               >
                 <LogOut size={14} /> {t.signOut}
               </button>
+              <button
+                data-delete-account-btn
+                onClick={() => setDeleteAccount({ password: "", busy: false, error: null })}
+                style={{ color: COLORS.muted }}
+                className="w-full mt-2 py-2 text-xs underline"
+              >
+                {t.accountDeleteBtn}
+              </button>
               <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-xs">
                 {t.versionLabel} {SHELL_BUILD}
               </div>
@@ -10248,6 +10314,58 @@ export default function SiteManager() {
             >
               {t.importApply}
             </button>
+          </div>
+        </Modal>
+      )}
+
+      {deleteAccount && (
+        <Modal t={t} onClose={() => setDeleteAccount(null)} title={t.accountDeleteTitle}>
+          <div data-delete-account>
+            {isOwner() ? (
+              <div data-delete-account-blocked style={{ color: COLORS.muted }} className="text-sm leading-relaxed">
+                {t.accountOwnerBlocked}{" "}
+                <a href="mailto:a.bizior@pm.me" style={{ color: COLORS.accent }} className="underline">
+                  a.bizior@pm.me
+                </a>
+              </div>
+            ) : (
+              <>
+                <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed mb-2">
+                  {t.accountDeleteHint}
+                </div>
+                <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed mb-3">
+                  {t.accountDeleteKeeps}
+                </div>
+                <input
+                  data-delete-account-password
+                  type="password"
+                  autoComplete="current-password"
+                  aria-label={t.passwordLabel || "Passwort"}
+                  placeholder={t.passwordLabel || "Passwort"}
+                  value={deleteAccount.password}
+                  onChange={(e) => setDeleteAccount((s) => ({ ...s, password: e.target.value }))}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-3 text-sm outline-none mb-3"
+                />
+                {deleteAccount.error && (
+                  <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+                    {t[deleteAccount.error] || t.authErrGeneric}
+                  </div>
+                )}
+                <button
+                  data-delete-account-confirm
+                  disabled={deleteAccount.busy || !deleteAccount.password}
+                  onClick={deleteOwnAccountFlow}
+                  style={{
+                    background: COLORS.danger,
+                    opacity: deleteAccount.busy || !deleteAccount.password ? 0.5 : 1,
+                  }}
+                  className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+                >
+                  {t.accountDeleteConfirm}
+                </button>
+              </>
+            )}
           </div>
         </Modal>
       )}

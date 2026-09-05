@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "deleteReasonHint": "Esta entrada est\xE1 en un informe enviado. El cambio se registra con el motivo.",
   "changeReasonLabel": "Motivo del cambio",
   "histTitle": "Historial",
-  "entryRestored": "Entrada restaurada"
+  "entryRestored": "Entrada restaurada",
+  "accountDeleteBtn": "Eliminar mi cuenta",
+  "accountDeleteTitle": "Eliminar cuenta",
+  "accountDeleteHint": "Perfil, documentos, dock, idioma y fichaje se eliminan y el acceso se borra. Escribe tu contrase\xF1a para confirmar.",
+  "accountDeleteKeeps": "Las horas, materiales, fotos y firmas que registraste quedan en la empresa como documentos de negocio, con tu nombre.",
+  "accountOwnerBlocked": "Como propietario de una empresa no puedes eliminar la cuenta aqu\xED. Primero cede la empresa, o escribe a",
+  "accountDeleteConfirm": "Eliminar la cuenta definitivamente",
+  "accountDeleted": "Tu cuenta ha sido eliminada.",
+  "backupCardTitle": "Copia de seguridad",
+  "backupLast": "\xDAltima exportaci\xF3n:",
+  "backupNever": "Ninguna exportaci\xF3n registrada.",
+  "backupOverdue": "Atrasada \u2014 exporta una copia",
+  "backupOk": "Al d\xEDa",
+  "backupNowBtn": "Guardar ahora"
 }
 `;export{o as default};

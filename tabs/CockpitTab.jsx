@@ -2,6 +2,7 @@
 // app and arrive as props; this module only renders.
 import { isOwner, getCompanyId } from "../company-store.js";
 import { getIdToken } from "../firebase-client.js";
+import { backupDue } from "../backup.js";
 import { fmtHM, monthKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { useEffect, useState } from "react";
@@ -257,8 +258,43 @@ function UsageCard({ t }) {
   );
 }
 
+// How long since the owner last exported; a nudge once a week has passed.
+function BackupCard({ t, backupMeta, onBackup }) {
+  const state = backupDue(backupMeta && backupMeta.lastAt);
+  const line = state.never
+    ? t.backupNever
+    : `${t.backupLast} ${new Date(backupMeta.lastAt).toLocaleDateString()} (${state.daysAgo} d)`;
+  return (
+    <div
+      data-backup-card
+      data-due={state.due ? "1" : "0"}
+      style={{ background: COLORS.card, border: `1px solid ${state.due ? COLORS.amber : COLORS.border}` }}
+      className="rounded-xl p-3"
+    >
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+        {t.backupCardTitle}
+      </div>
+      <div style={{ color: state.due ? COLORS.amber : COLORS.success }} className="text-sm font-bold mb-2">
+        {state.due ? t.backupOverdue : t.backupOk}
+      </div>
+      <div style={{ color: COLORS.muted }} className="text-xs mb-3">
+        {line}
+      </div>
+      <button
+        data-backup-now
+        onClick={onBackup}
+        style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+        className="w-full py-2.5 rounded-lg text-xs font-bold uppercase"
+      >
+        {t.backupNowBtn}
+      </button>
+    </div>
+  );
+}
+
 export function CockpitTab({
   approveEntry,
+  backupMeta,
   billing,
   commandCentre,
   customers,
@@ -267,6 +303,7 @@ export function CockpitTab({
   hoursBalance,
   leaveRequests,
   money,
+  onBackup,
   projects,
   setDocEditor,
   setHoursModalOpen,
@@ -324,6 +361,7 @@ export function CockpitTab({
 
       {isOwner() && <UsageCard t={t} />}
       {isOwner() && <ErrorsCard t={t} />}
+      {isOwner() && <BackupCard t={t} backupMeta={backupMeta} onBackup={onBackup} />}
       {isOwner() && (
         <ExportCard
           t={t}

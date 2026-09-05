@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "deleteReasonHint": "Ez a bejegyz\xE9s egy elk\xFCld\xF6tt jelent\xE9sen szerepel. A v\xE1ltoz\xE1s az okkal egy\xFCtt r\xF6gz\xFCl.",
   "changeReasonLabel": "A v\xE1ltoztat\xE1s oka",
   "histTitle": "El\u0151zm\xE9nyek",
-  "entryRestored": "Bejegyz\xE9s vissza\xE1ll\xEDtva"
+  "entryRestored": "Bejegyz\xE9s vissza\xE1ll\xEDtva",
+  "accountDeleteBtn": "Fi\xF3kom t\xF6rl\xE9se",
+  "accountDeleteTitle": "Fi\xF3k t\xF6rl\xE9se",
+  "accountDeleteHint": "A profil, a dokumentumok, a dokk, a nyelv \xE9s az \xF3ra t\xF6rl\u0151dik, a bejelentkez\xE9s megsz\u0171nik. Meger\u0151s\xEDt\xE9shez \xEDrd be a jelszavad.",
+  "accountDeleteKeeps": "A r\xF6gz\xEDtett \xF3r\xE1k, anyagok, fot\xF3k \xE9s al\xE1\xEDr\xE1sok a c\xE9gn\xE9l maradnak \xFCzleti iratk\xE9nt, a neved alatt.",
+  "accountOwnerBlocked": "C\xE9gtulajdonosk\xE9nt itt nem t\xF6r\xF6lheted a fi\xF3kot. El\u0151bb add \xE1t a c\xE9get, vagy \xEDrj ide:",
+  "accountDeleteConfirm": "Fi\xF3k v\xE9gleges t\xF6rl\xE9se",
+  "accountDeleted": "A fi\xF3kod t\xF6r\xF6lve lett.",
+  "backupCardTitle": "Biztons\xE1gi ment\xE9s",
+  "backupLast": "Utols\xF3 export:",
+  "backupNever": "M\xE9g nincs r\xF6gz\xEDtett export.",
+  "backupOverdue": "Esed\xE9kes \u2014 export\xE1lj ment\xE9st",
+  "backupOk": "Naprak\xE9sz",
+  "backupNowBtn": "Ment\xE9s most"
 }
 `;export{a as default};

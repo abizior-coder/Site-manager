@@ -894,5 +894,18 @@
   "deleteReasonHint": "Dieser Eintrag steht auf einem gesendeten Rapport. Die Änderung wird mit Grund festgehalten.",
   "changeReasonLabel": "Grund der Änderung",
   "histTitle": "Verlauf",
-  "entryRestored": "Eintrag wiederhergestellt"
+  "entryRestored": "Eintrag wiederhergestellt",
+  "accountDeleteBtn": "Mein Konto löschen",
+  "accountDeleteTitle": "Konto löschen",
+  "accountDeleteHint": "Profil, Dokumente, Dock, Sprache und Stempeluhr werden gelöscht und die Anmeldung entfernt. Zur Bestätigung das Passwort eingeben.",
+  "accountDeleteKeeps": "Stunden, Material, Fotos und Unterschriften, die Sie erfasst haben, bleiben als Geschäftsunterlagen bei der Firma, unter Ihrem Namen.",
+  "accountOwnerBlocked": "Als Inhaber einer Firma können Sie das Konto hier nicht löschen. Zuerst die Firma übergeben, oder schreiben an",
+  "accountDeleteConfirm": "Konto endgültig löschen",
+  "accountDeleted": "Ihr Konto wurde gelöscht.",
+  "backupCardTitle": "Backup",
+  "backupLast": "Letzter Export:",
+  "backupNever": "Noch kein Export festgehalten.",
+  "backupOverdue": "Überfällig — Sicherung exportieren",
+  "backupOk": "Aktuell",
+  "backupNowBtn": "Jetzt sichern"
 }

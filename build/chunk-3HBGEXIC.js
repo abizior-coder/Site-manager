@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "deleteReasonHint": "Ten wpis jest w wys\u0142anym raporcie. Zmiana zostanie zapisana z powodem.",
   "changeReasonLabel": "Pow\xF3d zmiany",
   "histTitle": "Historia",
-  "entryRestored": "Wpis przywr\xF3cony"
+  "entryRestored": "Wpis przywr\xF3cony",
+  "accountDeleteBtn": "Usu\u0144 moje konto",
+  "accountDeleteTitle": "Usu\u0144 konto",
+  "accountDeleteHint": "Profil, dokumenty, dock, j\u0119zyk i zegar zostan\u0105 usuni\u0119te, a logowanie skasowane. Wpisz has\u0142o, aby potwierdzi\u0107.",
+  "accountDeleteKeeps": "Godziny, materia\u0142y, zdj\u0119cia i podpisy, kt\xF3re wpisa\u0142e\u015B, zostaj\u0105 w firmie jako dokumentacja, pod Twoim nazwiskiem.",
+  "accountOwnerBlocked": "Jako w\u0142a\u015Bciciel firmy nie mo\u017Cesz tu usun\u0105\u0107 konta. Najpierw przeka\u017C firm\u0119 albo napisz na",
+  "accountDeleteConfirm": "Usu\u0144 konto na sta\u0142e",
+  "accountDeleted": "Twoje konto zosta\u0142o usuni\u0119te.",
+  "backupCardTitle": "Kopia zapasowa",
+  "backupLast": "Ostatni eksport:",
+  "backupNever": "Brak zapisanego eksportu.",
+  "backupOverdue": "Zaleg\u0142a \u2014 wyeksportuj kopi\u0119",
+  "backupOk": "Aktualna",
+  "backupNowBtn": "Zapisz kopi\u0119 teraz"
 }
 `;export{o as default};

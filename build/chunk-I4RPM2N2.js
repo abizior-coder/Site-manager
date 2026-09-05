@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "deleteReasonHint": "Ky sh\xEBnim \xEBsht\xEB n\xEB nj\xEB raport t\xEB d\xEBrguar. Ndryshimi regjistrohet me arsyen.",
   "changeReasonLabel": "Arsyeja e ndryshimit",
   "histTitle": "Historiku",
-  "entryRestored": "Sh\xEBnimi u rikthye"
+  "entryRestored": "Sh\xEBnimi u rikthye",
+  "accountDeleteBtn": "Fshi llogarin\xEB time",
+  "accountDeleteTitle": "Fshi llogarin\xEB",
+  "accountDeleteHint": "Profili, dokumentet, docku, gjuha dhe ora fshihen dhe hyrja hiqet. Shkruaj fjal\xEBkalimin p\xEBr t\xEB konfirmuar.",
+  "accountDeleteKeeps": "Or\xEBt, materialet, fotot dhe n\xEBnshkrimet q\xEB ke regjistruar mbeten te firma si dokumente pune, me emrin t\xEBnd.",
+  "accountOwnerBlocked": "Si pronar i nj\xEB firme nuk mund ta fshish llogarin\xEB k\xEBtu. Fillimisht dor\xEBzoje firm\xEBn, ose shkruaj te",
+  "accountDeleteConfirm": "Fshi llogarin\xEB p\xEBrgjithmon\xEB",
+  "accountDeleted": "Llogaria jote u fshi.",
+  "backupCardTitle": "Kopje rezerv\xEB",
+  "backupLast": "Eksporti i fundit:",
+  "backupNever": "Asnj\xEB eksport i regjistruar.",
+  "backupOverdue": "Vonuar \u2014 eksporto nj\xEB kopje",
+  "backupOk": "N\xEB rregull",
+  "backupNowBtn": "Ruaj tani"
 }
 `;export{r as default};

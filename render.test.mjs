@@ -940,6 +940,12 @@ async function renderAs(role) {
       !!window.document.querySelector("[data-errors-card]"),
       "no errors card",
     );
+    const backup = window.document.querySelector("[data-backup-card]");
+    check(
+      "owner: the cockpit shows the backup card, overdue when nothing was exported",
+      !!backup && backup.getAttribute("data-due") === "1" && !!backup.querySelector("[data-backup-now]"),
+      backup ? backup.textContent.slice(0, 80) : "no backup card",
+    );
 
     // Accessibility: every rendered button has a name, every input a label.
     const nameless = [...window.document.querySelectorAll("button")].filter(
@@ -1167,6 +1173,33 @@ async function renderAs(role) {
       "crew: no first-steps card",
       !window.document.querySelector("[data-first-steps]"),
       "crew saw the owner's first steps",
+    );
+
+    // A person can delete their own account from the profile.
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="more"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    [...window.document.querySelectorAll("button")]
+      .find((x) => (x.textContent || "").trim() === "Mein Profil")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    const delBtn = window.document.querySelector("[data-delete-account-btn]");
+    check("crew: the profile offers account deletion", !!delBtn, "no delete-account button");
+    delBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const delModal = window.document.querySelector("[data-delete-account]");
+    check(
+      "crew: the deletion modal asks for the password and says what stays",
+      !!delModal &&
+        !!delModal.querySelector("[data-delete-account-password]") &&
+        /Geschäftsunterlagen/.test(delModal.textContent || ""),
+      delModal ? delModal.textContent.slice(0, 80) : "no modal",
+    );
+    check(
+      "crew: the confirm button is disabled until a password is typed",
+      !!delModal?.querySelector("[data-delete-account-confirm]")?.disabled,
+      "enabled without password",
     );
   }
   if (errors.length) problems.push(...errors);

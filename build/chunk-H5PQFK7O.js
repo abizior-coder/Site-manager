@@ -894,6 +894,19 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "deleteReasonHint": "Tento z\xE1znam je v odoslanom raporte. Zmena sa zaznamen\xE1 s d\xF4vodom.",
   "changeReasonLabel": "D\xF4vod zmeny",
   "histTitle": "Hist\xF3ria",
-  "entryRestored": "Z\xE1znam obnoven\xFD"
+  "entryRestored": "Z\xE1znam obnoven\xFD",
+  "accountDeleteBtn": "Vymaza\u0165 m\xF4j \xFA\u010Det",
+  "accountDeleteTitle": "Vymaza\u0165 \xFA\u010Det",
+  "accountDeleteHint": "Profil, dokumenty, dock, jazyk a hodiny sa vyma\u017E\xFA a prihl\xE1senie zru\u0161\xED. Na potvrdenie zadajte heslo.",
+  "accountDeleteKeeps": "Hodiny, materi\xE1l, fotky a podpisy, ktor\xE9 ste zaznamenali, ost\xE1vaj\xFA firme ako obchodn\xE9 doklady, pod va\u0161\xEDm menom.",
+  "accountOwnerBlocked": "Ako majite\u013E firmy tu \xFA\u010Det vymaza\u0165 nem\xF4\u017Eete. Najprv firmu odovzdajte, alebo nap\xED\u0161te na",
+  "accountDeleteConfirm": "Vymaza\u0165 \xFA\u010Det natrvalo",
+  "accountDeleted": "V\xE1\u0161 \xFA\u010Det bol vymazan\xFD.",
+  "backupCardTitle": "Z\xE1loha",
+  "backupLast": "Posledn\xFD export:",
+  "backupNever": "Zatia\u013E \u017Eiadny export.",
+  "backupOverdue": "Po term\xEDne \u2014 exportujte z\xE1lohu",
+  "backupOk": "Aktu\xE1lne",
+  "backupNowBtn": "Z\xE1lohova\u0165 teraz"
 }
 `;export{o as default};

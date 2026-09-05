@@ -757,6 +757,49 @@ await check("owner CAN still read their personal kv (migration source)", () =>
   assertSucceeds(getDoc(doc(owner, "users", OWNER, "kv", "site-data"))),
 );
 
+// --- leaving ----------------------------------------------------------------
+await check("crew CAN set their own membership inactive (leaving)", () =>
+  assertSucceeds(updateDoc(doc(crew, "companies", CID, "members", CREW), { active: false, leftAt: Date.now() })),
+);
+await check("crew CANNOT change their role while leaving", () =>
+  assertFails(updateDoc(doc(crew, "companies", CID, "members", CREW), { active: false, role: "owner" })),
+);
+await check("crew CANNOT set themselves active again", () =>
+  assertFails(updateDoc(doc(crew, "companies", CID, "members", CREW), { active: true })),
+);
+await check("crew CANNOT deactivate the owner", () =>
+  assertFails(updateDoc(doc(crew, "companies", CID, "members", OWNER), { active: false })),
+);
+await check("crew CAN delete their own users record", () => assertSucceeds(deleteDoc(doc(crew, "users", CREW))));
+
+// --- managers filing for others (restore, Polier for a worker) -------------
+await check("owner CAN create an entry attributed to crew (backup restore)", () =>
+  assertSucceeds(setDoc(doc(owner, "companies", CID, "entries", "e-restored"), { userId: CREW, qty: "4" })),
+);
+await check("owner CAN file a leave record for crew", () =>
+  assertSucceeds(
+    setDoc(doc(owner, "companies", CID, "leave", "l-restored"), {
+      userId: CREW,
+      date: "2026-09-01",
+      type: "vacation",
+      status: "approved",
+    }),
+  ),
+);
+await check("owner CAN restore a sent report of crew", () =>
+  assertSucceeds(
+    setDoc(doc(owner, "companies", CID, "sentReports", "r-restored"), {
+      userId: CREW,
+      period: "daily",
+      periodLabel: "2026-09-01",
+      entryIds: [],
+    }),
+  ),
+);
+await check("crew CANNOT create an entry attributed to someone else", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "entries", "e-forged"), { userId: OWNER, qty: "4" })),
+);
+
 await testEnv.cleanup();
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
