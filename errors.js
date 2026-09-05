@@ -3,152 +3,108 @@
 // explains. Classification is by the error's shape (Firestore codes, HTTP
 // statuses, the Worker's messages), never by guessing at the cause.
 //
-// Pure: no DOM, no i18n. The panel adds the person's language on top.
+// Pure: no DOM, no i18n. The panel adds the person's language on top; the
+// sentences behind each code live in errors-text.js, loaded when a panel
+// opens, so the table here costs the first paint only the codes.
 
 export const ERROR_CODES = {
   // --- saving to the database --------------------------------------------
   E10: {
     tag: "SAVE-DENIED",
     group: "save",
-    de: "Die Datenbank hat den Eintrag abgelehnt: kein Zugriff, oder das Foto ist grösser als 1 MB.",
-    en: "The database refused the entry: no access, or the photo is over 1 MB.",
   },
   E11: {
     tag: "SAVE-OFFLINE",
     group: "save",
-    de: "Keine Verbindung zur Datenbank. Der Eintrag wird gesendet, sobald das Netz zurück ist.",
-    en: "No connection to the database. The entry is sent once the network is back.",
   },
   E12: {
     tag: "SAVE-TOO-BIG",
     group: "save",
-    de: "Der Eintrag ist zu gross für ein Datenbankdokument (1 MB).",
-    en: "The entry is too large for a database document (1 MB).",
   },
   E13: {
     tag: "SAVE-SIGNIN",
     group: "save",
-    de: "Nicht mehr angemeldet. Abmelden und wieder anmelden.",
-    en: "No longer signed in. Sign out and back in.",
   },
   E14: {
     tag: "SAVE-NO-COMPANY",
     group: "save",
-    de: "Kein Firmenkonto geladen. App neu laden.",
-    en: "No company loaded. Reload the app.",
   },
   E19: {
     tag: "SAVE-UNKNOWN",
     group: "save",
-    de: "Speichern fehlgeschlagen, Grund unbekannt. Code und Text melden.",
-    en: "Saving failed for an unknown reason. Report the code and text.",
   },
   // --- photos --------------------------------------------------------------
   E20: {
     tag: "PHOTO-DECODE",
     group: "photo",
-    de: "Das Bild konnte nicht gelesen werden. Anderes Format wählen (JPEG) oder das Foto zuerst in der Galerie öffnen.",
-    en: "The image could not be read. Try another format (JPEG) or open the photo in the gallery first.",
   },
   E21: {
     tag: "PHOTO-ENCODE",
     group: "photo",
-    de: "Das Bild konnte nicht verkleinert werden.",
-    en: "The image could not be re-encoded.",
   },
   // --- the AI proxy (scans, translations, inspection advisers) --------------
   E30: {
     tag: "AI-KEY",
     group: "ai",
-    de: "Der Schlüssel zum KI-Dienst ist ungültig. Der Betreiber muss ihn erneuern.",
-    en: "The AI service key is invalid. The operator must renew it.",
   },
   E31: {
     tag: "AI-LIMIT",
     group: "ai",
-    de: "Tageslimit für KI-Anfragen erreicht (Konto oder Firma). Morgen wieder.",
-    en: "The daily limit for AI requests is reached (account or company). Try tomorrow.",
   },
   E32: {
     tag: "AI-MEMBER",
     group: "ai",
-    de: "Dieses Konto gehört nicht zur Firma, für die die Anfrage gestellt wurde.",
-    en: "This account is not a member of the company the request was made for.",
   },
   E33: {
     tag: "AI-SIGNIN",
     group: "ai",
-    de: "Die Anmeldung ist abgelaufen. Abmelden und wieder anmelden.",
-    en: "The sign-in has expired. Sign out and back in.",
   },
   E34: {
     tag: "AI-ANSWER",
     group: "ai",
-    de: "Der KI-Dienst hat keine brauchbare Antwort geliefert. Nochmals versuchen.",
-    en: "The AI service gave no usable answer. Try again.",
   },
   E35: {
     tag: "AI-UNREACHABLE",
     group: "ai",
-    de: "Der KI-Dienst ist nicht erreichbar (Netz oder Dienst gestört).",
-    en: "The AI service cannot be reached (network or service down).",
   },
   E36: {
     tag: "AI-REQUEST",
     group: "ai",
-    de: "Die Anfrage wurde abgelehnt (zu viele Bilder oder ungültiger Inhalt).",
-    en: "The request was refused (too many images or invalid content).",
   },
   // --- languages ----------------------------------------------------------
   E40: {
     tag: "LANG-OFFLINE",
     group: "lang",
-    de: "Diese Sprache wurde noch nie geladen und braucht einmal eine Verbindung.",
-    en: "This language was never loaded and needs a connection once.",
   },
   // --- plans and documents (R2) ---------------------------------------------
   E50: {
     tag: "FILE-TYPE",
     group: "file",
-    de: "Dieser Dateityp wird nicht angenommen (PDF und Bilder sind erlaubt).",
-    en: "This file type is not accepted (PDF and images are allowed).",
   },
   E51: {
     tag: "FILE-TOO-BIG",
     group: "file",
-    de: "Die Datei ist zu gross für den Upload.",
-    en: "The file is too large to upload.",
   },
   E52: {
     tag: "FILE-DENIED",
     group: "file",
-    de: "Kein Zugriff auf die Dateiablage dieser Firma.",
-    en: "No access to this company's file store.",
   },
   E53: {
     tag: "FILE-UPLOAD",
     group: "file",
-    de: "Upload fehlgeschlagen. Verbindung prüfen und nochmals versuchen.",
-    en: "Upload failed. Check the connection and try again.",
   },
   // --- anything else --------------------------------------------------------
   E91: {
     tag: "CRASH",
     group: "other",
-    de: "Die App ist auf einen unerwarteten Fehler gelaufen. Der Fehler wurde gemeldet; die Seite neu laden.",
-    en: "The app hit an unexpected error. It has been reported; reload the page.",
   },
   E92: {
     tag: "STALE",
     group: "other",
-    de: "Die geöffnete App ist eine Version hinter dem Server. Seite neu laden — dann passt es wieder.",
-    en: "The open app is one version behind the server. Reload the page and it matches again.",
   },
   E90: {
     tag: "UNKNOWN",
     group: "other",
-    de: "Unerwarteter Fehler. Code und Text melden.",
-    en: "Unexpected error. Report the code and text.",
   },
 };
 

@@ -67,6 +67,7 @@ import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-gu
 import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { routeFor, precacheAllowed } from "./sw-routes.js";
 import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
+import { ERROR_TEXT } from "./errors-text.js";
 import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -1227,6 +1228,11 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       return w("./tabs/CockpitTab.jsx") === w("./roofing-site-manager.jsx");
     })(),
     true,
+  );
+  t(
+    "every error code has its sentence in German and English",
+    Object.keys(ERROR_CODES).filter((c) => !ERROR_TEXT[c] || !ERROR_TEXT[c].de || !ERROR_TEXT[c].en),
+    [],
   );
   t(
     "no type under 12 px in the source",

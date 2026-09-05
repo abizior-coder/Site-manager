@@ -900,6 +900,20 @@ export default function SiteManager() {
   const [quickAddSite, setQuickAddSite] = useState(null);
   // The one place a failure is shown: a panel in the middle with a code.
   const [errorBox, setErrorBox] = useState(null);
+  // The sentences behind the codes arrive when a panel first opens.
+  const [errText, setErrText] = useState(null);
+  useEffect(() => {
+    if (!errorBox || errText) return undefined;
+    let alive = true;
+    import("./errors-text.js")
+      .then((m) => {
+        if (alive) setErrText(m.ERROR_TEXT);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [errorBox]);
   function showError(e, context) {
     const c = classifyError(e, context);
     console.error(`[${c.code} ${c.tag}]`, context, e);
@@ -5738,7 +5752,8 @@ export default function SiteManager() {
                 file: t.errGroupFile,
                 other: t.errGroupOther,
               }[meta.group] || t.errGroupOther;
-            const meaning = lang === "de" || lang === "gsw" ? meta.de : meta.en;
+            const words = (errText && (errText[errorBox.code] || errText.E90)) || {};
+            const meaning = (lang === "de" || lang === "gsw" ? words.de : words.en) || "";
             const report = errorReport(errorBox, SHELL_BUILD);
             return (
               <div
