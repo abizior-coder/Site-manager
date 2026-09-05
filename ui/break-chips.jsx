@@ -9,7 +9,7 @@ export function BreakChips({ entries, userId, onToggle, t }) {
   const mine = (entries || []).filter((e) => e.date === today && e.userId === userId);
   return (
     <div className="mt-3">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.breaksTitle}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.breaksTitle}</div>
       <div className="grid grid-cols-2 gap-2">
         {BREAKS.map((b) => {
           const on = breakTaken(mine, b.key);

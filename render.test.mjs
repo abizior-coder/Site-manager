@@ -523,6 +523,31 @@ async function renderAs(role) {
     const exportCard = window.document.querySelector("[data-export-card]");
     check("owner: the cockpit shows the accounting export card", !!exportCard && !!exportCard.querySelector("[data-export-month]"), "no export card");
     check("owner: the cockpit shows the errors card", !!window.document.querySelector("[data-errors-card]"), "no errors card");
+
+    // Accessibility: every rendered button has a name, every input a label.
+    const nameless = [...window.document.querySelectorAll("button")].filter((b) => !(b.textContent || "").trim() && !b.getAttribute("aria-label") && !b.getAttribute("title"));
+    check("owner: every rendered button has an accessible name", nameless.length === 0, nameless.slice(0, 3).map((b) => b.outerHTML.slice(0, 80)).join(" | "));
+    const unlabelled = [...window.document.querySelectorAll("input, textarea")].filter((i) => i.type !== "hidden" && i.type !== "file" && !i.getAttribute("aria-label") && !i.getAttribute("aria-labelledby") && !i.id);
+    check("owner: every rendered input has a label", unlabelled.length === 0, unlabelled.slice(0, 3).map((i) => i.outerHTML.slice(0, 80)).join(" | "));
+    check("owner: the page language follows the UI", window.document.documentElement.lang === "de", window.document.documentElement.lang);
+
+    // A modal is a dialog: labelled, focus inside, Tab stays, Escape closes.
+    window.document.querySelector('[data-tab-bar] [data-tab="today"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const opener = window.document.querySelector('[data-first-step="hours"]');
+    opener?.focus();
+    opener?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const dlg = window.document.querySelector('[role="dialog"]');
+    check("owner: the billing modal is a labelled dialog", !!dlg && dlg.getAttribute("aria-modal") === "true" && !!dlg.getAttribute("aria-labelledby"), dlg ? dlg.outerHTML.slice(0, 120) : `no dialog; fixed=${window.document.querySelectorAll(".fixed").length}; opener=${!!opener}; billing=${/Rechnungsangaben/.test(text())}; err=${errors.slice(-1).join("").slice(0, 160)}`);
+    check("owner: focus moved into the dialog", !!dlg && dlg.contains(window.document.activeElement), String(window.document.activeElement?.outerHTML || "").slice(0, 60));
+    const focusables = dlg ? [...dlg.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])')] : [];
+    focusables[focusables.length - 1]?.focus();
+    dlg?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    check("owner: Tab from the last control wraps to the first", focusables.length > 1 && window.document.activeElement === focusables[0], String(window.document.activeElement?.outerHTML || "").slice(0, 60));
+    dlg?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check("owner: Escape closes the dialog and focus returns to the opener", !window.document.querySelector('[role="dialog"]') && window.document.activeElement === opener, String(window.document.activeElement?.outerHTML || "").slice(0, 60));
     const got = [];
     window.addEventListener("site-log:download", (e) => got.push(e.detail));
     exportCard?.querySelector('[data-export="payroll"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));

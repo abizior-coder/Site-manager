@@ -89,8 +89,8 @@ export function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDel
         {(entry.photo || entry.photoId) && <StoredImage photo={entry.photo} photoId={entry.photoId} className="w-full rounded-md mt-2 max-h-32 object-cover" />}
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {handleEdit && <button onClick={() => handleEdit(entry)} style={{ color: COLORS.muted }}><Pencil size={14} /></button>}
-        {onDelete && <button onClick={() => onDelete(entry)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>}
+        {handleEdit && <button className="tap" aria-label={t.a11yEdit} title={t.a11yEdit} onClick={() => handleEdit(entry)} style={{ color: COLORS.muted }}><Pencil size={14} /></button>}
+        {onDelete && <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => onDelete(entry)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>}
       </div>
     </div>
   );

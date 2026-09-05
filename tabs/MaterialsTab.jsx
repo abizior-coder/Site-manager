@@ -22,7 +22,7 @@ function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
   const last = Math.min(shown.length, first + Math.ceil(VIEW / ROW) + 20);
   const demo = rows.length > 0 && !!rows[0].demo;
   const head = (key, label, align) => (
-    <button data-sort-col={key} onClick={() => { if (sortKey === key) setDir(dir === "asc" ? "desc" : "asc"); else { setSortKey(key); setDir("asc"); } }} style={{ color: sortKey === key ? COLORS.accent : COLORS.muted }} className={`text-[10px] uppercase tracking-wide font-bold truncate ${align === "right" ? "text-right" : "text-left"}`}>
+    <button data-sort-col={key} onClick={() => { if (sortKey === key) setDir(dir === "asc" ? "desc" : "asc"); else { setSortKey(key); setDir("asc"); } }} style={{ color: sortKey === key ? COLORS.accent : COLORS.muted }} className={`text-xs uppercase tracking-wide font-bold truncate ${align === "right" ? "text-right" : "text-left"}`}>
       {label}{sortKey === key ? (dir === "asc" ? " ▲" : " ▼") : ""}
     </button>
   );
@@ -31,11 +31,11 @@ function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
     <div data-article-sheet style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
       <div className="flex items-center gap-2 mb-2">
         <Search size={14} color={COLORS.muted} className="shrink-0" />
-        <input data-sheet-search value={q} onChange={(e) => { setQ(e.target.value); setTop(0); }} placeholder={t.sheetSearch} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded-lg px-3 py-2 text-sm outline-none" />
-        <span data-sheet-count style={{ color: COLORS.muted }} className="text-[10px] shrink-0 tabular-nums">{q ? `${shown.length} / ${rows.length}` : `${rows.length} ${t.sheetArticles}`}</span>
+        <input aria-label={t.sheetSearch} data-sheet-search value={q} onChange={(e) => { setQ(e.target.value); setTop(0); }} placeholder={t.sheetSearch} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded-lg px-3 py-2 text-sm outline-none" />
+        <span data-sheet-count style={{ color: COLORS.muted }} className="text-xs shrink-0 tabular-nums">{q ? `${shown.length} / ${rows.length}` : `${rows.length} ${t.sheetArticles}`}</span>
       </div>
       {demo && (
-        <div style={{ color: COLORS.amber }} className="text-[11px] mb-2 flex flex-wrap items-center gap-x-2">
+        <div style={{ color: COLORS.amber }} className="text-xs mb-2 flex flex-wrap items-center gap-x-2">
           <span>{t.sheetDemo}</span>
           {onImport && <button onClick={onImport} style={{ color: COLORS.accent }} className="underline font-bold">{t.importPriceList}</button>}
         </div>
@@ -51,7 +51,7 @@ function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
             <span className="truncate font-semibold" title={a.name}>{a.name}</span>
             <span style={{ color: COLORS.muted }} className="truncate">{a.unit || ""}</span>
             <span className="tabular-nums text-right truncate">{a.price || ""}</span>
-            <button data-sheet-add onClick={() => onAdd(a)} title={t.basketLabel} style={{ background: COLORS.accent }} className="w-7 h-7 rounded-full flex items-center justify-center"><Plus size={14} color="#fff" /></button>
+            <button aria-label={t.a11yAdd} data-sheet-add onClick={() => onAdd(a)} title={t.basketLabel} style={{ background: COLORS.accent }} className="tap w-7 h-7 rounded-full flex items-center justify-center"><Plus size={14} color="#fff" /></button>
           </div>
         ))}
         <div style={{ height: Math.max(0, (shown.length - last) * ROW) }} />
@@ -88,14 +88,14 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <div className="text-sm font-bold flex items-center gap-1.5"><BookOpen size={14} color={COLORS.accent} /> {t.articleMasterTitle}</div>
-              <div style={{ color: COLORS.muted }} className="text-[11px] mt-0.5">
+              <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
                 {known > 0 ? `${known} ${t.articlesKnown}` : t.articleMasterEmpty}
               </div>
             </div>
             <button
               onClick={() => priceFileRef.current?.click()}
               style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.accent }}
-              className="shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold uppercase"
+              className="shrink-0 px-3 py-2 rounded-lg text-xs font-bold uppercase"
             >
               {t.importPriceList}
             </button>
@@ -126,7 +126,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
             <div className="flex flex-col gap-3">
               {Object.entries(bySupplier).map(([sup, items]) => (
                 <div key={sup}>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{sup}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{sup}</div>
                   <div className="flex flex-col gap-1.5">
                     {items.map((e) => {
                       const st = ORDER_STATES.find((x) => x.key === (e.orderStatus || "requested")) || ORDER_STATES[0];
@@ -135,26 +135,26 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
                           <div className="flex items-center justify-between gap-2">
                             <div className="min-w-0 flex-1">
                               <div className="text-sm truncate">{e.description}</div>
-                              <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                              <div style={{ color: COLORS.muted }} className="text-xs truncate">
                                 {[projectName(e.projectId), e.artNo && `${t.artNoShort} ${e.artNo}`].filter(Boolean).join(" · ")}
                               </div>
                             </div>
                             <span style={{ color: COLORS.muted }} className="shrink-0 text-xs tabular-nums">{e.qty}{e.unit ? " " + e.unit : ""}</span>
-                            <span style={{ background: `${st.color}22`, color: st.color, border: `1px solid ${st.color}66` }} className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase">
+                            <span style={{ background: `${st.color}22`, color: st.color, border: `1px solid ${st.color}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full uppercase">
                               {t[st.labelKey]}
                             </span>
                           </div>
                           {canManage() && (
                             <div className="flex gap-1.5 mt-1.5">
                               {e.orderStatus !== "ordered" && (
-                                <button onClick={() => setOrderStatus(e, "ordered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: "#6FB3D9" }} className="flex-1 py-1.5 rounded text-[10px] font-bold uppercase">
+                                <button onClick={() => setOrderStatus(e, "ordered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: "#6FB3D9" }} className="flex-1 py-1.5 rounded text-xs font-bold uppercase">
                                   {t.markOrdered}
                                 </button>
                               )}
-                              <button onClick={() => setOrderStatus(e, "delivered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.success }} className="flex-1 py-1.5 rounded text-[10px] font-bold uppercase">
+                              <button onClick={() => setOrderStatus(e, "delivered")} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.success }} className="flex-1 py-1.5 rounded text-xs font-bold uppercase">
                                 {t.markDelivered}
                               </button>
-                              <button onClick={() => deleteEntryFn(e)} style={{ color: COLORS.danger }} className="px-2"><Trash2 size={13} /></button>
+                              <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => deleteEntryFn(e)} style={{ color: COLORS.danger }} className="tap px-2"><Trash2 size={13} /></button>
                             </div>
                           )}
                         </div>
@@ -172,7 +172,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
           the merchants' catalogs. Every hit can be dragged to a job. */}
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl px-3 py-2 flex items-center gap-2">
         <Search size={15} color={COLORS.muted} className="shrink-0" />
-        <input
+        <input aria-label={t.materialSearchPlaceholder}
           value={materialSearch}
           onChange={(e) => setMaterialSearch(e.target.value)}
           placeholder={t.materialSearchPlaceholder}
@@ -180,7 +180,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
           className="flex-1 min-w-0 text-sm outline-none"
         />
         {materialSearch && (
-          <button onClick={() => setMaterialSearch("")} style={{ color: COLORS.muted }} className="shrink-0"><X size={14} /></button>
+          <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setMaterialSearch("")} style={{ color: COLORS.muted }} className="tap shrink-0"><X size={14} /></button>
         )}
       </div>
       <div className="grid grid-cols-4 gap-2">
@@ -207,14 +207,14 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
         const chip = (name, kind, sub) => (
           <button key={kind + name} {...materialDragProps(name, kind)} onClick={() => addToBasket(name, kind)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs text-left cursor-grab active:cursor-grabbing">
             <div>{name}</div>
-            {sub && <div style={{ color: COLORS.muted }} className="text-[10px]">{sub}</div>}
+            {sub && <div style={{ color: COLORS.muted }} className="text-xs">{sub}</div>}
           </button>
         );
         return (
           <div className="flex flex-col gap-3">
             {own.length > 0 && (
               <div>
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.searchOurArticles} ({own.length})</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.searchOurArticles} ({own.length})</div>
                 <div className="flex flex-wrap gap-1.5">
                   {own.map((a) => chip(a.name, "material", [a.supplier, a.artNo && `${t.artNoShort} ${a.artNo}`, a.price && `${a.price}${a.unit ? "/" + a.unit : ""}`].filter(Boolean).join(" · ")))}
                 </div>
@@ -222,7 +222,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
             )}
             {hits.length > 0 && (
               <div>
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.searchCatalog} ({hits.length})</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.searchCatalog} ({hits.length})</div>
                 <div className="flex flex-wrap gap-1.5">
                   {hits.map((h) => chip(h.name, h.kind, h.where))}
                 </div>
@@ -265,7 +265,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
             <div className="flex flex-col gap-2">
               {catalog.items[shopCat].map((grp) => (
                 <div key={grp.group}>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{grp.group}</div>
                   <div className="flex flex-wrap gap-1.5">
                     {grp.items.map((name) => (
                       <button key={name} {...materialDragProps(name, "material")} onClick={() => addToBasket(name, "material")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
@@ -299,7 +299,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
                   </a>
                   {toolsCatalog.items[shopCat].map((grp) => (
                     <div key={grp.group}>
-                      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{grp.group}</div>
+                      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{grp.group}</div>
                       <div className="flex flex-wrap gap-1.5">
                         {grp.items.map((name) => (
                           <button key={name} {...materialDragProps(name, "tool")} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
@@ -328,7 +328,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
                     if (matchingGroups.length === 0) return null;
                     return (
                       <div key={supplierKey}>
-                        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{toolsCatalog.cats[supplierKey]}</div>
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{toolsCatalog.cats[supplierKey]}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {matchingGroups.flatMap((g) => g.items).map((name) => (
                             <button key={name} {...materialDragProps(name, "tool")} onClick={() => addToBasket(name, "tool")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs cursor-grab active:cursor-grabbing">
@@ -376,7 +376,7 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
             </button>
           </div>
           {techLibrary.length > 0 && (
-            <input value={librarySearch} onChange={(e) => setLibrarySearch(e.target.value)} placeholder={t.specSearchPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.specSearchPlaceholder} value={librarySearch} onChange={(e) => setLibrarySearch(e.target.value)} placeholder={t.specSearchPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
           )}
           {techLibrary.length === 0 ? (
             <div style={{ color: COLORS.muted }} className="text-xs text-center py-6">{t.noLibraryItemsYet}</div>
@@ -400,14 +400,14 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
                         )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => openLibraryEdit(it)} style={{ color: COLORS.muted }}><Pencil size={15} /></button>
-                        <button onClick={() => deleteLibraryItem(it.id)} style={{ color: COLORS.danger }}><Trash2 size={15} /></button>
+                        <button className="tap" aria-label={t.a11yEdit} title={t.a11yEdit} onClick={() => openLibraryEdit(it)} style={{ color: COLORS.muted }}><Pencil size={15} /></button>
+                        <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => deleteLibraryItem(it.id)} style={{ color: COLORS.danger }}><Trash2 size={15} /></button>
                       </div>
                     </div>
                     {it.specs && it.specs.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {it.specs.map((s) => (
-                          <span key={s.id} style={{ background: COLORS.cardAlt, color: COLORS.muted }} className="text-[11px] rounded-md px-2 py-1">
+                          <span key={s.id} style={{ background: COLORS.cardAlt, color: COLORS.muted }} className="text-xs rounded-md px-2 py-1">
                             <b style={{ color: COLORS.text }}>{s.key}:</b> {s.value}
                           </span>
                         ))}
@@ -433,8 +433,8 @@ export function MaterialsTab({ materialDragProps, addToBasket, articleMaster, ba
                   <GripVertical size={12} color={COLORS.muted} className="shrink-0" /> {i.name}
                 </span>
                 <input value={i.qty} onChange={(e) => updateBasketItem(i.id, "qty", e.target.value)} inputMode="decimal" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-12 text-xs rounded px-1.5 py-1.5 outline-none" />
-                <input value={i.unit} onChange={(e) => updateBasketItem(i.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-16 text-xs rounded px-1.5 py-1.5 outline-none" />
-                <button onClick={() => removeBasketItem(i.id)} style={{ color: COLORS.muted }}><X size={14} /></button>
+                <input aria-label={t.unitPlaceholder} value={i.unit} onChange={(e) => updateBasketItem(i.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-16 text-xs rounded px-1.5 py-1.5 outline-none" />
+                <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => removeBasketItem(i.id)} style={{ color: COLORS.muted }}><X size={14} /></button>
               </div>
             ))}
           </div>

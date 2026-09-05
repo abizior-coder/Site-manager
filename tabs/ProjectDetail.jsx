@@ -7,10 +7,12 @@ import { todayKey, uid } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { Camera, Clock, LayoutGrid, MessageSquare, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDialog } from "../ui/dialog.js";
 import { LANGS } from "../i18n/index.js";
 import { DEFAULT_PROJECT_STATUS, DEFAULT_TRADE, PROJECT_CATEGORIES, Section, TRADES, documentState, mapsUrl, statusMeta, telHref } from "../roofing-site-manager.jsx";
 
 export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEditEntry, onCopyEntry, onDeleteEntry, onShare, onScanCompare, onReorderEntries, costing, money, documents, onNewDocument, onOpenDocument, onPrintDocument, canBill, reports, onOpenRapport, onPrintRapport, regie, onRegieDocument, customer, onEditCustomer, noteDraft, onNoteDraftChange, onSaveNote, onVoiceNote, voiceActive, crew, roster, onToggleCrew, canManageCrew, pinned, onTogglePin, files, onUploadFiles, onOpenFile, onDeleteFile, canDeleteFile, onAddLink, fileBusy, activeClock, onStartDay, onStopDay, translations, onTranslate, onTranslateAll, translatingIds, lang, langOptions, onOpenPhoto, onInspect, onEditInspection, canEditInspection, currentUid, t }) {
+  const sheetRef = useDialog({ onClose, active: true });
   // Which note has its language chips open.
   const [pickFor, setPickFor] = useState(null);
   const langLabel = (code) => (LANGS.find((l) => l.code === code) || {}).label || code.toUpperCase();
@@ -46,7 +48,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
       <div onClick={onClose} className="absolute inset-0 bg-black/60" />
       {/* On a phone this stays a sheet you thumb through. On a desk a job is
           the thing you are working on, so it takes the whole screen. */}
-      <div style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-none rounded-t-2xl lg:rounded-none p-5 lg:p-8 max-h-[85vh] lg:max-h-none lg:h-full overflow-y-auto">
+      <div ref={sheetRef} role="dialog" aria-modal="true" aria-label={project.name} tabIndex={-1} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-none rounded-t-2xl lg:rounded-none p-5 lg:p-8 max-h-[85vh] lg:max-h-none lg:h-full overflow-y-auto">
         {/* The name block yields and wraps; the buttons keep their width. On a
             phone the name plus two chips plus 'Bearbeiten' and the close
             button pushed the header past the right edge. */}
@@ -55,14 +57,14 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             <div className="flex items-center gap-1.5 flex-wrap">
               <div className="font-black text-lg break-words">{project.name}</div>
               {project.category && (
-                <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {t[PROJECT_CATEGORIES.find((c) => c.key === project.category)?.labelKey] || project.category}
                 </span>
               )}
               {(() => {
                 const sm = statusMeta(project.status || DEFAULT_PROJECT_STATUS);
                 return (
-                  <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                  <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
                     {t[sm.labelKey]}
                   </span>
                 );
@@ -80,12 +82,12 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             )}
           </div>
           <div className="flex items-center gap-3 shrink-0 pt-1">
-            <button onClick={onTogglePin} title={pinned ? t.dockUnpin : t.dockPin} style={{ color: pinned ? COLORS.accent : COLORS.muted }}>
+            <button className="tap" aria-label={t.a11yPin} onClick={onTogglePin} title={pinned ? t.dockUnpin : t.dockPin} style={{ color: pinned ? COLORS.accent : COLORS.muted }}>
               <Pin size={16} fill={pinned ? COLORS.accent : "none"} />
             </button>
-            <button onClick={() => onShare(project, entries)} style={{ color: COLORS.muted }}><Share2 size={16} /></button>
+            <button className="tap" aria-label={t.a11yShare} title={t.a11yShare} onClick={() => onShare(project, entries)} style={{ color: COLORS.muted }}><Share2 size={16} /></button>
             <button onClick={onEdit} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.editLabel}</button>
-            <button onClick={onClose}><X size={20} color={COLORS.muted} /></button>
+            <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={onClose}><X size={20} color={COLORS.muted} /></button>
           </div>
         </div>
         <div className="lg:max-w-4xl lg:mx-auto">
@@ -95,9 +97,9 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           {[["overview", t.hubOverview, 0], ["time", t.hubTime, timeCount], ["material", t.materials, materials.length + tools.length], ["photos", t.hubPhotos, photos.length], ["plans", t.hubPlans, (files || []).length], ["reports", t.hubReports, (reports || []).length], ["chat", t.hubChat, unreadChat]].map(([id, label, count]) => {
             const on = hubTab === id;
             return (
-              <button key={id} data-hub-tab={id} onClick={() => setHubTab(id)} style={{ background: on ? COLORS.accent : COLORS.card, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? "#fff" : COLORS.text }} className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase flex items-center gap-1.5">
+              <button key={id} data-hub-tab={id} onClick={() => setHubTab(id)} style={{ background: on ? COLORS.accent : COLORS.card, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? "#fff" : COLORS.text }} className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase flex items-center gap-1.5">
                 {label}
-                {count > 0 && <span data-hub-count={id} style={{ background: on ? "#ffffff33" : (id === "chat" ? COLORS.accent : COLORS.cardAlt), color: "#fff" }} className="px-1.5 rounded-full text-[10px] font-bold">{count}</span>}
+                {count > 0 && <span data-hub-count={id} style={{ background: on ? "#ffffff33" : (id === "chat" ? COLORS.accent : COLORS.cardAlt), color: "#fff" }} className="px-1.5 rounded-full text-xs font-bold">{count}</span>}
               </button>
             );
           })}
@@ -134,19 +136,19 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
         {customer && (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 mb-3">
             <div className="flex items-center justify-between gap-2 mb-2">
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.customerLabel}</div>
-              <button onClick={() => onEditCustomer(customer)} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase">{t.editLabel}</button>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.customerLabel}</div>
+              <button onClick={() => onEditCustomer(customer)} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase">{t.editLabel}</button>
             </div>
             <div className="text-sm font-semibold truncate">{customer.name}</div>
             {customer.company && <div style={{ color: COLORS.muted }} className="text-xs truncate">{customer.company}</div>}
             <div className="flex flex-wrap gap-1.5 mt-2">
               {customer.phone && (
-                <a href={telHref(customer.phone)} style={{ background: COLORS.cardAlt, color: COLORS.success }} className="px-2 py-1 rounded text-[11px] font-bold flex items-center gap-1">
+                <a href={telHref(customer.phone)} style={{ background: COLORS.cardAlt, color: COLORS.success }} className="px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                   <Phone size={11} /> {customer.phone}
                 </a>
               )}
               {customer.email && (
-                <a href={`mailto:${customer.email}`} style={{ background: COLORS.cardAlt, color: "#B48EAD" }} className="px-2 py-1 rounded text-[11px] font-bold flex items-center gap-1">
+                <a href={`mailto:${customer.email}`} style={{ background: COLORS.cardAlt, color: "#B48EAD" }} className="px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                   <Mail size={11} /> {customer.email}
                 </a>
               )}
@@ -171,16 +173,16 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           }}
           className="rounded-xl p-3 mb-3"
         >
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.crewOnJob} ({onCrew.length})</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.crewOnJob} ({onCrew.length})</div>
           {onCrew.length === 0 ? (
             <div style={{ color: COLORS.muted }} className="text-xs mb-2">{canManageCrew ? t.crewDropHint : t.crewNobody}</div>
           ) : (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {onCrew.map((m) => (
-                <span key={m.uid} style={{ background: `${COLORS.accent}1F`, border: `1px solid ${COLORS.accent}66`, color: COLORS.accent }} className="pl-2.5 pr-1.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5">
+                <span key={m.uid} style={{ background: `${COLORS.accent}1F`, border: `1px solid ${COLORS.accent}66`, color: COLORS.accent }} className="pl-2.5 pr-1.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
                   {m.name || m.email || m.uid}
                   {canManageCrew && (
-                    <button onClick={() => onToggleCrew(m.uid)} title={t.removeLabel}><X size={11} /></button>
+                    <button className="tap" aria-label={t.a11yClose} onClick={() => onToggleCrew(m.uid)} title={t.removeLabel}><X size={11} /></button>
                   )}
                 </span>
               ))}
@@ -195,7 +197,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                   onDragStart={(e) => e.dataTransfer.setData("text/member-uid", m.uid)}
                   onClick={() => onToggleCrew(m.uid)}
                   style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.muted }}
-                  className="px-2.5 py-1 rounded-full text-[11px] font-bold cursor-grab active:cursor-grabbing"
+                  className="px-2.5 py-1 rounded-full text-xs font-bold cursor-grab active:cursor-grabbing"
                 >
                   + {m.name || m.email || m.uid}
                 </button>
@@ -217,13 +219,13 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
           className="rounded-xl p-3 mb-3"
         >
           <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide flex items-center gap-1.5 min-w-0">
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide flex items-center gap-1.5 min-w-0">
               <FileText size={11} /> <span className="truncate">{t.filesTitle} ({(files || []).length})</span>
               {fileBusy > 0 && <Loader2 size={11} className="animate-spin" />}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => onAddLink()} style={{ color: COLORS.muted }} className="text-[10px] font-bold uppercase flex items-center gap-1 whitespace-nowrap"><ExternalLink size={11} /> {t.filesAddLink}</button>
-              <button onClick={() => fileInputRef.current?.click()} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 whitespace-nowrap"><Plus size={11} /> {t.filesAdd}</button>
+              <button onClick={() => onAddLink()} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase flex items-center gap-1 whitespace-nowrap"><ExternalLink size={11} /> {t.filesAddLink}</button>
+              <button onClick={() => fileInputRef.current?.click()} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase flex items-center gap-1 whitespace-nowrap"><Plus size={11} /> {t.filesAdd}</button>
               <input ref={fileInputRef} type="file" multiple className="hidden" onChange={(e) => { onUploadFiles(e.target.files); e.target.value = ""; }} />
             </div>
           </div>
@@ -238,12 +240,12 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                     <Icon size={15} color={f.kind === "plan" ? COLORS.accent : COLORS.muted} className="shrink-0" />
                     <button onClick={() => onOpenFile(f)} className="flex-1 min-w-0 text-left">
                       <div className="text-sm truncate">{f.name}</div>
-                      <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                      <div style={{ color: COLORS.muted }} className="text-xs truncate">
                         {[t[`fileKind_${f.kind}`] || f.kind, f.url ? t.filesLinkLabel : fmtSize(f.size), f.createdAt ? new Date(f.createdAt).toLocaleDateString() : ""].filter(Boolean).join(" · ")}
                       </div>
                     </button>
                     {canDeleteFile(f) && (
-                      <button onClick={() => onDeleteFile(f)} title={t.deleteLabel} style={{ color: COLORS.danger }} className="shrink-0"><Trash2 size={13} /></button>
+                      <button aria-label={t.a11yDelete} onClick={() => onDeleteFile(f)} title={t.deleteLabel} style={{ color: COLORS.danger }} className="tap shrink-0"><Trash2 size={13} /></button>
                     )}
                   </div>
                 );
@@ -269,7 +271,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
               <button key={r.id} onClick={() => onPrintRapport(r)} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm truncate">{t.rapportTitle} · {r.date}</div>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                  <div style={{ color: COLORS.muted }} className="text-xs truncate">
                     {r.signerName} · {r.hours} h
                     {rapportChanged(r, entries.filter((e) => e.date === r.date)) && <span style={{ color: COLORS.amber }}> · {t.rapportChangedSince}</span>}
                   </div>
@@ -300,12 +302,12 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                     <div className="text-sm font-semibold truncate">
                       {d.type === "invoice" ? t.invoiceLabel : t.quoteLabel} {d.number}
                     </div>
-                    <div style={{ color: COLORS.muted }} className="text-[10px]">{d.date} · {st.totals.gross.toFixed(2)}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs">{d.date} · {st.totals.gross.toFixed(2)}</div>
                   </button>
-                  <span style={{ background: `${st.overdue ? COLORS.danger : st.meta.color}22`, color: st.overdue ? COLORS.danger : st.meta.color, border: `1px solid ${st.overdue ? COLORS.danger : st.meta.color}66` }} className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                  <span style={{ background: `${st.overdue ? COLORS.danger : st.meta.color}22`, color: st.overdue ? COLORS.danger : st.meta.color, border: `1px solid ${st.overdue ? COLORS.danger : st.meta.color}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
                     {st.overdue ? t.overdueLabel : t[st.meta.labelKey]}
                   </span>
-                  <button onClick={() => onPrintDocument(d)} style={{ color: COLORS.muted }} className="shrink-0"><Printer size={14} /></button>
+                  <button aria-label={t.a11yPrint} title={t.a11yPrint} onClick={() => onPrintDocument(d)} style={{ color: COLORS.muted }} className="tap shrink-0"><Printer size={14} /></button>
                 </div>
               );
             })}
@@ -331,14 +333,14 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
               )}
             </div>
             {canBill && regie.unpriced > 0 && (
-              <div style={{ color: COLORS.amber }} className="text-[10px] mt-1.5">{regie.unpriced} {t.costingUnpriced}</div>
+              <div style={{ color: COLORS.amber }} className="text-xs mt-1.5">{regie.unpriced} {t.costingUnpriced}</div>
             )}
             {canBill && (
               <div className="grid grid-cols-2 gap-2 mt-3">
-                <button onClick={() => onRegieDocument("quote")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-[11px] font-bold uppercase">
+                <button onClick={() => onRegieDocument("quote")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2 rounded-lg text-xs font-bold uppercase">
                   {t.regieAsQuote}
                 </button>
-                <button onClick={() => onRegieDocument("invoice")} style={{ background: COLORS.amber, color: "#241C00" }} className="py-2 rounded-lg text-[11px] font-bold uppercase">
+                <button onClick={() => onRegieDocument("invoice")} style={{ background: COLORS.amber, color: "#241C00" }} className="py-2 rounded-lg text-xs font-bold uppercase">
                   {t.regieAsInvoice}
                 </button>
               </div>
@@ -378,7 +380,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
               )}
             </div>
             {(!costing.hasRate || costing.unpricedCount > 0) && (
-              <div style={{ color: COLORS.amber }} className="text-[10px] mt-2 leading-relaxed">
+              <div style={{ color: COLORS.amber }} className="text-xs mt-2 leading-relaxed">
                 {!costing.hasRate && <div>{t.costingNoRate}</div>}
                 {costing.unpricedCount > 0 && <div>{costing.unpricedCount} {t.costingUnpriced}</div>}
               </div>
@@ -419,7 +421,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                     <span style={{ color: tr.color }} className="text-xs font-black uppercase tracking-wide">{t[tr.labelKey]}</span>
                   </div>
                   {tradeHours > 0 && (
-                    <span style={{ color: COLORS.muted }} className="text-[11px] font-bold">{tradeHours.toFixed(1)} h</span>
+                    <span style={{ color: COLORS.muted }} className="text-xs font-bold">{tradeHours.toFixed(1)} h</span>
                   )}
                 </div>
                 {mine.length > 0 && <Section title={`${t.materials} (${mine.length})`} items={mine} onEditItem={onEditEntry} onCopyItem={onCopyEntry} onDeleteItem={onDeleteEntry} onReorder={onReorderEntries} t={t} />}
@@ -439,7 +441,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             <div className="flex flex-col gap-2">
               {inspections.map((e) => (
                 <div key={e.id} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 py-2 flex flex-col gap-1">
-                  <div className="flex items-center gap-2 text-[10px]" style={{ color: COLORS.muted }}>
+                  <div className="flex items-center gap-2 text-xs" style={{ color: COLORS.muted }}>
                     <span>{e.date}{e.startTime ? ` · ${e.startTime}` : ""}</span>
                     {e.wasteKg > 0 && <span style={{ color: COLORS.amber }} className="ml-auto font-bold">{t.inspectWaste}: ~{e.wasteKg} kg</span>}
                   </div>
@@ -447,13 +449,13 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                   {e.checklist && Object.keys(e.checklist).length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(e.checklist).map(([k, v]) => (
-                        <span key={k} style={{ background: v === "ok" ? `${COLORS.success}22` : `${COLORS.danger}22`, color: v === "ok" ? COLORS.success : COLORS.danger }} className="px-1.5 py-0.5 rounded text-[10px] font-bold">{t[`inspect_${k}`] || k}</span>
+                        <span key={k} style={{ background: v === "ok" ? `${COLORS.success}22` : `${COLORS.danger}22`, color: v === "ok" ? COLORS.success : COLORS.danger }} className="px-1.5 py-0.5 rounded text-xs font-bold">{t[`inspect_${k}`] || k}</span>
                       ))}
                     </div>
                   )}
                   <div className="flex gap-2 justify-end">
-                    {canEditInspection && canEditInspection(e) && <button data-inspect-edit onClick={() => onEditInspection(e)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>}
-                    <button onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }}><Trash2 size={13} /></button>
+                    {canEditInspection && canEditInspection(e) && <button className="tap" aria-label={t.a11yEdit} data-inspect-edit onClick={() => onEditInspection(e)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>}
+                    <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }}><Trash2 size={13} /></button>
                   </div>
                 </div>
               ))}
@@ -469,7 +471,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                   <span style={{ color: COLORS.muted }}>{e.date}</span>
                   <span className="font-bold">{e.from || "?"} → {e.to || "?"}</span>
                   <span style={{ color: COLORS.muted }}>{t[`load_${e.loadKind}`] || e.loadKind}{e.weightKg ? ` · ${e.weightKg} kg` : ""}{e.hours ? ` · ${e.hours} h` : ""}{e.km ? ` · ${e.km} km` : ""}</span>
-                  <button onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }} className="ml-auto"><Trash2 size={13} /></button>
+                  <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => onDeleteEntry(e.id)} style={{ color: COLORS.muted }} className="tap ml-auto"><Trash2 size={13} /></button>
                 </div>
               ))}
             </div>
@@ -486,7 +488,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
               {/* The crew writes in five languages; the desk reads in one.
                   One tap per note, or all at once; done once per language
                   and shared, so the next reader pays nothing. */}
-              <button data-translate-all onClick={onTranslateAll} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1 shrink-0">
+              <button data-translate-all onClick={onTranslateAll} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase flex items-center gap-1 shrink-0">
                 <Languages size={12} /> {t.translateAll}
               </button>
             </div>
@@ -504,21 +506,21 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                 return (
                 <div key={n.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div data-chat-author className="flex items-center gap-2 text-[10px] mb-0.5" style={{ color: COLORS.muted }}>
+                    <div data-chat-author className="flex items-center gap-2 text-xs mb-0.5" style={{ color: COLORS.muted }}>
                       <span className="font-bold" style={{ color: n.userId === currentUid ? COLORS.accent : COLORS.text }}>{memberName(n.userId) || "—"}</span>
                       <span>{n.date}{n.createdAt ? ` ${new Date(n.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}</span>
                     </div>
                     <div className="text-sm break-words">{n.description}</div>
                     {shown.map(([c, v]) => (
                       <div key={c} data-translation data-translation-lang={c} style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }} className="text-sm break-words mt-1.5 pl-2">
-                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mr-1">{c}</span>{v}
+                        <span style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mr-1">{c}</span>{v}
                       </div>
                     ))}
                     {pickFor === n.id && missing.length > 0 && (
                       <div data-translate-pick className="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.translateInto}</span>
+                        <span style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.translateInto}</span>
                         {missing.map((c) => (
-                          <button key={c} data-translate-to={c} onClick={() => { setPickFor(null); onTranslate(n, c); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded-full text-[11px] font-bold">{langLabel(c)}</button>
+                          <button key={c} data-translate-to={c} onClick={() => { setPickFor(null); onTranslate(n, c); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded-full text-xs font-bold">{langLabel(c)}</button>
                         ))}
                       </div>
                     )}
@@ -529,8 +531,8 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
                         {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
                       </button>
                     )}
-                    <button onClick={() => onEditEntry(n)} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
-                    <button onClick={() => onDeleteEntry(n)} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
+                    <button className="tap" aria-label={t.a11yEdit} title={t.a11yEdit} onClick={() => onEditEntry(n)} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
+                    <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => onDeleteEntry(n)} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
                   </div>
                 </div>
                 );
@@ -540,7 +542,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
         )}
 
         <div className="flex gap-2 mt-3">
-          <textarea
+          <textarea aria-label={t.commentPlaceholder}
             data-note-draft
             value={noteDraft}
             onChange={(e) => onNoteDraftChange(e.target.value)}
@@ -550,19 +552,19 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             className="flex-1 rounded-lg px-3 py-2 text-sm outline-none resize-none"
           />
           <div className="flex flex-col gap-2">
-            <button
+            <button aria-label={t.a11yVoice}
               onClick={onVoiceNote}
               title={t.speakBtn}
               style={{ background: voiceActive ? COLORS.danger : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
-              className="rounded-lg px-3 py-2 flex items-center justify-center"
+              className="tap rounded-lg px-3 py-2 flex items-center justify-center"
             >
               <Mic size={16} color={voiceActive ? "#fff" : COLORS.muted} />
             </button>
-            <button
+            <button aria-label={t.a11ySend} title={t.a11ySend}
               onClick={onSaveNote}
               disabled={!noteDraft.trim()}
               style={{ background: noteDraft.trim() ? COLORS.accent : COLORS.cardAlt, opacity: noteDraft.trim() ? 1 : 0.5 }}
-              className="rounded-lg px-3 py-2 flex items-center justify-center"
+              className="tap rounded-lg px-3 py-2 flex items-center justify-center"
             >
               <Send size={16} color={noteDraft.trim() ? "#fff" : COLORS.muted} />
             </button>
@@ -579,13 +581,13 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
             <div className="grid grid-cols-3 gap-2">
               {photos.map((p) => (
                 <div key={p.id} className="relative">
-                  <button data-photo-thumb onClick={() => onOpenPhoto(p)} className="w-full block">
+                  <button aria-label={t.a11yPhoto} title={t.a11yPhoto} data-photo-thumb onClick={() => onOpenPhoto(p)} className="tap w-full block">
                     <StoredImage photo={p.photo} photoId={p.photoId} className="w-full h-20 object-cover rounded-md" />
                   </button>
                   {p.originalPhotoId && (
-                    <span style={{ background: "rgba(0,0,0,0.65)", color: COLORS.amber }} className="absolute bottom-1 left-1 px-1 rounded text-[9px] font-bold uppercase">{t.photoEditedTag}</span>
+                    <span style={{ background: "rgba(0,0,0,0.65)", color: COLORS.amber }} className="absolute bottom-1 left-1 px-1 rounded text-xs font-bold uppercase">{t.photoEditedTag}</span>
                   )}
-                  <button onClick={() => onDeleteEntry(p)} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
+                  <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => onDeleteEntry(p)} style={{ background: "rgba(0,0,0,0.65)" }} className="tap absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center">
                     <X size={12} color="#fff" />
                   </button>
                 </div>
@@ -611,7 +613,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
               {rows.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.nothingLogged}</div>}
               {Object.keys(byDay).sort().reverse().map((day) => (
                 <div key={day} className="mb-2">
-                  <div className="flex items-center justify-between text-[11px] py-1" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+                  <div className="flex items-center justify-between text-xs py-1" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
                     <span style={{ color: COLORS.muted }}>{day}</span><span className="font-bold">{hoursOf(byDay[day]).toFixed(1)} h</span>
                   </div>
                   {byDay[day].map((e) => (
@@ -640,6 +642,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
 // jump between fit and 2.5x. A crack in a tile is a few pixels on a phone;
 // this is how the Polier actually looks at it.
 export function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = true, t }) {
+  const dialogRef = useDialog({ onClose, active: true });
   const [view, setView] = useState({ scale: 1, tx: 0, ty: 0 });
   const pointers = useRef(new Map());
   const gesture = useRef(null);
@@ -709,23 +712,23 @@ export function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = 
   };
 
   return (
-    <div data-photo-viewer className="fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(0,0,0,0.96)" }}>
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t.a11yPhoto} tabIndex={-1} data-photo-viewer className="fixed inset-0 z-50 flex flex-col outline-none" style={{ background: "rgba(0,0,0,0.96)" }}>
       <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0">
         <div className="min-w-0">
           <div className="text-sm font-bold truncate">{entry?.description || t.photoLabel}</div>
-          <div style={{ color: COLORS.muted }} className="text-[10px]">{entry?.date}{entry?.originalPhotoId ? ` · ${t.photoEditedTag}` : ""} · {Math.round(view.scale * 100)}%</div>
+          <div style={{ color: COLORS.muted }} className="text-xs">{entry?.date}{entry?.originalPhotoId ? ` · ${t.photoEditedTag}` : ""} · {Math.round(view.scale * 100)}%</div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => zoomAt(0.7, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomOut} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><ZoomOut size={18} /></button>
-          <button onClick={() => zoomAt(1.4, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomIn} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><ZoomIn size={18} /></button>
+          <button aria-label={t.a11yAction} onClick={() => zoomAt(0.7, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomOut} style={{ color: COLORS.muted }} className="tap w-9 h-9 flex items-center justify-center"><ZoomOut size={18} /></button>
+          <button aria-label={t.a11yAction} onClick={() => zoomAt(1.4, window.innerWidth / 2, window.innerHeight / 2)} title={t.photoZoomIn} style={{ color: COLORS.muted }} className="tap w-9 h-9 flex items-center justify-center"><ZoomIn size={18} /></button>
           {onRestore && (
-            <button onClick={onRestore} title={t.photoRestore} style={{ color: COLORS.amber }} className="w-9 h-9 flex items-center justify-center"><RotateCcw size={18} /></button>
+            <button aria-label={t.a11yUndo} onClick={onRestore} title={t.photoRestore} style={{ color: COLORS.amber }} className="tap w-9 h-9 flex items-center justify-center"><RotateCcw size={18} /></button>
           )}
           <a href={src} download={`${(entry?.description || "foto").replace(/[^\w.-]+/g, "_")}.jpg`} title={t.filesDownload} style={{ color: COLORS.muted }} className="w-9 h-9 flex items-center justify-center"><Download size={18} /></a>
           {canEdit && (
-            <button data-photo-edit onClick={onEdit} title={t.photoEdit} style={{ background: COLORS.accent }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Paintbrush size={18} color="#fff" /></button>
+            <button aria-label={t.a11yTool} data-photo-edit onClick={onEdit} title={t.photoEdit} style={{ background: COLORS.accent }} className="tap w-9 h-9 rounded-lg flex items-center justify-center"><Paintbrush size={18} color="#fff" /></button>
           )}
-          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center"><X size={20} color={COLORS.muted} /></button>
+          <button aria-label={t.a11yClose} title={t.a11yClose} onClick={onClose} className="tap w-9 h-9 flex items-center justify-center"><X size={20} color={COLORS.muted} /></button>
         </div>
       </div>
       <div
@@ -745,7 +748,7 @@ export function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = 
           style={{ transform: `translate(${view.tx}px, ${view.ty}px) scale(${view.scale})`, transition: gesture.current ? "none" : "transform 0.08s", willChange: "transform" }}
         />
       </div>
-      <div style={{ color: COLORS.muted }} className="text-[10px] text-center py-1.5 shrink-0">{t.photoZoomHint}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs text-center py-1.5 shrink-0">{t.photoZoomHint}</div>
     </div>
   );
 }
@@ -756,6 +759,7 @@ export function PhotoViewer({ src, entry, onClose, onEdit, onRestore, canEdit = 
 // a phone lands in the same place on a desk.
 const PHOTO_COLOURS = ["#DA291C", "#FFD400", "#2E8BFF", "#FFFFFF", "#111111"];
 export function PhotoEditor({ src, onCancel, onSave, t }) {
+  const dialogRef = useDialog({ onClose: onCancel, active: true });
   const canvasRef = useRef(null);
   const imgRef = useRef(null);
   const [ready, setReady] = useState(false);
@@ -869,11 +873,11 @@ export function PhotoEditor({ src, onCancel, onSave, t }) {
 
   const tools = [["pen", Paintbrush], ["arrow", MoveUpRight], ["rect", Square], ["circle", Circle], ["text", Type]];
   return (
-    <div data-photo-editor className="fixed inset-0 z-50 flex flex-col" style={{ background: "#000" }}>
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t.a11yPhotoEdit} tabIndex={-1} data-photo-editor className="fixed inset-0 z-50 flex flex-col outline-none" style={{ background: "#000" }}>
       <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0">
         <button onClick={onCancel} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.back}</button>
         <div className="flex items-center gap-1">
-          <button onClick={() => setShapes((s) => s.slice(0, -1))} disabled={!shapes.length} title={t.photoUndo} style={{ color: shapes.length ? COLORS.text : COLORS.border }} className="w-9 h-9 flex items-center justify-center"><Undo2 size={18} /></button>
+          <button aria-label={t.a11yUndo} onClick={() => setShapes((s) => s.slice(0, -1))} disabled={!shapes.length} title={t.photoUndo} style={{ color: shapes.length ? COLORS.text : COLORS.border }} className="tap w-9 h-9 flex items-center justify-center"><Undo2 size={18} /></button>
           <button data-photo-save onClick={save} disabled={!ready} style={{ background: COLORS.accent, opacity: ready ? 1 : 0.5 }} className="px-4 h-9 rounded-lg text-xs font-bold uppercase">{t.saveLabel}</button>
         </div>
       </div>
@@ -890,14 +894,14 @@ export function PhotoEditor({ src, onCancel, onSave, t }) {
       </div>
       {textAt && (
         <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="flex items-center gap-2 px-3 py-2 shrink-0">
-          <input autoFocus value={textValue} onChange={(e) => setTextValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextAt(null); }} placeholder={t.photoTextPrompt} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+          <input aria-label={t.photoTextPrompt} autoFocus value={textValue} onChange={(e) => setTextValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextAt(null); }} placeholder={t.photoTextPrompt} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
           <button onClick={commitText} style={{ background: COLORS.accent }} className="px-3 h-9 rounded-lg text-xs font-bold uppercase">OK</button>
         </div>
       )}
       <div style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-2 px-3 py-2 shrink-0 flex-wrap">
         <div className="flex items-center gap-1">
           {tools.map(([key, Icon]) => (
-            <button key={key} data-photo-tool={key} onClick={() => setTool(key)} title={t[`photoTool_${key}`]} style={{ background: tool === key ? `${COLORS.accent}33` : "transparent", color: tool === key ? COLORS.accent : COLORS.muted, border: `1px solid ${tool === key ? COLORS.accent : "transparent"}` }} className="w-9 h-9 rounded-lg flex items-center justify-center"><Icon size={18} /></button>
+            <button aria-label={t.a11yAction} key={key} data-photo-tool={key} onClick={() => setTool(key)} title={t[`photoTool_${key}`]} style={{ background: tool === key ? `${COLORS.accent}33` : "transparent", color: tool === key ? COLORS.accent : COLORS.muted, border: `1px solid ${tool === key ? COLORS.accent : "transparent"}` }} className="tap w-9 h-9 rounded-lg flex items-center justify-center"><Icon size={18} /></button>
           ))}
         </div>
         <div className="flex items-center gap-1.5">

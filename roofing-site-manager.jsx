@@ -18,6 +18,7 @@ import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
 import { photoCache, loadPhoto, StoredImage, typeMeta, Stat, EntryRow, ENTRY_TYPE_ORDER, EntryGroups } from "./ui/entries.jsx";
 import { BreakChips } from "./ui/break-chips.jsx";
+import { useDialog } from "./ui/dialog.js";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
@@ -3789,18 +3790,25 @@ export default function SiteManager() {
 
   // A newer build is live: offer a restart, on the sign-in screen as much as
   // inside the app, and never reload on our own.
+  // Full-screen overlays that are not <Modal>: same dialog manners.
+  const quickAddRef = useDialog({ onClose: () => { setQuickAddOpen(false); setQuickAddSite(null); }, active: quickAddOpen });
+  const menuRef = useDialog({ onClose: () => setMenuOpen(false), active: menuOpen });
+  const fileViewerRef = useDialog({ onClose: () => closeFileViewer(), active: !!fileViewer });
+  const sosRef = useDialog({ onClose: () => setSosOpen(false), active: sosOpen });
+  const errorRef = useDialog({ onClose: () => setErrorBox(null), active: !!errorBox });
+
   // The owner's first steps: shown on Heute until all four are done or the
   // card is dismissed on this device.
   const firstStepsList = isOwner() ? firstSteps({ projects, customers, members: team.members, invites: team.invites, billing }) : null;
   const firstStepsCard = firstStepsList && !firstStepsDismissed && firstStepsList.some((s) => !s.done) ? (
     <div data-first-steps style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}66` }} className="rounded-xl p-3">
       <div className="flex items-center justify-between mb-2">
-        <div style={{ color: COLORS.accent }} className="text-[10px] uppercase tracking-wide font-bold">{t.firstStepsTitle}</div>
-        <button data-first-steps-dismiss onClick={() => { setFirstStepsDismissed(true); try { localStorage.setItem("site-log-first-steps", "1"); } catch {} }} style={{ color: COLORS.muted }}><X size={14} /></button>
+        <div style={{ color: COLORS.accent }} className="text-xs uppercase tracking-wide font-bold">{t.firstStepsTitle}</div>
+        <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} data-first-steps-dismiss onClick={() => { setFirstStepsDismissed(true); try { localStorage.setItem("site-log-first-steps", "1"); } catch {} }} style={{ color: COLORS.muted }}><X size={14} /></button>
       </div>
       <div className="flex flex-col gap-1.5">
         {firstStepsList.map((s) => (
-          <button key={s.key} data-first-step={s.key} data-done={s.done ? "1" : "0"} onClick={() => { if (s.key === "hours") setBillingModalOpen(true); else if (s.key === "site") setNewProjectOpen(true); else if (s.key === "crew") openTeam(); else setTab("customers"); }} style={{ background: COLORS.cardAlt, opacity: s.done ? 0.6 : 1 }} className="w-full text-left rounded-lg px-3 py-2 flex items-center gap-2 text-sm">
+          <button key={s.key} data-first-step={s.key} data-done={s.done ? "1" : "0"} onClick={() => { if (s.key === "hours") { setBillingDraft({ ...billing }); setBillingModalOpen(true); } else if (s.key === "site") setNewProjectOpen(true); else if (s.key === "crew") openTeam(); else setTab("customers"); }} style={{ background: COLORS.cardAlt, opacity: s.done ? 0.6 : 1 }} className="w-full text-left rounded-lg px-3 py-2 flex items-center gap-2 text-sm">
             <span style={{ background: s.done ? COLORS.success : COLORS.shell, border: `1px solid ${COLORS.border}` }} className="w-5 h-5 rounded-full flex items-center justify-center shrink-0">{s.done ? <Check size={12} color="#12210A" /> : null}</span>
             <span className={s.done ? "line-through" : ""}>{t[`firstSteps${s.key.charAt(0).toUpperCase()}${s.key.slice(1)}`]}</span>
           </button>
@@ -3836,7 +3844,7 @@ export default function SiteManager() {
           </div>
           <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.authIntro}</div>
 
-          <input
+          <input aria-label={t.authEmail}
             type="email" inputMode="email" autoComplete="email"
             value={authForm.email}
             onChange={(e) => setAuthForm((s) => ({ ...s, email: e.target.value, error: null }))}
@@ -3844,7 +3852,7 @@ export default function SiteManager() {
             style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-3 text-sm mb-2 outline-none"
           />
-          <input
+          <input aria-label={t.authPassword}
             type="password" autoComplete={authForm.mode === "signup" ? "new-password" : "current-password"}
             value={authForm.password}
             onChange={(e) => setAuthForm((s) => ({ ...s, password: e.target.value, error: null }))}
@@ -3878,7 +3886,7 @@ export default function SiteManager() {
             <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">{t.authForgot}</button>
           </div>
 
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-8 leading-relaxed">
+          <div style={{ color: COLORS.muted }} className="text-xs mt-8 leading-relaxed">
             {t.authPrivacyNote}{" "}
             <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.amber }} className="underline">{t.privacyLink}</a>
             {" · "}<span data-app-version>{SHELL_BUILD}</span>
@@ -3904,16 +3912,16 @@ export default function SiteManager() {
           </div>
           <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.onbIntro}</div>
 
-          <input value={onboarding.displayName} onChange={(e) => setOnboarding((s) => ({ ...s, displayName: e.target.value }))} placeholder={t.yourName} style={inpStyle} className={inp} />
+          <input aria-label={t.yourName} value={onboarding.displayName} onChange={(e) => setOnboarding((s) => ({ ...s, displayName: e.target.value }))} placeholder={t.yourName} style={inpStyle} className={inp} />
 
           {onboarding.mode === "join" ? (
-            <input value={onboarding.code} onChange={(e) => setOnboarding((s) => ({ ...s, code: e.target.value.toUpperCase() }))} placeholder={t.onbCodePlaceholder} style={inpStyle} className={`${inp} font-mono tracking-widest`} />
+            <input aria-label={t.onbCodePlaceholder} value={onboarding.code} onChange={(e) => setOnboarding((s) => ({ ...s, code: e.target.value.toUpperCase() }))} placeholder={t.onbCodePlaceholder} style={inpStyle} className={`${inp} font-mono tracking-widest`} />
           ) : (
-            <input value={onboarding.companyName} onChange={(e) => setOnboarding((s) => ({ ...s, companyName: e.target.value }))} placeholder={t.onbCompanyName} style={inpStyle} className={inp} />
+            <input aria-label={t.onbCompanyName} value={onboarding.companyName} onChange={(e) => setOnboarding((s) => ({ ...s, companyName: e.target.value }))} placeholder={t.onbCompanyName} style={inpStyle} className={inp} />
           )}
 
           {onboarding.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[onboarding.error] || t.onbErrGeneric}</div>}
-          {onboarding.detail && <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 break-all">{onboarding.detail}</div>}
+          {onboarding.detail && <div style={{ color: COLORS.muted }} className="text-xs mb-3 break-all">{onboarding.detail}</div>}
 
           <button
             onClick={() => submitOnboarding(onboarding.mode === "join" ? "join" : "create")}
@@ -3934,7 +3942,7 @@ export default function SiteManager() {
           </button>
 
           <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">{t.signOut}</button>
-          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
+          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-xs underline">{t.privacyLink}</a>
         </div>
       </div>
     );
@@ -3987,7 +3995,7 @@ export default function SiteManager() {
             <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</div>
           </div>
           {membership && (
-            <div style={{ color: COLORS.muted }} className="text-[10px] mt-1 truncate">
+            <div style={{ color: COLORS.muted }} className="text-xs mt-1 truncate">
               {getRole() === "owner" ? t.roleOwner : getRole() === "supervisor" ? t.roleSupervisor : t.roleCrew}
             </div>
           )}
@@ -4056,14 +4064,14 @@ export default function SiteManager() {
             <div style={{ background: "#2E2620", color: COLORS.amber, border: `1px solid ${COLORS.amber}` }} className="text-xs font-bold px-2 py-1 rounded uppercase">{t.onSite}</div>
           ) : null}
           {canManage() && (
-            <button onClick={() => setTab(tab === "cockpit" ? "today" : "cockpit")} title={t.navCockpit} style={{ background: tab === "cockpit" ? COLORS.accent : COLORS.card, border: `1px solid ${tab === "cockpit" ? COLORS.accent : COLORS.border}` }} className="flex items-center justify-center w-7 h-7 rounded-full">
+            <button aria-label={t.a11yOpen} onClick={() => setTab(tab === "cockpit" ? "today" : "cockpit")} title={t.navCockpit} style={{ background: tab === "cockpit" ? COLORS.accent : COLORS.card, border: `1px solid ${tab === "cockpit" ? COLORS.accent : COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full">
               <ClipboardCheck size={14} color={tab === "cockpit" ? "#fff" : COLORS.muted} />
             </button>
           )}
-          <button onClick={() => setTab("safety")} style={{ background: tab === "safety" ? COLORS.danger : COLORS.card, border: `1px solid ${tab === "safety" ? COLORS.danger : COLORS.border}` }} className="flex items-center justify-center w-7 h-7 rounded-full">
+          <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setTab("safety")} style={{ background: tab === "safety" ? COLORS.danger : COLORS.card, border: `1px solid ${tab === "safety" ? COLORS.danger : COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full">
             <ShieldAlert size={13} color={tab === "safety" ? "#fff" : COLORS.muted} />
           </button>
-          <button onClick={openProfile} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center justify-center w-7 h-7 rounded-full lg:hidden">
+          <button aria-label={t.a11yProfile} title={t.a11yProfile} onClick={openProfile} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full lg:hidden">
             <User size={13} color={COLORS.muted} />
           </button>
           <button onClick={() => setLangPickerOpen(true)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center gap-1 px-2 py-1 rounded-full">
@@ -4080,7 +4088,7 @@ export default function SiteManager() {
             borderBottom: `1px solid ${syncState.error ? COLORS.danger : COLORS.amber}55`,
             color: syncState.error ? COLORS.danger : COLORS.amber,
           }}
-          className="px-4 py-1.5 text-[10px] font-bold text-center break-all"
+          className="px-4 py-1.5 text-xs font-bold text-center break-all"
         >
           {syncState.error ? `${t.syncFailed} ${syncState.error}` : t.syncOffline}
         </div>
@@ -4093,15 +4101,15 @@ export default function SiteManager() {
           const report = errorReport(errorBox, SHELL_BUILD);
           return (
             <div data-error-panel className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.65)" }}>
-              <div style={{ background: COLORS.card, border: `2px solid ${COLORS.danger}`, color: COLORS.text }} className="w-full max-w-md rounded-2xl p-5 shadow-2xl">
+              <div ref={errorRef} role="alertdialog" aria-modal="true" aria-label={`${errorBox.code} ${errorBox.tag}`} tabIndex={-1} style={{ background: COLORS.card, border: `2px solid ${COLORS.danger}`, color: COLORS.text }} className="w-full max-w-md rounded-2xl p-5 shadow-2xl outline-none">
                 <div className="flex items-baseline gap-3">
                   <div data-error-code style={{ color: COLORS.danger }} className="text-4xl font-black tracking-tight">{errorBox.code}</div>
                   <div style={{ color: COLORS.muted }} className="font-mono text-xs">{errorBox.tag}</div>
                 </div>
                 <div className="text-lg font-bold mt-2">{groupTitle}</div>
                 <div className="text-sm mt-1 leading-relaxed">{meaning}</div>
-                {errorBox.detail && <div style={{ background: COLORS.shell, color: COLORS.muted }} className="font-mono text-[11px] mt-3 p-2 rounded-lg break-all">{errorBox.detail}</div>}
-                <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.errReportHint} · {t.versionLabel} {SHELL_BUILD}</div>
+                {errorBox.detail && <div style={{ background: COLORS.shell, color: COLORS.muted }} className="font-mono text-xs mt-3 p-2 rounded-lg break-all">{errorBox.detail}</div>}
+                <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.errReportHint} · {t.versionLabel} {SHELL_BUILD}</div>
                 <div className="flex gap-2 mt-4">
                   <button onClick={() => { try { navigator.clipboard.writeText(report); showToast(t.copyBtn); } catch (e) {} }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errCopy}</button>
                   <button data-error-close onClick={() => setErrorBox(null)} style={{ background: COLORS.accent }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errClose}</button>
@@ -4141,13 +4149,13 @@ export default function SiteManager() {
             <div className="flex flex-col gap-4">
               <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
                 <div className="flex items-center justify-between mb-3">
-                  <button onClick={() => setCalMonth(new Date(year, month - 1, 1))}><ChevronLeft size={18} color={COLORS.muted} /></button>
+                  <button className="tap" aria-label={t.a11yBack} title={t.a11yBack} onClick={() => setCalMonth(new Date(year, month - 1, 1))}><ChevronLeft size={18} color={COLORS.muted} /></button>
                   <div className="font-bold text-sm capitalize">{monthLabel}</div>
-                  <button onClick={() => setCalMonth(new Date(year, month + 1, 1))}><ChevronRight size={18} color={COLORS.muted} /></button>
+                  <button className="tap" aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setCalMonth(new Date(year, month + 1, 1))}><ChevronRight size={18} color={COLORS.muted} /></button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 mb-1">
                   {weekdayLabels.map((w, i) => (
-                    <div key={i} style={{ color: COLORS.muted }} className="text-center text-[10px] font-bold uppercase">{w}</div>
+                    <div key={i} style={{ color: COLORS.muted }} className="text-center text-xs font-bold uppercase">{w}</div>
                   ))}
                 </div>
                 <div className="grid grid-cols-7 gap-1">
@@ -4173,7 +4181,7 @@ export default function SiteManager() {
                       >
                         <span style={{ color: isToday ? COLORS.accent : COLORS.text }} className="text-xs font-semibold">{d}</span>
                         {planned.length > 0 && (
-                          <span style={{ color: "#6FB3D9" }} className="text-[9px] font-bold leading-none absolute top-0.5 right-1">{planned.length}</span>
+                          <span style={{ color: "#6FB3D9" }} className="text-xs font-bold leading-none absolute top-0.5 right-1">{planned.length}</span>
                         )}
                         {hasEntries && <div style={{ background: COLORS.success }} className="w-1 h-1 rounded-full absolute bottom-1" />}
                       </button>
@@ -4181,13 +4189,13 @@ export default function SiteManager() {
                   })}
                 </div>
               </div>
-              <div className="flex items-center gap-4 px-1 text-[10px]" style={{ color: COLORS.muted }}>
+              <div className="flex items-center gap-4 px-1 text-xs" style={{ color: COLORS.muted }}>
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.dayJournalHeading}</div>
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" /> {t.statusPending}</div>
                 <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.statusApproved}</div>
               </div>
               {canManage() && (
-                <div style={{ color: COLORS.muted }} className="text-[10px] px-1 -mt-2">{t.schedHintOwner}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs px-1 -mt-2">{t.schedHintOwner}</div>
               )}
               <button onClick={() => setRangeLeaveModalOpen(true)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
                 <CalendarDays size={16} /> {t.rangeLeaveBtn}
@@ -4233,7 +4241,7 @@ export default function SiteManager() {
               )}
 
               {customers.length > 3 && (
-                <input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomers} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.searchCustomers} value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomers} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
               )}
 
               {customers.length === 0 ? (
@@ -4289,7 +4297,7 @@ export default function SiteManager() {
                   if (f.key !== "all" && count === 0) return null;
                   const active = pipelineFilter === f.key;
                   return (
-                    <button key={f.key} onClick={() => setPipelineFilter(f.key)} style={{ background: active ? `${f.color}33` : COLORS.card, border: `1px solid ${active ? f.color : COLORS.border}`, color: active ? f.color : COLORS.muted }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                    <button key={f.key} onClick={() => setPipelineFilter(f.key)} style={{ background: active ? `${f.color}33` : COLORS.card, border: `1px solid ${active ? f.color : COLORS.border}`, color: active ? f.color : COLORS.muted }} className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                       {f.label} {count}
                     </button>
                   );
@@ -4318,11 +4326,11 @@ export default function SiteManager() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <div className="font-bold">{p.name}</div>
                           {p.category && (
-                            <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full">
                               {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
                             </span>
                           )}
-                          <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                          <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
                             {t[sm.labelKey]}
                           </span>
                         </div>
@@ -4386,11 +4394,11 @@ export default function SiteManager() {
               <div data-tagesrapport style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.rapportTitleDay} · {todayKey()}</div>
-                  <span data-approval style={{ color: approved ? COLORS.success : COLORS.muted, border: `1px solid ${approved ? COLORS.success : COLORS.border}` }} className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0">{approved ? t.approvedAll : t.notApproved}</span>
+                  <span data-approval style={{ color: approved ? COLORS.success : COLORS.muted, border: `1px solid ${approved ? COLORS.success : COLORS.border}` }} className="text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0">{approved ? t.approvedAll : t.notApproved}</span>
                 </div>
                 {daily.projIds.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-2">
-                    {daily.projIds.map((id) => <span key={id} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(id)}66` }} className="px-2 py-0.5 rounded-full text-[11px] font-semibold">{projectName(id)}</span>)}
+                    {daily.projIds.map((id) => <span key={id} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(id)}66` }} className="px-2 py-0.5 rounded-full text-xs font-semibold">{projectName(id)}</span>)}
                   </div>
                 )}
                 <HourLine label={t.hoursNormal} value={fmt(split.normal)} />
@@ -4413,9 +4421,9 @@ export default function SiteManager() {
             {reportView === "week" && (
               <div data-woche style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <button data-week-prev onClick={() => shiftWeek(-1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-8 h-8 rounded-lg flex items-center justify-center"><ChevronLeft size={16} color={COLORS.muted} /></button>
+                  <button aria-label={t.a11yBack} title={t.a11yBack} data-week-prev onClick={() => shiftWeek(-1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap w-8 h-8 rounded-lg flex items-center justify-center"><ChevronLeft size={16} color={COLORS.muted} /></button>
                   <div data-week-label style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide text-center">{weekDates[0]} – {weekDates[6]}</div>
-                  <button data-week-next onClick={() => shiftWeek(1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-8 h-8 rounded-lg flex items-center justify-center"><ChevronRight size={16} color={COLORS.muted} /></button>
+                  <button aria-label={t.a11yOpen} title={t.a11yOpen} data-week-next onClick={() => shiftWeek(1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap w-8 h-8 rounded-lg flex items-center justify-center"><ChevronRight size={16} color={COLORS.muted} /></button>
                 </div>
                 {canManage() && team.members.length > 1 && (
                   <select data-week-person value={personId || ""} onChange={(e) => setRapportPerson(e.target.value)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-sm outline-none mb-2">
@@ -4425,7 +4433,7 @@ export default function SiteManager() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">
+                      <tr style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
                         <th className="text-left py-1">{t.docDate}</th><th className="text-right py-1">{t.hoursNormal}</th><th className="text-right py-1">{t.overtimeShort}</th><th className="text-right py-1">{t.hoursTravel}</th><th className="text-right py-1">{t.hoursBreaks}</th><th className="text-right py-1">{t.hoursTotal}</th>
                       </tr>
                     </thead>
@@ -4449,7 +4457,7 @@ export default function SiteManager() {
                     </tfoot>
                   </table>
                 </div>
-                {week.target == null && <div style={{ color: COLORS.muted }} className="text-[11px] mt-2">{t.hoursNotConfigured}</div>}
+                {week.target == null && <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.hoursNotConfigured}</div>}
                 <button data-week-csv onClick={downloadCsv} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"><Download size={14} /> {t.weekCsv}</button>
               </div>
             )}
@@ -4462,13 +4470,13 @@ export default function SiteManager() {
                 <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{monthKey()}</div>
                   <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
-                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-[11px] mt-1 mb-2 text-right">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
+                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-xs mt-1 mb-2 text-right">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
                   <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
                   <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
                   <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
                   <div style={{ color: COLORS.muted }} className="text-xs mt-3 mb-1">{t.sitesLabel}: {s.projIds.map(projectName).join(", ") || "—"}</div>
                   {reportView === "monthly" && monthUnsent.alreadySent > 0 && (
-                    <div style={{ color: COLORS.amber }} className="text-[11px] mb-1">{monthUnsent.alreadySent} {t.reportAlreadySentDaily}</div>
+                    <div style={{ color: COLORS.amber }} className="text-xs mb-1">{monthUnsent.alreadySent} {t.reportAlreadySentDaily}</div>
                   )}
                   <button onClick={() => sendReportToSupervisor("monthly", s, list)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
                     <FileText size={15} /> {t.sendToSupervisor}
@@ -4520,7 +4528,7 @@ export default function SiteManager() {
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="font-black text-lg">{t.navTeam}</div>
                 {isOwner() && (
-                  <button onClick={() => openTeam()} style={{ background: COLORS.accent }} className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase">
+                  <button onClick={() => openTeam()} style={{ background: COLORS.accent }} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase">
                     {t.teamInviteBtn}
                   </button>
                 )}
@@ -4546,7 +4554,7 @@ export default function SiteManager() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="text-sm font-bold truncate">{m.name || m.email || m.uid}</div>
-                          <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+                          <div style={{ color: COLORS.muted }} className="text-xs truncate">
                             {m.role === "owner" ? t.roleOwner : m.role === "supervisor" ? t.roleSupervisor : t.roleCrew}
                             {m.email && m.name ? ` · ${m.email}` : ""}
                           </div>
@@ -4554,7 +4562,7 @@ export default function SiteManager() {
                         {todayProjects.length > 0 && (
                           <span className="shrink-0 flex flex-wrap justify-end gap-1 max-w-[50%]">
                             {todayProjects.map((tp) => (
-                              <span key={tp.id} style={{ background: `${projectColour(tp.id)}22`, color: projectColour(tp.id), border: `1px solid ${projectColour(tp.id)}66` }} className="text-[10px] font-bold px-2 py-0.5 rounded-full truncate max-w-[9rem]">
+                              <span key={tp.id} style={{ background: `${projectColour(tp.id)}22`, color: projectColour(tp.id), border: `1px solid ${projectColour(tp.id)}66` }} className="text-xs font-bold px-2 py-0.5 rounded-full truncate max-w-[9rem]">
                                 {tp.name}
                               </span>
                             ))}
@@ -4569,24 +4577,24 @@ export default function SiteManager() {
                             key={pr.id}
                             onClick={() => { setTab("projects"); setSelectedProject(pr.id); }}
                             style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(pr.id)}66`, color: COLORS.text }}
-                            className="px-2 py-1 rounded-full text-[11px] font-semibold"
+                            className="px-2 py-1 rounded-full text-xs font-semibold"
                           >
                             {pr.name}
                           </button>
                         ))}
                         {jobs.length === 0 && (
-                          <span style={{ color: COLORS.muted }} className="text-[11px]">{t.crewNoJobs}</span>
+                          <span style={{ color: COLORS.muted }} className="text-xs">{t.crewNoJobs}</span>
                         )}
                       </div>
                       {isOwner() && m.role !== "owner" && m.uid !== user?.uid && (
                         removeConfirm === m.uid ? (
                           <div className="flex items-center gap-2 mt-2">
-                            <span style={{ color: COLORS.danger }} className="text-[11px] font-bold">{t.teamRemoveConfirm}</span>
-                            <button data-remove-yes onClick={() => removeMember(m.uid)} style={{ background: COLORS.danger }} className="px-2.5 py-1 rounded text-[11px] font-bold uppercase">{t.teamRemove}</button>
-                            <button onClick={() => setRemoveConfirm(null)} style={{ color: COLORS.muted }} className="px-2 py-1 text-[11px] font-bold uppercase">{t.back}</button>
+                            <span style={{ color: COLORS.danger }} className="text-xs font-bold">{t.teamRemoveConfirm}</span>
+                            <button data-remove-yes onClick={() => removeMember(m.uid)} style={{ background: COLORS.danger }} className="px-2.5 py-1 rounded text-xs font-bold uppercase">{t.teamRemove}</button>
+                            <button onClick={() => setRemoveConfirm(null)} style={{ color: COLORS.muted }} className="px-2 py-1 text-xs font-bold uppercase">{t.back}</button>
                           </div>
                         ) : (
-                          <button data-remove-member onClick={() => setRemoveConfirm(m.uid)} style={{ color: COLORS.danger }} className="mt-2 text-[10px] font-bold uppercase flex items-center gap-1"><LogOut size={11} /> {t.teamRemove}</button>
+                          <button data-remove-member onClick={() => setRemoveConfirm(m.uid)} style={{ color: COLORS.danger }} className="mt-2 text-xs font-bold uppercase flex items-center gap-1"><LogOut size={11} /> {t.teamRemove}</button>
                         )
                       )}
                       {canManage() && (
@@ -4594,7 +4602,7 @@ export default function SiteManager() {
                           value=""
                           onChange={(e) => { if (e.target.value) toggleProjectCrew(e.target.value, m.uid); e.target.value = ""; }}
                           style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}
-                          className="w-full mt-2 rounded-lg px-2 py-1.5 text-[11px] outline-none"
+                          className="w-full mt-2 rounded-lg px-2 py-1.5 text-xs outline-none"
                         >
                           <option value="">{t.crewAddToJob}</option>
                           {openJobs.filter((pr) => !projectCrew(pr).includes(m.uid)).map((pr) => (
@@ -4625,23 +4633,23 @@ export default function SiteManager() {
             <div className="flex flex-col gap-4">
               <button data-trip-add onClick={() => openTrip()} style={{ background: COLORS.accent }} className="w-full py-3.5 rounded-xl font-bold uppercase text-sm flex items-center justify-center gap-2"><Truck size={18} /> {t.tripAdd}</button>
               <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.thisMonth}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.thisMonth}</div>
                 <div className="grid grid-cols-4 gap-2 text-center">
                   {[[t.tripTrips, String(month.length), COLORS.accent], [t.tripHours, sum(month, "hours").toFixed(1), COLORS.amber], ["km", String(sum(month, "km")), COLORS.success], [t.tripWasteKg, String(sum(month.filter((e) => e.loadKind === "waste"), "weightKg")), "#C68B4F"]].map(([l, v, c]) => (
-                    <div key={l}><div style={{ color: c }} className="text-lg font-black leading-tight">{v}</div><div style={{ color: COLORS.muted }} className="text-[9px] uppercase">{l}</div></div>
+                    <div key={l}><div style={{ color: c }} className="text-lg font-black leading-tight">{v}</div><div style={{ color: COLORS.muted }} className="text-xs uppercase">{l}</div></div>
                   ))}
                 </div>
               </div>
               {jobIds.length > 1 && (
                 <div className="flex flex-wrap gap-1.5">
-                  <button onClick={() => setTransportFilter("")} style={{ background: !transportFilter ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold">{t.tripAllJobs}</button>
-                  {jobIds.map((id) => <button key={id} onClick={() => setTransportFilter(id)} style={{ background: transportFilter === id ? COLORS.accent : COLORS.card, border: `1px solid ${projectColour(id)}66` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold">{projectName(id)}</button>)}
+                  <button onClick={() => setTransportFilter("")} style={{ background: !transportFilter ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1 rounded-full text-xs font-bold">{t.tripAllJobs}</button>
+                  {jobIds.map((id) => <button key={id} onClick={() => setTransportFilter(id)} style={{ background: transportFilter === id ? COLORS.accent : COLORS.card, border: `1px solid ${projectColour(id)}66` }} className="px-2.5 py-1 rounded-full text-xs font-bold">{projectName(id)}</button>)}
                 </div>
               )}
               {trips.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm text-center py-6">{t.tripEmpty}</div>}
               {Object.keys(byDay).sort().reverse().map((day) => (
                 <div key={day} className="flex flex-col gap-2">
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{day}{day === todayKey() ? ` · ${t.navToday}` : ""}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{day}{day === todayKey() ? ` · ${t.navToday}` : ""}</div>
                   {byDay[day].map((e) => (
                     <div key={e.id} data-trip-row style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 flex flex-col gap-1">
                       <div className="flex items-center gap-2 min-w-0">
@@ -4649,7 +4657,7 @@ export default function SiteManager() {
                         <span className="text-sm font-bold truncate">{e.from || "?"} → {e.to || "?"}</span>
                         <span style={{ color: COLORS.muted }} className="ml-auto text-xs shrink-0">{e.departTime}{e.arriveTime ? `–${e.arriveTime}` : ""}</span>
                       </div>
-                      <div style={{ color: COLORS.muted }} className="text-[11px] flex flex-wrap gap-x-3 gap-y-0.5">
+                      <div style={{ color: COLORS.muted }} className="text-xs flex flex-wrap gap-x-3 gap-y-0.5">
                         <span>{t[`vehicle_${e.vehicle}`] || e.vehicle}</span>
                         <span>{t[`load_${e.loadKind}`] || e.loadKind}{e.weightKg ? ` · ${e.weightKg} kg` : ""}</span>
                         {e.hours ? <span>{e.hours} h</span> : null}
@@ -4690,7 +4698,7 @@ export default function SiteManager() {
                 return (
                   <button key={cat.key} onClick={() => setSafetyCat(cat.key)} style={{ background: active ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-lg py-2 px-1 flex flex-col items-center gap-1">
                     <CatIcon size={16} color={active ? "#fff" : COLORS.muted} />
-                    <span style={{ color: active ? "#fff" : COLORS.muted }} className="text-[10px] font-bold text-center leading-tight">{t[cat.labelKey]}</span>
+                    <span style={{ color: active ? "#fff" : COLORS.muted }} className="text-xs font-bold text-center leading-tight">{t[cat.labelKey]}</span>
                   </button>
                 );
               })}
@@ -4712,7 +4720,7 @@ export default function SiteManager() {
                   <a href={cat.url} target="_blank" rel="noreferrer" style={{ color: COLORS.accent, borderTop: `1px solid ${COLORS.border}` }} className="mt-3 pt-3 text-xs font-bold flex items-center gap-1">
                     {t.fullRulesLink} <ExternalLink size={12} />
                   </a>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.summaryDisclaimer}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.summaryDisclaimer}</div>
                 </div>
               );
             })()}
@@ -4741,7 +4749,7 @@ export default function SiteManager() {
             <div className="flex items-center gap-1 px-4 py-1">
               <button onClick={() => setDockOpenRemembered(!dockOpen)} className="flex-1 min-w-0 flex items-center gap-1.5 py-0.5 text-left">
                 <MapPin size={11} color={COLORS.muted} />
-                <span style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide font-bold truncate">
+                <span style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide font-bold truncate">
                   {dockDragOver ? t.dockDropProject : `${t.dockTitle} (${dockProjects.length})`}
                 </span>
               </button>
@@ -4751,11 +4759,11 @@ export default function SiteManager() {
                 onClick={cycleDockSort}
                 title={t[`dockSort_${dockSort}`]}
                 style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }}
-                className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
               >
                 <ArrowUpDown size={11} /> {t[`dockSort_${dockSort}`]}
               </button>
-              <button onClick={() => setDockOpenRemembered(!dockOpen)} className="shrink-0 pl-1">
+              <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setDockOpenRemembered(!dockOpen)} className="tap shrink-0 pl-1">
                 <ChevronRight size={14} color={COLORS.muted} style={{ transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
               </button>
             </div>
@@ -4800,8 +4808,8 @@ export default function SiteManager() {
                         )}
                         <span style={{ background: sm.color, border: `2px solid ${COLORS.card}` }} className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 rounded-full" title={t[sm.labelKey]} />
                       </div>
-                      <div className="text-[11px] font-bold leading-tight w-full overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{pr.name}</div>
-                      <div style={{ color: COLORS.muted }} className="flex items-center gap-1.5 text-[10px] tabular-nums">
+                      <div className="text-xs font-bold leading-tight w-full overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{pr.name}</div>
+                      <div style={{ color: COLORS.muted }} className="flex items-center gap-1.5 text-xs tabular-nums">
                         <span className="flex items-center gap-0.5"><Users size={9} /> {crewN}</span>
                         <span className="flex items-center gap-0.5"><Package size={9} /> {mats}</span>
                       </div>
@@ -4837,7 +4845,7 @@ export default function SiteManager() {
             const active = it.id === "more" ? menuOpen : tab === it.id && !selectedProject;
             const onClick = it.id === "more" ? () => setMenuOpen(true) : () => { setTab(it.id); setSelectedProject(null); setMenuOpen(false); };
             return (
-              <button key={it.id} data-tab={it.id} {...(it.id === "more" ? { "data-menu-button": true } : {})} onClick={onClick} style={{ color: active ? COLORS.accent : COLORS.muted }} className="flex flex-col items-center gap-0.5 py-1.5 text-[10px] font-bold uppercase tracking-wide">
+              <button key={it.id} data-tab={it.id} {...(it.id === "more" ? { "data-menu-button": true } : {})} onClick={onClick} style={{ color: active ? COLORS.accent : COLORS.muted }} className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase tracking-wide">
                 <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
                 <span className="truncate max-w-full">{it.label}</span>
               </button>
@@ -4858,15 +4866,15 @@ export default function SiteManager() {
         const setLine = (id, field, value) =>
           setDocEditor((s) => ({ ...s, lineItems: s.lineItems.map((li) => (li.id === id ? { ...li, [field]: value } : li)) }));
         return (
-          <Modal onClose={() => setDocEditor(null)} title={`${isInvoice ? t.invoiceLabel : t.quoteLabel} ${docEditor.number}`}>
+          <Modal t={t} onClose={() => setDocEditor(null)} title={`${isInvoice ? t.invoiceLabel : t.quoteLabel} ${docEditor.number}`}>
             <div className="flex gap-2 mb-3">
               <div className="w-1/2">
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase mb-1">{t.docDate}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">{t.docDate}</div>
                 <input type="date" value={docEditor.date} onChange={(e) => setDocEditor((s) => ({ ...s, date: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
               </div>
               {isInvoice && (
                 <div className="w-1/2">
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase mb-1">{t.docDue}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">{t.docDue}</div>
                   <input type="date" value={docEditor.dueDate} onChange={(e) => setDocEditor((s) => ({ ...s, dueDate: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
                 </div>
               )}
@@ -4877,13 +4885,13 @@ export default function SiteManager() {
               {docEditor.lineItems.map((li) => (
                 <div key={li.id} style={{ background: COLORS.card }} className="rounded-lg p-2">
                   <div className="flex gap-1.5 mb-1.5">
-                    <input value={li.description} onChange={(e) => setLine(li.id, "description", e.target.value)} placeholder={t.docDescription} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded px-2 py-1.5 text-xs outline-none" />
-                    <button onClick={() => setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))} style={{ color: COLORS.danger }} className="shrink-0 px-1"><Trash2 size={13} /></button>
+                    <input aria-label={t.docDescription} value={li.description} onChange={(e) => setLine(li.id, "description", e.target.value)} placeholder={t.docDescription} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded px-2 py-1.5 text-xs outline-none" />
+                    <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))} style={{ color: COLORS.danger }} className="tap shrink-0 px-1"><Trash2 size={13} /></button>
                   </div>
                   <div className="flex gap-1.5">
-                    <input type="number" inputMode="decimal" value={li.qty} onChange={(e) => setLine(li.id, "qty", e.target.value)} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
-                    <input value={li.unit} onChange={(e) => setLine(li.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
-                    <input type="number" inputMode="decimal" step="0.05" value={li.unitPrice} onChange={(e) => setLine(li.id, "unitPrice", e.target.value)} placeholder={t.unitPriceLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                    <input aria-label={t.qtyPlaceholder} type="number" inputMode="decimal" value={li.qty} onChange={(e) => setLine(li.id, "qty", e.target.value)} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                    <input aria-label={t.unitPlaceholder} value={li.unit} onChange={(e) => setLine(li.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
+                    <input aria-label={t.unitPriceLabel} type="number" inputMode="decimal" step="0.05" value={li.unitPrice} onChange={(e) => setLine(li.id, "unitPrice", e.target.value)} placeholder={t.unitPriceLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
                   </div>
                 </div>
               ))}
@@ -4931,7 +4939,7 @@ export default function SiteManager() {
                     <>
                       <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.paymentTitle}</div>
                       <div className="flex gap-2 mb-2">
-                        <input
+                        <input aria-label={t.paidAmountLabel}
                           type="number" inputMode="decimal" step="0.05"
                           value={docEditor.paidAmount || ""}
                           onChange={(e) => setDocEditor((d) => ({ ...d, paidAmount: e.target.value }))}
@@ -4966,7 +4974,7 @@ export default function SiteManager() {
               );
             })()}
 
-            <textarea value={docEditor.notes} onChange={(e) => setDocEditor((s) => ({ ...s, notes: e.target.value }))} placeholder={t.notesLabel} rows={2} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none" />
+            <textarea aria-label={t.notesLabel} value={docEditor.notes} onChange={(e) => setDocEditor((s) => ({ ...s, notes: e.target.value }))} placeholder={t.notesLabel} rows={2} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none" />
 
             {isInvoice && validateBillingProfile(billing).length > 0 && (
               <button onClick={() => { setBillingDraft({ ...billing }); setBillingModalOpen(true); }} style={{ background: `${COLORS.amber}22`, border: `1px solid ${COLORS.amber}66`, color: COLORS.amber }} className="w-full py-2.5 rounded-lg text-xs font-bold mb-3">
@@ -4995,7 +5003,7 @@ export default function SiteManager() {
       })()}
 
       {billingModalOpen && billingDraft && (
-        <Modal onClose={() => setBillingModalOpen(false)} title={t.billingTitle}>
+        <Modal t={t} onClose={() => setBillingModalOpen(false)} title={t.billingTitle}>
           <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.billingHint}</div>
           {[
             ["companyName", t.billingCompany],
@@ -5005,9 +5013,9 @@ export default function SiteManager() {
             ["town", t.billingTown],
             ["vatNumber", t.vatNumberLabel],
           ].map(([f, label]) => (
-            <input key={f} value={billingDraft[f] || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, [f]: e.target.value }))} placeholder={label} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+            <input aria-label={label} key={f} value={billingDraft[f] || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, [f]: e.target.value }))} placeholder={label} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
           ))}
-          <input
+          <input aria-label="IBAN (CH…)"
             value={billingDraft.iban || ""}
             onChange={(e) => setBillingDraft((s) => ({ ...s, iban: e.target.value }))}
             placeholder="IBAN (CH…)"
@@ -5019,13 +5027,13 @@ export default function SiteManager() {
             className="w-full rounded-lg px-3 py-2 text-sm mb-1 outline-none"
           />
           {billingDraft.iban && !isSwissIban(billingDraft.iban) && (
-            <div style={{ color: COLORS.danger }} className="text-[10px] mb-2">{t.qrErrIban}</div>
+            <div style={{ color: COLORS.danger }} className="text-xs mb-2">{t.qrErrIban}</div>
           )}
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.paymentDaysLabel}</div>
-          <input type="number" value={billingDraft.paymentDays || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))} placeholder="30" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" />
+          <input aria-label="30" type="number" value={billingDraft.paymentDays || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))} placeholder="30" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" />
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.costingTitle}</div>
           <div className="flex gap-2 mb-1">
-            <input
+            <input aria-label={t.labourRateLabel}
               type="number" inputMode="decimal" step="0.05"
               value={billingDraft.labourRate || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, labourRate: e.target.value }))}
@@ -5033,7 +5041,7 @@ export default function SiteManager() {
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-2/3 rounded-lg px-3 py-2 text-sm outline-none"
             />
-            <input
+            <input aria-label="CHF"
               value={billingDraft.currency ?? "CHF"}
               onChange={(e) => setBillingDraft((s) => ({ ...s, currency: e.target.value }))}
               placeholder="CHF"
@@ -5041,10 +5049,10 @@ export default function SiteManager() {
               className="w-1/3 rounded-lg px-3 py-2 text-sm outline-none"
             />
           </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.labourRateHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.labourRateHint}</div>
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.hoursSettings}</div>
           <div className="flex gap-2 mb-1">
-            <input
+            <input aria-label={t.weeklyHoursLabel}
               type="number" inputMode="decimal" step="0.5"
               value={billingDraft.weeklyHours || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, weeklyHours: e.target.value }))}
@@ -5052,7 +5060,7 @@ export default function SiteManager() {
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
             />
-            <input
+            <input aria-label={t.holidayDaysLabel}
               type="number" inputMode="numeric"
               value={billingDraft.holidayDays || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, holidayDays: e.target.value }))}
@@ -5061,13 +5069,13 @@ export default function SiteManager() {
               className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
             />
           </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.hoursSettingsHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.hoursSettingsHint}</div>
           <button onClick={saveBilling} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
         </Modal>
       )}
 
       {companyMigration && (
-        <Modal onClose={() => setCompanyMigration(null)} title={t.migrateTitle}>
+        <Modal t={t} onClose={() => setCompanyMigration(null)} title={t.migrateTitle}>
           {companyMigration.result ? (
             <>
               <div style={{ color: COLORS.success }} className="text-sm mb-3">{t.migrateDone}</div>
@@ -5076,7 +5084,7 @@ export default function SiteManager() {
                   <div key={k} className="flex justify-between"><span style={{ color: COLORS.muted }}>{k}</span><span>{v}</span></div>
                 ))}
               </div>
-              <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.migrateKeptOriginal}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.migrateKeptOriginal}</div>
               <button onClick={() => window.location.reload()} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.doneLabel}</button>
             </>
           ) : (
@@ -5108,10 +5116,10 @@ export default function SiteManager() {
         const pr = projects.find((x) => x.id === rapportModal.projectId);
         const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
         return (
-          <Modal onClose={() => setRapportModal(null)} title={t.rapportTitle}>
+          <Modal t={t} onClose={() => setRapportModal(null)} title={t.rapportTitle}>
             <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3">
               <div className="text-sm font-bold">{pr ? pr.name : ""}</div>
-              <div style={{ color: COLORS.muted }} className="text-[11px]">
+              <div style={{ color: COLORS.muted }} className="text-xs">
                 {rapportModal.date}{cust ? " · " + cust.name : ""}
               </div>
               <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-2 pt-2 flex justify-between text-sm">
@@ -5130,7 +5138,7 @@ export default function SiteManager() {
               )}
             </div>
 
-            <textarea
+            <textarea aria-label={t.rapportNotePlaceholder}
               value={rapportModal.note}
               onChange={(e) => setRapportModal((r) => ({ ...r, note: e.target.value }))}
               placeholder={t.rapportNotePlaceholder}
@@ -5139,7 +5147,7 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
             />
 
-            <input
+            <input aria-label={t.sigNameLabel}
               value={rapportModal.signerName}
               onChange={(e) => setRapportModal((r) => ({ ...r, signerName: e.target.value }))}
               placeholder={t.sigNameLabel}
@@ -5147,10 +5155,10 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
             />
 
-            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.sigHere}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.sigHere}</div>
             <SignaturePad onChange={(sig) => setRapportModal((r) => ({ ...r, signature: sig }))} t={t} />
 
-            <div style={{ color: COLORS.muted }} className="text-[10px] mb-3 leading-relaxed">{t.sigLockNote}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.sigLockNote}</div>
 
             <button
               onClick={saveRapport}
@@ -5170,7 +5178,7 @@ export default function SiteManager() {
         const openProjects = projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
         const dayLeave = leaveRequests.filter((r) => r.date === date);
         return (
-          <Modal onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
+          <Modal t={t} onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
             {team.members.length === 0 ? (
               <div style={{ color: COLORS.muted }} className="text-xs mb-3">{t.schedNoTeam}</div>
             ) : (
@@ -5183,7 +5191,7 @@ export default function SiteManager() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="text-sm font-semibold truncate">{m.name || m.email || m.uid}</div>
                         {away && (
-                          <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full">
                             {t[`leave${(away.type || "other").charAt(0).toUpperCase()}${(away.type || "other").slice(1)}`] || t.leaveOther}
                           </span>
                         )}
@@ -5223,7 +5231,7 @@ export default function SiteManager() {
       })()}
 
       {hoursModalOpen && (
-        <Modal onClose={() => setHoursModalOpen(false)} title={t.hoursDetailTitle}>
+        <Modal t={t} onClose={() => setHoursModalOpen(false)} title={t.hoursDetailTitle}>
           {!billing.weeklyHours ? (
             <div style={{ color: COLORS.amber }} className="text-xs mb-3 leading-relaxed">{t.hoursNotConfigured}</div>
           ) : null}
@@ -5253,21 +5261,21 @@ export default function SiteManager() {
               );
             })}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-3 leading-relaxed">{t.hoursFootnote}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mt-3 leading-relaxed">{t.hoursFootnote}</div>
         </Modal>
       )}
 
       {teamModalOpen && (
-        <Modal onClose={() => setTeamModalOpen(false)} title={t.teamTitle}>
+        <Modal t={t} onClose={() => setTeamModalOpen(false)} title={t.teamTitle}>
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamMembers} ({team.members.length})</div>
           <div className="flex flex-col gap-1.5 mb-4">
             {team.members.map((m) => (
               <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm truncate">{m.name || m.email || m.uid}</div>
-                  {m.email && m.name && <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{m.email}</div>}
+                  {m.email && m.name && <div style={{ color: COLORS.muted }} className="text-xs truncate">{m.email}</div>}
                 </div>
-                <span style={{ background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt, color: m.role === "owner" ? COLORS.accent : COLORS.muted, border: `1px solid ${COLORS.border}` }} className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                <span style={{ background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt, color: m.role === "owner" ? COLORS.accent : COLORS.muted, border: `1px solid ${COLORS.border}` }} className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
                   {m.role === "owner" ? t.roleOwner : m.role === "supervisor" ? t.roleSupervisor : t.roleCrew}
                 </span>
               </div>
@@ -5275,25 +5283,25 @@ export default function SiteManager() {
           </div>
 
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamInvites}</div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mb-2 leading-relaxed">{t.teamInviteHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-2 leading-relaxed">{t.teamInviteHint}</div>
           <div className="flex flex-col gap-1.5 mb-3">
             {team.invites.map((i) => (
               <div key={i.code} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm font-mono tracking-widest">{i.code}</div>
-                  <div style={{ color: COLORS.muted }} className="text-[10px]">{t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs">{t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}</div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button data-invite-share onClick={() => shareInvite(i.code)} title={t.inviteShare} style={{ color: COLORS.accent }}><Share2 size={14} /></button>
-                  <button data-invite-link onClick={() => { navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href)); showToast(t.inviteLinkCopy); }} title={t.inviteLinkCopy} style={{ color: COLORS.muted }}><Link2 size={14} /></button>
-                  <button onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={14} /></button>
-                  <button onClick={() => dropInvite(i.code)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>
+                  <button className="tap" aria-label={t.a11yShare} data-invite-share onClick={() => shareInvite(i.code)} title={t.inviteShare} style={{ color: COLORS.accent }}><Share2 size={14} /></button>
+                  <button className="tap" aria-label={t.a11yCopyLink} data-invite-link onClick={() => { navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href)); showToast(t.inviteLinkCopy); }} title={t.inviteLinkCopy} style={{ color: COLORS.muted }}><Link2 size={14} /></button>
+                  <button className="tap" aria-label={t.copyBtn} onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={14} /></button>
+                  <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => dropInvite(i.code)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>
                 </div>
               </div>
             ))}
             {team.invites.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.teamNoInvites}</div>}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.inviteRoleLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.inviteRoleLabel}</div>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => makeInvite("crew")} style={{ background: COLORS.accent }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5">
               <Plus size={14} /> {t.roleCrew}
@@ -5306,7 +5314,7 @@ export default function SiteManager() {
       )}
 
       {legacyImport && (
-        <Modal onClose={() => setLegacyImport(null)} title={t.legacyImportTitle}>
+        <Modal t={t} onClose={() => setLegacyImport(null)} title={t.legacyImportTitle}>
           <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.legacyImportHint}</div>
           <div style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 text-sm mb-4">
             {legacyImport.docs.length} {t.legacyImportCount}
@@ -5330,28 +5338,28 @@ export default function SiteManager() {
         const jobs = projects.filter((p) => p.customerId === c.id);
         const contacts = c.contacts || [];
         return (
-          <Modal onClose={() => setSelectedCustomer(null)} title={c.name}>
+          <Modal t={t} onClose={() => setSelectedCustomer(null)} title={c.name}>
             {c.company && <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-3">{c.company}</div>}
 
             <div className="grid grid-cols-4 gap-2 mb-4">
               {c.phone ? (
                 <a href={telHref(c.phone)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <Phone size={15} color={COLORS.success} /><span className="text-[10px] font-bold">{t.callLabel}</span>
+                  <Phone size={15} color={COLORS.success} /><span className="text-xs font-bold">{t.callLabel}</span>
                 </a>
               ) : <div />}
               {c.phone ? (
                 <a href={waHref(c.phone)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <MessageSquare size={15} color="#25D366" /><span className="text-[10px] font-bold">WhatsApp</span>
+                  <MessageSquare size={15} color="#25D366" /><span className="text-xs font-bold">WhatsApp</span>
                 </a>
               ) : <div />}
               {c.email ? (
                 <a href={`mailto:${c.email}`} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <Mail size={15} color="#B48EAD" /><span className="text-[10px] font-bold">{t.emailLabel}</span>
+                  <Mail size={15} color="#B48EAD" /><span className="text-xs font-bold">{t.emailLabel}</span>
                 </a>
               ) : <div />}
               {c.address ? (
                 <a href={mapsUrl(c.address)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <MapPin size={15} color={COLORS.accent} /><span className="text-[10px] font-bold">{t.routeLabel}</span>
+                  <MapPin size={15} color={COLORS.accent} /><span className="text-xs font-bold">{t.routeLabel}</span>
                 </a>
               ) : <div />}
             </div>
@@ -5380,7 +5388,7 @@ export default function SiteManager() {
                   return (
                     <button key={p.id} onClick={() => { setSelectedCustomer(null); setTab("projects"); setSelectedProject(p.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                       <span className="text-sm truncate">{p.name}</span>
-                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
+                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
                     </button>
                   );
                 })}
@@ -5401,14 +5409,14 @@ export default function SiteManager() {
                       <KIcon size={13} color={km.color} className="mt-0.5 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="text-sm break-words">{k.note}</div>
-                        <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">
+                        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
                           {new Date(k.at).toLocaleDateString()} · {t[km.labelKey]}
                           {k.followUp && (
                             <span style={{ color: overdue ? COLORS.amber : COLORS.muted }} className="font-bold"> · {t.followUpLabel} {k.followUp}</span>
                           )}
                         </div>
                       </div>
-                      <button onClick={() => deleteContact(c.id, k.id)} style={{ color: COLORS.danger }} className="shrink-0"><Trash2 size={12} /></button>
+                      <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => deleteContact(c.id, k.id)} style={{ color: COLORS.danger }} className="tap shrink-0"><Trash2 size={12} /></button>
                     </div>
                   );
                 })}
@@ -5419,7 +5427,7 @@ export default function SiteManager() {
       })()}
 
       {customerForm && (
-        <Modal onClose={() => setCustomerForm(null)} title={customerForm.id ? t.editCustomer : t.newCustomer}>
+        <Modal t={t} onClose={() => setCustomerForm(null)} title={customerForm.id ? t.editCustomer : t.newCustomer}>
           {[
             ["name", t.customerNameLabel],
             ["company", t.companyLabel],
@@ -5427,7 +5435,7 @@ export default function SiteManager() {
             ["email", t.emailLabel],
             ["address", t.addressLabel],
           ].map(([field, label]) => (
-            <input
+            <input aria-label={label}
               key={field}
               value={customerForm[field] || ""}
               onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
@@ -5437,7 +5445,7 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
             />
           ))}
-          <textarea
+          <textarea aria-label={t.notesLabel}
             value={customerForm.notes || ""}
             onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
             placeholder={t.notesLabel}
@@ -5453,7 +5461,7 @@ export default function SiteManager() {
       )}
 
       {contactForm && (
-        <Modal onClose={() => setContactForm(null)} title={t.logContact}>
+        <Modal t={t} onClose={() => setContactForm(null)} title={t.logContact}>
           <div className="flex flex-wrap gap-1.5 mb-3">
             {CONTACT_KINDS.map((k) => {
               const active = contactForm.kind === k.key;
@@ -5465,7 +5473,7 @@ export default function SiteManager() {
               );
             })}
           </div>
-          <textarea
+          <textarea aria-label={t.contactNotePlaceholder}
             value={contactForm.note}
             onChange={(e) => setContactForm((s) => ({ ...s, note: e.target.value }))}
             placeholder={t.contactNotePlaceholder}
@@ -5486,7 +5494,7 @@ export default function SiteManager() {
       )}
 
       {langPickerOpen && (
-        <Modal onClose={() => setLangPickerOpen(false)} title="Language / Sprache / Langue">
+        <Modal t={t} onClose={() => setLangPickerOpen(false)} title="Language / Sprache / Langue">
           <div className="grid grid-cols-2 gap-2">
             {LANGS.map((l) => (
               <button key={l.code} onClick={() => changeLang(l.code)} style={{ background: lang === l.code ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-3 rounded-lg text-sm font-semibold">
@@ -5498,21 +5506,21 @@ export default function SiteManager() {
       )}
 
       {profileModalOpen && profileDraft && (
-        <Modal onClose={() => setProfileModalOpen(false)} title={t.profileTitle}>
+        <Modal t={t} onClose={() => setProfileModalOpen(false)} title={t.profileTitle}>
           <div className="flex flex-col gap-2">
-            <input value={profileDraft.name} onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))} placeholder={t.yourName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={profileDraft.phone} onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))} placeholder={t.yourPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.yourName} value={profileDraft.name} onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))} placeholder={t.yourName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.yourPhone} value={profileDraft.phone} onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))} placeholder={t.yourPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.emergencyContact}</div>
-            <input value={profileDraft.contactName} onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))} placeholder={t.contactName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={profileDraft.contactRelationship} onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))} placeholder={t.contactRelationship} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={profileDraft.contactPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))} placeholder={t.contactPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.contactName} value={profileDraft.contactName} onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))} placeholder={t.contactName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.contactRelationship} value={profileDraft.contactRelationship} onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))} placeholder={t.contactRelationship} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.contactPhone} value={profileDraft.contactPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))} placeholder={t.contactPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.supervisorContactHeading}</div>
-            <input value={profileDraft.supervisorName} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))} placeholder={t.supervisorNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={profileDraft.supervisorEmail} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))} placeholder={t.supervisorEmailLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={profileDraft.supervisorPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))} placeholder={t.supervisorPhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.supervisorNameLabel} value={profileDraft.supervisorName} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))} placeholder={t.supervisorNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.supervisorEmailLabel} value={profileDraft.supervisorEmail} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))} placeholder={t.supervisorEmailLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.supervisorPhoneLabel} value={profileDraft.supervisorPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))} placeholder={t.supervisorPhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.webhookLabel}</div>
-            <input value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <div style={{ color: COLORS.muted }} className="text-[10px]">{t.webhookHint}</div>
+            <input aria-label={t.webhookPlaceholder} value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <div style={{ color: COLORS.muted }} className="text-xs">{t.webhookHint}</div>
             <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
             {isOwner() && (
               <>
@@ -5533,13 +5541,13 @@ export default function SiteManager() {
               </>
             )}
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-4 pt-3">
-              <div style={{ color: COLORS.muted }} className="text-[11px] mb-2 break-all">{t.signedInAs} {user?.email}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-2 break-all">{t.signedInAs} {user?.email}</div>
               <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
                 <LogOut size={14} /> {t.signOut}
               </button>
-              <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-[10px]">{t.versionLabel} {SHELL_BUILD}</div>
-          <button data-force-reload onClick={forceReload} style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="w-full mt-2 py-2 rounded-lg text-[11px] font-bold uppercase">{t.forceReloadBtn}</button>
-          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-[10px] underline">{t.privacyLink}</a>
+              <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-xs">{t.versionLabel} {SHELL_BUILD}</div>
+          <button data-force-reload onClick={forceReload} style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="w-full mt-2 py-2 rounded-lg text-xs font-bold uppercase">{t.forceReloadBtn}</button>
+          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-xs underline">{t.privacyLink}</a>
             </div>
 
             <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>
@@ -5585,12 +5593,12 @@ export default function SiteManager() {
       )}
 
       {backupModal === "export" && (
-        <Modal onClose={() => setBackupModal(null)} title={t.exportBackup}>
+        <Modal t={t} onClose={() => setBackupModal(null)} title={t.exportBackup}>
           <div className="flex flex-col gap-3">
             <button onClick={downloadFullBackup} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
               <FileText size={15} /> {t.backupFullBtn}
             </button>
-            <div style={{ color: COLORS.muted }} className="text-[10px] leading-relaxed">{t.backupFullHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">{t.backupFullHint}</div>
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-3" />
             <div style={{ color: COLORS.muted }} className="text-xs">{t.backupHint}</div>
             <textarea
@@ -5602,22 +5610,22 @@ export default function SiteManager() {
               style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none font-mono"
             />
-            <div style={{ color: COLORS.muted }} className="text-[10px]">{backupCodeOutput.length.toLocaleString()} {t.charactersLabel}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs">{backupCodeOutput.length.toLocaleString()} {t.charactersLabel}</div>
             <button onClick={copyBackupCode} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"><Copy size={15} /> {t.copyBtn}</button>
           </div>
         </Modal>
       )}
 
       {backupModal === "import" && (
-        <Modal onClose={() => setBackupModal(null)} title={t.importBackupBtn}>
+        <Modal t={t} onClose={() => setBackupModal(null)} title={t.importBackupBtn}>
           <div className="flex flex-col gap-2">
             <label style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2 cursor-pointer">
               <ClipboardPaste size={15} /> {t.backupRestoreFileBtn}
               <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) restoreFullBackup(f); }} />
             </label>
-            <div style={{ color: COLORS.muted }} className="text-[10px] leading-relaxed mb-1">{t.backupRestoreFileHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed mb-1">{t.backupRestoreFileHint}</div>
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-2" />
-            <textarea
+            <textarea aria-label={t.pasteCodePlaceholder}
               value={backupCodeInput}
               onChange={(e) => { setBackupCodeInput(e.target.value); setBackupError(null); }}
               placeholder={t.pasteCodePlaceholder}
@@ -5632,12 +5640,12 @@ export default function SiteManager() {
       )}
 
       {insuranceForm && (
-        <Modal onClose={() => setInsuranceForm(null)} title={t.addInsuranceCard}>
+        <Modal t={t} onClose={() => setInsuranceForm(null)} title={t.addInsuranceCard}>
           <div className="flex flex-col gap-2">
-            <input value={insuranceForm.label} onChange={(e) => setInsuranceForm((s) => ({ ...s, label: e.target.value }))} placeholder={t.insuranceTypeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={insuranceForm.provider} onChange={(e) => setInsuranceForm((s) => ({ ...s, provider: e.target.value }))} placeholder={t.providerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={insuranceForm.policyNumber} onChange={(e) => setInsuranceForm((s) => ({ ...s, policyNumber: e.target.value }))} placeholder={t.policyNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={insuranceForm.phone} onChange={(e) => setInsuranceForm((s) => ({ ...s, phone: e.target.value }))} placeholder={t.insurancePhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.insuranceTypeLabel} value={insuranceForm.label} onChange={(e) => setInsuranceForm((s) => ({ ...s, label: e.target.value }))} placeholder={t.insuranceTypeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.providerLabel} value={insuranceForm.provider} onChange={(e) => setInsuranceForm((s) => ({ ...s, provider: e.target.value }))} placeholder={t.providerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.policyNumberLabel} value={insuranceForm.policyNumber} onChange={(e) => setInsuranceForm((s) => ({ ...s, policyNumber: e.target.value }))} placeholder={t.policyNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.insurancePhoneLabel} value={insuranceForm.phone} onChange={(e) => setInsuranceForm((s) => ({ ...s, phone: e.target.value }))} placeholder={t.insurancePhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <input ref={docFileRef} type="file" accept="image/*" onChange={(e) => handleDocPhoto(e, setInsuranceForm)} className="hidden" />
             <button onClick={() => docFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-3 rounded-lg flex items-center justify-center gap-2">
               <Camera size={16} color={COLORS.accent} />
@@ -5651,13 +5659,13 @@ export default function SiteManager() {
       )}
 
       {certForm && (
-        <Modal onClose={() => setCertForm(null)} title={t.addCertificate}>
+        <Modal t={t} onClose={() => setCertForm(null)} title={t.addCertificate}>
           <div className="flex flex-col gap-2">
-            <input value={certForm.title} onChange={(e) => setCertForm((s) => ({ ...s, title: e.target.value }))} placeholder={t.certTitleLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={certForm.issuer} onChange={(e) => setCertForm((s) => ({ ...s, issuer: e.target.value }))} placeholder={t.issuerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.certTitleLabel} value={certForm.title} onChange={(e) => setCertForm((s) => ({ ...s, title: e.target.value }))} placeholder={t.certTitleLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.issuerLabel} value={certForm.issuer} onChange={(e) => setCertForm((s) => ({ ...s, issuer: e.target.value }))} placeholder={t.issuerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <div className="flex gap-2">
-              <input type="date" value={certForm.issueDate} onChange={(e) => setCertForm((s) => ({ ...s, issueDate: e.target.value }))} placeholder={t.issueDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
-              <input type="date" value={certForm.expiryDate} onChange={(e) => setCertForm((s) => ({ ...s, expiryDate: e.target.value }))} placeholder={t.expiryDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.issueDateLabel} type="date" value={certForm.issueDate} onChange={(e) => setCertForm((s) => ({ ...s, issueDate: e.target.value }))} placeholder={t.issueDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.expiryDateLabel} type="date" value={certForm.expiryDate} onChange={(e) => setCertForm((s) => ({ ...s, expiryDate: e.target.value }))} placeholder={t.expiryDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
             </div>
             <input ref={certFileRef} type="file" accept="image/*" onChange={(e) => handleDocPhoto(e, setCertForm)} className="hidden" />
             <button onClick={() => certFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-3 rounded-lg flex items-center justify-center gap-2">
@@ -5672,7 +5680,7 @@ export default function SiteManager() {
       )}
 
       {basketProjectModalOpen && (
-        <Modal onClose={() => setBasketProjectModalOpen(false)} title={t.chooseProjectLabel}>
+        <Modal t={t} onClose={() => setBasketProjectModalOpen(false)} title={t.chooseProjectLabel}>
           <div className="flex flex-col gap-2">
             {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
             {projects.map((p) => (
@@ -5685,7 +5693,7 @@ export default function SiteManager() {
       )}
 
       {reportProjectPickerOpen && (
-        <Modal onClose={() => setReportProjectPickerOpen(false)} title={t.chooseProjectLabel}>
+        <Modal t={t} onClose={() => setReportProjectPickerOpen(false)} title={t.chooseProjectLabel}>
           <div className="flex flex-col gap-2">
             {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
             {projects.map((p) => {
@@ -5719,15 +5727,15 @@ export default function SiteManager() {
       )}
 
       {rangeLeaveModalOpen && (
-        <Modal onClose={() => setRangeLeaveModalOpen(false)} title={t.rangeLeaveBtn}>
+        <Modal t={t} onClose={() => setRangeLeaveModalOpen(false)} title={t.rangeLeaveBtn}>
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <div className="flex-1">
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.dateFromLabel}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.dateFromLabel}</div>
                 <input type="date" value={rangeLeaveForm.from} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, from: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
               </div>
               <div className="flex-1">
-                <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.dateToLabel}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.dateToLabel}</div>
                 <input type="date" value={rangeLeaveForm.to} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, to: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
               </div>
             </div>
@@ -5738,7 +5746,7 @@ export default function SiteManager() {
                 </button>
               ))}
             </div>
-            <input value={rangeLeaveForm.note} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.leaveNotePlaceholder} value={rangeLeaveForm.note} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             <button onClick={submitRangeLeave} disabled={!rangeLeaveForm.from || !rangeLeaveForm.to} style={{ background: COLORS.accent, opacity: rangeLeaveForm.from && rangeLeaveForm.to ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.requestLeave}</button>
           </div>
         </Modal>
@@ -5748,7 +5756,7 @@ export default function SiteManager() {
         const dayEntries = entries.filter((e) => e.date === selectedDay);
         const leave = myLeaveFor(selectedDay);
         return (
-          <Modal onClose={() => setSelectedDay(null)} title={selectedDay}>
+          <Modal t={t} onClose={() => setSelectedDay(null)} title={selectedDay}>
             <div className="flex flex-col gap-4">
               <div>
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.dayJournalHeading}</div>
@@ -5770,7 +5778,7 @@ export default function SiteManager() {
                     </button>
                   ))}
                 </div>
-                <input value={leaveForm.note} onChange={(e) => setLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2" />
+                <input aria-label={t.leaveNotePlaceholder} value={leaveForm.note} onChange={(e) => setLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2" />
                 <button onClick={submitLeaveRequest} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-2.5 rounded-lg font-bold uppercase text-xs mb-2">{leave ? t.saveLabel : t.requestLeave}</button>
 
                 {leave && (
@@ -5871,10 +5879,10 @@ export default function SiteManager() {
       )}
 
       {newProjectOpen && (
-        <Modal onClose={() => setNewProjectOpen(false)} title={t.newProjectTitle}>
-          <input value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input value={newProjectClient} onChange={(e) => setNewProjectClient(e.target.value)} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input value={newProjectAddr} onChange={(e) => setNewProjectAddr(e.target.value)} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+        <Modal t={t} onClose={() => setNewProjectOpen(false)} title={t.newProjectTitle}>
+          <input aria-label={t.projectNameLabel} value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+          <input aria-label={t.clientNameLabel} value={newProjectClient} onChange={(e) => setNewProjectClient(e.target.value)} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+          <input aria-label={t.addressLabel} value={newProjectAddr} onChange={(e) => setNewProjectAddr(e.target.value)} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.categoryLabel}</div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_CATEGORIES.map((c) => (
@@ -5905,10 +5913,10 @@ export default function SiteManager() {
       )}
 
       {editProject && (
-        <Modal onClose={() => setEditProject(null)} title={t.editProjectTitle}>
-          <input value={editProject.name} onChange={(e) => setEditProject((s) => ({ ...s, name: e.target.value }))} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input value={editProject.client} onChange={(e) => setEditProject((s) => ({ ...s, client: e.target.value }))} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input value={editProject.address} onChange={(e) => setEditProject((s) => ({ ...s, address: e.target.value }))} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+        <Modal t={t} onClose={() => setEditProject(null)} title={t.editProjectTitle}>
+          <input aria-label={t.projectNameLabel} value={editProject.name} onChange={(e) => setEditProject((s) => ({ ...s, name: e.target.value }))} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+          <input aria-label={t.clientNameLabel} value={editProject.client} onChange={(e) => setEditProject((s) => ({ ...s, client: e.target.value }))} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+          <input aria-label={t.addressLabel} value={editProject.address} onChange={(e) => setEditProject((s) => ({ ...s, address: e.target.value }))} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.categoryLabel}</div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_CATEGORIES.map((c) => (
@@ -5938,7 +5946,7 @@ export default function SiteManager() {
             </>
           )}
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.quotedLabel}</div>
-          <input
+          <input aria-label={`${t.quotedPlaceholder} (${billing.currency || "CHF"})`}
             type="number" inputMode="decimal" step="0.05"
             value={editProject.quotedAmount || ""}
             onChange={(e) => setEditProject((s) => ({ ...s, quotedAmount: e.target.value }))}
@@ -5951,7 +5959,7 @@ export default function SiteManager() {
       )}
 
       {shareProjectModal && (
-        <Modal onClose={() => setShareProjectModal(null)} title={t.shareProject}>
+        <Modal t={t} onClose={() => setShareProjectModal(null)} title={t.shareProject}>
           <div className="flex flex-col gap-3">
             <div style={{ color: COLORS.muted }} className="text-xs">{t.shareHint}</div>
             <div style={{ color: COLORS.muted }} className="text-xs">
@@ -5969,10 +5977,10 @@ export default function SiteManager() {
       )}
 
       {importModalOpen && (
-        <Modal onClose={() => setImportModalOpen(false)} title={t.importProject}>
+        <Modal t={t} onClose={() => setImportModalOpen(false)} title={t.importProject}>
           <div className="flex flex-col gap-2">
             <div style={{ color: COLORS.muted }} className="text-xs mb-1">{t.shareHint}</div>
-            <textarea
+            <textarea aria-label={t.pasteCodePlaceholder}
               value={importCodeInput}
               onChange={(e) => { setImportCodeInput(e.target.value); setImportError(null); }}
               placeholder={t.pasteCodePlaceholder}
@@ -5987,13 +5995,13 @@ export default function SiteManager() {
       )}
 
       {editTimeModal && (
-        <Modal onClose={() => setEditTimeModal(null)} title={t.adjustHoursTitle}>
+        <Modal t={t} onClose={() => setEditTimeModal(null)} title={t.adjustHoursTitle}>
           <div className="flex flex-col gap-2">
             <div style={{ color: COLORS.muted }} className="text-xs mb-1">{editTimeModal.date}{editTimeModal.projectId ? ` · ${projectName(editTimeModal.projectId)}` : ""}</div>
             {editTimeModal.startTime ? (
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.startTimeLabel}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.startTimeLabel}</div>
                   <input
                     type="time"
                     autoFocus
@@ -6004,7 +6012,7 @@ export default function SiteManager() {
                   />
                 </div>
                 <div className="flex-1">
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.endTimeLabel}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.endTimeLabel}</div>
                   <input
                     type="time"
                     value={editEndTime}
@@ -6015,7 +6023,7 @@ export default function SiteManager() {
                 </div>
               </div>
             ) : (
-              <input
+              <input aria-label={t.hoursFieldLabel}
                 type="number"
                 inputMode="decimal"
                 step="0.1"
@@ -6048,7 +6056,7 @@ export default function SiteManager() {
           ? (reportViewModal.excludedIds || []).map((id) => entries.find((e) => e.id === id) || { id, description: (reportViewModal.entryLabels || {})[id] || "", deleted: true })
           : [];
         return (
-        <Modal onClose={() => setReportViewModal(null)} title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}>
+        <Modal t={t} onClose={() => setReportViewModal(null)} title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}>
           <div className="flex flex-col gap-3">
             <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-3">
               <Stat label={t.sitesLabel} value={f.sites.join(", ") || "—"} color={COLORS.text} />
@@ -6057,7 +6065,7 @@ export default function SiteManager() {
               <Stat label={t.materialsLogged} value={f.materialsCount} color={COLORS.success} />
               <Stat label={t.toolsLogged} value={f.toolsCount} color={COLORS.amber} />
               {(reportViewModal.sends || []).length > 0 && (
-                <div style={{ color: COLORS.muted }} className="text-[10px] mt-1">
+                <div style={{ color: COLORS.muted }} className="text-xs mt-1">
                   {t.reportSentTimes} {reportViewModal.sends.length}× · {t.reportLastSent} {new Date(reportViewModal.sends[reportViewModal.sends.length - 1].at).toLocaleString()}
                 </div>
               )}
@@ -6067,7 +6075,7 @@ export default function SiteManager() {
               <span style={{ color: COLORS.muted }} className="text-xs">{t.hoursFieldLabel}</span>
               <input type="number" inputMode="decimal" step="0.1" value={reportViewModal.hours} onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
             </div>)}
-            <textarea value={reportViewModal.notes} onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))} placeholder={t.notesLabel} rows={3} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
+            <textarea aria-label={t.notesLabel} value={reportViewModal.notes} onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))} placeholder={t.notesLabel} rows={3} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
             <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
               {f.rows.map((e) => {
                 const meta = typeMeta(e.type, t) || typeMeta("note", t);
@@ -6079,7 +6087,7 @@ export default function SiteManager() {
                     <span className="flex items-center gap-2 shrink-0">
                       <span style={{ color: COLORS.muted }}>{e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}</span>
                       {live && (
-                        <button onClick={() => toggleReportEntry(e.id)} title={t.reportExclude} style={{ color: COLORS.muted }}><X size={12} /></button>
+                        <button className="tap" aria-label={t.a11yClose} onClick={() => toggleReportEntry(e.id)} title={t.reportExclude} style={{ color: COLORS.muted }}><X size={12} /></button>
                       )}
                     </span>
                   </div>
@@ -6087,11 +6095,11 @@ export default function SiteManager() {
               })}
               {excludedRows.length > 0 && (
                 <>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-2">{t.reportExcludedTitle} ({excludedRows.length})</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-2">{t.reportExcludedTitle} ({excludedRows.length})</div>
                   {excludedRows.map((e) => (
                     <div key={e.id} style={{ background: COLORS.cardAlt, opacity: 0.55 }} className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2">
                       <span className="min-w-0 truncate line-through">{e.description}</span>
-                      <button onClick={() => toggleReportEntry(e.id)} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase shrink-0">{t.reportRestore}</button>
+                      <button onClick={() => toggleReportEntry(e.id)} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase shrink-0">{t.reportRestore}</button>
                     </div>
                   ))}
                 </>
@@ -6127,17 +6135,17 @@ export default function SiteManager() {
           return (
             <div className="fixed inset-0 z-50 flex items-end lg:hidden">
               <div onClick={close} className="absolute inset-0 bg-black/60" />
-              <div data-quick-add style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="relative w-full rounded-t-2xl px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+              <div ref={quickAddRef} role="dialog" aria-modal="true" aria-label={t.a11yQuickAdd} tabIndex={-1} data-quick-add style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="outline-none relative w-full rounded-t-2xl px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
                 <div className="flex items-center justify-between mb-2">
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.quickAddTitle}{site ? ` · ${site.name}` : ""}</div>
-                  <button onClick={close}><X size={18} color={COLORS.muted} /></button>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.quickAddTitle}{site ? ` · ${site.name}` : ""}</div>
+                  <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={close}><X size={18} color={COLORS.muted} /></button>
                 </div>
                 {!pid && candidates.length > 1 && (
                   <div className="mb-3">
-                    <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.quickPickSite}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.quickPickSite}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {candidates.map((p) => (
-                        <button key={p.id} data-quick-site={p.id} onClick={() => setQuickAddSite(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(p.id)}66` }} className="px-2.5 py-1.5 rounded-full text-[11px] font-bold">{p.name}</button>
+                        <button key={p.id} data-quick-site={p.id} onClick={() => setQuickAddSite(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(p.id)}66` }} className="px-2.5 py-1.5 rounded-full text-xs font-bold">{p.name}</button>
                       ))}
                     </div>
                   </div>
@@ -6147,7 +6155,7 @@ export default function SiteManager() {
                     const Icon = a.icon;
                     const needsSite = a.key !== "stop" && !pid;
                     return (
-                      <button key={a.key} data-quick-action={a.key} disabled={needsSite} onClick={() => { close(); a.run(); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, opacity: needsSite ? 0.4 : 1 }} className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-[11px] font-bold">
+                      <button key={a.key} data-quick-action={a.key} disabled={needsSite} onClick={() => { close(); a.run(); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, opacity: needsSite ? 0.4 : 1 }} className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-xs font-bold">
                         <Icon size={20} color={a.color} />
                         <span className="truncate max-w-full">{a.label}</span>
                       </button>
@@ -6161,13 +6169,13 @@ export default function SiteManager() {
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/60" />
-          <div data-menu-drawer style={{ background: COLORS.card, borderLeft: `1px solid ${COLORS.border}` }} className="relative ml-auto h-full w-72 max-w-[85vw] flex flex-col pt-4 pb-6 px-3 overflow-y-auto">
+          <div ref={menuRef} role="dialog" aria-modal="true" aria-label={t.a11yMenu} tabIndex={-1} data-menu-drawer style={{ background: COLORS.card, borderLeft: `1px solid ${COLORS.border}` }} className="outline-none relative ml-auto h-full w-72 max-w-[85vw] flex flex-col pt-4 pb-6 px-3 overflow-y-auto">
             <div className="flex items-center justify-between px-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <SwissCross size={12} />
-                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-[11px] font-bold uppercase">{t.appLabel}</span>
+                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</span>
               </div>
-              <button onClick={() => setMenuOpen(false)}><X size={18} color={COLORS.muted} /></button>
+              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setMenuOpen(false)}><X size={18} color={COLORS.muted} /></button>
             </div>
             {[
               ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Ruler }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
@@ -6232,12 +6240,12 @@ export default function SiteManager() {
       )}
 
       {fileViewer && (
-        <div className="fixed inset-0 z-50 flex flex-col" style={{ background: "rgba(0,0,0,0.94)" }}>
+        <div ref={fileViewerRef} role="dialog" aria-modal="true" aria-label={fileViewer.file.name} tabIndex={-1} className="fixed inset-0 z-50 flex flex-col outline-none" style={{ background: "rgba(0,0,0,0.94)" }}>
           <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-3 px-4 py-2">
             <div className="text-sm font-bold truncate">{fileViewer.file.name}</div>
             <div className="flex items-center gap-4 shrink-0">
-              <a href={fileViewer.url} download={fileViewer.file.name} style={{ color: COLORS.muted }} className="text-[11px] font-bold uppercase">{t.filesDownload}</a>
-              <button onClick={closeFileViewer}><X size={20} color={COLORS.muted} /></button>
+              <a href={fileViewer.url} download={fileViewer.file.name} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.filesDownload}</a>
+              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={closeFileViewer}><X size={20} color={COLORS.muted} /></button>
             </div>
           </div>
           <div className="flex-1 min-h-0">
@@ -6249,8 +6257,8 @@ export default function SiteManager() {
       )}
 
       {linkForm && (
-        <Modal onClose={() => setLinkForm(null)} title={t.filesAddLink}>
-          <input
+        <Modal t={t} onClose={() => setLinkForm(null)} title={t.filesAddLink}>
+          <input aria-label={t.filesLinkPlaceholder}
             value={linkForm.url}
             onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
             placeholder={t.filesLinkPlaceholder}
@@ -6258,19 +6266,19 @@ export default function SiteManager() {
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm outline-none"
           />
-          <input
+          <input aria-label={t.filesLinkName}
             value={linkForm.name}
             onChange={(e) => setLinkForm((f) => ({ ...f, name: e.target.value }))}
             placeholder={t.filesLinkName}
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full mt-2 rounded-lg px-3 py-2 text-sm outline-none"
           />
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-3 mb-1.5">{t.filesKindLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.filesKindLabel}</div>
           <div className="flex flex-wrap gap-1.5">
             {FILE_KINDS.map((k) => {
               const on = linkForm.kind === k;
               return (
-                <button key={k} onClick={() => setLinkForm((f) => ({ ...f, kind: k }))} style={{ background: on ? `${COLORS.accent}22` : COLORS.cardAlt, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? COLORS.accent : COLORS.muted }} className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
+                <button key={k} onClick={() => setLinkForm((f) => ({ ...f, kind: k }))} style={{ background: on ? `${COLORS.accent}22` : COLORS.cardAlt, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? COLORS.accent : COLORS.muted }} className="px-2.5 py-1.5 rounded-lg text-xs font-bold">
                   {t[`fileKind_${k}`]}
                 </button>
               );
@@ -6281,7 +6289,7 @@ export default function SiteManager() {
       )}
 
       {rapportExists && (
-        <Modal onClose={() => setRapportExists(null)} title={t.rapportExistsTitle}>
+        <Modal t={t} onClose={() => setRapportExists(null)} title={t.rapportExistsTitle}>
           <div style={{ color: COLORS.muted }} className="text-sm mb-3">
             {projectName(rapportExists.projectId)} · {rapportExists.date} · {rapportExists.existing.signerName}
           </div>
@@ -6293,7 +6301,7 @@ export default function SiteManager() {
       )}
 
       {customerImport && (
-        <Modal onClose={() => setCustomerImport(null)} title={t.importCustomers}>
+        <Modal t={t} onClose={() => setCustomerImport(null)} title={t.importCustomers}>
           <div data-customers-import-preview>
             <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{customerImport.fileName}</div>
             {customerImport.rows.length === 0 ? (
@@ -6301,14 +6309,14 @@ export default function SiteManager() {
             ) : (
               <div className="text-sm mb-3">{(t.importCustomersPreview || "").replace("{n}", String(customerImport.rows.length)).replace("{added}", String(customerImport.added)).replace("{skipped}", String(customerImport.skipped))}</div>
             )}
-            {customerImport.warnings.length > 0 && <div style={{ color: COLORS.amber }} className="text-[11px] mb-3">{customerImport.warnings.join(" \u00b7 ")}</div>}
+            {customerImport.warnings.length > 0 && <div style={{ color: COLORS.amber }} className="text-xs mb-3">{customerImport.warnings.join(" \u00b7 ")}</div>}
             <button data-customers-import-apply disabled={!customerImport.added} onClick={applyCustomersImport} style={{ background: COLORS.accent, opacity: customerImport.added ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.importApply}</button>
           </div>
         </Modal>
       )}
 
       {priceImport && (
-        <Modal onClose={() => setPriceImport(null)} title={t.importPriceList}>
+        <Modal t={t} onClose={() => setPriceImport(null)} title={t.importPriceList}>
           <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{priceImport.fileName}</div>
           {priceImport.rows.length === 0 ? (
             <div>
@@ -6325,14 +6333,14 @@ export default function SiteManager() {
                 ].map(([n, label, colour]) => (
                   <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2 text-center">
                     <div style={{ color: colour }} className="text-lg font-black tabular-nums">{n}</div>
-                    <div style={{ color: COLORS.muted }} className="text-[10px] uppercase">{label}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase">{label}</div>
                   </div>
                 ))}
               </div>
 
               {/* Naming the merchant on import is what makes the purchase-order
                   grouping work later, and most exports do not carry it. */}
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {KNOWN_SUPPLIERS.map((sup) => {
                   const on = priceImport.supplier === sup;
@@ -6345,7 +6353,7 @@ export default function SiteManager() {
                         border: `1px solid ${on ? COLORS.success : COLORS.border}`,
                         color: on ? COLORS.success : COLORS.muted,
                       }}
-                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
                     >
                       {sup}
                     </button>
@@ -6354,17 +6362,17 @@ export default function SiteManager() {
               </div>
 
               {priceImport.warnings.length > 0 && (
-                <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55`, color: COLORS.amber }} className="rounded-lg p-2.5 mb-3 text-[11px] leading-relaxed">
+                <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55`, color: COLORS.amber }} className="rounded-lg p-2.5 mb-3 text-xs leading-relaxed">
                   {priceImport.warnings.map((w) => (
                     <div key={w}>{t[`importWarn_${w}`] || w}</div>
                   ))}
                 </div>
               )}
 
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.importPreview}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.importPreview}</div>
               <div style={{ border: `1px solid ${COLORS.border}` }} className="rounded-lg overflow-hidden mb-3">
                 {priceImport.rows.slice(0, 8).map((r, i) => (
-                  <div key={i} style={{ background: i % 2 ? COLORS.cardAlt : COLORS.card }} className="px-2.5 py-1.5 flex items-center justify-between gap-2 text-[11px]">
+                  <div key={i} style={{ background: i % 2 ? COLORS.cardAlt : COLORS.card }} className="px-2.5 py-1.5 flex items-center justify-between gap-2 text-xs">
                     <span className="truncate flex-1 min-w-0">{r.name}</span>
                     {r.artNo && <span style={{ color: COLORS.muted }} className="shrink-0">{r.artNo}</span>}
                     <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{r.price ? `${r.price}${r.unit ? "/" + r.unit : ""}` : ""}</span>
@@ -6372,7 +6380,7 @@ export default function SiteManager() {
                 ))}
               </div>
               {priceImport.rows.length > 8 && (
-                <div style={{ color: COLORS.muted }} className="text-[10px] mb-3">+{priceImport.rows.length - 8} {t.importMoreRows}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs mb-3">+{priceImport.rows.length - 8} {t.importMoreRows}</div>
               )}
 
               <button onClick={applyPriceList} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">
@@ -6384,7 +6392,7 @@ export default function SiteManager() {
       )}
 
       {addModal && (
-        <Modal onClose={() => setAddModal(null)} title={addModal.editingId ? t.editLabel : (addModal.type === "material" ? t.addMaterialTitle : addModal.type === "tool" ? t.addToolTitle : t.attachPhotoTitle)}>
+        <Modal t={t} onClose={() => setAddModal(null)} title={addModal.editingId ? t.editLabel : (addModal.type === "material" ? t.addMaterialTitle : addModal.type === "tool" ? t.addToolTitle : t.attachPhotoTitle)}>
           {addModal.type === "photo" ? (
             <div className="flex flex-col gap-3">
               <input ref={fileRef} data-photo-input type="file" accept="image/*" multiple={!addModal.editingId} onChange={handleFile} className="hidden" />
@@ -6395,22 +6403,22 @@ export default function SiteManager() {
               {photoPreview && <img src={photoPreview} alt="preview" className="w-full rounded-lg max-h-48 object-cover" />}
               {photoExtra.length > 0 && (
                 <div>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{1 + photoExtra.length} {t.photosSelected}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{1 + photoExtra.length} {t.photosSelected}</div>
                   <div data-photo-extra className="grid grid-cols-4 gap-1.5">
                     {photoExtra.map((src, i) => (
                       <div key={i} className="relative">
                         <img src={src} alt="" className="w-full h-16 object-cover rounded-md" />
-                        <button onClick={() => setPhotoExtra((x) => x.filter((_, j) => j !== i))} style={{ background: "rgba(0,0,0,0.65)" }} className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"><X size={11} color="#fff" /></button>
+                        <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setPhotoExtra((x) => x.filter((_, j) => j !== i))} style={{ background: "rgba(0,0,0,0.65)" }} className="tap absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"><X size={11} color="#fff" /></button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t.captionPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.captionPlaceholder} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t.captionPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <input value={form.description} onChange={(e) => setDescriptionWithUnitMemory(e.target.value)} placeholder={t.whatUsedPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.whatUsedPlaceholder} value={form.description} onChange={(e) => setDescriptionWithUnitMemory(e.target.value)} placeholder={t.whatUsedPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
 
               {addModal.type === "material" && (() => {
                 const catalog = materialsCatalogFor(lang);
@@ -6424,7 +6432,7 @@ export default function SiteManager() {
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-1.5 overflow-x-auto pb-1">
                       {Object.entries(catalog.cats).map(([key, label]) => (
-                        <button key={key} onClick={() => setSuggestCat((c) => (c === key ? null : key))} style={{ background: suggestCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap">
+                        <button key={key} onClick={() => setSuggestCat((c) => (c === key ? null : key))} style={{ background: suggestCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
                           {label}
                         </button>
                       ))}
@@ -6433,7 +6441,7 @@ export default function SiteManager() {
                       <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.success}` }} className="rounded-lg p-2.5 flex flex-col gap-2">
                         <div className="text-xs font-semibold">{pendingSuggestion.name}</div>
                         <div className="flex gap-2">
-                          <input
+                          <input aria-label={t.sizePlaceholder}
                             autoFocus
                             value={sizeInput}
                             onChange={(e) => setSizeInput(e.target.value)}
@@ -6442,13 +6450,13 @@ export default function SiteManager() {
                             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                             className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
                           />
-                          <button onClick={confirmSuggestion} style={{ background: COLORS.success }} className="rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
-                          <button onClick={() => { setPendingSuggestion(null); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 flex items-center justify-center"><X size={16} color={COLORS.muted} /></button>
+                          <button aria-label={t.a11yConfirm} title={t.a11yConfirm} onClick={confirmSuggestion} style={{ background: COLORS.success }} className="tap rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
+                          <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => { setPendingSuggestion(null); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap rounded-lg px-3 flex items-center justify-center"><X size={16} color={COLORS.muted} /></button>
                         </div>
                       </div>
                     ) : q.length > 0 && searchResults.length > 0 ? (
                       <div>
-                        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{t.suggestionsTitle}</div>
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.suggestionsTitle}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {searchResults.map((it) => (
                             <button key={it.name} onClick={() => { setDescriptionWithUnitMemory(it.name); setPendingSuggestion(it); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
@@ -6461,7 +6469,7 @@ export default function SiteManager() {
                       <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
                         {catalog.items[suggestCat].map((grp) => (
                           <div key={grp.group}>
-                            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1 mt-1">{grp.group}</div>
+                            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1 mt-1">{grp.group}</div>
                             <div className="flex flex-wrap gap-1.5">
                               {grp.items.map((name) => (
                                 <button key={name} onClick={() => { setDescriptionWithUnitMemory(name); setPendingSuggestion({ name, catKey: suggestCat }); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
@@ -6478,9 +6486,9 @@ export default function SiteManager() {
               })()}
 
               <div className="flex gap-2">
-                <input type="number" inputMode="decimal" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.qtyPlaceholder} type="number" inputMode="decimal" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
                 <div className="w-1/2 relative">
-                  <input
+                  <input aria-label={t.unitPlaceholder}
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
                     onFocus={() => setUnitSuggestFocused(true)}
@@ -6496,7 +6504,7 @@ export default function SiteManager() {
                     return (
                       <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="absolute z-10 mt-1 left-0 right-0 rounded-lg p-1.5 flex flex-wrap gap-1">
                         {matches.map((u) => (
-                          <button key={u} onMouseDown={(e) => e.preventDefault()} onClick={() => setForm((f) => ({ ...f, unit: u }))} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded text-[11px]">
+                          <button key={u} onMouseDown={(e) => e.preventDefault()} onClick={() => setForm((f) => ({ ...f, unit: u }))} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded text-xs">
                             {u}
                           </button>
                         ))}
@@ -6505,7 +6513,7 @@ export default function SiteManager() {
                   })()}
                 </div>
               </div>
-              <input
+              <input aria-label={`${t.unitPriceLabel} (${billing.currency || "CHF"})`}
                 type="number" inputMode="decimal" step="0.01"
                 value={form.unitPrice || ""}
                 onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
@@ -6526,12 +6534,12 @@ export default function SiteManager() {
               >
                 {form.regie ? <Check size={14} /> : <Plus size={14} />} {t.regieToggle}
               </button>
-              <div style={{ color: COLORS.muted }} className="text-[10px] mt-1 leading-relaxed">{t.regieHint}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs mt-1 leading-relaxed">{t.regieHint}</div>
             </div>
           )}
           {addModal.type !== "photo" && (
             <div className="mt-3">
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
               {/* The known wholesalers as one tap, but the field stays free
                   text: half the material on a Swiss roof comes from a merchant
                   nobody put in a list. */}
@@ -6547,7 +6555,7 @@ export default function SiteManager() {
                         border: `1px solid ${on ? COLORS.success : COLORS.border}`,
                         color: on ? COLORS.success : COLORS.muted,
                       }}
-                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
                     >
                       {sup}
                     </button>
@@ -6555,14 +6563,14 @@ export default function SiteManager() {
                 })}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input
+                <input aria-label={t.supplierPlaceholder}
                   value={form.supplier || ""}
                   onChange={(e) => setForm({ ...form, supplier: e.target.value })}
                   placeholder={t.supplierPlaceholder}
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                   className="rounded-lg px-3 py-2 text-sm outline-none"
                 />
-                <input
+                <input aria-label={t.artNoPlaceholder}
                   value={form.artNo || ""}
                   onChange={(e) => setForm({ ...form, artNo: e.target.value })}
                   placeholder={t.artNoPlaceholder}
@@ -6573,7 +6581,7 @@ export default function SiteManager() {
             </div>
           )}
           <div className="mt-4">
-            <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1.5">{t.tradeLabel}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.tradeLabel}</div>
             <div className="flex flex-wrap gap-1.5">
               {TRADES.map((tr) => {
                 const on = (form.trade || DEFAULT_TRADE) === tr.key;
@@ -6586,7 +6594,7 @@ export default function SiteManager() {
                       border: `1px solid ${on ? tr.color : COLORS.border}`,
                       color: on ? tr.color : COLORS.muted,
                     }}
-                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold"
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
                   >
                     {t[tr.labelKey]}
                   </button>
@@ -6611,7 +6619,7 @@ export default function SiteManager() {
       )}
 
       {sosOpen && (
-        <div className="fixed inset-0 z-[60] flex flex-col" style={{ background: "#150000" }}>
+        <div ref={sosRef} role="dialog" aria-modal="true" aria-label={t.emergencyTitle} tabIndex={-1} className="fixed inset-0 z-[60] flex flex-col outline-none" style={{ background: "#150000" }}>
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
             <div style={{ color: COLORS.danger }} className="text-lg font-black uppercase flex items-center gap-2"><Siren size={20} /> {t.emergencyTitle}</div>
             <button onClick={() => { setSosOpen(false); logIncident(); }} className="text-xs font-bold uppercase" style={{ color: COLORS.muted }}>{t.closeAndLog}</button>
@@ -6663,7 +6671,7 @@ export default function SiteManager() {
       )}
 
       {scanModal && (
-        <Modal onClose={() => setScanModal(null)} title={scanModal.mode === "compare" ? t.scanTitleCompare : t.scanTitleSingle}>
+        <Modal t={t} onClose={() => setScanModal(null)} title={scanModal.mode === "compare" ? t.scanTitleCompare : t.scanTitleSingle}>
           <div className="flex flex-col gap-3">
             {scanModal.mode === "compare" && <div style={{ color: COLORS.muted }} className="text-xs">{t.scanHintCompare}</div>}
             <div className="grid grid-cols-2 gap-2">
@@ -6677,7 +6685,7 @@ export default function SiteManager() {
             </div>
             <input ref={scanFileRef} type="file" accept="image/*" onChange={addScanImage} className="hidden" />
             {scanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{scanModal.error}</div>}
-            {scanModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{scanModal.detail}</div>}
+            {scanModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{scanModal.detail}</div>}
             {!scanModal.items && (
               <button onClick={runScan} disabled={scanModal.loading || (scanModal.mode === "single" ? scanModal.images.length < 1 : scanModal.images.length < 2)} style={{ background: COLORS.success, opacity: scanModal.loading ? 0.7 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
                 {scanModal.loading ? <Loader2 size={16} className="animate-spin" /> : <ScanLine size={16} />}
@@ -6702,7 +6710,7 @@ export default function SiteManager() {
       )}
 
       {libraryScanModal && (
-        <Modal onClose={() => setLibraryScanModal(null)} title={t.scanSpecSheet}>
+        <Modal t={t} onClose={() => setLibraryScanModal(null)} title={t.scanSpecSheet}>
           <div className="flex flex-col gap-3">
             {!libraryScanModal.image ? (
               <button onClick={() => libraryScanFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="h-32 rounded-lg flex flex-col items-center justify-center gap-1">
@@ -6714,7 +6722,7 @@ export default function SiteManager() {
             )}
             <input ref={libraryScanFileRef} type="file" accept="image/*" capture="environment" onChange={addLibraryScanImage} className="hidden" />
             {libraryScanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{libraryScanModal.error}</div>}
-            {libraryScanModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{libraryScanModal.detail}</div>}
+            {libraryScanModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{libraryScanModal.detail}</div>}
 
             {!libraryScanModal.result && (
               <button onClick={runLibraryScan} disabled={!libraryScanModal.image || libraryScanModal.loading} style={{ background: COLORS.success, opacity: !libraryScanModal.image || libraryScanModal.loading ? 0.6 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
@@ -6726,17 +6734,17 @@ export default function SiteManager() {
             {libraryScanModal.result && (
               <div className="flex flex-col gap-2">
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.reviewBeforeSaving}</div>
-                <input value={libraryScanModal.result.name} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, name: e.target.value } }))} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={libraryScanModal.result.supplier} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, supplier: e.target.value } }))} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={libraryScanModal.result.articleNumber} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, articleNumber: e.target.value } }))} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={libraryScanModal.result.category} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, category: e.target.value } }))} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.itemNameLabel} value={libraryScanModal.result.name} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, name: e.target.value } }))} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.manufacturerLabel} value={libraryScanModal.result.supplier} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, supplier: e.target.value } }))} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.articleNumberLabel} value={libraryScanModal.result.articleNumber} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, articleNumber: e.target.value } }))} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.techCategoryLabel} value={libraryScanModal.result.category} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, category: e.target.value } }))} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
 
                 <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
                 {libraryScanModal.result.specs.map((s) => (
                   <div key={s.id} className="flex gap-2">
-                    <input value={s.key} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, key: e.target.value } : x)) } }))} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                    <input value={s.value} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, value: e.target.value } : x)) } }))} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                    <button onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) } }))} style={{ color: COLORS.danger }}><X size={16} /></button>
+                    <input aria-label={t.specKeyPlaceholder} value={s.key} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, key: e.target.value } : x)) } }))} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                    <input aria-label={t.specValuePlaceholder} value={s.value} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, value: e.target.value } : x)) } }))} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                    <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) } }))} style={{ color: COLORS.danger }}><X size={16} /></button>
                   </div>
                 ))}
                 <button onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: [...st.result.specs, { id: uid(), key: "", value: "" }] } }))} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
@@ -6754,19 +6762,19 @@ export default function SiteManager() {
       )}
 
       {libraryEditModal && (
-        <Modal onClose={() => setLibraryEditModal(null)} title={libraryEditModal.id ? t.editLibraryItemTitle : t.newLibraryItemTitle}>
+        <Modal t={t} onClose={() => setLibraryEditModal(null)} title={libraryEditModal.id ? t.editLibraryItemTitle : t.newLibraryItemTitle}>
           <div className="flex flex-col gap-2">
-            <input value={libraryEditModal.name} onChange={(e) => updateLibraryEditField("name", e.target.value)} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={libraryEditModal.supplier} onChange={(e) => updateLibraryEditField("supplier", e.target.value)} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={libraryEditModal.articleNumber} onChange={(e) => updateLibraryEditField("articleNumber", e.target.value)} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input value={libraryEditModal.category} onChange={(e) => updateLibraryEditField("category", e.target.value)} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.itemNameLabel} value={libraryEditModal.name} onChange={(e) => updateLibraryEditField("name", e.target.value)} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.manufacturerLabel} value={libraryEditModal.supplier} onChange={(e) => updateLibraryEditField("supplier", e.target.value)} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.articleNumberLabel} value={libraryEditModal.articleNumber} onChange={(e) => updateLibraryEditField("articleNumber", e.target.value)} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input aria-label={t.techCategoryLabel} value={libraryEditModal.category} onChange={(e) => updateLibraryEditField("category", e.target.value)} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
 
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
             {libraryEditModal.specs.map((s) => (
               <div key={s.id} className="flex gap-2">
-                <input value={s.key} onChange={(e) => updateLibrarySpecRow(s.id, "key", e.target.value)} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                <input value={s.value} onChange={(e) => updateLibrarySpecRow(s.id, "value", e.target.value)} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                <button onClick={() => removeLibrarySpecRow(s.id)} style={{ color: COLORS.danger }}><X size={16} /></button>
+                <input aria-label={t.specKeyPlaceholder} value={s.key} onChange={(e) => updateLibrarySpecRow(s.id, "key", e.target.value)} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                <input aria-label={t.specValuePlaceholder} value={s.value} onChange={(e) => updateLibrarySpecRow(s.id, "value", e.target.value)} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
+                <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => removeLibrarySpecRow(s.id)} style={{ color: COLORS.danger }}><X size={16} /></button>
               </div>
             ))}
             <button onClick={addLibrarySpecRow} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
@@ -6777,12 +6785,12 @@ export default function SiteManager() {
       )}
 
       {pickupModal && (
-        <Modal onClose={() => setPickupModal(null)} title={t.pickupTitle}>
+        <Modal t={t} onClose={() => setPickupModal(null)} title={t.pickupTitle}>
           {pickupModal.step === "form" ? (
             <div className="flex flex-col gap-2">
               <div style={{ color: COLORS.muted }} className="text-xs mb-1">{t.pickupHint}</div>
-              <input value={pickupModal.orderRef} onChange={(e) => setPickupModal((s) => ({ ...s, orderRef: e.target.value }))} placeholder={t.orderPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-              <input value={pickupModal.supplier} onChange={(e) => setPickupModal((s) => ({ ...s, supplier: e.target.value }))} placeholder={t.supplierPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.orderPlaceholder} value={pickupModal.orderRef} onChange={(e) => setPickupModal((s) => ({ ...s, orderRef: e.target.value }))} placeholder={t.orderPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input aria-label={t.supplierPlaceholder} value={pickupModal.supplier} onChange={(e) => setPickupModal((s) => ({ ...s, supplier: e.target.value }))} placeholder={t.supplierPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
               <div className="flex gap-2 mt-1">
                 <button onClick={() => setPickupModal((s) => ({ ...s, codeType: "qr" }))} style={{ background: pickupModal.codeType === "qr" ? "#C9A6F5" : COLORS.cardAlt }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"><QrCode size={14} /> {t.qrLabel}</button>
                 <button onClick={() => setPickupModal((s) => ({ ...s, codeType: "barcode" }))} style={{ background: pickupModal.codeType === "barcode" ? "#C9A6F5" : COLORS.cardAlt }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"><Barcode size={14} /> {t.barcodeLabel}</button>
@@ -6817,9 +6825,9 @@ export default function SiteManager() {
           const wasteOpen = tripModal.loadKind === "waste" ? openWasteKg(tripModal.projectId) : 0;
           const hours = tripHours(tripModal.departTime, tripModal.arriveTime);
           const field = { background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text };
-          const lbl = (s) => <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{s}</div>;
+          const lbl = (s) => <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{s}</div>;
           return (
-            <Modal onClose={() => setTripModal(null)} title={t.tripAdd}>
+            <Modal t={t} onClose={() => setTripModal(null)} title={t.tripAdd}>
               <div className="flex flex-col gap-2.5">
                 {lbl(t.tripProject)}
                 <select data-trip-project value={tripModal.projectId || ""} onChange={(e) => setTripField("projectId", e.target.value)} style={field} className="rounded-lg px-2 py-2 text-sm outline-none">
@@ -6831,32 +6839,32 @@ export default function SiteManager() {
                   <div>{lbl(t.tripDate)}<input type="date" value={tripModal.date} onChange={(e) => setTripField("date", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div>{lbl(t.tripFrom)}<input data-trip-from value={tripModal.from} onChange={(e) => setTripField("from", e.target.value)} placeholder={t.tripFromPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
-                  <div>{lbl(t.tripTo)}<input data-trip-to value={tripModal.to} onChange={(e) => setTripField("to", e.target.value)} placeholder={t.tripToPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripFrom)}<input aria-label={t.tripFromPh} data-trip-from value={tripModal.from} onChange={(e) => setTripField("from", e.target.value)} placeholder={t.tripFromPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripTo)}<input aria-label={t.tripToPh} data-trip-to value={tripModal.to} onChange={(e) => setTripField("to", e.target.value)} placeholder={t.tripToPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>{lbl(t.tripDepart)}<input data-trip-depart type="time" value={tripModal.departTime} onChange={(e) => setTripField("departTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                   <div>{lbl(t.tripArrive)}<input data-trip-arrive type="time" value={tripModal.arriveTime} onChange={(e) => setTripField("arriveTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
-                  <div>{lbl(t.tripKm)}<input data-trip-km value={tripModal.km} onChange={(e) => setTripField("km", e.target.value)} inputMode="decimal" placeholder="0" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripKm)}<input aria-label="0" data-trip-km value={tripModal.km} onChange={(e) => setTripField("km", e.target.value)} inputMode="decimal" placeholder="0" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                 </div>
                 {hours > 0 && <div data-trip-hours style={{ color: COLORS.amber }} className="text-xs font-bold">{t.tripHours}: {hours} h</div>}
                 {lbl(t.tripLoad)}
                 <div className="flex flex-wrap gap-1.5">
                   {LOAD_KINDS.map((k) => (
-                    <button key={k} data-trip-load={k} onClick={() => setTripField("loadKind", k)} style={{ background: tripModal.loadKind === k ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-full text-[11px] font-bold">{t[`load_${k}`]}</button>
+                    <button key={k} data-trip-load={k} onClick={() => setTripField("loadKind", k)} style={{ background: tripModal.loadKind === k ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-full text-xs font-bold">{t[`load_${k}`]}</button>
                   ))}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div>{lbl(t.tripWeight)}<input data-trip-weight value={tripModal.weightKg} onChange={(e) => setTripField("weightKg", e.target.value)} inputMode="decimal" placeholder="kg" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripWeight)}<input aria-label="kg" data-trip-weight value={tripModal.weightKg} onChange={(e) => setTripField("weightKg", e.target.value)} inputMode="decimal" placeholder="kg" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                   {tripModal.loadKind === "waste" && (
                     <div>{lbl(t.tripMulde)}<select data-trip-mulde value={tripModal.mulde} onChange={(e) => setTripField("mulde", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none">{MULDE_SIZES.map((m) => <option key={m} value={m}>{m ? `${m} m³` : "—"}</option>)}</select></div>
                   )}
                 </div>
                 {tripModal.loadKind === "waste" && wasteOpen > 0 && (
-                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-[11px]">{t.tripWasteOpen.replace("{kg}", String(wasteOpen))}</div>
+                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-xs">{t.tripWasteOpen.replace("{kg}", String(wasteOpen))}</div>
                 )}
                 {tripModal.loadKind === "waste" && (
-                  <div>{lbl(t.tripDisposal)}<input data-trip-disposal value={tripModal.disposalSite} onChange={(e) => setTripField("disposalSite", e.target.value)} placeholder={t.tripDisposalPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>{lbl(t.tripDisposal)}<input aria-label={t.tripDisposalPh} data-trip-disposal value={tripModal.disposalSite} onChange={(e) => setTripField("disposalSite", e.target.value)} placeholder={t.tripDisposalPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
                 )}
                 {lbl(t.notesLabel)}
                 <textarea value={tripModal.notes} onChange={(e) => setTripField("notes", e.target.value)} rows={2} style={field} className="rounded-lg px-2 py-2 text-sm outline-none resize-none" />
@@ -6866,44 +6874,44 @@ export default function SiteManager() {
           );
       })()}
       {inspectionModal && (
-        <Modal onClose={() => setInspectionModal(null)} title={inspectionModal.editingId ? t.inspectEditTitle : t.inspectionTitle}>
+        <Modal t={t} onClose={() => setInspectionModal(null)} title={inspectionModal.editingId ? t.inspectEditTitle : t.inspectionTitle}>
           {inspectionModal.step === "form" && (
             <div className="flex flex-col gap-2">
-              <textarea value={inspectionModal.text} onChange={(e) => setInspectionModal((s) => ({ ...s, text: e.target.value }))} placeholder={t.inspectionPlaceholder} rows={4} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
+              <textarea aria-label={t.inspectionPlaceholder} value={inspectionModal.text} onChange={(e) => setInspectionModal((s) => ({ ...s, text: e.target.value }))} placeholder={t.inspectionPlaceholder} rows={4} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
               <div className="flex gap-2">
-                <input value={inspectionModal.startTime} onChange={(e) => setInspectionModal((s) => ({ ...s, startTime: e.target.value }))} placeholder={t.startTimeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={inspectionModal.ladderLength} onChange={(e) => setInspectionModal((s) => ({ ...s, ladderLength: e.target.value }))} placeholder={t.ladderLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                <input value={inspectionModal.psaCount} onChange={(e) => setInspectionModal((s) => ({ ...s, psaCount: e.target.value }))} placeholder={t.psaLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.startTimeLabel} value={inspectionModal.startTime} onChange={(e) => setInspectionModal((s) => ({ ...s, startTime: e.target.value }))} placeholder={t.startTimeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.ladderLabel} value={inspectionModal.ladderLength} onChange={(e) => setInspectionModal((s) => ({ ...s, ladderLength: e.target.value }))} placeholder={t.ladderLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input aria-label={t.psaLabel} value={inspectionModal.psaCount} onChange={(e) => setInspectionModal((s) => ({ ...s, psaCount: e.target.value }))} placeholder={t.psaLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {inspectionModal.images.map((img, i) => (<img key={i} src={`data:${img.mediaType};base64,${img.b64}`} alt="" className="w-full h-16 object-cover rounded-lg" />))}
                 {inspectionModal.images.length < 3 && (
-                  <button onClick={() => inspectionFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="h-16 rounded-lg flex items-center justify-center">
+                  <button aria-label={t.a11yPhoto} title={t.a11yPhoto} onClick={() => inspectionFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="tap h-16 rounded-lg flex items-center justify-center">
                     <ImagePlus size={16} color={COLORS.muted} />
                   </button>
                 )}
               </div>
               <input ref={inspectionFileRef} type="file" accept="image/*" onChange={addInspectionImage} className="hidden" />
               {inspectionModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{inspectionModal.error}</div>}
-              {inspectionModal.detail && <div style={{ color: COLORS.muted }} className="text-[10px] break-all">{inspectionModal.detail}</div>}
+              {inspectionModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{inspectionModal.detail}</div>}
               {/* Tiles: what was looked at. Tap cycles none → OK → Mangel. */}
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-1">{t.inspectChecklist}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.inspectChecklist}</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {INSPECTION_ITEMS.map((k) => {
                   const st = (inspectionModal.checklist || {})[k];
                   const col = st === "ok" ? COLORS.success : st === "mangel" ? COLORS.danger : COLORS.muted;
                   return (
-                    <button key={k} data-inspect-tile={k} onClick={() => cycleInspectionItem(k)} style={{ background: st ? `${col}22` : COLORS.cardAlt, border: `1px solid ${st ? col : COLORS.border}`, color: st ? col : COLORS.text }} className="rounded-lg px-2 py-2 text-[11px] font-bold leading-tight text-left flex items-center gap-1.5">
+                    <button key={k} data-inspect-tile={k} onClick={() => cycleInspectionItem(k)} style={{ background: st ? `${col}22` : COLORS.cardAlt, border: `1px solid ${st ? col : COLORS.border}`, color: st ? col : COLORS.text }} className="rounded-lg px-2 py-2 text-xs font-bold leading-tight text-left flex items-center gap-1.5">
                       <span style={{ background: st ? col : COLORS.border }} className="w-2 h-2 rounded-full shrink-0" />
                       <span className="truncate">{t[`inspect_${k}`]}</span>
-                      {st && <span className="ml-auto text-[9px] uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>}
+                      {st && <span className="ml-auto text-xs uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>}
                     </button>
                   );
                 })}
               </div>
               {/* Replaced tiles: model from the reference, count, and what that
                   weighs -- the number the skip is ordered by. */}
-              <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mt-1">{t.inspectReplacedTiles}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.inspectReplacedTiles}</div>
               {(inspectionModal.tiles || []).map((row, i) => {
                 const meta = tileMeta(row.model);
                 const w = tileWaste(row.model, row.count);
@@ -6921,13 +6929,13 @@ export default function SiteManager() {
                         {ROOF_TILES.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
                         <option value="__free">{t.inspectTileOther}</option>
                       </select>
-                      <input data-tile-count value={row.count} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], count: e.target.value }; return { ...s, tiles }; })} inputMode="numeric" placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-20 rounded-lg px-2 py-2 text-sm outline-none" />
+                      <input aria-label={t.qtyPlaceholder} data-tile-count value={row.count} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], count: e.target.value }; return { ...s, tiles }; })} inputMode="numeric" placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-20 rounded-lg px-2 py-2 text-sm outline-none" />
                     </div>
                     {row.model && !meta && (
-                      <input value={row.model.trim()} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value || " " }; return { ...s, tiles }; })} placeholder={t.inspectTileOther} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1.5 text-xs outline-none" />
+                      <input aria-label={t.inspectTileOther} value={row.model.trim()} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value || " " }; return { ...s, tiles }; })} placeholder={t.inspectTileOther} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1.5 text-xs outline-none" />
                     )}
                     {meta && (
-                      <div style={{ color: COLORS.muted }} className="text-[10px]">
+                      <div style={{ color: COLORS.muted }} className="text-xs">
                         {meta.kgPerPiece} kg/Stk{meta.perM2 ? ` · ${meta.perM2} Stk/m²` : ""}{parseFloat(row.count) > 0 ? ` → ~${w.wasteKg} kg${w.areaM2 ? ` · ${w.areaM2} m²` : ""}` : ""}
                       </div>
                     )}
@@ -6935,12 +6943,12 @@ export default function SiteManager() {
                 );
               })}
               <div className="flex items-center justify-between">
-                <button onClick={() => setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))} style={{ color: COLORS.accent }} className="text-[10px] font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.inspectAddTile}</button>
-                {(() => { const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0)); return w.wasteKg > 0 ? <span data-waste-kg style={{ color: COLORS.amber }} className="text-[11px] font-bold">{t.inspectWaste}: ~{w.wasteKg} kg</span> : null; })()}
+                <button onClick={() => setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.inspectAddTile}</button>
+                {(() => { const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0)); return w.wasteKg > 0 ? <span data-waste-kg style={{ color: COLORS.amber }} className="text-xs font-bold">{t.inspectWaste}: ~{w.wasteKg} kg</span> : null; })()}
               </div>
               <button data-inspect-save onClick={saveInspectionPlain} style={{ background: COLORS.accent }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.inspectSave}</button>
               {!inspectionModal.editingId && <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>}
-              <div style={{ color: COLORS.muted }} className="text-[10px]">{t.advisorsHint}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs">{t.advisorsHint}</div>
             </div>
           )}
           {inspectionModal.step === "running" && (
@@ -7033,23 +7041,23 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
       <div className="flex-1 min-w-0">
         <div className="truncate flex items-center gap-1.5">
           {i.regie && (
-            <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-[9px] font-bold px-1 py-0.5 rounded uppercase">
+            <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-xs font-bold px-1 py-0.5 rounded uppercase">
               {t.regieShort}
             </span>
           )}
           <span className="truncate">{i.description}</span>
         </div>
         {(i.supplier || i.artNo) && (
-          <div style={{ color: COLORS.muted }} className="text-[10px] truncate">
+          <div style={{ color: COLORS.muted }} className="text-xs truncate">
             {[i.supplier, i.artNo && `${t.artNoShort} ${i.artNo}`].filter(Boolean).join(" · ")}
           </div>
         )}
       </div>
       <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}</span>
       <div className="flex items-center gap-2 shrink-0">
-        <button onClick={() => onCopyItem(i)} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={13} /></button>
-        <button onClick={() => onEditItem(i)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
-        <button onClick={() => onDeleteItem(i)} title={t.deleteLabel} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
+        <button className="tap" aria-label={t.copyBtn} onClick={() => onCopyItem(i)} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={13} /></button>
+        <button className="tap" aria-label={t.a11yEdit} onClick={() => onEditItem(i)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
+        <button className="tap" aria-label={t.a11yDelete} onClick={() => onDeleteItem(i)} title={t.deleteLabel} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
       </div>
     </div>
   );
@@ -7070,7 +7078,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             style={{ background: "transparent", color: COLORS.text }}
-            className="text-[11px] font-bold outline-none appearance-none pr-3 max-w-[9rem]"
+            className="text-xs font-bold outline-none appearance-none pr-3 max-w-[9rem]"
           >
             {[
               ["name", t.sortName],
@@ -7170,7 +7178,7 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               style={{ color: COLORS.muted, touchAction: "none", cursor: "grab" }}
-              className="shrink-0 px-1 py-1 -my-1"
+              className="tap shrink-0 px-1 py-1 -my-1"
               aria-label="Reorder"
             >
               <GripVertical size={15} />
@@ -7261,21 +7269,23 @@ function SignaturePad({ onChange, t }) {
         style={{ background: "#fff", border: `1px solid ${COLORS.border}`, touchAction: "none" }}
         className="w-full h-40 rounded-lg"
       />
-      <button onClick={clear} style={{ color: COLORS.muted }} className="w-full py-2 text-[11px] font-bold uppercase">
+      <button onClick={clear} style={{ color: COLORS.muted }} className="w-full py-2 text-xs font-bold uppercase">
         {t.sigClear}
       </button>
     </div>
   );
 }
 
-function Modal({ title, onClose, children }) {
+function Modal({ title, onClose, children, t = {} }) {
+  const ref = useDialog({ onClose });
+  const titleId = useRef(`dlg-${Math.random().toString(36).slice(2, 8)}`);
   return (
     <div className="fixed inset-0 z-50 flex items-end lg:items-center justify-center">
       <div onClick={onClose} className="absolute inset-0 bg-black/60" />
-      <div style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-xl rounded-t-2xl lg:rounded-2xl p-5 lg:p-6 max-h-[85vh] overflow-y-auto">
+      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId.current} tabIndex={-1} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-xl rounded-t-2xl lg:rounded-2xl p-5 lg:p-6 max-h-[85vh] overflow-y-auto outline-none">
         <div className="flex items-center justify-between mb-4">
-          <div className="font-black text-lg uppercase">{title}</div>
-          <button onClick={onClose}><X size={20} color={COLORS.muted} /></button>
+          <div id={titleId.current} className="font-black text-lg uppercase">{title}</div>
+          <button data-dialog-close onClick={onClose} aria-label={t.a11yClose || "Close"} title={t.a11yClose || "Close"} className="tap"><X size={20} color={COLORS.muted} /></button>
         </div>
         {children}
       </div>

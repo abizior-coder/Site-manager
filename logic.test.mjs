@@ -11,6 +11,7 @@ import { documentTotals as docTotalsPure } from "./documents.js";
 import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./onboarding.js";
 import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
 import { readFileSync } from "node:fs";
+import * as fsMod from "node:fs";
 import { todayKey, monthKey, dateKeyOffset, uid } from "./ui/format.js";
 import { code128Values, code128Bars, patternFor, patternCount, START_B, START_C, CODE_B, CODE_C, STOP } from "./barcode.js";
 import { createCrashGate, crashPayload, installCrashCapture, uaFamily } from "./errors-client.js";
@@ -460,6 +461,8 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("bars start after the quiet zone and the first bar is two modules wide", (() => { const b = code128Bars("ABC"); return [b.bars[0].x, b.bars[0].w, b.width > 60]; })(), [10, 2, true]);
   t("non-printable text is refused", (() => { try { code128Values("é"); return "no"; } catch (e) { return "refused"; } })(), "refused");
   t("the Cockpit chunk talks to the same Worker as the app", (() => { const w = (f) => (readFileSync(new URL(f, import.meta.url), "utf8").match(/https:\/\/site-log-claude-proxy[^"]*/) || [])[0]; return w("./tabs/CockpitTab.jsx") === w("./roofing-site-manager.jsx"); })(), true);
+  t("no type under 12 px in the source", ["./roofing-site-manager.jsx", "./tabs/ProjectDetail.jsx", "./tabs/MaterialsTab.jsx", "./tabs/TodayTab.jsx", "./tabs/BoardTab.jsx", "./tabs/CockpitTab.jsx", "./ui/entries.jsx", "./ui/break-chips.jsx"].filter((f) => /text-\[(9|10|11)px\]/.test(readFileSync(new URL(f, import.meta.url), "utf8"))), []);
+  t("every icon the manifest names is a file", (() => { const m = JSON.parse(readFileSync(new URL("./manifest.webmanifest", import.meta.url), "utf8")); const { existsSync } = fsMod; return m.icons.filter((i) => !existsSync(new URL("./" + i.src, import.meta.url))).map((i) => i.src); })(), []);
   t("no order reference goes to a third-party image service", /qrserver|bwipjs/.test(readFileSync(new URL("./roofing-site-manager.jsx", import.meta.url), "utf8")), false);
 }
 

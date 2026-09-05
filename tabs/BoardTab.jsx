@@ -76,21 +76,21 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
         return (
           <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <button onClick={() => { const d = new Date(weekAnchor); d.setDate(d.getDate() - 7); setWeekAnchor(d); }} style={{ background: COLORS.cardAlt }} className="w-8 h-8 rounded-lg flex items-center justify-center">
+              <button aria-label={t.a11yBack} title={t.a11yBack} onClick={() => { const d = new Date(weekAnchor); d.setDate(d.getDate() - 7); setWeekAnchor(d); }} style={{ background: COLORS.cardAlt }} className="tap w-8 h-8 rounded-lg flex items-center justify-center">
                 <ChevronLeft size={16} color={COLORS.muted} />
               </button>
               <div className="font-bold text-sm">
                 {days[0].js.toLocaleDateString(locale, { day: "numeric", month: "short" })} – {days[6].js.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setWeekAnchor(new Date())} style={{ background: COLORS.cardAlt, color: COLORS.muted }} className="px-2.5 h-8 rounded-lg text-[11px] font-bold uppercase">{t.navToday}</button>
-                <button onClick={() => { const d = new Date(weekAnchor); d.setDate(d.getDate() + 7); setWeekAnchor(d); }} style={{ background: COLORS.cardAlt }} className="w-8 h-8 rounded-lg flex items-center justify-center">
+                <button onClick={() => setWeekAnchor(new Date())} style={{ background: COLORS.cardAlt, color: COLORS.muted }} className="px-2.5 h-8 rounded-lg text-xs font-bold uppercase">{t.navToday}</button>
+                <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => { const d = new Date(weekAnchor); d.setDate(d.getDate() + 7); setWeekAnchor(d); }} style={{ background: COLORS.cardAlt }} className="tap w-8 h-8 rounded-lg flex items-center justify-center">
                   <ChevronRight size={16} color={COLORS.muted} />
                 </button>
               </div>
             </div>
 
-            <div style={{ color: COLORS.muted }} className="text-[10px] mb-2">{t.plannerHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs mb-2">{t.plannerHint}</div>
             <div className="flex flex-wrap gap-1.5 mb-4">
               {assignable.map((pr) => (
                 <div
@@ -112,7 +112,7 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
                 <div className="grid gap-1.5" style={{ gridTemplateColumns: "140px repeat(7, 1fr)" }}>
                   <div />
                   {days.map((d) => (
-                    <div key={d.date} style={{ color: d.date === todayKey() ? COLORS.accent : COLORS.muted }} className="text-center text-[10px] font-bold uppercase pb-1">
+                    <div key={d.date} style={{ color: d.date === todayKey() ? COLORS.accent : COLORS.muted }} className="text-center text-xs font-bold uppercase pb-1">
                       {dayName(d.js)} {d.dayOfMonth}
                     </div>
                   ))}
@@ -145,7 +145,7 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
                               border: `1px solid ${mineHere.length ? `${first}55` : away ? `${COLORS.amber}55` : COLORS.border}`,
                               opacity: away && !mineHere.length ? 0.85 : 1,
                             }}
-                            className="min-h-[46px] rounded-lg p-1 text-[11px] leading-tight flex flex-col gap-1 justify-center transition"
+                            className="min-h-[46px] rounded-lg p-1 text-xs leading-tight flex flex-col gap-1 justify-center transition"
                           >
                             {mineHere.map((a) => {
                               const pr = projects.find((x) => x.id === a.projectId);
@@ -186,17 +186,17 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
           any words. */}
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <button onClick={() => setCalMonth(new Date(year, month - 1, 1))} style={{ background: COLORS.cardAlt }} className="w-8 h-8 rounded-lg flex items-center justify-center">
+          <button aria-label={t.a11yBack} title={t.a11yBack} onClick={() => setCalMonth(new Date(year, month - 1, 1))} style={{ background: COLORS.cardAlt }} className="tap w-8 h-8 rounded-lg flex items-center justify-center">
             <ChevronLeft size={16} color={COLORS.muted} />
           </button>
           <div className="font-bold capitalize">{calMonth.toLocaleDateString(locale, { month: "long", year: "numeric" })}</div>
-          <button onClick={() => setCalMonth(new Date(year, month + 1, 1))} style={{ background: COLORS.cardAlt }} className="w-8 h-8 rounded-lg flex items-center justify-center">
+          <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setCalMonth(new Date(year, month + 1, 1))} style={{ background: COLORS.cardAlt }} className="tap w-8 h-8 rounded-lg flex items-center justify-center">
             <ChevronRight size={16} color={COLORS.muted} />
           </button>
         </div>
         <div className="grid grid-cols-7 gap-1.5 mb-1.5">
           {weekdays.map((w, i) => (
-            <div key={i} style={{ color: COLORS.muted }} className="text-center text-[10px] font-bold uppercase">{w}</div>
+            <div key={i} style={{ color: COLORS.muted }} className="text-center text-xs font-bold uppercase">{w}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1.5">
@@ -214,26 +214,26 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
                 style={{ background: COLORS.cardAlt, border: `1px solid ${isToday ? COLORS.accent : COLORS.border}` }}
                 className="min-h-[92px] rounded-lg p-1.5 text-left flex flex-col gap-1 overflow-hidden hover:brightness-125 transition"
               >
-                <div style={{ color: isToday ? COLORS.accent : COLORS.muted }} className="text-[11px] font-bold">{d}</div>
+                <div style={{ color: isToday ? COLORS.accent : COLORS.muted }} className="text-xs font-bold">{d}</div>
                 {dayPlan.slice(0, 3).map((a) => {
                   const pr = projects.find((x) => x.id === a.projectId);
                   const col = projectColour(a.projectId);
                   return (
-                    <div key={a.id} style={{ background: `${col}2A`, borderLeft: `3px solid ${col}`, color: COLORS.text }} className="text-[9px] leading-tight px-1 py-0.5 rounded-sm truncate">
+                    <div key={a.id} style={{ background: `${col}2A`, borderLeft: `3px solid ${col}`, color: COLORS.text }} className="text-xs leading-tight px-1 py-0.5 rounded-sm truncate">
                       {memberName(a.userId).split(" ")[0]} · {pr ? pr.name : "—"}
                     </div>
                   );
                 })}
                 {dayPlan.length > 3 && (
-                  <div style={{ color: COLORS.muted }} className="text-[9px]">+{dayPlan.length - 3}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs">+{dayPlan.length - 3}</div>
                 )}
                 {dayLeave.map((r) => (
-                  <div key={r.id} style={{ background: `${COLORS.amber}22`, color: COLORS.amber }} className="text-[9px] px-1 py-0.5 rounded-sm truncate">
+                  <div key={r.id} style={{ background: `${COLORS.amber}22`, color: COLORS.amber }} className="text-xs px-1 py-0.5 rounded-sm truncate">
                     {memberName(r.userId).split(" ")[0]} · {t[`leave${(r.type || "other").charAt(0).toUpperCase()}${(r.type || "other").slice(1)}`] || t.leaveOther}
                   </div>
                 ))}
                 {dayNotes.slice(0, 1).map((n) => (
-                  <div key={n.id} style={{ color: COLORS.muted }} className="text-[9px] italic truncate">{n.description}</div>
+                  <div key={n.id} style={{ color: COLORS.muted }} className="text-xs italic truncate">{n.description}</div>
                 ))}
               </button>
             );
@@ -248,14 +248,14 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
           the screen. */}
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
             {t.boardTree} ({live.length})
           </div>
           {finished.length > 0 && (
             <button
               onClick={() => setShowFinishedJobs((v) => !v)}
               style={{ color: COLORS.accent }}
-              className="text-[10px] font-bold uppercase"
+              className="text-xs font-bold uppercase"
             >
               {showFinishedJobs ? t.boardHideFinished : `${t.boardShowFinished} (${finished.length})`}
             </button>
@@ -285,7 +285,7 @@ export function BoardTab({ assignments, boardView, calMonth, customers, dragProj
                   >
                     <div className="min-w-0 flex items-center gap-2">
                       <span className="font-semibold truncate">{pr.name}</span>
-                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
+                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
                       {cust && <span style={{ color: COLORS.muted }} className="text-xs truncate hidden xl:inline">{cust.name}</span>}
                     </div>
                     <ChevronRight size={15} color={COLORS.muted} style={{ transform: open ? "rotate(90deg)" : "none", transition: "transform .15s" }} />

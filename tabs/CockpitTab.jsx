@@ -27,14 +27,14 @@ function ExportCard({ t, documents, customers, projects, entries, team, billing,
   const Btn = ({ kind, label, count }) => (
     <button data-export={kind} onClick={() => { const [name, text] = files[kind](); downloadText(name, text); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-2.5 px-3 rounded-lg text-xs font-bold flex items-center justify-between gap-2">
       <span className="flex items-center gap-2 min-w-0"><Download size={14} color={COLORS.accent} /><span className="truncate">{label}</span></span>
-      <span style={{ color: count ? COLORS.muted : COLORS.amber }} className="text-[10px] shrink-0">{count ? count : t.exportEmpty}</span>
+      <span style={{ color: count ? COLORS.muted : COLORS.amber }} className="text-xs shrink-0">{count ? count : t.exportEmpty}</span>
     </button>
   );
   return (
     <div data-export-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
       <div className="flex items-center justify-between gap-2 mb-2">
-        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.exportTitle}</div>
-        <input data-export-month type="month" value={month} onChange={(e) => setMonth(e.target.value || month)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1 text-xs outline-none" />
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.exportTitle}</div>
+        <input data-export-month aria-label={t.exportMonth} type="month" value={month} onChange={(e) => setMonth(e.target.value || month)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1 text-xs outline-none" />
       </div>
       <div className="grid gap-2 lg:grid-cols-2">
         <Btn kind="invoices" label={t.exportInvoices} count={journal.length} />
@@ -43,7 +43,7 @@ function ExportCard({ t, documents, customers, projects, entries, team, billing,
         <Btn kind="payroll-days" label={t.exportPayrollDays} count={people.reduce((s, p) => s + p.worked, 0)} />
         <Btn kind="contacts" label={t.exportContacts} count={contacts.length} />
       </div>
-      <div style={{ color: COLORS.muted }} className="text-[10px] mt-2 leading-relaxed">{t.exportHint}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs mt-2 leading-relaxed">{t.exportHint}</div>
     </div>
   );
 }
@@ -83,7 +83,7 @@ function ErrorsCard({ t }) {
   return (
     <div data-errors-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
       <div className="flex items-center justify-between mb-2">
-        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.ccErrors}</div>
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.ccErrors}</div>
         {errorsLog && <span style={{ color: total ? COLORS.amber : COLORS.success }} className="text-sm font-black">{total}</span>}
       </div>
       {!errorsLog && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
@@ -91,7 +91,7 @@ function ErrorsCard({ t }) {
       {errorsLog && total > 0 && (
         <div className="flex flex-col gap-1">
           {(errorsLog.recent || []).map((e, i) => (
-            <div key={i} className="text-[11px] font-mono truncate" title={e.stack || ""}>
+            <div key={i} className="text-xs font-mono truncate" title={e.stack || ""}>
               <span style={{ color: COLORS.amber }}>{e.code}</span> {e.tag} · {new Date(e.at).toLocaleString()} · {e.build} · {e.ua} · {e.message}
             </div>
           ))}
@@ -116,13 +116,13 @@ function UsageCard({ t }) {
   const maxActive = Math.max(...days.map((d) => d.active), 1);
   const tile = (label, value) => (
     <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2.5">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{label}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{label}</div>
       <div className="text-lg font-black leading-tight">{value}</div>
     </div>
   );
   return (
     <div data-usage-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccUsage}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccUsage}</div>
       {!usage && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
       {usage && days.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageEmpty}</div>}
       {usage && days.length > 0 && (
@@ -139,7 +139,7 @@ function UsageCard({ t }) {
               <div key={d.date} title={`${d.date}: ${d.active}`} style={{ height: `${Math.max(6, Math.round((d.active / maxActive) * 100))}%`, background: d.active ? COLORS.accent : COLORS.border }} className="flex-1 rounded-sm" />
             ))}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.ccUsageFootnote}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.ccUsageFootnote}</div>
         </>
       )}
     </div>
@@ -152,9 +152,9 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
   // single column.
   const Tile = ({ label, value, color, sub }) => (
     <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-1">{label}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{label}</div>
       <div style={{ color: color || COLORS.text }} className="text-lg font-black leading-tight">{value}</div>
-      {sub && <div style={{ color: COLORS.muted }} className="text-[10px] mt-0.5">{sub}</div>}
+      {sub && <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{sub}</div>}
     </div>
   );
   return (
@@ -181,7 +181,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
 
       {c.pendingHours.length > 0 && (
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccHoursToApprove}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccHoursToApprove}</div>
           <div className="flex flex-col gap-1.5">
             {c.pendingHours.slice(0, 8).map((e) => {
               const m = team.members.find((x) => x.uid === e.userId);
@@ -190,9 +190,9 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
                 <div key={e.id} style={{ background: COLORS.cardAlt }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <div className="text-sm truncate">{m ? (m.name || m.email || e.userId) : t.ccUnassigned} · {e.qty} h</div>
-                    <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{e.date} · {pr ? pr.name : "—"}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs truncate">{e.date} · {pr ? pr.name : "—"}</div>
                   </div>
-                  <button onClick={() => approveEntry(e)} style={{ background: COLORS.success, color: "#12210A" }} className="shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase">
+                  <button onClick={() => approveEntry(e)} style={{ background: COLORS.success, color: "#12210A" }} className="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase">
                     {t.approveBtn}
                   </button>
                 </div>
@@ -204,7 +204,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
 
       {c.pendingLeave.length > 0 && (
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccLeaveToDecide}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccLeaveToDecide}</div>
           <div className="flex flex-col gap-1.5">
             {c.pendingLeave.slice(0, 8).map((r) => {
               const m = team.members.find((x) => x.uid === r.userId);
@@ -212,11 +212,11 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
                 <div key={r.id} style={{ background: COLORS.cardAlt }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <div className="text-sm truncate">{m ? (m.name || m.email || r.userId) : t.ccUnassigned}</div>
-                    <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{r.date} · {t[`leave${(r.type || "other").charAt(0).toUpperCase()}${(r.type || "other").slice(1)}`] || t.leaveOther}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs truncate">{r.date} · {t[`leave${(r.type || "other").charAt(0).toUpperCase()}${(r.type || "other").slice(1)}`] || t.leaveOther}</div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <button onClick={() => setLeaveStatus(r.id, "approved")} style={{ background: COLORS.success, color: "#12210A" }} className="px-2.5 py-1.5 rounded-full text-[10px] font-bold uppercase">{t.markApproved}</button>
-                    <button onClick={() => setLeaveStatus(r.id, "declined")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.danger}`, color: COLORS.danger }} className="px-2.5 py-1.5 rounded-full text-[10px] font-bold uppercase">{t.markDeclined}</button>
+                    <button onClick={() => setLeaveStatus(r.id, "approved")} style={{ background: COLORS.success, color: "#12210A" }} className="px-2.5 py-1.5 rounded-full text-xs font-bold uppercase">{t.markApproved}</button>
+                    <button onClick={() => setLeaveStatus(r.id, "declined")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.danger}`, color: COLORS.danger }} className="px-2.5 py-1.5 rounded-full text-xs font-bold uppercase">{t.markDeclined}</button>
                   </div>
                 </div>
               );
@@ -226,7 +226,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
       )}
 
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccOnSite}</div>
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccOnSite}</div>
         {c.onSite.length === 0 ? (
           <div style={{ color: COLORS.muted }} className="text-xs">{t.ccNobodyOnSite}</div>
         ) : (
@@ -235,7 +235,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
               <div key={p.uid} className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <div className="text-sm truncate">{p.name}</div>
-                  <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{p.project ? p.project.name : "—"}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs truncate">{p.project ? p.project.name : "—"}</div>
                 </div>
                 <span style={{ color: COLORS.success }} className="text-xs font-bold shrink-0">{fmtHM(Date.now() - p.since)}</span>
               </div>
@@ -245,7 +245,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
       </div>
 
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccPlannedToday}</div>
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccPlannedToday}</div>
         {c.plannedToday.length === 0 ? (
           <div style={{ color: COLORS.muted }} className="text-xs">{t.ccNobodyPlanned}</div>
         ) : (
@@ -266,7 +266,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
 
       {Object.keys(c.hoursByUser).length > 0 && (
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-          <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccHoursThisMonth}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.ccHoursThisMonth}</div>
           <div className="flex flex-col gap-2">
             {Object.entries(c.hoursByUser).sort((a, b) => b[1] - a[1]).map(([uidKey, hrs]) => {
               const m = team.members.find((x) => x.uid === uidKey);
@@ -277,7 +277,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
                   <span className="shrink-0 text-right">
                     <span style={{ color: COLORS.muted }}>{hrs.toFixed(1)} h</span>
                     {bal.configured && bal.overtime !== null && Math.abs(bal.overtime) >= 0.1 && (
-                      <span style={{ color: bal.overtime > 0 ? COLORS.amber : COLORS.muted }} className="block text-[10px]">
+                      <span style={{ color: bal.overtime > 0 ? COLORS.amber : COLORS.muted }} className="block text-xs">
                         {bal.overtime > 0 ? "+" : ""}{bal.overtime.toFixed(1)} h {t.overtimeShort}
                       </span>
                     )}
@@ -287,7 +287,7 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
             })}
           </div>
           {!isOwner() ? null : (
-            <button onClick={() => setHoursModalOpen(true)} style={{ color: COLORS.accent }} className="mt-2 text-[11px] font-bold uppercase">
+            <button onClick={() => setHoursModalOpen(true)} style={{ color: COLORS.accent }} className="mt-2 text-xs font-bold uppercase">
               {t.hoursDetailBtn}
             </button>
           )}
@@ -301,31 +301,31 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
 
       {(c.overdueList.length > 0 || c.dueFollow.length > 0 || c.expiringCerts.length > 0) && (
         <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55` }} className="rounded-xl p-3">
-          <div style={{ color: COLORS.amber }} className="text-[10px] uppercase tracking-wide mb-2 font-bold">{t.ccAttention}</div>
+          <div style={{ color: COLORS.amber }} className="text-xs uppercase tracking-wide mb-2 font-bold">{t.ccAttention}</div>
           <div className="flex flex-col gap-1.5">
             {isOwner() && c.overdueList.slice(0, 5).map(({ doc, st }) => (
               <button key={doc.id} onClick={() => { setTab("projects"); setDocEditor({ ...doc }); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
                 <div className="text-sm">{t.invoiceLabel} {doc.number} · {money(st.outstanding)}</div>
-                <div style={{ color: COLORS.danger }} className="text-[10px]">{t.overdueLabel} — {doc.dueDate}</div>
+                <div style={{ color: COLORS.danger }} className="text-xs">{t.overdueLabel} — {doc.dueDate}</div>
               </button>
             ))}
             {c.dueFollow.slice(0, 3).map(({ customer, contact }) => (
               <button key={contact.id} onClick={() => { setTab("customers"); setSelectedCustomer(customer.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
                 <div className="text-sm truncate">{customer.name}</div>
-                <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{t.followUpLabel} {contact.followUp}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs truncate">{t.followUpLabel} {contact.followUp}</div>
               </button>
             ))}
             {c.expiringCerts.slice(0, 3).map((cert) => (
               <div key={cert.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2">
                 <div className="text-sm truncate">{cert.title}</div>
-                <div style={{ color: COLORS.amber }} className="text-[10px]">{t.ccCertExpiring} {cert.expiryDate}</div>
+                <div style={{ color: COLORS.amber }} className="text-xs">{t.ccCertExpiring} {cert.expiryDate}</div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div style={{ color: COLORS.muted }} className="text-[10px] text-center leading-relaxed lg:col-span-3">{t.ccFootnote}</div>
+      <div style={{ color: COLORS.muted }} className="text-xs text-center leading-relaxed lg:col-span-3">{t.ccFootnote}</div>
     </div>
   );
 }

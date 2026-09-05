@@ -27,7 +27,7 @@ export function TodayTab({ topCard, t, projects, entries, user, activeClock, tod
                   return (
                     <button key={a.id} onClick={() => { setTab("projects"); setSelectedProject(pr.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
                       <div className="text-sm font-semibold">{pr.name}</div>
-                      {pr.address && <div style={{ color: COLORS.muted }} className="text-[10px] truncate">{pr.address}</div>}
+                      {pr.address && <div style={{ color: COLORS.muted }} className="text-xs truncate">{pr.address}</div>}
                     </button>
                   );
                 })}
@@ -40,13 +40,13 @@ export function TodayTab({ topCard, t, projects, entries, user, activeClock, tod
             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.weatherTitle} · {weatherLoc.name}</div>
             <div className="flex items-center gap-2">
               <button onClick={() => { setWeatherEditOpen((o) => !o); setWeatherCityInput(""); }} className="text-xs font-bold uppercase" style={{ color: COLORS.accent }}>{t.changeLocation}</button>
-              <button onClick={() => fetchWeather(weatherLoc)}><RefreshCw size={14} color={COLORS.muted} /></button>
+              <button className="tap" aria-label={t.a11yReload} title={t.a11yReload} onClick={() => fetchWeather(weatherLoc)}><RefreshCw size={14} color={COLORS.muted} /></button>
             </div>
           </div>
           {weatherEditOpen && (
             <div className="flex gap-2 my-2">
-              <input value={weatherCityInput} onChange={(e) => setWeatherCityInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitWeatherCity()} placeholder={t.cityPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-              <button onClick={submitWeatherCity} style={{ background: COLORS.accent }} className="rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
+              <input aria-label={t.cityPlaceholder} value={weatherCityInput} onChange={(e) => setWeatherCityInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitWeatherCity()} placeholder={t.cityPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+              <button aria-label={t.a11yConfirm} title={t.a11yConfirm} onClick={submitWeatherCity} style={{ background: COLORS.accent }} className="tap rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
             </div>
           )}
           {weather.loading && <div style={{ color: COLORS.muted }} className="text-sm">{t.weatherLoading}</div>}
@@ -61,7 +61,7 @@ export function TodayTab({ topCard, t, projects, entries, user, activeClock, tod
               <div style={{ color: COLORS.muted }} className="text-xs mt-1">{t.windLabel}: {Math.round(weather.data.wind_speed_10m)} km/h</div>
             </>
           )}
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.weatherSource}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.weatherSource}</div>
         </div>
 
         <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
@@ -92,9 +92,9 @@ export function TodayTab({ topCard, t, projects, entries, user, activeClock, tod
             <MessageSquare size={13} /> {t.tellLog}
           </div>
           <div className="flex gap-2">
-            <input value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitNote()} placeholder={t.tellLogPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-            <button onClick={() => toggleVoiceInput()} style={{ background: voiceListening && voiceTarget === "today" ? COLORS.danger : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg px-3 flex items-center justify-center"><Mic size={16} color={voiceListening && voiceTarget === "today" ? "#fff" : COLORS.muted} /></button>
-            <button onClick={submitNote} style={{ background: COLORS.accent }} className="rounded-lg px-3 flex items-center justify-center"><Send size={16} /></button>
+            <input aria-label={t.tellLogPlaceholder} value={noteText} onChange={(e) => setNoteText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submitNote()} placeholder={t.tellLogPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+            <button aria-label={t.a11yVoice} title={t.a11yVoice} onClick={() => toggleVoiceInput()} style={{ background: voiceListening && voiceTarget === "today" ? COLORS.danger : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap rounded-lg px-3 flex items-center justify-center"><Mic size={16} color={voiceListening && voiceTarget === "today" ? "#fff" : COLORS.muted} /></button>
+            <button aria-label={t.a11ySend} title={t.a11ySend} onClick={submitNote} style={{ background: COLORS.accent }} className="tap rounded-lg px-3 flex items-center justify-center"><Send size={16} /></button>
           </div>
           <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.autoSortHint}</div>
         </div>
