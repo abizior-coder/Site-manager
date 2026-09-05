@@ -19,3 +19,9 @@ Bauen der App erzeugt, kein Laufzeitdienst), Lucide (Icons im Bundle).
 
 Vom Betreiber selbst genutzt, ohne Firmendaten: Proton (E‑Mail des
 Betreibers, Schweiz).
+
+## Vom Kunden gewählte Empfänger (keine Subprozessoren von Site Log)
+
+| Anbieter | Leistung | Welche Daten | Wann | Grundlage |
+|---|---|---|---|---|
+| **bexio AG**, Alte Jonastrasse 24, 8640 Rapperswil‑Jona | Buchhaltung des Kunden; Site Log überträgt auf Knopfdruck Kunden und Rechnungen in das bexio‑Konto der Firma | Kundenstamm (Name, Adresse, Telefon, E‑Mail), Rechnungen mit Positionen | nur wenn der Inhaber sein bexio verbindet und einen Push auslöst | Vertrag zwischen der Firma und bexio; der Zugriffstoken der Firma liegt verschlüsselt im Cloudflare‑Worker (siehe oben) und wird vom Inhaber jederzeit gelöscht |
