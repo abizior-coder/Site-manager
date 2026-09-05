@@ -7,8 +7,12 @@
 // (reports.js weekOf, accounting-export monthDays) is UTC by design because
 // it never looks at "now".
 const pad2 = (n) => String(n).padStart(2, "0");
-export function todayKey(d = new Date()) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
-export function monthKey(d = new Date()) { return todayKey(d).slice(0, 7); }
+export function todayKey(d = new Date()) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+export function monthKey(d = new Date()) {
+  return todayKey(d).slice(0, 7);
+}
 // The local day `days` from `from` (a due date, an expiry look-ahead).
 export function dateKeyOffset(days, from = new Date()) {
   return todayKey(new Date(from.getFullYear(), from.getMonth(), from.getDate() + (Number(days) || 0)));

@@ -11,12 +11,26 @@ const NUM = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
 
 const ENTRY_TYPES = new Set(["time", "break", "material", "tool", "order", "photo", "pickup", "inspection", "note"]);
-const MAX = { projects: 2000, entries: 50000, customers: 5000, documents: 5000, assignments: 20000, leave: 5000, reports: 5000, sentReports: 5000, photos: 3000 };
+const MAX = {
+  projects: 2000,
+  entries: 50000,
+  customers: 5000,
+  documents: 5000,
+  assignments: 20000,
+  leave: 5000,
+  reports: 5000,
+  sentReports: 5000,
+  photos: 3000,
+};
 
 // A photo is a data URL of an image and under the document limit. Anything
 // else -- a script, a page, a link -- is not a photo and is dropped.
 export function isPhotoDataUrl(v) {
-  return typeof v === "string" && /^data:image\/(jpeg|jpg|png|webp|gif|heic|heif);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length <= 1000000;
+  return (
+    typeof v === "string" &&
+    /^data:image\/(jpeg|jpg|png|webp|gif|heic|heif);base64,[A-Za-z0-9+/=]+$/.test(v) &&
+    v.length <= 1000000
+  );
 }
 
 function cleanEntry(e, makeId, photoMap, userId) {
@@ -44,7 +58,8 @@ function cleanEntry(e, makeId, photoMap, userId) {
   if (typeof e.endTime === "string") out.endTime = STR(e.endTime, 5);
   // Photos come only through the remap: a pasted id is never adopted.
   if (photoMap && typeof e.photoId === "string" && photoMap.has(e.photoId)) out.photoId = photoMap.get(e.photoId);
-  if (photoMap && typeof e.originalPhotoId === "string" && photoMap.has(e.originalPhotoId)) out.originalPhotoId = photoMap.get(e.originalPhotoId);
+  if (photoMap && typeof e.originalPhotoId === "string" && photoMap.has(e.originalPhotoId))
+    out.originalPhotoId = photoMap.get(e.originalPhotoId);
   return out;
 }
 
@@ -52,8 +67,10 @@ function cleanEntry(e, makeId, photoMap, userId) {
 // its entries. Nothing else travels.
 export function sanitiseProjectCode(obj, { makeId, userId }) {
   if (!isObj(obj) || !STR(obj.name, 200)) return null;
-  const entries = (Array.isArray(obj.entries) ? obj.entries : []).slice(0, 5000)
-    .map((e) => cleanEntry(e, makeId, null, userId)).filter(Boolean);
+  const entries = (Array.isArray(obj.entries) ? obj.entries : [])
+    .slice(0, 5000)
+    .map((e) => cleanEntry(e, makeId, null, userId))
+    .filter(Boolean);
   return {
     id: makeId(),
     name: STR(obj.name, 200),
@@ -72,11 +89,16 @@ function cleanRecord(r, makeId, keep) {
   for (const [k, max] of Object.entries(keep)) {
     if (!(k in r)) continue;
     const v = r[k];
-    if (max === "num") { const n = NUM(v); if (n != null) out[k] = n; }
-    else if (max === "bool") { out[k] = v === true; }
-    else if (max === "obj") { if (isObj(v)) out[k] = v; }
-    else if (max === "arr") { if (Array.isArray(v)) out[k] = v.slice(0, 500).filter(isObj); }
-    else if (typeof v === "string") out[k] = v.slice(0, max);
+    if (max === "num") {
+      const n = NUM(v);
+      if (n != null) out[k] = n;
+    } else if (max === "bool") {
+      out[k] = v === true;
+    } else if (max === "obj") {
+      if (isObj(v)) out[k] = v;
+    } else if (max === "arr") {
+      if (Array.isArray(v)) out[k] = v.slice(0, 500).filter(isObj);
+    } else if (typeof v === "string") out[k] = v.slice(0, max);
     else if (v === null) out[k] = null;
   }
   return out;
@@ -97,41 +119,144 @@ export function sanitiseBackup(data, { makeId, userId }) {
     }
   }
   const projIdMap = new Map();
-  const projects = data.projects.slice(0, MAX.projects).map((p) => {
-    const r = cleanRecord(p, makeId, { name: 200, client: 200, address: 300, category: 30, status: 30, customerId: 100, createdAt: "num", crew: "arr", quotedAmount: 40 });
-    if (!r || !r.name) return null;
-    if (isObj(p) && typeof p.id === "string") projIdMap.set(p.id, r.id);
-    return r;
-  }).filter(Boolean);
+  const projects = data.projects
+    .slice(0, MAX.projects)
+    .map((p) => {
+      const r = cleanRecord(p, makeId, {
+        name: 200,
+        client: 200,
+        address: 300,
+        category: 30,
+        status: 30,
+        customerId: 100,
+        createdAt: "num",
+        crew: "arr",
+        quotedAmount: 40,
+      });
+      if (!r || !r.name) return null;
+      if (isObj(p) && typeof p.id === "string") projIdMap.set(p.id, r.id);
+      return r;
+    })
+    .filter(Boolean);
   const remapProject = (pid) => (typeof pid === "string" && projIdMap.get(pid)) || null;
 
-  const entries = (Array.isArray(data.entries) ? data.entries : []).slice(0, MAX.entries)
-    .map((e) => { const c = cleanEntry(e, makeId, photoMap, userId); if (c) c.projectId = remapProject(e.projectId); return c; })
+  const entries = (Array.isArray(data.entries) ? data.entries : [])
+    .slice(0, MAX.entries)
+    .map((e) => {
+      const c = cleanEntry(e, makeId, photoMap, userId);
+      if (c) c.projectId = remapProject(e.projectId);
+      return c;
+    })
     .filter(Boolean);
-  const customers = (Array.isArray(data.customers) ? data.customers : []).slice(0, MAX.customers)
-    .map((c) => cleanRecord(c, makeId, { name: 200, company: 200, phone: 60, email: 200, address: 300, notes: 4000, contacts: "arr", followUp: 20, createdAt: "num" })).filter((c) => c && c.name);
-  const documents = (Array.isArray(data.documents) ? data.documents : []).slice(0, MAX.documents)
-    .map((d) => { const r = cleanRecord(d, makeId, { type: 20, number: 40, date: 10, dueDate: 10, status: 20, notes: 4000, customerId: 100, projectId: 100, lineItems: "arr", vatRate: "num", paidAmount: "num", createdAt: "num" }); if (r) r.projectId = remapProject(d && d.projectId); return r; }).filter(Boolean);
-  const assignments = (Array.isArray(data.assignments) ? data.assignments : []).slice(0, MAX.assignments)
-    .map((a) => { const r = cleanRecord(a, makeId, { date: 10, userId: 100, projectId: 100, createdAt: "num" }); if (r) r.projectId = remapProject(a && a.projectId); return r; }).filter((a) => a && a.projectId && a.date);
-  const leaveRequests = (Array.isArray(data.leaveRequests) ? data.leaveRequests : []).slice(0, MAX.leave)
-    .map((l) => cleanRecord(l, makeId, { date: 10, userId: 100, type: 20, note: 1000, status: 20, createdAt: "num" })).filter((l) => l && l.date);
-  const siteReports = (Array.isArray(data.siteReports) ? data.siteReports : []).slice(0, MAX.reports)
+  const customers = (Array.isArray(data.customers) ? data.customers : [])
+    .slice(0, MAX.customers)
+    .map((c) =>
+      cleanRecord(c, makeId, {
+        name: 200,
+        company: 200,
+        phone: 60,
+        email: 200,
+        address: 300,
+        notes: 4000,
+        contacts: "arr",
+        followUp: 20,
+        createdAt: "num",
+      }),
+    )
+    .filter((c) => c && c.name);
+  const documents = (Array.isArray(data.documents) ? data.documents : [])
+    .slice(0, MAX.documents)
+    .map((d) => {
+      const r = cleanRecord(d, makeId, {
+        type: 20,
+        number: 40,
+        date: 10,
+        dueDate: 10,
+        status: 20,
+        notes: 4000,
+        customerId: 100,
+        projectId: 100,
+        lineItems: "arr",
+        vatRate: "num",
+        paidAmount: "num",
+        createdAt: "num",
+      });
+      if (r) r.projectId = remapProject(d && d.projectId);
+      return r;
+    })
+    .filter(Boolean);
+  const assignments = (Array.isArray(data.assignments) ? data.assignments : [])
+    .slice(0, MAX.assignments)
+    .map((a) => {
+      const r = cleanRecord(a, makeId, { date: 10, userId: 100, projectId: 100, createdAt: "num" });
+      if (r) r.projectId = remapProject(a && a.projectId);
+      return r;
+    })
+    .filter((a) => a && a.projectId && a.date);
+  const leaveRequests = (Array.isArray(data.leaveRequests) ? data.leaveRequests : [])
+    .slice(0, MAX.leave)
+    .map((l) => cleanRecord(l, makeId, { date: 10, userId: 100, type: 20, note: 1000, status: 20, createdAt: "num" }))
+    .filter((l) => l && l.date);
+  const siteReports = (Array.isArray(data.siteReports) ? data.siteReports : [])
+    .slice(0, MAX.reports)
     .map((r) => {
-      const c = cleanRecord(r, makeId, { projectId: 100, date: 10, userId: 100, hours: 20, lines: "arr", note: 4000, signerName: 200, signedAt: "num", createdAt: "num" });
+      const c = cleanRecord(r, makeId, {
+        projectId: 100,
+        date: 10,
+        userId: 100,
+        hours: 20,
+        lines: "arr",
+        note: 4000,
+        signerName: 200,
+        signedAt: "num",
+        createdAt: "num",
+      });
       if (!c) return null;
       c.projectId = remapProject(r && r.projectId);
       // A signature only follows if it came along as a photo of its own.
-      if (r && typeof r.signatureId === "string" && photoMap.has(r.signatureId)) c.signatureId = photoMap.get(r.signatureId);
+      if (r && typeof r.signatureId === "string" && photoMap.has(r.signatureId))
+        c.signatureId = photoMap.get(r.signatureId);
       return c;
-    }).filter((r) => r && r.projectId);
-  const sentReports = (Array.isArray(data.sentReports) ? data.sentReports : []).slice(0, MAX.sentReports)
-    .map((r) => cleanRecord(r, makeId, { period: 10, periodLabel: 10, userId: 100, notes: 4000, hours: "num", materialsCount: "num", toolsCount: "num", sitesVisited: "arr", entries: "arr", entryIds: "arr", excludedIds: "arr", entryLabels: "obj", sends: "arr", sentAt: "num", editedAt: "num", createdAt: "num" })).filter(Boolean);
+    })
+    .filter((r) => r && r.projectId);
+  const sentReports = (Array.isArray(data.sentReports) ? data.sentReports : [])
+    .slice(0, MAX.sentReports)
+    .map((r) =>
+      cleanRecord(r, makeId, {
+        period: 10,
+        periodLabel: 10,
+        userId: 100,
+        notes: 4000,
+        hours: "num",
+        materialsCount: "num",
+        toolsCount: "num",
+        sitesVisited: "arr",
+        entries: "arr",
+        entryIds: "arr",
+        excludedIds: "arr",
+        entryLabels: "obj",
+        sends: "arr",
+        sentAt: "num",
+        editedAt: "num",
+        createdAt: "num",
+      }),
+    )
+    .filter(Boolean);
 
-  return { projects, entries, customers, documents, assignments, leaveRequests, siteReports, sentReports, photos,
+  return {
+    projects,
+    entries,
+    customers,
+    documents,
+    assignments,
+    leaveRequests,
+    siteReports,
+    sentReports,
+    photos,
     profile: isObj(data.profile) ? data.profile : null,
     insurance: Array.isArray(data.insurance) ? data.insurance.slice(0, 50).filter(isObj) : null,
     certificates: Array.isArray(data.certificates) ? data.certificates.slice(0, 200).filter(isObj) : null,
     techLibrary: Array.isArray(data.techLibrary) ? data.techLibrary.slice(0, 2000).filter(isObj) : null,
-    dropped: { photos: isObj(data.photos) ? Object.keys(data.photos).length - Object.keys(photos).length : 0 } };
+    dropped: { photos: isObj(data.photos) ? Object.keys(data.photos).length - Object.keys(photos).length : 0 },
+  };
 }

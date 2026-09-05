@@ -51,9 +51,16 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
     const w = navigator.serviceWorker.controller;
     if (!w || !shellBuild) return;
     const ch = new MessageChannel();
-    ch.port1.onmessage = (e) => { if (e.data && e.data.version && e.data.version !== shellBuild) announce(); };
-    try { w.postMessage({ type: "version" }, [ch.port2]); } catch {}
+    ch.port1.onmessage = (e) => {
+      if (e.data && e.data.version && e.data.version !== shellBuild) announce();
+    };
+    try {
+      w.postMessage({ type: "version" }, [ch.port2]);
+    } catch {}
   };
   navigator.serviceWorker.addEventListener("controllerchange", compare);
-  navigator.serviceWorker.register("./sw.js").then(compare).catch((e) => console.warn("service worker:", e && e.message));
+  navigator.serviceWorker
+    .register("./sw.js")
+    .then(compare)
+    .catch((e) => console.warn("service worker:", e && e.message));
 }

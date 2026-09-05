@@ -11,6 +11,15 @@ module.exports = {
     screens: { sm: "640px", md: "768px", lg: "900px", xl: "1280px", "2xl": "1536px" },
   },
   // Class names assembled at runtime that the scanner cannot see whole.
-  safelist: ["gap-1.5", "gap-2", "font-mono", "tracking-widest", "bottom-[150px]", "lg:bottom-[132px]", "bottom-5", "lg:bottom-8"],
+  safelist: [
+    "gap-1.5",
+    "gap-2",
+    "font-mono",
+    "tracking-widest",
+    "bottom-[150px]",
+    "lg:bottom-[132px]",
+    "bottom-5",
+    "lg:bottom-8",
+  ],
   corePlugins: { preflight: true },
 };

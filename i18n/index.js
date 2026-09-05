@@ -41,18 +41,25 @@ function withFallback(dict) {
 // has resolved; callers fall back to `T.de` or `T.en` meanwhile.
 export const T = {};
 
-export function isLang(code) { return Object.prototype.hasOwnProperty.call(LOADERS, code); }
+export function isLang(code) {
+  return Object.prototype.hasOwnProperty.call(LOADERS, code);
+}
 
 export function loadLang(code) {
   const c = isLang(code) ? code : "en";
   if (T[c]) return Promise.resolve(T[c]);
   if (!pending[c]) {
-    pending[c] = LOADERS[c]().then((mod) => {
-      const d = mod.default !== undefined ? mod.default : mod;
-      raw[c] = typeof d === "string" ? JSON.parse(d) : d;
-      T[c] = c === "en" ? raw.en : withFallback(raw[c]);
-      return T[c];
-    }).catch((e) => { delete pending[c]; throw e; });
+    pending[c] = LOADERS[c]()
+      .then((mod) => {
+        const d = mod.default !== undefined ? mod.default : mod;
+        raw[c] = typeof d === "string" ? JSON.parse(d) : d;
+        T[c] = c === "en" ? raw.en : withFallback(raw[c]);
+        return T[c];
+      })
+      .catch((e) => {
+        delete pending[c];
+        throw e;
+      });
   }
   return pending[c];
 }

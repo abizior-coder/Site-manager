@@ -10,8 +10,12 @@ export const MAX_DAYS = 30;
 export const RECENT = 10;
 export const FIELD_LIMITS = { build: 16, code: 4, tag: 24, message: 200, stack: 400, path: 80, lang: 5, ua: 12 };
 
-export function dayKey(now) { return new Date(now).toISOString().slice(0, 10); }
-export function kvKey(cid, day) { return `e:${cid}:${day}`; }
+export function dayKey(now) {
+  return new Date(now).toISOString().slice(0, 10);
+}
+export function kvKey(cid, day) {
+  return `e:${cid}:${day}`;
+}
 
 // Only the listed fields, each cut to its limit; nothing without a message or code.
 export function cleanReport(body) {
@@ -67,7 +71,11 @@ export async function handleErrors({ request, env, headers, verify, isMember, no
 
   if (request.method === "POST") {
     let body;
-    try { body = await request.json(); } catch { return json({ error: "invalid JSON body" }, 400, headers); }
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "invalid JSON body" }, 400, headers);
+    }
     const report = cleanReport(body);
     if (!report) return json({ error: "report missing" }, 400, headers);
     const key = kvKey(cid, dayKey(now));
@@ -82,7 +90,9 @@ export async function handleErrors({ request, env, headers, verify, isMember, no
     const days = Math.min(MAX_DAYS, Math.max(1, parseInt(url.searchParams.get("days") || "7", 10) || 7));
     const dates = [];
     for (let i = days - 1; i >= 0; i--) dates.push(dayKey(now - i * 86400000));
-    const rows = await Promise.all(dates.map(async (date) => ({ date, day: JSON.parse((await kv.get(kvKey(cid, date))) || "null") })));
+    const rows = await Promise.all(
+      dates.map(async (date) => ({ date, day: JSON.parse((await kv.get(kvKey(cid, date))) || "null") })),
+    );
     return json(summarise(rows), 200, headers);
   }
 

@@ -40,11 +40,17 @@ export function tileWaste(key, count) {
 // Total waste over several rows; rows with an unknown model contribute
 // nothing and are reported so the form can say so.
 export function tilesWaste(rows) {
-  let wasteKg = 0, areaM2 = 0, unknown = 0;
+  let wasteKg = 0,
+    areaM2 = 0,
+    unknown = 0;
   for (const r of rows || []) {
     const w = tileWaste(r.model, r.count);
-    if (w.wasteKg == null) { if (parseFloat(r.count) > 0) unknown++; continue; }
-    wasteKg += w.wasteKg; areaM2 += w.areaM2;
+    if (w.wasteKg == null) {
+      if (parseFloat(r.count) > 0) unknown++;
+      continue;
+    }
+    wasteKg += w.wasteKg;
+    areaM2 += w.areaM2;
   }
   return { wasteKg, areaM2: Math.round(areaM2 * 10) / 10, unknown };
 }
@@ -52,14 +58,19 @@ export function tilesWaste(rows) {
 // The inspection's own summary line, for the entry text when no AI report
 // is asked for.
 export function summariseInspection({ checklist = {}, tiles = [], note = "", labels = {} }) {
-  const bad = Object.entries(checklist).filter(([, v]) => v === "mangel").map(([k]) => labels[k] || k);
+  const bad = Object.entries(checklist)
+    .filter(([, v]) => v === "mangel")
+    .map(([k]) => labels[k] || k);
   const ok = Object.entries(checklist).filter(([, v]) => v === "ok").length;
   const w = tilesWaste(tiles);
   const parts = [];
   if (bad.length) parts.push(`${labels.__mangel || "Mangel"}: ${bad.join(", ")}`);
   if (ok) parts.push(`${ok} ${labels.__ok || "OK"}`);
-  const tileLines = (tiles || []).filter((r) => parseFloat(r.count) > 0).map((r) => `${r.count} ${(tileMeta(r.model) || {}).label || r.model || "?"}`);
-  if (tileLines.length) parts.push(`${labels.__replaced || "ersetzt"}: ${tileLines.join(", ")}${w.wasteKg ? ` (~${w.wasteKg} kg)` : ""}`);
+  const tileLines = (tiles || [])
+    .filter((r) => parseFloat(r.count) > 0)
+    .map((r) => `${r.count} ${(tileMeta(r.model) || {}).label || r.model || "?"}`);
+  if (tileLines.length)
+    parts.push(`${labels.__replaced || "ersetzt"}: ${tileLines.join(", ")}${w.wasteKg ? ` (~${w.wasteKg} kg)` : ""}`);
   if (note && note.trim()) parts.push(note.trim());
   return parts.join(" · ");
 }
@@ -67,8 +78,12 @@ export function summariseInspection({ checklist = {}, tiles = [], note = "", lab
 // Hours between two HH:MM times on the same day; a trip that ends after
 // midnight counts forward. Blank or malformed → 0.
 export function tripHours(depart, arrive) {
-  const p = (s) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "").trim()); return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null; };
-  const a = p(depart), b = p(arrive);
+  const p = (s) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "").trim());
+    return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+  };
+  const a = p(depart),
+    b = p(arrive);
   if (a == null || b == null) return 0;
   let d = b - a;
   if (d < 0) d += 24 * 60;

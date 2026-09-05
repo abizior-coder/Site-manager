@@ -4,15 +4,37 @@
 
 @layer base {
   /* Keyboard focus is visible in the accent; pointer focus stays quiet. */
-  :focus-visible { outline: 2px solid #DA291C; outline-offset: 2px; }
+  :focus-visible {
+    outline: 2px solid #da291c;
+    outline-offset: 2px;
+  }
   /* People who asked their phone for less motion get none. */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer components {
   /* A 44 x 44 hit area around a control drawn smaller, without moving anything. */
-  .tap { position: relative; }
-  .tap::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); }
+  .tap {
+    position: relative;
+  }
+  .tap::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+  }
 }

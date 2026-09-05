@@ -17,8 +17,10 @@ export const MAX_FILE_BYTES = 25 * 1024 * 1024;
 // documents and CAD exports all pass; the list is what gets refused.
 // Also refused: anything a browser would *render as a page*. An HTML or SVG
 // "plan" opened inline would run as the app itself.
-const REFUSED_EXT = /\.(exe|msi|bat|cmd|com|scr|pif|vbs|vbe|js|jse|wsf|wsh|ps1|psm1|sh|apk|jar|dll|cpl|hta|lnk|reg|html?|xhtml|mhtml?|svgz?)$/i;
-const REFUSED_MIME = /^(application\/(x-msdownload|x-msdos-program|x-sh|x-shellscript|java-archive|vnd\.android\.package-archive|x-executable|xhtml\+xml)|text\/(javascript|html)|image\/svg\+xml)/i;
+const REFUSED_EXT =
+  /\.(exe|msi|bat|cmd|com|scr|pif|vbs|vbe|js|jse|wsf|wsh|ps1|psm1|sh|apk|jar|dll|cpl|hta|lnk|reg|html?|xhtml|mhtml?|svgz?)$/i;
+const REFUSED_MIME =
+  /^(application\/(x-msdownload|x-msdos-program|x-sh|x-shellscript|java-archive|vnd\.android\.package-archive|x-executable|xhtml\+xml)|text\/(javascript|html)|image\/svg\+xml)/i;
 
 // What may open inline. Everything else is handed over as a download with a
 // neutral type, whatever the uploader claimed it was.
@@ -86,9 +88,14 @@ export async function handleFiles({ request, env, headers, verify, isMember }) {
     if (declared > MAX_FILE_BYTES + 4096) return json({ error: "file too large (max 25 MB)" }, 413, headers);
 
     let form;
-    try { form = await request.formData(); } catch { return json({ error: "expected multipart form data" }, 400, headers); }
+    try {
+      form = await request.formData();
+    } catch {
+      return json({ error: "expected multipart form data" }, 400, headers);
+    }
     const file = form.get("file");
-    if (!file || typeof file === "string" || typeof file.arrayBuffer !== "function") return json({ error: "missing file field" }, 400, headers);
+    if (!file || typeof file === "string" || typeof file.arrayBuffer !== "function")
+      return json({ error: "missing file field" }, 400, headers);
 
     const name = String(file.name || "file").slice(0, 200);
     const type = String(file.type || "application/octet-stream").slice(0, 120);
@@ -112,7 +119,9 @@ export async function handleFiles({ request, env, headers, verify, isMember }) {
     const stored = (obj.httpMetadata && obj.httpMetadata.contentType) || "";
     const safe = inlineType(stored);
     // ASCII fallback plus RFC 5987 so an umlaut in the plan's name survives.
-    const ascii = String(meta.name || "file").replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
+    const ascii = String(meta.name || "file")
+      .replace(/[^\x20-\x7E]/g, "_")
+      .replace(/"/g, "");
     const fname = `filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(meta.name || "file")}`;
     return new Response(obj.body, {
       status: 200,
@@ -136,7 +145,8 @@ export async function handleFiles({ request, env, headers, verify, isMember }) {
     const obj = await bucket.head(key);
     if (!obj) return json({ error: "not found" }, 404, headers);
     const uploadedBy = (obj.customMetadata || {}).uploadedBy;
-    if (!manages && uploadedBy !== auth.uid) return json({ error: "only a manager or the uploader can delete this" }, 403, headers);
+    if (!manages && uploadedBy !== auth.uid)
+      return json({ error: "only a manager or the uploader can delete this" }, 403, headers);
     await bucket.delete(key);
     return new Response(null, { status: 204, headers });
   }

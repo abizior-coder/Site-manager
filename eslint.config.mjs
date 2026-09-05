@@ -5,7 +5,17 @@ import globals from "globals";
 import react from "eslint-plugin-react";
 
 export default [
-  { ignores: ["build/**", "node_modules/**", "sw.js", "tailwind.css", "worker/node_modules/**", "functions/**", ".claude/**"] },
+  {
+    ignores: [
+      "build/**",
+      "node_modules/**",
+      "sw.js",
+      "tailwind.css",
+      "worker/node_modules/**",
+      "functions/**",
+      ".claude/**",
+    ],
+  },
   js.configs.recommended,
   {
     files: ["**/*.{js,jsx,mjs}"],

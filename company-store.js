@@ -10,23 +10,47 @@
 
 import { initFirebase, getSdk, currentUser } from "./firebase-client.js";
 
-export const ENTITY_COLLECTIONS = ["projects", "entries", "customers", "documents", "assignments", "leave", "reports", "sentReports", "files"];
+export const ENTITY_COLLECTIONS = [
+  "projects",
+  "entries",
+  "customers",
+  "documents",
+  "assignments",
+  "leave",
+  "reports",
+  "sentReports",
+  "files",
+];
 
 let companyId = null;
 let role = null;
 // Last state written or received per collection, used as the diff baseline.
 const baseline = new Map();
 
-export function getCompanyId() { return companyId; }
-export function getRole() { return role; }
-export function isOwner() { return role === "owner"; }
-export function isSupervisor() { return role === "supervisor"; }
+export function getCompanyId() {
+  return companyId;
+}
+export function getRole() {
+  return role;
+}
+export function isOwner() {
+  return role === "owner";
+}
+export function isSupervisor() {
+  return role === "supervisor";
+}
 // Runs the work: plans days, approves hours and absences, maintains projects.
 // Deliberately not the money — see firestore.rules.
-export function canManage() { return role === "owner" || role === "supervisor"; }
+export function canManage() {
+  return role === "owner" || role === "supervisor";
+}
 
-function db() { return getSdk().db; }
-function fs() { return getSdk().fs; }
+function db() {
+  return getSdk().db;
+}
+function fs() {
+  return getSdk().fs;
+}
 
 function col(name) {
   return fs().collection(db(), "companies", companyId, name);
@@ -84,7 +108,10 @@ export async function loadMembership(uid) {
 export async function setMemberActive(uid, active) {
   await initFirebase();
   if (!companyId) throw new Error("no company");
-  await fs().updateDoc(fs().doc(db(), "companies", companyId, "members", uid), { active: !!active, ...(active ? {} : { removedAt: Date.now() }) });
+  await fs().updateDoc(fs().doc(db(), "companies", companyId, "members", uid), {
+    active: !!active,
+    ...(active ? {} : { removedAt: Date.now() }),
+  });
 }
 
 export async function createCompany(uid, { companyName, displayName, email }) {
@@ -92,11 +119,17 @@ export async function createCompany(uid, { companyName, displayName, email }) {
   const id = fs().doc(col_root()).id;
   const now = Date.now();
   await fs().setDoc(fs().doc(db(), "companies", id), {
-    name: companyName, ownerUid: uid, createdAt: now,
+    name: companyName,
+    ownerUid: uid,
+    createdAt: now,
     publicSettings: { currency: "CHF" },
   });
   await fs().setDoc(fs().doc(db(), "companies", id, "members", uid), {
-    role: "owner", name: displayName || "", email: email || "", active: true, joinedAt: now,
+    role: "owner",
+    name: displayName || "",
+    email: email || "",
+    active: true,
+    joinedAt: now,
   });
   await fs().setDoc(fs().doc(db(), "users", uid), { companyId: id, displayName: displayName || "" }, { merge: true });
 
@@ -129,16 +162,20 @@ export async function createInvite(inviteRole = "crew", days = 3) {
   await initFirebase();
   const code = randomCode();
   await fs().setDoc(fs().doc(db(), "invites", code), {
-    companyId, role: inviteRole,
+    companyId,
+    role: inviteRole,
     expiresAt: Date.now() + days * 86400000,
-    createdAt: Date.now(), usedBy: null,
+    createdAt: Date.now(),
+    usedBy: null,
   });
   return code;
 }
 
 export async function listInvites() {
   await initFirebase();
-  const snaps = await fs().getDocs(fs().query(fs().collection(db(), "invites"), fs().where("companyId", "==", companyId)));
+  const snaps = await fs().getDocs(
+    fs().query(fs().collection(db(), "invites"), fs().where("companyId", "==", companyId)),
+  );
   const out = [];
   snaps.forEach((d) => out.push({ code: d.id, ...d.data() }));
   return out.filter((i) => !i.usedBy && i.expiresAt > Date.now());
@@ -151,7 +188,9 @@ export async function revokeInvite(code) {
 
 export async function joinCompanyWithCode(uid, code, { displayName, email }) {
   await initFirebase();
-  const clean = String(code || "").trim().toUpperCase();
+  const clean = String(code || "")
+    .trim()
+    .toUpperCase();
   const inviteRef = fs().doc(db(), "invites", clean);
   const invite = await fs().getDoc(inviteRef);
   if (!invite.exists()) throw new Error("invite-invalid");
@@ -164,10 +203,18 @@ export async function joinCompanyWithCode(uid, code, { displayName, email }) {
   // state after the batch, so a code can be redeemed exactly once.
   const batch = fs().writeBatch(db());
   batch.set(fs().doc(db(), "companies", data.companyId, "members", uid), {
-    role: data.role || "crew", name: displayName || "", email: email || "",
-    active: true, joinedAt: Date.now(), inviteCode: clean,
+    role: data.role || "crew",
+    name: displayName || "",
+    email: email || "",
+    active: true,
+    joinedAt: Date.now(),
+    inviteCode: clean,
   });
-  batch.set(fs().doc(db(), "users", uid), { companyId: data.companyId, displayName: displayName || "" }, { merge: true });
+  batch.set(
+    fs().doc(db(), "users", uid),
+    { companyId: data.companyId, displayName: displayName || "" },
+    { merge: true },
+  );
   batch.update(inviteRef, { usedBy: uid });
   await batch.commit();
 
@@ -215,7 +262,7 @@ export async function syncCollection(name, nextArr) {
   // list, or a snapshot arriving mid-write — not an intention. Refuse it and
   // say so, rather than quietly destroying data that cannot be recovered.
   const MAX_REASONABLE_DELETES = 5;
-  const wipes = deletes.length > MAX_REASONABLE_DELETES || (nextArr || []).length === 0 && prev.size > 1;
+  const wipes = deletes.length > MAX_REASONABLE_DELETES || ((nextArr || []).length === 0 && prev.size > 1);
   if (wipes) {
     const message = `refused to delete ${deletes.length} of ${prev.size} ${name}: looks like stale state, not an intentional delete`;
     console.error(message);
@@ -264,7 +311,7 @@ export function subscribeCollection(name, cb, onError) {
       // exactly like an empty account.
       console.error(`subscription failed: ${name}`, err);
       if (onError) onError(err, name);
-    }
+    },
   );
   return unsub;
 }
@@ -301,7 +348,9 @@ export const companyStorage = {
     if (!companyId) throw new Error("no company");
     const snaps = await fs().getDocs(col("kv"));
     const keys = [];
-    snaps.forEach((d) => { if (!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
+    snaps.forEach((d) => {
+      if (!prefix || d.id.startsWith(prefix)) keys.push(d.id);
+    });
     return { keys, prefix: prefix || "" };
   },
 };
@@ -339,7 +388,11 @@ export async function migrateFromPersonal(uid, onProgress) {
 
   if (blobDoc) {
     let blob;
-    try { blob = JSON.parse(blobDoc.value); } catch { blob = null; }
+    try {
+      blob = JSON.parse(blobDoc.value);
+    } catch {
+      blob = null;
+    }
     if (blob) {
       for (const name of ENTITY_COLLECTIONS) {
         const arr = Array.isArray(blob[name]) ? blob[name] : [];
@@ -372,7 +425,11 @@ export async function personalDataSummary(uid) {
   kvSnaps.forEach((d) => kv.push({ id: d.id, value: d.data().value }));
   const blobDoc = kv.find((d) => d.id === "site-data");
   let blob = null;
-  if (blobDoc) { try { blob = JSON.parse(blobDoc.value); } catch {} }
+  if (blobDoc) {
+    try {
+      blob = JSON.parse(blobDoc.value);
+    } catch {}
+  }
   return {
     hasData: !!blobDoc || kv.length > 0,
     projects: blob && blob.projects ? blob.projects.length : 0,

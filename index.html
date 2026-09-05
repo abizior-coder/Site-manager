@@ -1,37 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Site Log</title>
-<!-- Tailwind is built at build time from the classes the source uses
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Site Log</title>
+    <!-- Tailwind is built at build time from the classes the source uses
      (tailwind.config.js; the desktop breakpoint sits at 900px there). No
      third-party script compiles styles in the browser any more. -->
-<link rel="stylesheet" href="tailwind.css?v=378b3fbf" />
-<link rel="manifest" href="manifest.webmanifest" />
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="icon-180.png" />
-<meta name="theme-color" content="#1B1B1A" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Site Log" />
-<style>
-  html, body { margin: 0; padding: 0; background: #1B1B1A; }
-  #root { min-height: 100vh; }
-</style>
-<meta name="site-log-build" content="adac68db1e" />
-</head>
-<body>
-<div id="root"></div>
+    <link rel="stylesheet" href="tailwind.css?v=378b3fbf" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon-180.png" />
+    <meta name="theme-color" content="#1B1B1A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Site Log" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #1b1b1a;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
+    <meta name="site-log-build" content="b781bce575" />
+  </head>
+  <body>
+    <div id="root"></div>
 
-<!-- Everything lives in the bundle: Firebase setup, authentication, storage
+    <!-- Everything lives in the bundle: Firebase setup, authentication, storage
      and the Claude proxy call. This shell deliberately holds no app logic,
      because it is cached independently of bundle.js and a stale copy used to
      leave the app wired to globals that no longer matched (PROJECT.md section 6). -->
 
-<!-- The app bundle. Languages, the job view, the photo editor and the
+    <!-- The app bundle. Languages, the job view, the photo editor and the
      catalogues are separate chunks under build/, loaded when first needed. -->
-<script type="module" src="build/bundle.js?v=0aff3fe2"></script>
-</body>
+    <script type="module" src="build/bundle.js?v=592d8bc6"></script>
+  </body>
 </html>

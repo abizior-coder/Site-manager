@@ -51,7 +51,14 @@ export function reportTotals(rows) {
     if (r.projectId && !projIds.includes(r.projectId)) projIds.push(r.projectId);
   }
   // Net of breaks marked that day: what the supervisor is told is worked time.
-  return { hours: Math.max(0, Math.round((hours - breaks) * 100) / 100), breaks: Math.round(breaks * 100) / 100, transportHours: Math.round(transportHours * 100) / 100, materialsCount, toolsCount, projIds };
+  return {
+    hours: Math.max(0, Math.round((hours - breaks) * 100) / 100),
+    breaks: Math.round(breaks * 100) / 100,
+    transportHours: Math.round(transportHours * 100) / 100,
+    materialsCount,
+    toolsCount,
+    projIds,
+  };
 }
 
 // A short label per entry, stored with the report so a deleted entry can
@@ -87,7 +94,9 @@ export function unsentMonthEntries(monthEntries, sentReports, userId, monthLabel
 export function withSend(report, via, at = Date.now()) {
   const history = Array.isArray(report.sends)
     ? report.sends
-    : report.sentAt ? [{ at: report.sentAt, via: "mail" }] : [];
+    : report.sentAt
+      ? [{ at: report.sentAt, via: "mail" }]
+      : [];
   return { ...report, sends: [...history, { at, via }], sentAt: at };
 }
 
@@ -96,7 +105,12 @@ export function withSend(report, via, at = Date.now()) {
 // due. Compares what the Rapport carried: hours and the material lines.
 export function rapportChanged(report, dayEntries) {
   if (!report || !Array.isArray(dayEntries)) return false;
-  const norm = (d, q, u) => `${String(d || "").trim().toLowerCase()}|${String(q || "").trim()}|${String(u || "").trim().toLowerCase()}`;
+  const norm = (d, q, u) =>
+    `${String(d || "")
+      .trim()
+      .toLowerCase()}|${String(q || "").trim()}|${String(u || "")
+      .trim()
+      .toLowerCase()}`;
   const signed = (report.lines || []).map((l) => norm(l.description, l.qty, l.unit)).sort();
   const now = dayEntries
     .filter((e) => e.type === "material" || e.type === "tool")
@@ -117,7 +131,9 @@ export function splitDayHours(dayEntries, contractDaily) {
   const list = dayEntries || [];
   const gross = list.filter((e) => e.type === "time").reduce((s, e) => s + (parseFloat(e.qty || 0) || 0), 0);
   const breaks = list.filter((e) => e.type === "break").reduce((s, e) => s + (parseFloat(e.qty || 0) || 0), 0);
-  const travel = list.filter((e) => e.type === "transport").reduce((s, e) => s + (parseFloat(e.hours || e.qty || 0) || 0), 0);
+  const travel = list
+    .filter((e) => e.type === "transport")
+    .reduce((s, e) => s + (parseFloat(e.hours || e.qty || 0) || 0), 0);
   const net = Math.max(0, gross - breaks);
   const target = contractDaily > 0 ? contractDaily : null;
   const normal = target == null ? net : Math.min(net, target);
@@ -147,7 +163,13 @@ export function weekRows(entries, userId, weekDates, weeklyHours) {
     return { date, ...splitDayHours(mine, contractDaily) };
   });
   const sum = (k) => Math.round(rows.reduce((s, r) => s + r[k], 0) * 100) / 100;
-  const total = { normal: sum("normal"), overtime: sum("overtime"), travel: sum("travel"), breaks: sum("breaks"), net: sum("net") };
+  const total = {
+    normal: sum("normal"),
+    overtime: sum("overtime"),
+    travel: sum("travel"),
+    breaks: sum("breaks"),
+    net: sum("net"),
+  };
   const target = weeklyHours > 0 ? weeklyHours : null;
   const diff = target == null ? null : Math.round((total.net - target) * 100) / 100;
   return { rows, total, target, diff };
@@ -155,11 +177,36 @@ export function weekRows(entries, userId, weekDates, weeklyHours) {
 
 // Semicolon CSV, the way Excel in a Swiss office opens it without asking.
 export function weekCsv(week, personName, labels = {}) {
-  const L = { date: "Datum", normal: "Normal", overtime: "Überstunden", travel: "Reisezeit", breaks: "Pausen", net: "Total", total: "Summe", target: "Soll", diff: "Differenz", ...labels };
+  const L = {
+    date: "Datum",
+    normal: "Normal",
+    overtime: "Überstunden",
+    travel: "Reisezeit",
+    breaks: "Pausen",
+    net: "Total",
+    total: "Summe",
+    target: "Soll",
+    diff: "Differenz",
+    ...labels,
+  };
   const f = (x) => (x == null ? "" : String(x).replace(".", ","));
-  const lines = [[personName, "", "", "", "", ""].join(";"), [L.date, L.normal, L.overtime, L.travel, L.breaks, L.net].join(";")];
-  for (const r of week.rows) lines.push([r.date, f(r.normal), f(r.overtime), f(r.travel), f(r.breaks), f(r.net)].join(";"));
-  lines.push([L.total, f(week.total.normal), f(week.total.overtime), f(week.total.travel), f(week.total.breaks), f(week.total.net)].join(";"));
-  if (week.target != null) lines.push([L.target, "", "", "", "", f(week.target)].join(";"), [L.diff, "", "", "", "", f(week.diff)].join(";"));
+  const lines = [
+    [personName, "", "", "", "", ""].join(";"),
+    [L.date, L.normal, L.overtime, L.travel, L.breaks, L.net].join(";"),
+  ];
+  for (const r of week.rows)
+    lines.push([r.date, f(r.normal), f(r.overtime), f(r.travel), f(r.breaks), f(r.net)].join(";"));
+  lines.push(
+    [
+      L.total,
+      f(week.total.normal),
+      f(week.total.overtime),
+      f(week.total.travel),
+      f(week.total.breaks),
+      f(week.total.net),
+    ].join(";"),
+  );
+  if (week.target != null)
+    lines.push([L.target, "", "", "", "", f(week.target)].join(";"), [L.diff, "", "", "", "", f(week.diff)].join(";"));
   return lines.join("\r\n") + "\r\n";
 }

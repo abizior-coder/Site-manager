@@ -8,17 +8,19 @@ const SHELL = "index.html";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE)
+    caches
+      .open(CACHE)
       .then((cache) => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then((keys) => Promise.all(keys.filter((k) => k.startsWith(PREFIX) && k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -28,11 +30,16 @@ self.addEventListener("activate", (event) => {
 async function shell(request) {
   const cache = await caches.open(CACHE);
   const cached = await cache.match(SHELL);
-  const refresh = fetch(request).then((res) => {
-    if (res && res.ok) cache.put(SHELL, res.clone());
-    return res;
-  }).catch(() => null);
-  if (cached) { refresh.catch(() => {}); return cached; }
+  const refresh = fetch(request)
+    .then((res) => {
+      if (res && res.ok) cache.put(SHELL, res.clone());
+      return res;
+    })
+    .catch(() => null);
+  if (cached) {
+    refresh.catch(() => {});
+    return cached;
+  }
   const fresh = await refresh;
   return fresh || new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } });
 }
@@ -55,8 +62,14 @@ self.addEventListener("message", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  const route = routeFor({ url: event.request.url, mode: event.request.mode, method: event.request.method }, self.registration.scope);
+  const route = routeFor(
+    { url: event.request.url, mode: event.request.mode, method: event.request.method },
+    self.registration.scope,
+  );
   if (route === "network") return;
-  if (route === "shell") { event.respondWith(shell(event.request)); return; }
+  if (route === "shell") {
+    event.respondWith(shell(event.request));
+    return;
+  }
   event.respondWith(cacheFirst(event.request));
 });

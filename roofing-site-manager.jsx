@@ -1,13 +1,122 @@
 import { useState, useEffect, useRef, useMemo, Fragment, lazy, Suspense } from "react";
-import { Clock, Package, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Truck, Ruler, GripVertical, LogOut, Lock, Users, Pin, Building2, Layers, ArrowUpDown, Menu, Download, Link2, FileUp } from "lucide-react";
-import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, importLegacy, getIdToken } from "./firebase-client.js";
-import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
-import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
-import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
-  loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
-  syncCollection, loadCollection, subscribeCollection, companyStorage, isOwner, getRole,
-  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, getCompanyId, setMemberActive,
+  Clock,
+  Package,
+  Camera,
+  MessageSquare,
+  MapPin,
+  FileText,
+  Plus,
+  X,
+  Check,
+  ChevronRight,
+  ChevronLeft,
+  Play,
+  Square,
+  Send,
+  Siren,
+  Phone,
+  ShieldAlert,
+  ScanLine,
+  Loader2,
+  ExternalLink,
+  ImagePlus,
+  QrCode,
+  Barcode,
+  ClipboardCheck,
+  Globe,
+  Sun,
+  CloudSun,
+  Cloud,
+  CloudFog,
+  CloudDrizzle,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Mountain,
+  User,
+  Flame,
+  HardHat,
+  Shovel,
+  Copy,
+  Pencil,
+  CalendarDays,
+  Mail,
+  CreditCard,
+  Award,
+  Trash2,
+  Share2,
+  ClipboardPaste,
+  Printer,
+  Truck,
+  Ruler,
+  GripVertical,
+  LogOut,
+  Lock,
+  Users,
+  Pin,
+  Building2,
+  Layers,
+  ArrowUpDown,
+  Menu,
+  Download,
+  Link2,
+  FileUp,
+} from "lucide-react";
+import {
+  onAuthChange,
+  signIn,
+  signUp,
+  signOutUser,
+  sendReset,
+  authErrorKey,
+  importLegacy,
+  getIdToken,
+} from "./firebase-client.js";
+import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
+import {
+  reportId,
+  reportRows,
+  reportTotals,
+  entryLabels,
+  unsentMonthEntries,
+  withSend,
+  splitDayHours,
+  weekOf,
+  weekRows,
+  weekCsv,
+} from "./reports.js";
+import {
+  buildQrPayload,
+  qrDataUrl,
+  validateBillingProfile,
+  normaliseIban,
+  creditorReference,
+  isSwissIban,
+  SWISS_CROSS_SVG,
+} from "./swiss-qr.js";
+import {
+  loadMembership,
+  createCompany,
+  joinCompanyWithCode,
+  listMembers,
+  createInvite,
+  listInvites,
+  revokeInvite,
+  syncCollection,
+  loadCollection,
+  subscribeCollection,
+  companyStorage,
+  isOwner,
+  getRole,
+  loadFinance,
+  saveFinance,
+  migrateFromPersonal,
+  personalDataSummary,
+  resetCompanyState,
+  canManage,
+  getCompanyId,
+  setMemberActive,
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, guessKind, normaliseLink } from "./files.js";
 import { breakMeta, breakHours, netHours } from "./breaks.js";
@@ -26,7 +135,8 @@ import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./o
 
 // Which build this page is: the shell names it, and a phone that shows an
 // old number is a phone that has not restarted since the last deploy.
-const SHELL_BUILD = (typeof document !== "undefined" && document.querySelector('meta[name="site-log-build"]')?.content) || "dev";
+const SHELL_BUILD =
+  (typeof document !== "undefined" && document.querySelector('meta[name="site-log-build"]')?.content) || "dev";
 
 // The hard way out of a stale app: forget every worker and cache, then load
 // afresh from the server. For the profile's "App neu laden" button.
@@ -40,7 +150,9 @@ async function forceReload() {
       const keys = await caches.keys();
       await Promise.all(keys.map((k) => caches.delete(k)));
     }
-  } catch (e) { console.warn("force reload:", e); }
+  } catch (e) {
+    console.warn("force reload:", e);
+  }
   window.location.reload();
 }
 
@@ -72,7 +184,8 @@ const tracker = createTracker({
     const token = await getIdToken();
     if (!token) return false;
     const res = await fetch(`${CLAUDE_PROXY_URL}/metrics/${cid}`, {
-      method: "POST", keepalive: true,
+      method: "POST",
+      keepalive: true,
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ events }),
     });
@@ -80,11 +193,10 @@ const tracker = createTracker({
   },
 });
 if (typeof document !== "undefined") {
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") tracker.flush(); });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") tracker.flush();
+  });
 }
-
-
-
 
 function cprSteps(t) {
   return [1, 2, 3, 4, 5, 6, 7].map((n) => ({ title: t[`cpr${n}t`], text: t[`cpr${n}x`] }));
@@ -96,13 +208,43 @@ function cprSteps(t) {
 const SAFETY_RULES_ROOF = ["safety_roof_1", "safety_roof_2", "safety_roof_3", "safety_roof_4", "safety_roof_5"];
 const SAFETY_RULES_METAL = ["safety_metal_1", "safety_metal_2", "safety_metal_3", "safety_metal_4", "safety_metal_5"];
 const SAFETY_RULES_FORMWORK = ["safety_formwork_1", "safety_formwork_2", "safety_formwork_3", "safety_formwork_4"];
-const SAFETY_RULES_GROUND = ["safety_ground_1", "safety_ground_2", "safety_ground_3", "safety_ground_4", "safety_ground_5"];
+const SAFETY_RULES_GROUND = [
+  "safety_ground_1",
+  "safety_ground_2",
+  "safety_ground_3",
+  "safety_ground_4",
+  "safety_ground_5",
+];
 
 const SAFETY_CATEGORIES = [
-  { key: "roof", labelKey: "safetyCatRoof", icon: Mountain, rules: SAFETY_RULES_ROOF, url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/dacharbeiten-absturzsicherung" },
-  { key: "metal", labelKey: "safetyCatMetal", icon: Flame, rules: SAFETY_RULES_METAL, url: "https://www.suva.ch/de-ch/praevention/nach-branchen/arbeitssicherheit-in-gewerbe-und-industrie/metallbearbeitung" },
-  { key: "formwork", labelKey: "safetyCatFormwork", icon: HardHat, rules: SAFETY_RULES_FORMWORK, url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/absturzsicherung-deckenschalung" },
-  { key: "ground", labelKey: "safetyCatGround", icon: Shovel, rules: SAFETY_RULES_GROUND, url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/unternehmer-und-kader-baustelle/graeben-schaechte-baugruben" },
+  {
+    key: "roof",
+    labelKey: "safetyCatRoof",
+    icon: Mountain,
+    rules: SAFETY_RULES_ROOF,
+    url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/dacharbeiten-absturzsicherung",
+  },
+  {
+    key: "metal",
+    labelKey: "safetyCatMetal",
+    icon: Flame,
+    rules: SAFETY_RULES_METAL,
+    url: "https://www.suva.ch/de-ch/praevention/nach-branchen/arbeitssicherheit-in-gewerbe-und-industrie/metallbearbeitung",
+  },
+  {
+    key: "formwork",
+    labelKey: "safetyCatFormwork",
+    icon: HardHat,
+    rules: SAFETY_RULES_FORMWORK,
+    url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/absturzsicherung-deckenschalung",
+  },
+  {
+    key: "ground",
+    labelKey: "safetyCatGround",
+    icon: Shovel,
+    rules: SAFETY_RULES_GROUND,
+    url: "https://www.suva.ch/de-ch/praevention/nach-branchen/baustellen-sicher-machen/unternehmer-und-kader-baustelle/graeben-schaechte-baugruben",
+  },
 ];
 
 // Until the catalogue chunk lands, every group is empty and the shop just
@@ -113,11 +255,33 @@ const EMPTY_CATALOG = { cats: {}, links: {}, items: new Proxy({}, { get: () => [
 // fetched a few seconds after start.
 let COMPANY_LOGO_DATA_URI = "";
 if (typeof window !== "undefined") {
-  setTimeout(() => import("./data/logo.js").then((m) => { COMPANY_LOGO_DATA_URI = m.COMPANY_LOGO_DATA_URI; }).catch(() => {}), 3000);
+  setTimeout(
+    () =>
+      import("./data/logo.js")
+        .then((m) => {
+          COMPANY_LOGO_DATA_URI = m.COMPANY_LOGO_DATA_URI;
+        })
+        .catch(() => {}),
+    3000,
+  );
 }
 
 const SWISS_EMERGENCY_NUMS = ["144", "117", "118", "112"];
-const UNIT_SUGGESTIONS = ["pcs", "bags", "m", "m²", "m³", "kg", "l", "rolls", "pallets", "boxes", "pairs", "sets", "tubes"];
+const UNIT_SUGGESTIONS = [
+  "pcs",
+  "bags",
+  "m",
+  "m²",
+  "m³",
+  "kg",
+  "l",
+  "rolls",
+  "pallets",
+  "boxes",
+  "pairs",
+  "sets",
+  "tubes",
+];
 
 // A Swiss roofing job is really several trades sharing one address. The
 // Spengler's sheet metal and the carpenter's timber land on the same site but
@@ -142,14 +306,39 @@ const VEHICLES = ["lieferwagen", "pritsche", "anhaenger", "lkw_kran", "mulden_se
 const LOAD_KINDS = ["material", "waste", "tools", "scaffold", "other"];
 const MULDE_SIZES = ["", "3", "7", "10", "15", "20"];
 
-const INSPECTION_ITEMS = ["eindeckung", "first", "kehle", "anschluesse", "fenster", "rinne", "unterdach", "lattung", "daemmung", "schneefang", "blitzschutz", "kamin", "moos"];
+const INSPECTION_ITEMS = [
+  "eindeckung",
+  "first",
+  "kehle",
+  "anschluesse",
+  "fenster",
+  "rinne",
+  "unterdach",
+  "lattung",
+  "daemmung",
+  "schneefang",
+  "blitzschutz",
+  "kamin",
+  "moos",
+];
 
 // How each UI language is named to the translator. Swiss German gets a hint,
 // because "German" alone comes back as Hochdeutsch.
 const LANG_NAMES = {
-  de: "German", gsw: "Swiss German (Schwiizerdütsch, written the way it is spoken in Zürich)", fr: "French", it: "Italian",
-  en: "English", sq: "Albanian", ro: "Romanian", bg: "Bulgarian", hu: "Hungarian", pl: "Polish", pt: "Portuguese",
-  es: "Spanish", sk: "Slovak", cs: "Czech",
+  de: "German",
+  gsw: "Swiss German (Schwiizerdütsch, written the way it is spoken in Zürich)",
+  fr: "French",
+  it: "Italian",
+  en: "English",
+  sq: "Albanian",
+  ro: "Romanian",
+  bg: "Bulgarian",
+  hu: "Hungarian",
+  pl: "Polish",
+  pt: "Portuguese",
+  es: "Spanish",
+  sk: "Slovak",
+  cs: "Czech",
 };
 
 // A material request is not a delivery. It is asked for on the roof, ordered
@@ -165,7 +354,6 @@ export const ORDER_STATES = [
 // most deliveries; the field stays free text for everyone else.
 const KNOWN_SUPPLIERS = ["HGC", "GABS", "Soprema", "Velux", "Glaromat", "Gyso", "SFS", "Hasler"];
 
-
 // Each category carries an icon so a job is recognisable at tile size, where
 // there is no room for the word.
 export const PROJECT_CATEGORIES = [
@@ -179,7 +367,16 @@ export const PROJECT_CATEGORIES = [
 // from an icon set so all four read as one family and take the project's
 // colour.
 function ProjectIcon({ category, size = 40, color = "currentColor" }) {
-  const common = { width: size, height: size, viewBox: "0 0 48 48", fill: "none", stroke: color, strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" };
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 48 48",
+    fill: "none",
+    stroke: color,
+    strokeWidth: 3,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
   switch (category) {
     case "pitched":
       return (
@@ -259,7 +456,9 @@ export function projectColour(id) {
 }
 
 export function statusMeta(status) {
-  return PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES.find((s) => s.key === DEFAULT_PROJECT_STATUS);
+  return (
+    PROJECT_STATUSES.find((s) => s.key === status) || PROJECT_STATUSES.find((s) => s.key === DEFAULT_PROJECT_STATUS)
+  );
 }
 
 // Contact history types — what actually happens between a trade business and
@@ -286,7 +485,17 @@ export function migrateClientsToCustomers(projects, customers) {
     const key = p.client.trim().toLowerCase();
     let customer = byName.get(key);
     if (!customer) {
-      customer = { id: uid(), name: p.client.trim(), company: "", phone: "", email: "", address: p.address || "", notes: "", contacts: [], createdAt: Date.now() };
+      customer = {
+        id: uid(),
+        name: p.client.trim(),
+        company: "",
+        phone: "",
+        email: "",
+        address: p.address || "",
+        notes: "",
+        contacts: [],
+        createdAt: Date.now(),
+      };
       next.push(customer);
       byName.set(key, customer);
     }
@@ -310,20 +519,32 @@ export function nextDocNumber(documents, type, year) {
   return `${prefix}${String(next).padStart(3, "0")}`;
 }
 
-export function telHref(v) { return `tel:${String(v).replace(/[^\d+]/g, "")}`; }
-function waHref(v) { return `https://wa.me/${String(v).replace(/[^\d]/g, "")}`; }
+export function telHref(v) {
+  return `tel:${String(v).replace(/[^\d+]/g, "")}`;
+}
+function waHref(v) {
+  return `https://wa.me/${String(v).replace(/[^\d]/g, "")}`;
+}
 
 // Photos live in their own Firestore document (`photo-<id>`), never inside the
 // site-data / site-docs / site-tech-library blobs. Firestore allows 1 MB per
 // document and a scaled photo is 200-500 KB, so a couple of inline photos used
 // to push those blobs over the limit and make every later save fail silently.
 // Uses the existing window.storage shim, so index.html needs no change.
-export function mapsUrl(address) { return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`; }
+export function mapsUrl(address) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
 export function encodeProjectCode(project, entries) {
   const items = (entries || [])
     .filter((e) => e.type !== "photo") // keep the code a manageable size — photos aren't included
     .map((e) => ({ type: e.type, description: e.description, qty: e.qty || "", unit: e.unit || "", date: e.date }));
-  const payload = { name: project.name, client: project.client || "", address: project.address || "", category: project.category || "flat", entries: items };
+  const payload = {
+    name: project.name,
+    client: project.client || "",
+    address: project.address || "",
+    category: project.category || "flat",
+    entries: items,
+  };
   try {
     return "SITE1-" + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   } catch (e) {
@@ -347,7 +568,9 @@ function decodePayload(raw) {
     try {
       const obj = JSON.parse(decodeURIComponent(escape(atob(raw.slice(0, len)))));
       if (obj && typeof obj === "object") return obj;
-    } catch (e) { /* keep trimming */ }
+    } catch (e) {
+      /* keep trimming */
+    }
   }
   return null;
 }
@@ -384,8 +607,18 @@ export function decodeBackup(code) {
 
 export function classifyNote(text) {
   const t = text.toLowerCase();
-  if (/(kg|bag|bags|m2|m²|sq m|pallet|szt|piece|pieces|tile|tiles|nail|shingle|membrane|insulation|felt|beam|plank|sack|zement|ciment|cemento|worki|vrec|pytl)/.test(t)) return "material";
-  if (/(drill|saw|ladder|nail gun|hammer|scaffold|harness|tool|grinder|compressor|leiter|échelle|scala|escalera|escada|drabina|rebrík|žebřík)/.test(t)) return "tool";
+  if (
+    /(kg|bag|bags|m2|m²|sq m|pallet|szt|piece|pieces|tile|tiles|nail|shingle|membrane|insulation|felt|beam|plank|sack|zement|ciment|cemento|worki|vrec|pytl)/.test(
+      t,
+    )
+  )
+    return "material";
+  if (
+    /(drill|saw|ladder|nail gun|hammer|scaffold|harness|tool|grinder|compressor|leiter|échelle|scala|escalera|escada|drabina|rebrík|žebřík)/.test(
+      t,
+    )
+  )
+    return "tool";
   if (/(hour|hrs|clock|overtime|start|finish|break|off site|stunde|heure|ora|hora|godzin|hodin)/.test(t)) return "time";
   return "note";
 }
@@ -406,14 +639,34 @@ export default function SiteManager() {
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [authForm, setAuthForm] = useState({ mode: "signin", email: "", password: "", error: null, busy: false, notice: null });
+  const [authForm, setAuthForm] = useState({
+    mode: "signin",
+    email: "",
+    password: "",
+    error: null,
+    busy: false,
+    notice: null,
+  });
   const [legacyImport, setLegacyImport] = useState(null); // { docs, busy } when old public data is found
   const [membership, setMembership] = useState(null);
   const [membershipChecked, setMembershipChecked] = useState(false);
-  const [onboarding, setOnboarding] = useState({ mode: "choose", companyName: "", displayName: "", code: "", busy: false, error: null });
+  const [onboarding, setOnboarding] = useState({
+    mode: "choose",
+    companyName: "",
+    displayName: "",
+    code: "",
+    busy: false,
+    error: null,
+  });
   const [customerImport, setCustomerImport] = useState(null);
   const customerFileRef = useRef(null);
-  const [firstStepsDismissed, setFirstStepsDismissed] = useState(() => { try { return localStorage.getItem("site-log-first-steps") === "1"; } catch { return false; } });
+  const [firstStepsDismissed, setFirstStepsDismissed] = useState(() => {
+    try {
+      return localStorage.getItem("site-log-first-steps") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   // An invite link lands here: the code comes from the address, the sign-in
   // screen switches to "create account" with a notice, and the onboarding
@@ -423,7 +676,9 @@ export default function SiteManager() {
     if (!code) return;
     setOnboarding((s) => ({ ...s, mode: "join", code }));
     setAuthForm((s) => ({ ...s, mode: "signup", notice: "onbLinkNotice" }));
-    try { window.history.replaceState(null, "", withoutJoinParam(window.location.href)); } catch {}
+    try {
+      window.history.replaceState(null, "", withoutJoinParam(window.location.href));
+    } catch {}
   }, []);
   const [companyMigration, setCompanyMigration] = useState(null);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
@@ -432,7 +687,11 @@ export default function SiteManager() {
   const customersRef = useRef([]);
   const [lang, setLang] = useState("de");
   // Screen readers, hyphenation and the crash report read the language here.
-  useEffect(() => { try { document.documentElement.lang = lang; } catch {} }, [lang]);
+  useEffect(() => {
+    try {
+      document.documentElement.lang = lang;
+    } catch {}
+  }, [lang]);
   const [langPickerOpen, setLangPickerOpen] = useState(false);
   // A language whose file has not arrived yet reads as German, then English,
   // until its chunk lands and the tick re-renders.
@@ -440,8 +699,14 @@ export default function SiteManager() {
   useEffect(() => {
     if (T[lang]) return;
     let alive = true;
-    loadLang(lang).then(() => { if (alive) setLangTick((x) => x + 1); }).catch(() => {});
-    return () => { alive = false; };
+    loadLang(lang)
+      .then(() => {
+        if (alive) setLangTick((x) => x + 1);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [lang]);
   const t = T[lang] || T.de || T.en;
 
@@ -463,7 +728,18 @@ export default function SiteManager() {
   const [docEditor, setDocEditor] = useState(null);
   const [billingModalOpen, setBillingModalOpen] = useState(false);
   const [billingDraft, setBillingDraft] = useState(null);
-  const [billing, setBilling] = useState({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
+  const [billing, setBilling] = useState({
+    companyName: "",
+    street: "",
+    buildingNumber: "",
+    postalCode: "",
+    town: "",
+    country: "CH",
+    iban: "",
+    vatNumber: "",
+    defaultVatKey: "standard",
+    paymentDays: "30",
+  });
   const [customerForm, setCustomerForm] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
@@ -549,10 +825,19 @@ export default function SiteManager() {
   const [photoEdit, setPhotoEdit] = useState(null); // { entry, src }
   const [materialSearch, setMaterialSearch] = useState("");
   const [dockSort, setDockSort] = useState(() => {
-    try { const v = localStorage.getItem("site-dock-sort"); return DOCK_SORTS.includes(v) ? v : "pinned"; } catch (e) { return "pinned"; }
+    try {
+      const v = localStorage.getItem("site-dock-sort");
+      return DOCK_SORTS.includes(v) ? v : "pinned";
+    } catch (e) {
+      return "pinned";
+    }
   });
   const [dockOpen, setDockOpen] = useState(() => {
-    try { return localStorage.getItem("site-dock-open") !== "0"; } catch (e) { return true; }
+    try {
+      return localStorage.getItem("site-dock-open") !== "0";
+    } catch (e) {
+      return true;
+    }
   });
   const [priceImport, setPriceImport] = useState(null);
   const priceFileRef = useRef(null);
@@ -586,7 +871,19 @@ export default function SiteManager() {
     setErrorBox(c);
   }
   useEffect(() => {
-    const onErr = (ev) => { const d = ev.detail || {}; setErrorBox(d.code && ERROR_CODES[d.code] ? { code: d.code, tag: ERROR_CODES[d.code].tag, group: ERROR_CODES[d.code].group, detail: String(d.detail || "") } : classifyError(d.error || d, d.context || "other")); };
+    const onErr = (ev) => {
+      const d = ev.detail || {};
+      setErrorBox(
+        d.code && ERROR_CODES[d.code]
+          ? {
+              code: d.code,
+              tag: ERROR_CODES[d.code].tag,
+              group: ERROR_CODES[d.code].group,
+              detail: String(d.detail || ""),
+            }
+          : classifyError(d.error || d, d.context || "other"),
+      );
+    };
     window.addEventListener("site-log:error", onErr);
     return () => window.removeEventListener("site-log:error", onErr);
   }, []);
@@ -601,10 +898,17 @@ export default function SiteManager() {
         if (!cid) return;
         const token = await getIdToken();
         if (!token) return;
-        await fetch(`${CLAUDE_PROXY_URL}/errors/${cid}`, { method: "POST", keepalive: true, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(p) });
+        await fetch(`${CLAUDE_PROXY_URL}/errors/${cid}`, {
+          method: "POST",
+          keepalive: true,
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify(p),
+        });
       } catch {}
     };
-    const onCrash = (ev) => { if (ev.detail) send(ev.detail); };
+    const onCrash = (ev) => {
+      if (ev.detail) send(ev.detail);
+    };
     window.addEventListener("site-log:crash", onCrash);
     const queued = window.__siteLogCrashes || [];
     window.__siteLogCrashes = [];
@@ -629,7 +933,19 @@ export default function SiteManager() {
   const [weatherEditOpen, setWeatherEditOpen] = useState(false);
   const [weatherCityInput, setWeatherCityInput] = useState("");
   const [safetyCat, setSafetyCat] = useState("roof");
-  const [profile, setProfile] = useState({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "", labourRate: "", currency: "CHF" });
+  const [profile, setProfile] = useState({
+    name: "",
+    phone: "",
+    contactName: "",
+    contactRelationship: "",
+    contactPhone: "",
+    supervisorName: "",
+    supervisorEmail: "",
+    supervisorPhone: "",
+    webhookUrl: "",
+    labourRate: "",
+    currency: "CHF",
+  });
   // Kept as derived views so the costing call sites read the same as before.
   const materialUnits = useMemo(() => {
     const out = {};
@@ -642,7 +958,11 @@ export default function SiteManager() {
     return out;
   }, [articleMaster]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [calMonth, setCalMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+  const [calMonth, setCalMonth] = useState(() => {
+    const d = new Date();
+    d.setDate(1);
+    return d;
+  });
   const [selectedDay, setSelectedDay] = useState(null);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [leaveForm, setLeaveForm] = useState({ type: "vacation", note: "" });
@@ -675,26 +995,68 @@ export default function SiteManager() {
         // shared: signing out and back in as someone else left the last
         // person's invoices, labour rate and IBAN in memory, and they appeared
         // on screen for a role that must never see them.
-        setProjects([]); setEntries([]); setCustomers([]);
-        setLeaveRequests([]); setSentReports([]); setActiveClock(null);
-        setDocuments([]); setAssignments([]); setClocks([]); setSiteReports([]); setProjectFiles([]); projectFilesRef.current = [];
-        setBilling({ companyName: "", street: "", buildingNumber: "", postalCode: "", town: "", country: "CH", iban: "", vatNumber: "", defaultVatKey: "standard", paymentDays: "30" });
-        setProfile({ name: "", phone: "", contactName: "", contactRelationship: "", contactPhone: "", supervisorName: "", supervisorEmail: "", supervisorPhone: "", webhookUrl: "" });
-        setInsuranceCards([]); setCertificates([]); setTechLibrary([]);
+        setProjects([]);
+        setEntries([]);
+        setCustomers([]);
+        setLeaveRequests([]);
+        setSentReports([]);
+        setActiveClock(null);
+        setDocuments([]);
+        setAssignments([]);
+        setClocks([]);
+        setSiteReports([]);
+        setProjectFiles([]);
+        projectFilesRef.current = [];
+        setBilling({
+          companyName: "",
+          street: "",
+          buildingNumber: "",
+          postalCode: "",
+          town: "",
+          country: "CH",
+          iban: "",
+          vatNumber: "",
+          defaultVatKey: "standard",
+          paymentDays: "30",
+        });
+        setProfile({
+          name: "",
+          phone: "",
+          contactName: "",
+          contactRelationship: "",
+          contactPhone: "",
+          supervisorName: "",
+          supervisorEmail: "",
+          supervisorPhone: "",
+          webhookUrl: "",
+        });
+        setInsuranceCards([]);
+        setCertificates([]);
+        setTechLibrary([]);
         setTeam({ members: [], invites: [], busy: false });
         setArticleMaster({});
         setPinnedIds([]);
         setSyncState({ error: null, fromCache: false });
       }
-    }).then((fn) => { unsub = fn; }).catch(() => setAuthChecked(true));
-    return () => { if (unsub) unsub(); };
+    })
+      .then((fn) => {
+        unsub = fn;
+      })
+      .catch(() => setAuthChecked(true));
+    return () => {
+      if (unsub) unsub();
+    };
   }, []);
 
   // Resolve which company this account belongs to before touching any data:
   // every document path is company-scoped, and a crew member has no personal
   // store to fall back on.
   useEffect(() => {
-    if (!user) { setMembership(null); setMembershipChecked(false); return; }
+    if (!user) {
+      setMembership(null);
+      setMembershipChecked(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
@@ -711,7 +1073,9 @@ export default function SiteManager() {
       }
       if (!cancelled) setMembershipChecked(true);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // Live collection subscriptions. Two devices editing different records now
@@ -720,19 +1084,36 @@ export default function SiteManager() {
     if (!user || !membership) return;
     const unsubs = [];
     // A failed listener used to look exactly like an empty account. Report it.
-    const onErr = (err, name) => setSyncState({ error: name + ": " + ((err && (err.code || err.message)) || err), fromCache: false });
-    const track = (meta) => setSyncState((st) => (st.error ? st : { error: null, fromCache: !!(meta && meta.fromCache) }));
+    const onErr = (err, name) =>
+      setSyncState({ error: name + ": " + ((err && (err.code || err.message)) || err), fromCache: false });
+    const track = (meta) =>
+      setSyncState((st) => (st.error ? st : { error: null, fromCache: !!(meta && meta.fromCache) }));
 
-    unsubs.push(subscribeCollection("projects", (rows, meta) => {
-      track(meta);
-      const { projects: mp, customers: mc, changed } = migrateClientsToCustomers(rows, customersRef.current || []);
-      setProjects(mp);
-      if (changed && isOwner()) {
-        syncCollection("projects", mp).catch(() => {});
-        syncCollection("customers", mc).catch(() => {});
-      }
-    }, onErr));
-    unsubs.push(subscribeCollection("entries", (rows, meta) => { track(meta); setEntries(rows); }, onErr));
+    unsubs.push(
+      subscribeCollection(
+        "projects",
+        (rows, meta) => {
+          track(meta);
+          const { projects: mp, customers: mc, changed } = migrateClientsToCustomers(rows, customersRef.current || []);
+          setProjects(mp);
+          if (changed && isOwner()) {
+            syncCollection("projects", mp).catch(() => {});
+            syncCollection("customers", mc).catch(() => {});
+          }
+        },
+        onErr,
+      ),
+    );
+    unsubs.push(
+      subscribeCollection(
+        "entries",
+        (rows, meta) => {
+          track(meta);
+          setEntries(rows);
+        },
+        onErr,
+      ),
+    );
     unsubs.push(subscribeCollection("customers", setCustomers, onErr));
     unsubs.push(subscribeCollection("assignments", setAssignments, onErr));
     unsubs.push(subscribeCollection("leave", setLeaveRequests, onErr));
@@ -742,7 +1123,12 @@ export default function SiteManager() {
     // Crew have no access to quotes and invoices — subscribing would simply
     // be denied, so don't ask.
     if (isOwner()) unsubs.push(subscribeCollection("documents", setDocuments, onErr));
-    return () => unsubs.forEach((u) => { try { u(); } catch {} });
+    return () =>
+      unsubs.forEach((u) => {
+        try {
+          u();
+        } catch {}
+      });
   }, [user, membership]);
 
   useEffect(() => {
@@ -757,9 +1143,14 @@ export default function SiteManager() {
             try {
               const already = await loadCollection("sentReports");
               if (already.length === 0) {
-                await syncCollection("sentReports", meta.sentReports.map((r) => ({
-                  ...r, id: r.id || uid(), userId: r.userId || user.uid,
-                })));
+                await syncCollection(
+                  "sentReports",
+                  meta.sentReports.map((r) => ({
+                    ...r,
+                    id: r.id || uid(),
+                    userId: r.userId || user.uid,
+                  })),
+                );
               }
             } catch (e) {}
           }
@@ -769,7 +1160,11 @@ export default function SiteManager() {
             try {
               const already = await loadCollection("leave");
               if (already.length === 0) {
-                const stamped = meta.leaveRequests.map((r) => ({ ...r, id: r.id || uid(), userId: r.userId || user.uid }));
+                const stamped = meta.leaveRequests.map((r) => ({
+                  ...r,
+                  id: r.id || uid(),
+                  userId: r.userId || user.uid,
+                }));
                 await syncCollection("leave", stamped);
               }
             } catch (e) {}
@@ -856,8 +1251,12 @@ export default function SiteManager() {
     })();
   }, [user, membership]);
 
-  useEffect(() => { customersRef.current = customers; }, [customers]);
-  useEffect(() => { projectFilesRef.current = projectFiles; }, [projectFiles]);
+  useEffect(() => {
+    customersRef.current = customers;
+  }, [customers]);
+  useEffect(() => {
+    projectFilesRef.current = projectFiles;
+  }, [projectFiles]);
 
   // The languages the crew reads live in one shared document, one line per
   // member, kept up to date by each member for themselves. (Scanning the
@@ -876,7 +1275,9 @@ export default function SiteManager() {
         if (alive) setMemberLangs([...new Set(Object.values(map).filter((v) => v && isLang(v)))]);
       } catch (e) {}
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [membership, lang]);
 
   // One "open" per company per session; the Worker turns it into "people
@@ -885,18 +1286,22 @@ export default function SiteManager() {
     if (membership) tracker.track("open");
   }, [membership?.companyId]);
 
-
-
   useEffect(() => {
     if (!selectedProject || !membership) return;
     let alive = true;
-    companyStorage.get(`xl-${selectedProject}`)
+    companyStorage
+      .get(`xl-${selectedProject}`)
       .then((res) => {
         if (!alive || !res || !res.value) return;
-        try { const map = JSON.parse(res.value); setNoteTranslations((m) => ({ ...m, [selectedProject]: { ...(m[selectedProject] || {}), ...map } })); } catch (e) {}
+        try {
+          const map = JSON.parse(res.value);
+          setNoteTranslations((m) => ({ ...m, [selectedProject]: { ...(m[selectedProject] || {}), ...map } }));
+        } catch (e) {}
       })
       .catch(() => {});
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [selectedProject, membership]);
 
   // Everyone needs the roster once: the Team tab lists it, and the crew shown
@@ -908,9 +1313,18 @@ export default function SiteManager() {
     if (!membership) return;
     let alive = true;
     listMembers()
-      .then((all) => { if (alive) setTeam((s) => ({ ...s, members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false) })); })
+      .then((all) => {
+        if (alive)
+          setTeam((s) => ({
+            ...s,
+            members: all.filter((m) => m.active !== false),
+            former: all.filter((m) => m.active === false),
+          }));
+      })
       .catch(() => {});
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [membership]);
 
   // The dashboard needs names and each person's clock. Refreshed on entry and
@@ -935,14 +1349,19 @@ export default function SiteManager() {
         for (const m of members || []) {
           const res = await companyStorage.get(`clock-${m.uid}`).catch(() => null);
           if (!res || !res.value) continue;
-          try { rows.push({ uid: m.uid, ...JSON.parse(res.value) }); } catch {}
+          try {
+            rows.push({ uid: m.uid, ...JSON.parse(res.value) });
+          } catch {}
         }
         if (alive) setClocks(rows);
       } catch (e) {}
     }
     refresh();
     const iv = setInterval(refresh, 60000);
-    return () => { alive = false; clearInterval(iv); };
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
   }, [tab, membership]);
 
   async function submitOnboarding(mode) {
@@ -967,17 +1386,23 @@ export default function SiteManager() {
       setMembership(m);
       setOnboarding((s) => ({ ...s, busy: false }));
     } catch (err) {
-      const key = {
-        "company-name": "onbErrCompanyName",
-        "invite-invalid": "onbErrInvalidCode",
-        "invite-used": "onbErrCodeUsed",
-        "invite-expired": "onbErrCodeExpired",
-        "company-not-confirmed": "onbErrNotConfirmed",
-      }[err.message] || "onbErrGeneric";
+      const key =
+        {
+          "company-name": "onbErrCompanyName",
+          "invite-invalid": "onbErrInvalidCode",
+          "invite-used": "onbErrCodeUsed",
+          "invite-expired": "onbErrCodeExpired",
+          "company-not-confirmed": "onbErrNotConfirmed",
+        }[err.message] || "onbErrGeneric";
       // Keep the real reason visible: a generic message here once hid a
       // rules bug that blocked company creation entirely.
       console.error("onboarding failed:", err);
-      setOnboarding((s) => ({ ...s, busy: false, error: key, detail: String(err && (err.code || err.message) || err) }));
+      setOnboarding((s) => ({
+        ...s,
+        busy: false,
+        error: key,
+        detail: String((err && (err.code || err.message)) || err),
+      }));
     }
   }
 
@@ -986,7 +1411,12 @@ export default function SiteManager() {
     setTeam((s) => ({ ...s, busy: true }));
     try {
       const [all, invites] = await Promise.all([listMembers(), listInvites()]);
-      setTeam({ members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false), invites, busy: false });
+      setTeam({
+        members: all.filter((m) => m.active !== false),
+        former: all.filter((m) => m.active === false),
+        invites,
+        busy: false,
+      });
     } catch (e) {
       setTeam((s) => ({ ...s, busy: false }));
     }
@@ -997,31 +1427,60 @@ export default function SiteManager() {
       await createInvite(inviteRole);
       const invites = await listInvites();
       setTeam((s) => ({ ...s, invites }));
-    } catch (e) { saveFailed(e, "makeInvite"); }
+    } catch (e) {
+      saveFailed(e, "makeInvite");
+    }
   }
 
   // The phone's share sheet when there is one, the clipboard otherwise.
   async function shareInvite(code) {
     const url = inviteUrl(code, window.location.href);
-    const text = (t.inviteShareText || "").replace("{company}", billing.companyName || t.appLabel).replace("{link}", url);
+    const text = (t.inviteShareText || "")
+      .replace("{company}", billing.companyName || t.appLabel)
+      .replace("{link}", url);
     if (navigator.share) {
-      try { await navigator.share({ title: t.appLabel, text }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+      try {
+        await navigator.share({ title: t.appLabel, text });
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") return;
+      }
     }
-    try { await navigator.clipboard.writeText(text); showToast(t.inviteLinkCopy); } catch { showToast(url); }
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(t.inviteLinkCopy);
+    } catch {
+      showToast(url);
+    }
   }
 
   async function stageCustomersFile(file) {
     if (!file) return;
     try {
-      const [{ parseCustomersCsv, mergeCustomers }, text] = await Promise.all([import("./customers-import.js"), file.text()]);
+      const [{ parseCustomersCsv, mergeCustomers }, text] = await Promise.all([
+        import("./customers-import.js"),
+        file.text(),
+      ]);
       const parsed = parseCustomersCsv(text);
       const preview = mergeCustomers(customers, parsed.rows);
-      setCustomerImport({ fileName: file.name, rows: parsed.rows, warnings: parsed.warnings, added: preview.added.length, skipped: preview.skipped.length, merged: preview.customers });
-    } catch (e) { showError(e, "customersImport"); }
+      setCustomerImport({
+        fileName: file.name,
+        rows: parsed.rows,
+        warnings: parsed.warnings,
+        added: preview.added.length,
+        skipped: preview.skipped.length,
+        merged: preview.customers,
+      });
+    } catch (e) {
+      showError(e, "customersImport");
+    }
   }
 
   function applyCustomersImport() {
-    if (!customerImport || !customerImport.added) { setCustomerImport(null); return; }
+    if (!customerImport || !customerImport.added) {
+      setCustomerImport(null);
+      return;
+    }
     persist({ customers: customerImport.merged });
     showToast((t.importCustomersDone || "").replace("{n}", String(customerImport.added)));
     setCustomerImport(null);
@@ -1031,7 +1490,9 @@ export default function SiteManager() {
     try {
       await revokeInvite(code);
       setTeam((s) => ({ ...s, invites: s.invites.filter((i) => i.code !== code) }));
-    } catch (e) { saveFailed(e, "dropInvite"); }
+    } catch (e) {
+      saveFailed(e, "dropInvite");
+    }
   }
 
   async function runCompanyMigration() {
@@ -1075,22 +1536,33 @@ export default function SiteManager() {
     // dropped rather than kept around to fire later.
     const badHook = profileDraft.webhookUrl && !/^https:\/\/[^\s/]+/.test(String(profileDraft.webhookUrl).trim());
     const cleanedProfile = badHook ? { ...profileDraft, webhookUrl: "" } : profileDraft;
-    if (badHook) { showToast(t.webhookHttpsOnly); setProfileDraft(cleanedProfile); }
+    if (badHook) {
+      showToast(t.webhookHttpsOnly);
+      setProfileDraft(cleanedProfile);
+    }
     setProfile(cleanedProfile);
     setProfileModalOpen(false);
-    try { await window.storage.set(personalKey("site-profile"), JSON.stringify(cleanedProfile)); } catch (e) {}
+    try {
+      await window.storage.set(personalKey("site-profile"), JSON.stringify(cleanedProfile));
+    } catch (e) {}
   }
 
   async function saveDocs(next) {
     const data = { insurance: next.insurance ?? insuranceCards, certificates: next.certificates ?? certificates };
     if (next.insurance) setInsuranceCards(next.insurance);
     if (next.certificates) setCertificates(next.certificates);
-    try { await window.storage.set(personalKey("site-docs"), JSON.stringify(data)); } catch (e) {}
+    try {
+      await window.storage.set(personalKey("site-docs"), JSON.stringify(data));
+    } catch (e) {}
   }
 
   async function saveTechLibrary(next) {
     setTechLibrary(next);
-    try { await window.storage.set("site-tech-library", JSON.stringify(next)); } catch (e) { saveFailed(e, "saveTechLibrary"); }
+    try {
+      await window.storage.set("site-tech-library", JSON.stringify(next));
+    } catch (e) {
+      saveFailed(e, "saveTechLibrary");
+    }
   }
 
   // Moves a freshly picked image out of the record and into its own document,
@@ -1107,7 +1579,11 @@ export default function SiteManager() {
   }
 
   function openInsuranceForm(existing) {
-    setInsuranceForm(existing ? { ...existing } : { id: null, label: "", provider: "", policyNumber: "", phone: "", photo: null, photoId: null });
+    setInsuranceForm(
+      existing
+        ? { ...existing }
+        : { id: null, label: "", provider: "", policyNumber: "", phone: "", photo: null, photoId: null },
+    );
     if (existing && !existing.photo && existing.photoId) {
       loadPhoto(existing.photoId).then((v) => setInsuranceForm((s) => (s ? { ...s, photo: v } : s)));
     }
@@ -1132,7 +1608,11 @@ export default function SiteManager() {
   }
 
   function openCertForm(existing) {
-    setCertForm(existing ? { ...existing } : { id: null, title: "", issuer: "", issueDate: "", expiryDate: "", photo: null, photoId: null });
+    setCertForm(
+      existing
+        ? { ...existing }
+        : { id: null, title: "", issuer: "", issueDate: "", expiryDate: "", photo: null, photoId: null },
+    );
     if (existing && !existing.photo && existing.photoId) {
       loadPhoto(existing.photoId).then((v) => setCertForm((s) => (s ? { ...s, photo: v } : s)));
     }
@@ -1184,9 +1664,22 @@ export default function SiteManager() {
     const existing = myLeaveFor(selectedDay);
     let updated;
     if (existing) {
-      updated = leaveRequests.map((r) => (r.id === existing.id ? { ...r, type: leaveForm.type, note: leaveForm.note } : r));
+      updated = leaveRequests.map((r) =>
+        r.id === existing.id ? { ...r, type: leaveForm.type, note: leaveForm.note } : r,
+      );
     } else {
-      updated = [...leaveRequests, { id: uid(), date: selectedDay, userId: user?.uid || null, type: leaveForm.type, note: leaveForm.note, status: "pending", createdAt: Date.now() }];
+      updated = [
+        ...leaveRequests,
+        {
+          id: uid(),
+          date: selectedDay,
+          userId: user?.uid || null,
+          type: leaveForm.type,
+          note: leaveForm.note,
+          status: "pending",
+          createdAt: Date.now(),
+        },
+      ];
     }
     persist({ leaveRequests: updated });
   }
@@ -1205,9 +1698,19 @@ export default function SiteManager() {
     dates.forEach((dateStr) => {
       const existing = updated.find((r) => r.date === dateStr && (r.userId ? r.userId === user?.uid : isOwner()));
       if (existing) {
-        updated = updated.map((r) => (r.id === existing.id ? { ...r, type: rangeLeaveForm.type, note: rangeLeaveForm.note } : r));
+        updated = updated.map((r) =>
+          r.id === existing.id ? { ...r, type: rangeLeaveForm.type, note: rangeLeaveForm.note } : r,
+        );
       } else {
-        updated.push({ id: uid(), date: dateStr, userId: user?.uid || null, type: rangeLeaveForm.type, note: rangeLeaveForm.note, status: "pending", createdAt: Date.now() });
+        updated.push({
+          id: uid(),
+          date: dateStr,
+          userId: user?.uid || null,
+          type: rangeLeaveForm.type,
+          note: rangeLeaveForm.note,
+          status: "pending",
+          createdAt: Date.now(),
+        });
       }
     });
     persist({ leaveRequests: updated });
@@ -1221,13 +1724,20 @@ export default function SiteManager() {
   }
 
   function sendLeaveToSupervisor(request) {
-    const typeLabel = request.type === "vacation" ? t.leaveVacation : request.type === "sick" ? t.leaveSick : t.leaveOther;
+    const typeLabel =
+      request.type === "vacation" ? t.leaveVacation : request.type === "sick" ? t.leaveSick : t.leaveOther;
     const subject = `${t.requestLeave}: ${request.date}`;
     const body = `${profile.name || ""}\n${typeLabel} — ${request.date}\n${request.note || ""}`;
     if (profile.supervisorEmail) {
-      window.open(`mailto:${profile.supervisorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_blank");
+      window.open(
+        `mailto:${profile.supervisorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+        "_blank",
+      );
     } else if (profile.supervisorPhone) {
-      window.open(`https://wa.me/${profile.supervisorPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`${subject}\n${body}`)}`, "_blank");
+      window.open(
+        `https://wa.me/${profile.supervisorPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`${subject}\n${body}`)}`,
+        "_blank",
+      );
     } else {
       setProfileModalOpen(true);
       setProfileDraft({ ...profile });
@@ -1247,7 +1757,7 @@ export default function SiteManager() {
       transportHours: live ? totals.transportHours : (report.transportHours ?? totals.transportHours),
       materialsCount: live ? totals.materialsCount : (report.materialsCount ?? totals.materialsCount),
       toolsCount: live ? totals.toolsCount : (report.toolsCount ?? totals.toolsCount),
-      sites: live ? totals.projIds.map(projectName).filter(Boolean) : (report.sitesVisited || []),
+      sites: live ? totals.projIds.map(projectName).filter(Boolean) : report.sitesVisited || [],
     };
   }
 
@@ -1262,9 +1772,15 @@ export default function SiteManager() {
   function sendReportVia(report) {
     const { subject, body } = reportSendText(report);
     if (profile.supervisorEmail) {
-      window.open(`mailto:${profile.supervisorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, "_blank");
+      window.open(
+        `mailto:${profile.supervisorEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+        "_blank",
+      );
     } else if (profile.supervisorPhone) {
-      window.open(`https://wa.me/${profile.supervisorPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`${subject}\n${body}`)}`, "_blank");
+      window.open(
+        `https://wa.me/${profile.supervisorPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`${subject}\n${body}`)}`,
+        "_blank",
+      );
     } else {
       setProfileModalOpen(true);
       setProfileDraft({ ...profile });
@@ -1313,10 +1829,22 @@ export default function SiteManager() {
     setReportViewModal(report);
     sendReportVia(report);
     sendWebhook("report", {
-      reportId: id, sendIndex: report.sends.length,
-      period: report.period, periodLabel: report.periodLabel, hours: report.hours,
-      materialsCount: report.materialsCount, toolsCount: report.toolsCount, sitesVisited: report.sitesVisited,
-      entries: scoped.map((e) => ({ id: e.id, type: e.type, description: e.description, qty: e.qty || "", unit: e.unit || "", projectName: e.projectId ? projectName(e.projectId) : "" })),
+      reportId: id,
+      sendIndex: report.sends.length,
+      period: report.period,
+      periodLabel: report.periodLabel,
+      hours: report.hours,
+      materialsCount: report.materialsCount,
+      toolsCount: report.toolsCount,
+      sitesVisited: report.sitesVisited,
+      entries: scoped.map((e) => ({
+        id: e.id,
+        type: e.type,
+        description: e.description,
+        qty: e.qty || "",
+        unit: e.unit || "",
+        projectName: e.projectId ? projectName(e.projectId) : "",
+      })),
     });
   }
 
@@ -1327,7 +1855,16 @@ export default function SiteManager() {
     setReportViewModal(updated);
     sendReportVia(updated);
     const f = reportFigures(updated);
-    sendWebhook("report", { reportId: updated.id, sendIndex: updated.sends.length, period: updated.period, periodLabel: updated.periodLabel, hours: f.hours, materialsCount: f.materialsCount, toolsCount: f.toolsCount, sitesVisited: f.sites });
+    sendWebhook("report", {
+      reportId: updated.id,
+      sendIndex: updated.sends.length,
+      period: updated.period,
+      periodLabel: updated.periodLabel,
+      hours: f.hours,
+      materialsCount: f.materialsCount,
+      toolsCount: f.toolsCount,
+      sitesVisited: f.sites,
+    });
   }
 
   function toggleReportEntry(id) {
@@ -1355,11 +1892,13 @@ export default function SiteManager() {
   function renderReportDocument(subtitle, sections, remark) {
     // Notes are free text typed on a roof; the print must not become HTML
     // because someone wrote "<3" in a comment.
-    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const esc = (v) =>
+      String(v == null ? "" : v).replace(
+        /[&<>"']/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+      );
     const rowsHtml = (items) =>
-      items
-        .map((i) => `<tr><td>${esc(i.description)}</td><td>${esc(i.qty)}</td><td>${esc(i.unit)}</td></tr>`)
-        .join("");
+      items.map((i) => `<tr><td>${esc(i.description)}</td><td>${esc(i.qty)}</td><td>${esc(i.unit)}</td></tr>`).join("");
 
     // What was said on site belongs on the record next to what was used.
     const notesHtml = (notes) =>
@@ -1386,7 +1925,7 @@ export default function SiteManager() {
         ${tableHtml(t.materialsLogged, s.materials)}
         ${tableHtml(t.machinesToolsLabel, s.machines)}
         ${notesHtml(s.notes)}
-      </div>`
+      </div>`,
       )
       .join("");
 
@@ -1452,7 +1991,15 @@ export default function SiteManager() {
       const materials = ents.filter((e) => e.type === "material");
       const machines = ents.filter((e) => e.type === "tool");
       const notes = ents.filter((e) => e.type === "note");
-      return { title: siteName, client: clientNameFor(proj), address: proj?.address || "", hours, materials, machines, notes };
+      return {
+        title: siteName,
+        client: clientNameFor(proj),
+        address: proj?.address || "",
+        hours,
+        materials,
+        machines,
+        notes,
+      };
     });
     const subtitle = `${periodLabel} · ${report.periodLabel}${profile.name ? " · " + profile.name : ""}`;
     // The author's own remark on the report goes on top, before the sites.
@@ -1460,14 +2007,19 @@ export default function SiteManager() {
   }
 
   function buildProjectsReportHtml(projectIds) {
-    const orderedProjects = projectIds && projectIds.length ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean) : projects;
+    const orderedProjects =
+      projectIds && projectIds.length
+        ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean)
+        : projects;
     const sections = orderedProjects
       .map((p) => {
         const pEntries = entries.filter((e) => e.projectId === p.id);
         const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
         const materials = pEntries.filter((e) => e.type === "material");
         const machines = pEntries.filter((e) => e.type === "tool");
-        const notes = pEntries.filter((e) => e.type === "note").sort((a, b) => String(a.date).localeCompare(String(b.date)) || (a.createdAt || 0) - (b.createdAt || 0));
+        const notes = pEntries
+          .filter((e) => e.type === "note")
+          .sort((a, b) => String(a.date).localeCompare(String(b.date)) || (a.createdAt || 0) - (b.createdAt || 0));
         return { title: p.name, client: clientNameFor(p), address: p.address || "", hours, materials, machines, notes };
       })
       .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0 || s.notes.length > 0);
@@ -1481,7 +2033,11 @@ export default function SiteManager() {
     const totals = documentTotals(doc);
     const cur = billing.currency || "CHF";
     const isInvoice = doc.type === "invoice";
-    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const esc = (v) =>
+      String(v == null ? "" : v).replace(
+        /[&<>"']/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+      );
     const fmt = (n) => n.toLocaleString("de-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // The payment part is only produced when the billing details are actually
@@ -1494,12 +2050,24 @@ export default function SiteManager() {
         const payload = buildQrPayload({
           iban: billing.iban,
           creditor: {
-            name: billing.companyName, street: billing.street, buildingNumber: billing.buildingNumber,
-            postalCode: billing.postalCode, town: billing.town, country: billing.country || "CH",
+            name: billing.companyName,
+            street: billing.street,
+            buildingNumber: billing.buildingNumber,
+            postalCode: billing.postalCode,
+            town: billing.town,
+            country: billing.country || "CH",
           },
-          debtor: customer && customer.name
-            ? { name: customer.name, street: customer.address || "", buildingNumber: "", postalCode: "", town: "", country: "CH" }
-            : null,
+          debtor:
+            customer && customer.name
+              ? {
+                  name: customer.name,
+                  street: customer.address || "",
+                  buildingNumber: "",
+                  postalCode: "",
+                  town: "",
+                  country: "CH",
+                }
+              : null,
           amount: totals.gross,
           currency: cur,
           reference: doc.number,
@@ -1537,11 +2105,13 @@ export default function SiteManager() {
       }
     }
 
-    const rows = (doc.lineItems || []).map((li) => {
-      const qty = parseFloat(li.qty || 0) || 0;
-      const price = parseFloat(li.unitPrice || 0) || 0;
-      return `<tr><td>${esc(li.description)}</td><td class="r">${fmt(qty)} ${esc(li.unit || "")}</td><td class="r">${fmt(price)}</td><td class="r">${fmt(qty * price)}</td></tr>`;
-    }).join("");
+    const rows = (doc.lineItems || [])
+      .map((li) => {
+        const qty = parseFloat(li.qty || 0) || 0;
+        const price = parseFloat(li.unitPrice || 0) || 0;
+        return `<tr><td>${esc(li.description)}</td><td class="r">${fmt(qty)} ${esc(li.unit || "")}</td><td class="r">${fmt(price)}</td><td class="r">${fmt(qty * price)}</td></tr>`;
+      })
+      .join("");
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(doc.number)}</title>
     <style>
@@ -1608,12 +2178,19 @@ export default function SiteManager() {
   async function printRapport(report) {
     const pr = projects.find((x) => x.id === report.projectId);
     const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
-    const esc = (v) => String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const esc = (v) =>
+      String(v == null ? "" : v).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
     let signature = "";
-    try { signature = (await loadPhoto(report.signatureId)) || ""; } catch (e) {}
+    try {
+      signature = (await loadPhoto(report.signatureId)) || "";
+    } catch (e) {}
 
-    const rows = (report.lines || []).map((li) =>
-      `<tr><td>${li.regie ? `<span class="reg">${esc(t.regieShort)}</span> ` : ""}${esc(li.description)}</td><td class="r">${esc(li.qty)} ${esc(li.unit)}</td></tr>`).join("");
+    const rows = (report.lines || [])
+      .map(
+        (li) =>
+          `<tr><td>${li.regie ? `<span class="reg">${esc(t.regieShort)}</span> ` : ""}${esc(li.description)}</td><td class="r">${esc(li.qty)} ${esc(li.unit)}</td></tr>`,
+      )
+      .join("");
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(t.rapportTitle)} ${esc(report.date)}</title>
     <style>
@@ -1710,10 +2287,20 @@ export default function SiteManager() {
       const payload = {
         version: 2,
         exportedAt: new Date().toISOString(),
-        projects, entries, customers, documents, assignments,
-        leaveRequests, sentReports, siteReports,
-        profile, billing, techLibrary,
-        insurance: insuranceCards, certificates, lang,
+        projects,
+        entries,
+        customers,
+        documents,
+        assignments,
+        leaveRequests,
+        sentReports,
+        siteReports,
+        profile,
+        billing,
+        techLibrary,
+        insurance: insuranceCards,
+        certificates,
+        lang,
         photos,
       };
 
@@ -1737,12 +2324,17 @@ export default function SiteManager() {
       // from a stranger cannot plant a record or overwrite a signature.
       const { sanitiseBackup } = await import("./import-guard.js");
       const data = sanitiseBackup(JSON.parse(text), { makeId: uid, userId: user?.uid || null });
-      if (!data) { showToast(t.invalidBackupCode); return; }
+      if (!data) {
+        showToast(t.invalidBackupCode);
+        return;
+      }
 
       // Photos first: records reference them, and a half-restored backup with
       // missing pictures is worse than a slow one.
       for (const [id, value] of Object.entries(data.photos)) {
-        try { await window.storage.set(`photo-${id}`, value); } catch (e) {}
+        try {
+          await window.storage.set(`photo-${id}`, value);
+        } catch (e) {}
       }
       await persist({
         projects: data.projects,
@@ -1756,12 +2348,19 @@ export default function SiteManager() {
       });
       if (data.profile) {
         setProfile(data.profile);
-        try { await window.storage.set(personalKey("site-profile"), JSON.stringify(data.profile)); } catch (e) {}
+        try {
+          await window.storage.set(personalKey("site-profile"), JSON.stringify(data.profile));
+        } catch (e) {}
       }
       if (data.insurance || data.certificates) {
         setInsuranceCards(data.insurance || []);
         setCertificates(data.certificates || []);
-        try { await window.storage.set(personalKey("site-docs"), JSON.stringify({ insurance: data.insurance || [], certificates: data.certificates || [] })); } catch (e) {}
+        try {
+          await window.storage.set(
+            personalKey("site-docs"),
+            JSON.stringify({ insurance: data.insurance || [], certificates: data.certificates || [] }),
+          );
+        } catch (e) {}
       }
       if (data.techLibrary) saveTechLibrary(data.techLibrary);
       setBackupModal(null);
@@ -1780,9 +2379,16 @@ export default function SiteManager() {
     // Customers and invoices belong in a backup too — they were missing, so a
     // restore would have quietly dropped the entire CRM and billing history.
     const payload = {
-      projects, entries: lightEntries, customers, documents,
-      leaveRequests, sentReports, profile,
-      insurance: lightInsurance, certificates: lightCertificates, lang,
+      projects,
+      entries: lightEntries,
+      customers,
+      documents,
+      leaveRequests,
+      sentReports,
+      profile,
+      insurance: lightInsurance,
+      certificates: lightCertificates,
+      lang,
     };
     const code = encodeBackup(payload);
     setBackupCodeOutput(code);
@@ -1817,14 +2423,21 @@ export default function SiteManager() {
     });
     if (data.profile) {
       setProfile(data.profile);
-      try { await window.storage.set(personalKey("site-profile"), JSON.stringify(data.profile)); } catch (e) {}
+      try {
+        await window.storage.set(personalKey("site-profile"), JSON.stringify(data.profile));
+      } catch (e) {}
     }
     if (data.insurance || data.certificates) {
       const newInsurance = data.insurance || [];
       const newCerts = data.certificates || [];
       setInsuranceCards(newInsurance);
       setCertificates(newCerts);
-      try { await window.storage.set(personalKey("site-docs"), JSON.stringify({ insurance: newInsurance, certificates: newCerts })); } catch (e) {}
+      try {
+        await window.storage.set(
+          personalKey("site-docs"),
+          JSON.stringify({ insurance: newInsurance, certificates: newCerts }),
+        );
+      } catch (e) {}
     }
     setBackupModal(null);
     showToast(t.backupRestored);
@@ -1835,10 +2448,15 @@ export default function SiteManager() {
     if (el) {
       el.focus();
       el.select();
-      try { el.setSelectionRange(0, backupCodeOutput.length); } catch (e) {}
+      try {
+        el.setSelectionRange(0, backupCodeOutput.length);
+      } catch (e) {}
     }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(backupCodeOutput).then(() => showToast(t.copyBtn)).catch(() => showToast(t.copyBtn));
+      navigator.clipboard
+        .writeText(backupCodeOutput)
+        .then(() => showToast(t.copyBtn))
+        .catch(() => showToast(t.copyBtn));
     } else {
       showToast(t.copyBtn);
     }
@@ -1847,13 +2465,17 @@ export default function SiteManager() {
   async function fetchWeather(loc) {
     setWeather({ loading: true, error: null, data: null });
     try {
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto&models=meteoswiss_icon_ch1`);
+      const res = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto&models=meteoswiss_icon_ch1`,
+      );
       const data = await res.json();
       if (!data.current) throw new Error("no data");
       setWeather({ loading: false, error: null, data: data.current });
     } catch (e) {
       try {
-        const res2 = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto`);
+        const res2 = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto`,
+        );
         const data2 = await res2.json();
         setWeather({ loading: false, error: null, data: data2.current });
       } catch (e2) {
@@ -1866,7 +2488,9 @@ export default function SiteManager() {
     if (!weatherCityInput.trim()) return;
     setWeather({ loading: true, error: null, data: null });
     try {
-      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(weatherCityInput.trim())}&count=1`);
+      const res = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(weatherCityInput.trim())}&count=1`,
+      );
       const data = await res.json();
       const hit = data.results && data.results[0];
       if (!hit) {
@@ -1877,7 +2501,9 @@ export default function SiteManager() {
       setWeatherLoc(loc);
       setWeatherEditOpen(false);
       setWeatherCityInput("");
-      try { await window.storage.set(personalKey("site-weather-loc"), JSON.stringify(loc)); } catch (e) {}
+      try {
+        await window.storage.set(personalKey("site-weather-loc"), JSON.stringify(loc));
+      } catch (e) {}
     } catch (e) {
       setWeather({ loading: false, error: t.locationNotFound, data: null });
     }
@@ -1886,10 +2512,17 @@ export default function SiteManager() {
   async function changeLang(code) {
     // The language file is a chunk of its own; offline it cannot come, and
     // then the current language stays rather than the app going English.
-    try { await loadLang(code); } catch (e) { showError(e, "lang"); return; }
+    try {
+      await loadLang(code);
+    } catch (e) {
+      showError(e, "lang");
+      return;
+    }
     setLang(code);
     setLangPickerOpen(false);
-    try { await window.storage.set(personalKey("site-lang"), code); } catch (e) {}
+    try {
+      await window.storage.set(personalKey("site-lang"), code);
+    } catch (e) {}
   }
 
   // Writes only the records that actually changed, rather than rewriting one
@@ -1903,7 +2536,10 @@ export default function SiteManager() {
     if (next.documents) setDocuments(next.documents);
     if (next.assignments) setAssignments(next.assignments);
     if (next.siteReports) setSiteReports(next.siteReports);
-    if (next.projectFiles) { setProjectFiles(next.projectFiles); projectFilesRef.current = next.projectFiles; }
+    if (next.projectFiles) {
+      setProjectFiles(next.projectFiles);
+      projectFilesRef.current = next.projectFiles;
+    }
     if (next.projects) setProjects(next.projects);
     if (next.entries) setEntries(next.entries);
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
@@ -1933,7 +2569,10 @@ export default function SiteManager() {
   // A failed save names its reason -- the Firestore code, the error text or
   // at least where it happened -- so a toast read off a phone can be acted on.
   function saveFailed(e, where) {
-    showError(e || new Error(where || "save"), where && /photo|Photo|image/i.test(where) && e && /decode|encode/i.test(String(e.message)) ? "photo" : "save");
+    showError(
+      e || new Error(where || "save"),
+      where && /photo|Photo|image/i.test(where) && e && /decode|encode/i.test(String(e.message)) ? "photo" : "save",
+    );
   }
 
   function showToast(msg) {
@@ -1948,12 +2587,11 @@ export default function SiteManager() {
   // state on the entry rather than a note somewhere else.
   function approveEntry(entry) {
     persist({
-      entries: entries.map((e) => (e.id === entry.id
-        ? { ...e, approvedBy: user?.uid || null, approvedAt: Date.now() }
-        : e)),
+      entries: entries.map((e) =>
+        e.id === entry.id ? { ...e, approvedBy: user?.uid || null, approvedAt: Date.now() } : e,
+      ),
     });
   }
-
 
   function pendingApproval() {
     return entries.filter((e) => e.type === "time" && !e.approvedBy);
@@ -1968,7 +2606,10 @@ export default function SiteManager() {
     // A signed Rapport already covers this day: open it rather than quietly
     // making a second one. The signed record itself is never touched.
     const existing = !force && siteReports.find((r) => r.projectId === projectId && r.date === d);
-    if (existing) { setRapportExists({ existing, projectId, date: d }); return; }
+    if (existing) {
+      setRapportExists({ existing, projectId, date: d });
+      return;
+    }
     const list = entries.filter((e) => e.projectId === projectId && e.date === d);
     const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
     setRapportModal({
@@ -1978,7 +2619,9 @@ export default function SiteManager() {
       lines: list
         .filter((e) => e.type === "material" || e.type === "tool")
         .map((e) => ({ description: e.description, qty: e.qty || "", unit: e.unit || "", regie: !!e.regie })),
-      regieHours: list.filter((e) => e.type === "time" && e.regie).reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0),
+      regieHours: list
+        .filter((e) => e.type === "time" && e.regie)
+        .reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0),
       note: "",
       signerName: "",
       signature: null,
@@ -2024,8 +2667,7 @@ export default function SiteManager() {
   // extra day nobody agreed to in writing. It is the most commonly lost money
   // in this trade, so it is tracked separately and billed on its own.
   function regieEntries(projectId, { unbilledOnly = false } = {}) {
-    return entries.filter((e) =>
-      e.projectId === projectId && e.regie && (!unbilledOnly || !e.billedIn));
+    return entries.filter((e) => e.projectId === projectId && e.regie && (!unbilledOnly || !e.billedIn));
   }
 
   function regieSummary(projectId, opts) {
@@ -2034,32 +2676,63 @@ export default function SiteManager() {
     const rate = parseFloat(billing.labourRate || 0) || 0;
     let materials = 0;
     let unpriced = 0;
-    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
-      const price = parseFloat(e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()] ?? "");
-      const qty = parseFloat(e.qty || 0) || 0;
-      if (!isNaN(price) && price > 0) materials += price * (qty || 1);
-      else unpriced++;
-    });
-    return { list, count: list.length, hours, labour: hours * rate, materials, total: hours * rate + materials, unpriced };
+    list
+      .filter((e) => e.type === "material" || e.type === "tool")
+      .forEach((e) => {
+        const price = parseFloat(e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()] ?? "");
+        const qty = parseFloat(e.qty || 0) || 0;
+        if (!isNaN(price) && price > 0) materials += price * (qty || 1);
+        else unpriced++;
+      });
+    return {
+      list,
+      count: list.length,
+      hours,
+      labour: hours * rate,
+      materials,
+      total: hours * rate + materials,
+      unpriced,
+    };
   }
 
   // Turns unbilled Regie into its own document, and marks those entries as
   // billed so the same extra work cannot be charged twice.
   function createRegieDocument(project, type) {
     const { list } = regieSummary(project.id, { unbilledOnly: true });
-    if (list.length === 0) { showToast(t.regieNothing); return; }
+    if (list.length === 0) {
+      showToast(t.regieNothing);
+      return;
+    }
 
     const rate = parseFloat(billing.labourRate || 0) || 0;
     const hours = list.filter((e) => e.type === "time").reduce((sum, e) => sum + (parseFloat(e.qty || 0) || 0), 0);
     const lineItems = [];
     if (hours > 0 && rate > 0) {
-      lineItems.push({ id: uid(), description: t.regieLabour, qty: String(Math.round(hours * 100) / 100), unit: "h", unitPrice: String(rate) });
+      lineItems.push({
+        id: uid(),
+        description: t.regieLabour,
+        qty: String(Math.round(hours * 100) / 100),
+        unit: "h",
+        unitPrice: String(rate),
+      });
     }
-    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
-      const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
-      if (price) lineItems.push({ id: uid(), description: e.description, qty: String(e.qty || 1), unit: e.unit || "", unitPrice: String(price) });
-    });
-    if (lineItems.length === 0) { showToast(t.regieNoPrices); return; }
+    list
+      .filter((e) => e.type === "material" || e.type === "tool")
+      .forEach((e) => {
+        const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
+        if (price)
+          lineItems.push({
+            id: uid(),
+            description: e.description,
+            qty: String(e.qty || 1),
+            unit: e.unit || "",
+            unitPrice: String(price),
+          });
+      });
+    if (lineItems.length === 0) {
+      showToast(t.regieNoPrices);
+      return;
+    }
 
     const vatKey = billing.defaultVatKey || "standard";
     const due = new Date();
@@ -2100,9 +2773,13 @@ export default function SiteManager() {
     const holidayDays = parseFloat(billing.holidayDays || 0) || 0;
     const contractDaily = weekly > 0 ? weekly / 5 : 0;
 
-    const mine = entries.filter((e) =>
-      (e.type === "time" || e.type === "break") && e.userId === uidKey &&
-      (!from || e.date >= from) && (!to || e.date <= to));
+    const mine = entries.filter(
+      (e) =>
+        (e.type === "time" || e.type === "break") &&
+        e.userId === uidKey &&
+        (!from || e.date >= from) &&
+        (!to || e.date <= to),
+    );
     const worked = mine.filter((e) => e.type === "time");
     // Net of the breaks marked in the period: Znüni and Mittag are not work.
     const workedHours = netHours(mine);
@@ -2112,8 +2789,9 @@ export default function SiteManager() {
     const expected = contractDaily * workedDays;
 
     const year = String(new Date().getFullYear());
-    const leaveTaken = leaveRequests.filter((r) =>
-      r.userId === uidKey && r.status === "approved" && r.type === "vacation" && (r.date || "").startsWith(year)).length;
+    const leaveTaken = leaveRequests.filter(
+      (r) => r.userId === uidKey && r.status === "approved" && r.type === "vacation" && (r.date || "").startsWith(year),
+    ).length;
 
     return {
       workedHours,
@@ -2134,7 +2812,11 @@ export default function SiteManager() {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
-      return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, dayOfMonth: d.getDate(), js: d };
+      return {
+        date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+        dayOfMonth: d.getDate(),
+        js: d,
+      };
     });
   }
 
@@ -2164,7 +2846,9 @@ export default function SiteManager() {
   function cycleDockSort() {
     const next = DOCK_SORTS[(DOCK_SORTS.indexOf(dockSort) + 1) % DOCK_SORTS.length];
     setDockSort(next);
-    try { localStorage.setItem("site-dock-sort", next); } catch (e) {}
+    try {
+      localStorage.setItem("site-dock-sort", next);
+    } catch (e) {}
   }
 
   // A project dropped anywhere on the tray gets pinned. Never unpinned that
@@ -2181,7 +2865,9 @@ export default function SiteManager() {
 
   function setDockOpenRemembered(open) {
     setDockOpen(open);
-    try { localStorage.setItem("site-dock-open", open ? "1" : "0"); } catch (e) {}
+    try {
+      localStorage.setItem("site-dock-open", open ? "1" : "0");
+    } catch (e) {}
   }
 
   // What can be picked up and carried to a job tile. The payload is the
@@ -2211,14 +2897,22 @@ export default function SiteManager() {
 
   function dockAccepts(dt) {
     const types = Array.from((dt && dt.types) || []);
-    return types.includes("Files") || types.includes("text/material") || types.includes("text/project-id") || (types.includes("text/member-uid") && canManage());
+    return (
+      types.includes("Files") ||
+      types.includes("text/material") ||
+      types.includes("text/project-id") ||
+      (types.includes("text/member-uid") && canManage())
+    );
   }
 
   function dropOnProject(projectId, dt) {
     const pr = projects.find((x) => x.id === projectId);
     if (!pr || !dt) return;
     // A file from the desk dropped on a job tile: same tray, same gesture.
-    if (dt.files && dt.files.length) { uploadFiles(projectId, dt.files); return; }
+    if (dt.files && dt.files.length) {
+      uploadFiles(projectId, dt.files);
+      return;
+    }
     const memberUid = dt.getData("text/member-uid");
     if (memberUid) {
       if (!canManage()) return;
@@ -2227,7 +2921,11 @@ export default function SiteManager() {
       return;
     }
     let payload = null;
-    try { payload = JSON.parse(dt.getData("text/material") || "null"); } catch (e) { payload = null; }
+    try {
+      payload = JSON.parse(dt.getData("text/material") || "null");
+    } catch (e) {
+      payload = null;
+    }
     const name = payload && String(payload.name || "").trim();
     if (!name) return;
     const known = articleMaster[name.toLowerCase()] || {};
@@ -2259,20 +2957,48 @@ export default function SiteManager() {
     if (!files.length || !cid || !projectId) return;
     let current = projectFilesRef.current;
     for (const file of files) {
-      if (file.size > MAX_FILE_BYTES) { showToast(`${file.name}: ${t.filesTooLarge}`); continue; }
+      if (file.size > MAX_FILE_BYTES) {
+        showToast(`${file.name}: ${t.filesTooLarge}`);
+        continue;
+      }
       setFileBusy((n) => n + 1);
       try {
         const token = await getIdToken();
         const fd = new FormData();
         fd.append("file", file, file.name);
         fd.append("kind", kind || guessKind(file.name, file.type));
-        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${projectId}`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: fd });
-        if (res.status === 413) { showToast(`${file.name}: ${t.filesTooLarge}`); continue; }
-        if (res.status === 415) { showToast(`${file.name}: ${t.filesTypeRefused}`); continue; }
-        if (res.status === 503) { showToast(t.filesNotConfigured); continue; }
-        if (!res.ok) { showError({ status: res.status, message: `upload ${res.status}` }, "file"); continue; }
+        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${projectId}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        if (res.status === 413) {
+          showToast(`${file.name}: ${t.filesTooLarge}`);
+          continue;
+        }
+        if (res.status === 415) {
+          showToast(`${file.name}: ${t.filesTypeRefused}`);
+          continue;
+        }
+        if (res.status === 503) {
+          showToast(t.filesNotConfigured);
+          continue;
+        }
+        if (!res.ok) {
+          showError({ status: res.status, message: `upload ${res.status}` }, "file");
+          continue;
+        }
         const meta = await res.json();
-        const record = { id: meta.id, name: meta.name, size: meta.size, type: meta.type, kind: meta.kind, projectId, uploadedBy: user?.uid || null, createdAt: Date.now() };
+        const record = {
+          id: meta.id,
+          name: meta.name,
+          size: meta.size,
+          type: meta.type,
+          kind: meta.kind,
+          projectId,
+          uploadedBy: user?.uid || null,
+          createdAt: Date.now(),
+        };
         current = [record, ...current];
         projectFilesRef.current = current;
         await persist({ projectFiles: current });
@@ -2288,7 +3014,9 @@ export default function SiteManager() {
   async function fetchFileBlob(f) {
     const cid = getCompanyId();
     const token = await getIdToken();
-    const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (!res.ok) throw new Error(String(res.status));
     return await res.blob();
   }
@@ -2298,7 +3026,11 @@ export default function SiteManager() {
   async function openFile(f) {
     // A stored link is re-checked every time: metadata is member-writable, and
     // a javascript: url planted there must never reach window.open.
-    if (f.url) { const safe = normaliseLink(f.url); if (safe) window.open(safe, "_blank", "noopener"); return; }
+    if (f.url) {
+      const safe = normaliseLink(f.url);
+      if (safe) window.open(safe, "_blank", "noopener");
+      return;
+    }
     setFileBusy((n) => n + 1);
     try {
       const raw = await fetchFileBlob(f);
@@ -2313,7 +3045,9 @@ export default function SiteManager() {
         setFileViewer({ file: { ...f, type: inline }, url });
       } else {
         const a = document.createElement("a");
-        a.href = url; a.download = f.name || "file"; a.click();
+        a.href = url;
+        a.download = f.name || "file";
+        a.click();
         setTimeout(() => URL.revokeObjectURL(url), 60000);
       }
     } catch (e) {
@@ -2324,7 +3058,11 @@ export default function SiteManager() {
   }
 
   function closeFileViewer() {
-    if (fileViewer && fileViewer.url) { try { URL.revokeObjectURL(fileViewer.url); } catch (e) {} }
+    if (fileViewer && fileViewer.url) {
+      try {
+        URL.revokeObjectURL(fileViewer.url);
+      } catch (e) {}
+    }
     setFileViewer(null);
   }
 
@@ -2338,9 +3076,18 @@ export default function SiteManager() {
       try {
         const cid = getCompanyId();
         const token = await getIdToken();
-        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok && res.status !== 404) { showError({ status: res.status, message: `file ${res.status}` }, "file"); return; }
-      } catch (e) { showError(e, "file"); return; }
+        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${f.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok && res.status !== 404) {
+          showError({ status: res.status, message: `file ${res.status}` }, "file");
+          return;
+        }
+      } catch (e) {
+        showError(e, "file");
+        return;
+      }
     }
     persist({ projectFiles: projectFilesRef.current.filter((x) => x.id !== f.id) });
     showToast(t.filesDeleted);
@@ -2352,7 +3099,17 @@ export default function SiteManager() {
     const url = normaliseLink(linkForm.url);
     if (!url) return;
     const name = (linkForm.name || "").trim() || url.replace(/^https?:\/\//, "").slice(0, 80);
-    const record = { id: uid(), name, url, kind: linkForm.kind || "plan", projectId: linkForm.projectId, uploadedBy: user?.uid || null, createdAt: Date.now(), size: 0, type: "text/uri-list" };
+    const record = {
+      id: uid(),
+      name,
+      url,
+      kind: linkForm.kind || "plan",
+      projectId: linkForm.projectId,
+      uploadedBy: user?.uid || null,
+      createdAt: Date.now(),
+      size: 0,
+      type: "text/uri-list",
+    };
     persist({ projectFiles: [record, ...projectFilesRef.current] });
     setLinkForm(null);
   }
@@ -2377,7 +3134,11 @@ export default function SiteManager() {
   }
   async function openTeamRefresh() {
     const all = await listMembers();
-    setTeam((s) => ({ ...s, members: all.filter((m) => m.active !== false), former: all.filter((m) => m.active === false) }));
+    setTeam((s) => ({
+      ...s,
+      members: all.filter((m) => m.active !== false),
+      former: all.filter((m) => m.active === false),
+    }));
   }
 
   function assignmentsFor(date) {
@@ -2409,11 +3170,28 @@ export default function SiteManager() {
   // A tap marks the break taken; a second tap unmarks it. Stored as an entry
   // so it syncs and is owned like everything else.
   function toggleBreak(key, date = todayKey()) {
-    const existing = entries.find((e) => e.type === "break" && e.breakKey === key && e.date === date && e.userId === user?.uid);
-    if (existing) { persist({ entries: entries.filter((e) => e.id !== existing.id) }); return; }
+    const existing = entries.find(
+      (e) => e.type === "break" && e.breakKey === key && e.date === date && e.userId === user?.uid,
+    );
+    if (existing) {
+      persist({ entries: entries.filter((e) => e.id !== existing.id) });
+      return;
+    }
     const meta = breakMeta(key);
     if (!meta) return;
-    persist({ entries: [newEntry({ type: "break", breakKey: key, date, qty: String(meta.minutes / 60), unit: "h", description: `${t[`break_${key}`]} ${meta.start}` }), ...entries] });
+    persist({
+      entries: [
+        newEntry({
+          type: "break",
+          breakKey: key,
+          date,
+          qty: String(meta.minutes / 60),
+          unit: "h",
+          description: `${t[`break_${key}`]} ${meta.start}`,
+        }),
+        ...entries,
+      ],
+    });
   }
 
   function startDayOn(projectId) {
@@ -2456,11 +3234,19 @@ export default function SiteManager() {
     if (catalogs) return;
     if (tab !== "materials" && !(addModal && addModal.type === "material")) return;
     let alive = true;
-    import("./data/catalog.js").then((m) => { if (alive) setCatalogs(m); }).catch(() => {});
-    return () => { alive = false; };
+    import("./data/catalog.js")
+      .then((m) => {
+        if (alive) setCatalogs(m);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [tab, addModal, catalogs]);
-  const materialsCatalogFor = (code) => (catalogs && (catalogs.MATERIALS_CATALOG[code] || catalogs.MATERIALS_CATALOG.en)) || EMPTY_CATALOG;
-  const toolsCatalogFor = (code) => (catalogs && (catalogs.TOOLS_CATALOG[code] || catalogs.TOOLS_CATALOG.en)) || EMPTY_CATALOG;
+  const materialsCatalogFor = (code) =>
+    (catalogs && (catalogs.MATERIALS_CATALOG[code] || catalogs.MATERIALS_CATALOG.en)) || EMPTY_CATALOG;
+  const toolsCatalogFor = (code) =>
+    (catalogs && (catalogs.TOOLS_CATALOG[code] || catalogs.TOOLS_CATALOG.en)) || EMPTY_CATALOG;
 
   function newEntry(partial) {
     tracker.track(`entry.${(partial && partial.type) || "note"}`);
@@ -2474,7 +3260,16 @@ export default function SiteManager() {
 
   function addProject() {
     if (!newProjectName.trim()) return;
-    const p = { id: uid(), name: newProjectName.trim(), client: newProjectClient.trim(), customerId: newProjectCustomerId || null, address: newProjectAddr.trim(), category: newProjectCat, status: newProjectStatus, createdAt: Date.now() };
+    const p = {
+      id: uid(),
+      name: newProjectName.trim(),
+      client: newProjectClient.trim(),
+      customerId: newProjectCustomerId || null,
+      address: newProjectAddr.trim(),
+      category: newProjectCat,
+      status: newProjectStatus,
+      createdAt: Date.now(),
+    };
     persist({ projects: [p, ...projects] });
     setNewProjectCustomerId("");
     setNewProjectName("");
@@ -2488,7 +3283,20 @@ export default function SiteManager() {
 
   function saveProjectEdit() {
     if (!editProject) return;
-    const updated = projects.map((p) => (p.id === editProject.id ? { ...p, name: editProject.name.trim() || p.name, client: editProject.client.trim(), customerId: editProject.customerId || null, address: editProject.address.trim(), category: editProject.category, status: editProject.status, quotedAmount: editProject.quotedAmount || "" } : p));
+    const updated = projects.map((p) =>
+      p.id === editProject.id
+        ? {
+            ...p,
+            name: editProject.name.trim() || p.name,
+            client: editProject.client.trim(),
+            customerId: editProject.customerId || null,
+            address: editProject.address.trim(),
+            category: editProject.category,
+            status: editProject.status,
+            quotedAmount: editProject.quotedAmount || "",
+          }
+        : p,
+    );
     persist({ projects: updated });
     setEditProject(null);
     showToast(t.projectUpdated);
@@ -2524,7 +3332,9 @@ export default function SiteManager() {
   }
 
   async function doSignOut() {
-    try { await signOutUser(); } catch {}
+    try {
+      await signOutUser();
+    } catch {}
     // Clear company state too, or the next person to sign in on this phone
     // would briefly see the previous account data.
     resetCompanyState();
@@ -2540,7 +3350,11 @@ export default function SiteManager() {
   async function saveBilling() {
     setBilling(billingDraft);
     setBillingModalOpen(false);
-    try { await saveFinance(billingDraft); } catch (e) { saveFailed(e, "saveBilling"); }
+    try {
+      await saveFinance(billingDraft);
+    } catch (e) {
+      saveFailed(e, "saveBilling");
+    }
   }
 
   // A quote starts from what was actually logged on site — hours at the
@@ -2553,14 +3367,28 @@ export default function SiteManager() {
     const lineItems = [];
 
     if (hours > 0 && rate > 0) {
-      lineItems.push({ id: uid(), description: t.labourCost, qty: String(Math.round(hours * 100) / 100), unit: "h", unitPrice: String(rate) });
+      lineItems.push({
+        id: uid(),
+        description: t.labourCost,
+        qty: String(Math.round(hours * 100) / 100),
+        unit: "h",
+        unitPrice: String(rate),
+      });
     }
-    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
-      const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
-      if (price) {
-        lineItems.push({ id: uid(), description: e.description, qty: String(e.qty || 1), unit: e.unit || "", unitPrice: String(price) });
-      }
-    });
+    list
+      .filter((e) => e.type === "material" || e.type === "tool")
+      .forEach((e) => {
+        const price = e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()];
+        if (price) {
+          lineItems.push({
+            id: uid(),
+            description: e.description,
+            qty: String(e.qty || 1),
+            unit: e.unit || "",
+            unitPrice: String(price),
+          });
+        }
+      });
     if (lineItems.length === 0) lineItems.push({ id: uid(), description: "", qty: "1", unit: "", unitPrice: "" });
 
     const vatKey = billing.defaultVatKey || "standard";
@@ -2590,7 +3418,10 @@ export default function SiteManager() {
       ...docEditor,
       lineItems: (docEditor.lineItems || []).filter((li) => String(li.description || "").trim()),
     };
-    if (clean.lineItems.length === 0) { showToast(t.docNeedsLine); return; }
+    if (clean.lineItems.length === 0) {
+      showToast(t.docNeedsLine);
+      return;
+    }
     if (clean.id) {
       persist({ documents: documents.map((d) => (d.id === clean.id ? clean : d)) });
     } else {
@@ -2630,9 +3461,9 @@ export default function SiteManager() {
   }
 
   function openCustomerForm(existing) {
-    setCustomerForm(existing
-      ? { ...existing }
-      : { id: null, name: "", company: "", phone: "", email: "", address: "", notes: "" });
+    setCustomerForm(
+      existing ? { ...existing } : { id: null, name: "", company: "", phone: "", email: "", address: "", notes: "" },
+    );
   }
 
   function submitCustomer() {
@@ -2665,9 +3496,17 @@ export default function SiteManager() {
 
   function submitContact() {
     if (!contactForm || !contactForm.note.trim()) return;
-    const entry = { id: uid(), kind: contactForm.kind, note: contactForm.note.trim(), followUp: contactForm.followUp || null, at: Date.now() };
+    const entry = {
+      id: uid(),
+      kind: contactForm.kind,
+      note: contactForm.note.trim(),
+      followUp: contactForm.followUp || null,
+      at: Date.now(),
+    };
     persist({
-      customers: customers.map((c) => (c.id === contactForm.customerId ? { ...c, contacts: [entry, ...(c.contacts || [])] } : c)),
+      customers: customers.map((c) =>
+        c.id === contactForm.customerId ? { ...c, contacts: [entry, ...(c.contacts || [])] } : c,
+      ),
     });
     setContactForm(null);
     showToast(t.contactLogged);
@@ -2675,7 +3514,9 @@ export default function SiteManager() {
 
   function deleteContact(customerId, contactId) {
     persist({
-      customers: customers.map((c) => (c.id === customerId ? { ...c, contacts: (c.contacts || []).filter((x) => x.id !== contactId) } : c)),
+      customers: customers.map((c) =>
+        c.id === customerId ? { ...c, contacts: (c.contacts || []).filter((x) => x.id !== contactId) } : c,
+      ),
     });
   }
 
@@ -2702,7 +3543,9 @@ export default function SiteManager() {
   function reorderProjects(idsInOrder) {
     const idSet = new Set(idsInOrder);
     const slots = [];
-    projects.forEach((p, i) => { if (idSet.has(p.id)) slots.push(i); });
+    projects.forEach((p, i) => {
+      if (idSet.has(p.id)) slots.push(i);
+    });
     const byId = new Map(projects.map((p) => [p.id, p]));
     const next = projects.slice();
     idsInOrder.forEach((id, k) => {
@@ -2718,7 +3561,9 @@ export default function SiteManager() {
   function reorderEntries(idsInOrder) {
     const idSet = new Set(idsInOrder);
     const slots = [];
-    entries.forEach((e, i) => { if (idSet.has(e.id)) slots.push(i); });
+    entries.forEach((e, i) => {
+      if (idSet.has(e.id)) slots.push(i);
+    });
     const byId = new Map(entries.map((e) => [e.id, e]));
     const next = entries.slice();
     idsInOrder.forEach((id, k) => {
@@ -2734,7 +3579,10 @@ export default function SiteManager() {
     if (channel === "whatsapp") {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
     } else {
-      window.open(`mailto:?subject=${encodeURIComponent(t.shareProject + ": " + project.name)}&body=${encodeURIComponent(text)}`, "_blank");
+      window.open(
+        `mailto:?subject=${encodeURIComponent(t.shareProject + ": " + project.name)}&body=${encodeURIComponent(text)}`,
+        "_blank",
+      );
     }
   }
 
@@ -2757,14 +3605,18 @@ export default function SiteManager() {
     showToast(t.projectAdded);
   }
 
-
   function sendWebhook(eventType, payload) {
     if (!profile.webhookUrl) return;
     try {
       fetch(profile.webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: eventType, employee: profile.name || "", sentAt: new Date().toISOString(), ...payload }),
+        body: JSON.stringify({
+          event: eventType,
+          employee: profile.name || "",
+          sentAt: new Date().toISOString(),
+          ...payload,
+        }),
       }).catch(() => {});
     } catch (e) {}
   }
@@ -2777,14 +3629,22 @@ export default function SiteManager() {
     const endD = new Date();
     const e = newEntry({
       type: "time",
-      projectId: activeClock.projectId, description: `${fmtHM(durationMs)}`,
-      qty: (durationMs / 3600000).toFixed(2), unit: "h",
+      projectId: activeClock.projectId,
+      description: `${fmtHM(durationMs)}`,
+      qty: (durationMs / 3600000).toFixed(2),
+      unit: "h",
       startTime: `${pad(startD.getHours())}:${pad(startD.getMinutes())}`,
       endTime: `${pad(endD.getHours())}:${pad(endD.getMinutes())}`,
     });
     persist({ entries: [e, ...entries], activeClock: null });
     showToast(t.clockedOutLogged);
-    sendWebhook("time_entry", { project: projectName(activeClock.projectId), date: e.date, hours: e.qty, startTime: e.startTime, endTime: e.endTime });
+    sendWebhook("time_entry", {
+      project: projectName(activeClock.projectId),
+      date: e.date,
+      hours: e.qty,
+      startTime: e.startTime,
+      endTime: e.endTime,
+    });
   }
 
   function submitNote() {
@@ -2807,13 +3667,27 @@ export default function SiteManager() {
       setVoiceTarget(null);
       return;
     }
-    if (voiceListening) { try { recognitionRef.current?.stop(); } catch (e) {} }
+    if (voiceListening) {
+      try {
+        recognitionRef.current?.stop();
+      } catch (e) {}
+    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       showToast(t.voiceNotSupported);
       return;
     }
-    const localeMap = { en: "en-US", de: "de-CH", fr: "fr-CH", it: "it-CH", es: "es-ES", pt: "pt-PT", pl: "pl-PL", sk: "sk-SK", cs: "cs-CZ" };
+    const localeMap = {
+      en: "en-US",
+      de: "de-CH",
+      fr: "fr-CH",
+      it: "it-CH",
+      es: "es-ES",
+      pt: "pt-PT",
+      pl: "pl-PL",
+      sk: "sk-SK",
+      cs: "cs-CZ",
+    };
     const recog = new SpeechRecognition();
     recog.lang = localeMap[lang] || "en-US";
     recog.interimResults = false;
@@ -2822,8 +3696,14 @@ export default function SiteManager() {
       const transcript = e.results[0][0].transcript;
       setter((prev) => (String(prev || "").trim() ? `${String(prev).trim()} ${transcript}` : transcript));
     };
-    recog.onerror = () => { setVoiceListening(false); setVoiceTarget(null); };
-    recog.onend = () => { setVoiceListening(false); setVoiceTarget(null); };
+    recog.onerror = () => {
+      setVoiceListening(false);
+      setVoiceTarget(null);
+    };
+    recog.onend = () => {
+      setVoiceListening(false);
+      setVoiceTarget(null);
+    };
     recognitionRef.current = recog;
     setVoiceListening(true);
     setVoiceTarget(targetKey);
@@ -2842,7 +3722,19 @@ export default function SiteManager() {
         return b.map((i) => (i === existing ? { ...i, qty: (parseFloat(i.qty) || 0) + 1 } : i));
       }
       // The sheet knows the article's unit, price and number; a chip knows only the name.
-      return [...b, { id: uid(), name, kind, qty: 1, unit: extra.unit || materialUnits[name.trim().toLowerCase()] || "", price: extra.price || "", artNo: extra.artNo || "", supplier: extra.supplier || "" }];
+      return [
+        ...b,
+        {
+          id: uid(),
+          name,
+          kind,
+          qty: 1,
+          unit: extra.unit || materialUnits[name.trim().toLowerCase()] || "",
+          price: extra.price || "",
+          artNo: extra.artNo || "",
+          supplier: extra.supplier || "",
+        },
+      ];
     });
     showToast(t.addedToBasketToast);
   }
@@ -2856,9 +3748,15 @@ export default function SiteManager() {
   }
 
   function transferBasketToProject(projectId) {
-    const newEntries = basket.map((i) => newEntry({
-      type: i.kind, projectId, description: i.name, qty: i.qty, unit: i.unit,
-    }));
+    const newEntries = basket.map((i) =>
+      newEntry({
+        type: i.kind,
+        projectId,
+        description: i.name,
+        qty: i.qty,
+        unit: i.unit,
+      }),
+    );
     persist({ entries: [...newEntries, ...entries] });
     setBasket([]);
     setBasketProjectModalOpen(false);
@@ -2869,17 +3767,19 @@ export default function SiteManager() {
   // On site those are the same gesture; what differs is whether the stuff is
   // already on the roof.
   function requestBasketForProject(projectId) {
-    const requests = basket.map((i) => newEntry({
-      type: "order",
-      projectId,
-      description: i.name,
-      qty: i.qty,
-      unit: i.unit,
-      trade: lastTrade,
-      supplier: (articleMaster[i.name.trim().toLowerCase()] || {}).supplier || "",
-      artNo: (articleMaster[i.name.trim().toLowerCase()] || {}).artNo || "",
-      orderStatus: "requested",
-    }));
+    const requests = basket.map((i) =>
+      newEntry({
+        type: "order",
+        projectId,
+        description: i.name,
+        qty: i.qty,
+        unit: i.unit,
+        trade: lastTrade,
+        supplier: (articleMaster[i.name.trim().toLowerCase()] || {}).supplier || "",
+        artNo: (articleMaster[i.name.trim().toLowerCase()] || {}).artNo || "",
+        orderStatus: "requested",
+      }),
+    );
     persist({ entries: [...requests, ...entries] });
     setBasket([]);
     setBasketProjectModalOpen(false);
@@ -2892,9 +3792,11 @@ export default function SiteManager() {
       // here is what puts it into costing instead of leaving it in a list
       // nobody reconciles.
       persist({
-        entries: entries.map((e) => (e.id === entry.id
-          ? { ...e, type: "material", orderStatus: "delivered", deliveredAt: Date.now(), date: todayKey() }
-          : e)),
+        entries: entries.map((e) =>
+          e.id === entry.id
+            ? { ...e, type: "material", orderStatus: "delivered", deliveredAt: Date.now(), date: todayKey() }
+            : e,
+        ),
       });
       showToast(t.orderDeliveredToast);
       return;
@@ -2906,7 +3808,16 @@ export default function SiteManager() {
     // The trade sticks between entries: someone logging Spengler work logs
     // several pieces in a row, and re-picking it each time is how it ends up
     // filed wrong.
-    setForm({ description: "", qty: "", unit: "", unitPrice: "", regie: false, trade: lastTrade, supplier: "", artNo: "" });
+    setForm({
+      description: "",
+      qty: "",
+      unit: "",
+      unitPrice: "",
+      regie: false,
+      trade: lastTrade,
+      supplier: "",
+      artNo: "",
+    });
     setPhotoPreview(null);
     setPhotoExtra([]);
     setPhotoPreviewId(null);
@@ -2917,7 +3828,16 @@ export default function SiteManager() {
   }
 
   function openEditEntry(entry) {
-    setForm({ description: entry.description || "", qty: entry.qty || "", unit: entry.unit || "", unitPrice: entry.unitPrice ?? "", regie: !!entry.regie, trade: entry.trade || DEFAULT_TRADE, supplier: entry.supplier || "", artNo: entry.artNo || "" });
+    setForm({
+      description: entry.description || "",
+      qty: entry.qty || "",
+      unit: entry.unit || "",
+      unitPrice: entry.unitPrice ?? "",
+      regie: !!entry.regie,
+      trade: entry.trade || DEFAULT_TRADE,
+      supplier: entry.supplier || "",
+      artNo: entry.artNo || "",
+    });
     // Keep the existing photo's id so re-saving without picking a new image
     // reuses that document instead of writing a duplicate.
     setPhotoPreviewId(entry.photoId || null);
@@ -2949,15 +3869,21 @@ export default function SiteManager() {
       if (hours <= 0) return;
       const updated = entries.map((e) =>
         e.id === editTimeModal.id
-          ? { ...e, qty: hours.toFixed(2), description: fmtHM(hours * 3600000), startTime: editStartTime, endTime: editEndTime }
-          : e
+          ? {
+              ...e,
+              qty: hours.toFixed(2),
+              description: fmtHM(hours * 3600000),
+              startTime: editStartTime,
+              endTime: editEndTime,
+            }
+          : e,
       );
       persist({ entries: updated });
     } else {
       const hours = parseFloat(editHoursInput);
       if (isNaN(hours) || hours < 0) return;
       const updated = entries.map((e) =>
-        e.id === editTimeModal.id ? { ...e, qty: hours.toFixed(2), description: fmtHM(hours * 3600000) } : e
+        e.id === editTimeModal.id ? { ...e, qty: hours.toFixed(2), description: fmtHM(hours * 3600000) } : e,
       );
       persist({ entries: updated });
     }
@@ -2974,7 +3900,13 @@ export default function SiteManager() {
   }
 
   function copyEntryFn(entry) {
-    addEntry({ type: entry.type, projectId: entry.projectId, description: entry.description, qty: entry.qty, unit: entry.unit });
+    addEntry({
+      type: entry.type,
+      projectId: entry.projectId,
+      description: entry.description,
+      qty: entry.qty,
+      unit: entry.unit,
+    });
     showToast(t.projectAdded);
   }
 
@@ -3058,17 +3990,30 @@ export default function SiteManager() {
       }
       if (addModal.editingId) {
         const previous = entries.find((e) => e.id === addModal.editingId);
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description || t.photoLabel, photoId, photo: null } : e)) });
+        persist({
+          entries: entries.map((e) =>
+            e.id === addModal.editingId
+              ? { ...e, description: form.description || t.photoLabel, photoId, photo: null }
+              : e,
+          ),
+        });
         if (previous && previous.photoId && previous.photoId !== photoId) deletePhoto(previous.photoId);
       } else {
         // One entry per photo, the caption on each; stored one document at a
         // time so a slow connection loses at most the last one, not all.
         const extraIds = [];
         for (const dataUrl of photoExtra) {
-          try { extraIds.push(await savePhoto(dataUrl)); } catch (err) { console.error("photo save:", err); showToast(`${t.couldntSave} (${(err && (err.code || err.message)) || "save"})`); }
+          try {
+            extraIds.push(await savePhoto(dataUrl));
+          } catch (err) {
+            console.error("photo save:", err);
+            showToast(`${t.couldntSave} (${(err && (err.code || err.message)) || "save"})`);
+          }
         }
         const caption = form.description || t.photoLabel;
-        const made = [photoId, ...extraIds].map((id) => newEntry({ type: "photo", projectId: addModal.projectId, description: caption, photoId: id }));
+        const made = [photoId, ...extraIds].map((id) =>
+          newEntry({ type: "photo", projectId: addModal.projectId, description: caption, photoId: id }),
+        );
         persist({ entries: [...made, ...entries] });
         if (made.length > 1) showToast(`${made.length} ${t.photosAdded}`);
       }
@@ -3076,10 +4021,32 @@ export default function SiteManager() {
       if (!form.description.trim()) return;
       const unitPrice = form.unitPrice === "" || form.unitPrice === undefined ? undefined : form.unitPrice;
       if (addModal.editingId) {
-        persist({ entries: entries.map((e) => (e.id === addModal.editingId ? { ...e, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() } : e)) });
+        persist({
+          entries: entries.map((e) =>
+            e.id === addModal.editingId
+              ? {
+                  ...e,
+                  description: form.description.trim(),
+                  qty: form.qty,
+                  unit: form.unit,
+                  unitPrice,
+                  regie: !!form.regie,
+                  trade: form.trade || DEFAULT_TRADE,
+                  supplier: (form.supplier || "").trim(),
+                  artNo: (form.artNo || "").trim(),
+                }
+              : e,
+          ),
+        });
         // An edited note gets fresh translations; the old ones would lie.
         if (addModal.type === "note" && addModal.projectId) {
-          const edited = { ...(entries.find((e) => e.id === addModal.editingId) || {}), id: addModal.editingId, type: "note", projectId: addModal.projectId, description: form.description.trim() };
+          const edited = {
+            ...(entries.find((e) => e.id === addModal.editingId) || {}),
+            id: addModal.editingId,
+            type: "note",
+            projectId: addModal.projectId,
+            description: form.description.trim(),
+          };
           setNoteTranslations((m) => {
             const forProject = { ...(m[addModal.projectId] || {}) };
             delete forProject[addModal.editingId];
@@ -3089,7 +4056,18 @@ export default function SiteManager() {
           setTimeout(() => autoTranslateNote(edited), 0);
         }
       } else {
-        addEntry({ type: addModal.type, projectId: addModal.projectId, description: form.description.trim(), qty: form.qty, unit: form.unit, unitPrice, regie: !!form.regie, trade: form.trade || DEFAULT_TRADE, supplier: (form.supplier || "").trim(), artNo: (form.artNo || "").trim() });
+        addEntry({
+          type: addModal.type,
+          projectId: addModal.projectId,
+          description: form.description.trim(),
+          qty: form.qty,
+          unit: form.unit,
+          unitPrice,
+          regie: !!form.regie,
+          trade: form.trade || DEFAULT_TRADE,
+          supplier: (form.supplier || "").trim(),
+          artNo: (form.artNo || "").trim(),
+        });
         setLastTrade(form.trade || DEFAULT_TRADE);
       }
       // Everything the entry taught us about this article goes back into the
@@ -3121,7 +4099,11 @@ export default function SiteManager() {
     // and never render on another device.
     const scaled = [];
     for (const file of list) {
-      try { scaled.push((await fileToScaledImage(file)).dataUrl); } catch (err) { showError(err, "photo"); }
+      try {
+        scaled.push((await fileToScaledImage(file)).dataUrl);
+      } catch (err) {
+        showError(err, "photo");
+      }
     }
     if (!scaled.length) return;
     if (editing || !photoPreview) {
@@ -3160,7 +4142,11 @@ export default function SiteManager() {
       try {
         const img = new Image();
         img.decoding = "async";
-        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = () => reject(new Error("decode")); img.src = url; });
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error("decode"));
+          img.src = url;
+        });
         return img;
       } finally {
         URL.revokeObjectURL(url);
@@ -3187,7 +4173,8 @@ export default function SiteManager() {
       dataUrl = canvas.toDataURL("image/jpeg", quality);
       if (dataUrl.length <= MAX_PHOTO_DATA_URL) break;
       // Quality first (cheap to lose), then size.
-      if (quality > 0.65) quality -= 0.1; else edge = Math.round(edge * 0.8);
+      if (quality > 0.65) quality -= 0.1;
+      else edge = Math.round(edge * 0.8);
     }
     source.close?.();
     if (!dataUrl.startsWith("data:image/jpeg")) throw new Error("encode");
@@ -3195,7 +4182,14 @@ export default function SiteManager() {
   }
 
   function openScan(mode, projectId) {
-    setScanModal({ mode, images: [], items: null, loading: false, error: null, projectId: projectId || activeClock?.projectId || projects[0]?.id || null });
+    setScanModal({
+      mode,
+      images: [],
+      items: null,
+      loading: false,
+      error: null,
+      projectId: projectId || activeClock?.projectId || projects[0]?.id || null,
+    });
   }
 
   async function addScanImage(e) {
@@ -3258,7 +4252,10 @@ export default function SiteManager() {
       }
       if (!Object.keys(got).length) throw new Error("empty");
       setNoteTranslations((m) => {
-        const forProject = { ...(m[projectId] || {}), [entry.id]: { ...((m[projectId] || {})[entry.id] || {}), ...got } };
+        const forProject = {
+          ...(m[projectId] || {}),
+          [entry.id]: { ...((m[projectId] || {})[entry.id] || {}), ...got },
+        };
         companyStorage.set(`xl-${projectId}`, JSON.stringify(forProject)).catch(() => {});
         return { ...m, [projectId]: forProject };
       });
@@ -3299,7 +4296,10 @@ export default function SiteManager() {
   // --- photos: look, zoom, mark up ----------------------------------------------
   async function openPhoto(entry) {
     const src = entry.photo || (await loadPhoto(entry.photoId));
-    if (!src) { saveFailed(null, "openPhoto"); return; }
+    if (!src) {
+      saveFailed(null, "openPhoto");
+      return;
+    }
     setPhotoView({ entry, src });
   }
 
@@ -3308,7 +4308,13 @@ export default function SiteManager() {
   async function savePhotoEdit(entry, dataUrl) {
     try {
       const id = await savePhoto(dataUrl);
-      const updated = { ...entry, photoId: id, photo: null, originalPhotoId: entry.originalPhotoId || entry.photoId || null, editedAt: Date.now() };
+      const updated = {
+        ...entry,
+        photoId: id,
+        photo: null,
+        originalPhotoId: entry.originalPhotoId || entry.photoId || null,
+        editedAt: Date.now(),
+      };
       persist({ entries: entries.map((e) => (e.id === entry.id ? updated : e)) });
       setPhotoEdit(null);
       setPhotoView({ entry: updated, src: dataUrl });
@@ -3321,7 +4327,10 @@ export default function SiteManager() {
   async function restorePhotoOriginal(entry) {
     if (!entry.originalPhotoId) return;
     const src = await loadPhoto(entry.originalPhotoId);
-    if (!src) { saveFailed(null, "restorePhotoOriginal"); return; }
+    if (!src) {
+      saveFailed(null, "restorePhotoOriginal");
+      return;
+    }
     const edited = entry.photoId;
     const updated = { ...entry, photoId: entry.originalPhotoId, originalPhotoId: null, editedAt: null };
     persist({ entries: entries.map((e) => (e.id === entry.id ? updated : e)) });
@@ -3331,7 +4340,11 @@ export default function SiteManager() {
   }
 
   function parseJsonSafe(text, fallback) {
-    try { return JSON.parse(text.replace(/```json|```/g, "").trim()); } catch { return fallback; }
+    try {
+      return JSON.parse(text.replace(/```json|```/g, "").trim());
+    } catch {
+      return fallback;
+    }
   }
 
   // The friendly "couldn't read that" message hides why a scan actually failed,
@@ -3354,11 +4367,14 @@ export default function SiteManager() {
     setScanModal((s) => ({ ...s, loading: true, error: null }));
     const isCompare = scanModal.mode === "compare";
     const prompt = isCompare
-      ? "The first image is a stack/pallet of construction materials BEFORE work, the second is the SAME stack AFTER work. Estimate how much material was consumed. Respond ONLY with JSON, no markdown, no prose: {\"items\":[{\"name\":string,\"qty\":number,\"unit\":string}]}. Use whole, practical units. If unsure, make a reasonable best guess and keep the list short."
-      : "Identify the construction materials visible in this photo (delivery note, pallet, or stacked materials) and estimate quantities. Respond ONLY with JSON: {\"items\":[{\"name\":string,\"qty\":number,\"unit\":string}]}. Keep the list short and practical.";
+      ? 'The first image is a stack/pallet of construction materials BEFORE work, the second is the SAME stack AFTER work. Estimate how much material was consumed. Respond ONLY with JSON, no markdown, no prose: {"items":[{"name":string,"qty":number,"unit":string}]}. Use whole, practical units. If unsure, make a reasonable best guess and keep the list short.'
+      : 'Identify the construction materials visible in this photo (delivery note, pallet, or stacked materials) and estimate quantities. Respond ONLY with JSON: {"items":[{"name":string,"qty":number,"unit":string}]}. Keep the list short and practical.';
     try {
       const content = [
-        ...scanModal.images.map((img) => ({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.b64 } })),
+        ...scanModal.images.map((img) => ({
+          type: "image",
+          source: { type: "base64", media_type: img.mediaType, data: img.b64 },
+        })),
         { type: "text", text: prompt },
       ];
       const text = await callClaude(content);
@@ -3373,7 +4389,9 @@ export default function SiteManager() {
   function confirmScan() {
     if (!scanModal || !scanModal.items) return;
     const chosen = scanModal.items.filter((i) => i.checked);
-    const newEntries = chosen.map((i) => newEntry({ type: "material", projectId: scanModal.projectId, description: i.name, qty: i.qty, unit: i.unit }));
+    const newEntries = chosen.map((i) =>
+      newEntry({ type: "material", projectId: scanModal.projectId, description: i.name, qty: i.qty, unit: i.unit }),
+    );
     persist({ entries: [...newEntries, ...entries] });
     setScanModal(null);
   }
@@ -3396,21 +4414,33 @@ export default function SiteManager() {
   async function runLibraryScan() {
     if (!libraryScanModal || !libraryScanModal.image) return;
     setLibraryScanModal((s) => ({ ...s, loading: true, error: null }));
-    const prompt = "This photo shows a product label, datasheet, or technical spec sheet for a construction material or tool. Extract what's legible. Respond ONLY with JSON, no markdown, no prose: {\"name\":string,\"supplier\":string,\"articleNumber\":string,\"category\":string,\"specs\":[{\"key\":string,\"value\":string}]}. Use empty string for anything not legible or not present. Keep \"specs\" to the technical properties only (dimensions, ratings, performance values, materials, etc.), not marketing text.";
+    const prompt =
+      'This photo shows a product label, datasheet, or technical spec sheet for a construction material or tool. Extract what\'s legible. Respond ONLY with JSON, no markdown, no prose: {"name":string,"supplier":string,"articleNumber":string,"category":string,"specs":[{"key":string,"value":string}]}. Use empty string for anything not legible or not present. Keep "specs" to the technical properties only (dimensions, ratings, performance values, materials, etc.), not marketing text.';
     try {
       const content = [
-        { type: "image", source: { type: "base64", media_type: libraryScanModal.image.mediaType, data: libraryScanModal.image.b64 } },
+        {
+          type: "image",
+          source: { type: "base64", media_type: libraryScanModal.image.mediaType, data: libraryScanModal.image.b64 },
+        },
         { type: "text", text: prompt },
       ];
       const text = await callClaude(content);
       const parsed = parseJsonSafe(text, { name: "", supplier: "", articleNumber: "", category: "", specs: [] });
       const result = {
-        name: parsed.name || "", supplier: parsed.supplier || "", articleNumber: parsed.articleNumber || "", category: parsed.category || "",
+        name: parsed.name || "",
+        supplier: parsed.supplier || "",
+        articleNumber: parsed.articleNumber || "",
+        category: parsed.category || "",
         specs: (parsed.specs || []).map((s) => ({ id: uid(), key: s.key || "", value: s.value || "" })),
       };
       setLibraryScanModal((s) => ({ ...s, loading: false, result, detail: null }));
     } catch (err) {
-      setLibraryScanModal((s) => ({ ...s, loading: false, error: t.specScanErrorHint, detail: errDetail(err, libraryScanModal.image ? [libraryScanModal.image] : []) }));
+      setLibraryScanModal((s) => ({
+        ...s,
+        loading: false,
+        error: t.specScanErrorHint,
+        detail: errDetail(err, libraryScanModal.image ? [libraryScanModal.image] : []),
+      }));
     }
   }
 
@@ -3418,9 +4448,17 @@ export default function SiteManager() {
     if (!libraryScanModal || !libraryScanModal.result) return;
     const r = libraryScanModal.result;
     const entry = {
-      id: uid(), createdAt: Date.now(), name: r.name, supplier: r.supplier, articleNumber: r.articleNumber, category: r.category,
+      id: uid(),
+      createdAt: Date.now(),
+      name: r.name,
+      supplier: r.supplier,
+      articleNumber: r.articleNumber,
+      category: r.category,
       specs: r.specs.filter((s) => s.key.trim() || s.value.trim()),
-      photo: libraryScanModal.keepPhoto && libraryScanModal.image ? `data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}` : null,
+      photo:
+        libraryScanModal.keepPhoto && libraryScanModal.image
+          ? `data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}`
+          : null,
       photoId: null,
     };
     saveTechLibrary([await externalizePhoto(entry), ...techLibrary]);
@@ -3429,9 +4467,11 @@ export default function SiteManager() {
   }
 
   function openLibraryEdit(existing) {
-    setLibraryEditModal(existing
-      ? { ...existing, specs: existing.specs.map((s) => ({ ...s })) }
-      : { id: null, name: "", supplier: "", articleNumber: "", category: "", specs: [], photo: null, photoId: null });
+    setLibraryEditModal(
+      existing
+        ? { ...existing, specs: existing.specs.map((s) => ({ ...s })) }
+        : { id: null, name: "", supplier: "", articleNumber: "", category: "", specs: [], photo: null, photoId: null },
+    );
     if (existing && !existing.photo && existing.photoId) {
       loadPhoto(existing.photoId).then((v) => setLibraryEditModal((m) => (m ? { ...m, photo: v } : m)));
     }
@@ -3474,18 +4514,40 @@ export default function SiteManager() {
   }
 
   function openPickup() {
-    setPickupModal({ step: "form", orderRef: "", supplier: "", projectId: activeClock?.projectId || projects[0]?.id || null, codeType: "qr" });
+    setPickupModal({
+      step: "form",
+      orderRef: "",
+      supplier: "",
+      projectId: activeClock?.projectId || projects[0]?.id || null,
+      codeType: "qr",
+    });
   }
 
   function generatePickupCode() {
     if (!pickupModal || !pickupModal.orderRef.trim()) return;
-    addEntry({ type: "pickup", projectId: pickupModal.projectId, description: `${pickupModal.orderRef.trim()}${pickupModal.supplier ? " — " + pickupModal.supplier.trim() : ""}` });
+    addEntry({
+      type: "pickup",
+      projectId: pickupModal.projectId,
+      description: `${pickupModal.orderRef.trim()}${pickupModal.supplier ? " — " + pickupModal.supplier.trim() : ""}`,
+    });
     // Both codes are drawn here, on the phone: the reference never leaves the app.
     const ref = pickupModal.orderRef.trim();
     setPickupModal((s) => ({ ...s, step: "code", barcode: null, qr: null }));
     // Both drawn on the phone; the modules load when a code is first needed.
-    import("./barcode.js").then(({ code128Bars }) => { let barcode = null; try { barcode = code128Bars(ref); } catch { barcode = null; } setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, barcode } : s)); }).catch(() => {});
-    qrDataUrl(ref).then((url) => setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, qr: url } : s))).catch(() => {});
+    import("./barcode.js")
+      .then(({ code128Bars }) => {
+        let barcode = null;
+        try {
+          barcode = code128Bars(ref);
+        } catch {
+          barcode = null;
+        }
+        setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, barcode } : s));
+      })
+      .catch(() => {});
+    qrDataUrl(ref)
+      .then((url) => setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, qr: url } : s)))
+      .catch(() => {});
   }
 
   function openInspection(projectId, entry) {
@@ -3493,21 +4555,42 @@ export default function SiteManager() {
       // Editing: the note comes back as typed; an old entry without a stored
       // note (an AI report, say) offers its text so nothing is lost on save.
       setInspectionModal({
-        step: "form", editingId: entry.id,
-        text: entry.note != null ? entry.note : (entry.checklist ? "" : String(entry.description || "")),
-        startTime: entry.startTime || "", ladderLength: entry.ladderLength || "", psaCount: entry.psaCount || "",
-        images: [], projectId: entry.projectId || projectId, progress: 0, agentNote: "",
-        report: null, materials: null, error: null,
+        step: "form",
+        editingId: entry.id,
+        text: entry.note != null ? entry.note : entry.checklist ? "" : String(entry.description || ""),
+        startTime: entry.startTime || "",
+        ladderLength: entry.ladderLength || "",
+        psaCount: entry.psaCount || "",
+        images: [],
+        projectId: entry.projectId || projectId,
+        progress: 0,
+        agentNote: "",
+        report: null,
+        materials: null,
+        error: null,
         checklist: { ...(entry.checklist || {}) },
-        tiles: (entry.tiles && entry.tiles.length ? entry.tiles.map((r) => ({ model: r.model || "", count: String(r.count || "") })) : [{ model: "", count: "" }]),
+        tiles:
+          entry.tiles && entry.tiles.length
+            ? entry.tiles.map((r) => ({ model: r.model || "", count: String(r.count || "") }))
+            : [{ model: "", count: "" }],
       });
       return;
     }
     setInspectionModal({
-      step: "form", text: "", startTime: new Date().toTimeString().slice(0, 5), ladderLength: "", psaCount: "",
-      images: [], projectId: projectId || activeClock?.projectId || projects[0]?.id || null, progress: 0, agentNote: "",
-      report: null, materials: null, error: null,
-      checklist: {}, tiles: [{ model: "", count: "" }],
+      step: "form",
+      text: "",
+      startTime: new Date().toTimeString().slice(0, 5),
+      ladderLength: "",
+      psaCount: "",
+      images: [],
+      projectId: projectId || activeClock?.projectId || projects[0]?.id || null,
+      progress: 0,
+      agentNote: "",
+      report: null,
+      materials: null,
+      error: null,
+      checklist: {},
+      tiles: [{ model: "", count: "" }],
     });
   }
 
@@ -3520,8 +4603,12 @@ export default function SiteManager() {
   // the number offered when a waste trip is logged for the job.
   function openWasteKg(projectId) {
     if (!projectId) return 0;
-    const produced = entries.filter((e) => e.type === "inspection" && e.projectId === projectId).reduce((s, e) => s + (parseFloat(e.wasteKg) || 0), 0);
-    const carried = entries.filter((e) => e.type === "transport" && e.projectId === projectId && e.loadKind === "waste").reduce((s, e) => s + (parseFloat(e.weightKg) || 0), 0);
+    const produced = entries
+      .filter((e) => e.type === "inspection" && e.projectId === projectId)
+      .reduce((s, e) => s + (parseFloat(e.wasteKg) || 0), 0);
+    const carried = entries
+      .filter((e) => e.type === "transport" && e.projectId === projectId && e.loadKind === "waste")
+      .reduce((s, e) => s + (parseFloat(e.weightKg) || 0), 0);
     return Math.max(0, Math.round(produced - carried));
   }
 
@@ -3529,16 +4616,33 @@ export default function SiteManager() {
     const pid = projectId || activeClock?.projectId || "";
     const pr = projects.find((p) => p.id === pid);
     setTripModal({
-      projectId: pid, vehicle: VEHICLES[0], from: "", to: pr ? (pr.address || pr.name) : "", departTime: new Date().toTimeString().slice(0, 5), arriveTime: "",
-      km: "", loadKind: "material", weightKg: "", mulde: "", disposalSite: "", notes: "", date: todayKey(),
+      projectId: pid,
+      vehicle: VEHICLES[0],
+      from: "",
+      to: pr ? pr.address || pr.name : "",
+      departTime: new Date().toTimeString().slice(0, 5),
+      arriveTime: "",
+      km: "",
+      loadKind: "material",
+      weightKg: "",
+      mulde: "",
+      disposalSite: "",
+      notes: "",
+      date: todayKey(),
     });
   }
 
   function setTripField(k, v) {
     setTripModal((s) => {
       const n = { ...s, [k]: v };
-      if (k === "projectId") { const pr = projects.find((p) => p.id === v); if (pr && !s.to) n.to = pr.address || pr.name; }
-      if ((k === "loadKind" || k === "projectId") && n.loadKind === "waste" && !n.weightKg) { const w = openWasteKg(n.projectId); if (w) n.weightKg = String(w); }
+      if (k === "projectId") {
+        const pr = projects.find((p) => p.id === v);
+        if (pr && !s.to) n.to = pr.address || pr.name;
+      }
+      if ((k === "loadKind" || k === "projectId") && n.loadKind === "waste" && !n.weightKg) {
+        const w = openWasteKg(n.projectId);
+        if (w) n.weightKg = String(w);
+      }
       return n;
     });
   }
@@ -3546,15 +4650,36 @@ export default function SiteManager() {
   function saveTrip() {
     const m = tripModal;
     if (!m) return;
-    if (!m.from.trim() && !m.to.trim()) { showToast(t.tripNeedsRoute); return; }
+    if (!m.from.trim() && !m.to.trim()) {
+      showToast(t.tripNeedsRoute);
+      return;
+    }
     const hours = tripHours(m.departTime, m.arriveTime);
-    persist({ entries: [newEntry({
-      type: "transport", projectId: m.projectId || null, date: m.date || todayKey(),
-      description: `${m.from.trim() || "?"} → ${m.to.trim() || "?"}`,
-      vehicle: m.vehicle, from: m.from.trim(), to: m.to.trim(), departTime: m.departTime, arriveTime: m.arriveTime, hours,
-      km: parseFloat(m.km) || 0, loadKind: m.loadKind, weightKg: parseFloat(m.weightKg) || 0, mulde: m.mulde || "", disposalSite: m.disposalSite.trim(), notes: m.notes.trim(),
-      qty: hours ? String(hours) : "", unit: hours ? "h" : "",
-    }), ...entries] });
+    persist({
+      entries: [
+        newEntry({
+          type: "transport",
+          projectId: m.projectId || null,
+          date: m.date || todayKey(),
+          description: `${m.from.trim() || "?"} → ${m.to.trim() || "?"}`,
+          vehicle: m.vehicle,
+          from: m.from.trim(),
+          to: m.to.trim(),
+          departTime: m.departTime,
+          arriveTime: m.arriveTime,
+          hours,
+          km: parseFloat(m.km) || 0,
+          loadKind: m.loadKind,
+          weightKg: parseFloat(m.weightKg) || 0,
+          mulde: m.mulde || "",
+          disposalSite: m.disposalSite.trim(),
+          notes: m.notes.trim(),
+          qty: hours ? String(hours) : "",
+          unit: hours ? "h" : "",
+        }),
+        ...entries,
+      ],
+    });
     showToast(t.tripSaved);
     setTripModal(null);
   }
@@ -3564,14 +4689,17 @@ export default function SiteManager() {
       const cur = (s.checklist || {})[key];
       const next = cur === "ok" ? "mangel" : cur === "mangel" ? undefined : "ok";
       const checklist = { ...(s.checklist || {}) };
-      if (next) checklist[key] = next; else delete checklist[key];
+      if (next) checklist[key] = next;
+      else delete checklist[key];
       return { ...s, checklist };
     });
   }
 
   function inspectionLabels() {
     const labels = { __mangel: t.inspectMangel, __ok: t.inspectOk, __replaced: t.inspectReplaced };
-    INSPECTION_ITEMS.forEach((k) => { labels[k] = t[`inspect_${k}`]; });
+    INSPECTION_ITEMS.forEach((k) => {
+      labels[k] = t[`inspect_${k}`];
+    });
     return labels;
   }
 
@@ -3584,11 +4712,20 @@ export default function SiteManager() {
     const tiles = (m.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0);
     const waste = tilesWaste(tiles);
     const summary = summariseInspection({ checklist: m.checklist, tiles, note: m.text, labels: inspectionLabels() });
-    if (!summary) { showToast(t.inspectNothing); return; }
+    if (!summary) {
+      showToast(t.inspectNothing);
+      return;
+    }
     const fields = {
-      description: summary, note: m.text || "",
-      checklist: m.checklist || {}, tiles, wasteKg: waste.wasteKg, areaM2: waste.areaM2,
-      startTime: m.startTime || "", ladderLength: m.ladderLength || "", psaCount: m.psaCount || "",
+      description: summary,
+      note: m.text || "",
+      checklist: m.checklist || {},
+      tiles,
+      wasteKg: waste.wasteKg,
+      areaM2: waste.areaM2,
+      startTime: m.startTime || "",
+      ladderLength: m.ladderLength || "",
+      psaCount: m.psaCount || "",
     };
     if (m.editingId) {
       // The same entry, changed: the rules keep userId as it was.
@@ -3615,27 +4752,62 @@ export default function SiteManager() {
   async function runInspection() {
     if (!inspectionModal || !inspectionModal.text.trim()) return;
     const m = inspectionModal;
-    const imageBlocks = m.images.map((img) => ({ type: "image", source: { type: "base64", media_type: img.mediaType, data: img.b64 } }));
+    const imageBlocks = m.images.map((img) => ({
+      type: "image",
+      source: { type: "base64", media_type: img.mediaType, data: img.b64 },
+    }));
     const contextLine = `Roof inspection note: "${m.text.trim()}". Start time: ${m.startTime || "not given"}. Ladder length: ${m.ladderLength || "not given"} m. PSA (fall-arrest) harnesses used: ${m.psaCount || "not given"}.`;
     try {
       setInspectionModal((s) => ({ ...s, step: "running", progress: 1, agentNote: t.agent1Note }));
-      const safetyText = await callClaude([{ type: "text", text: `You are a Swiss construction site safety advisor familiar with SUVA and BauAV fall-protection rules. ${contextLine} List 2-5 short, concrete safety observations or compliance notes. Respond ONLY with JSON: {"safety":["...", "..."]}` }]);
+      const safetyText = await callClaude([
+        {
+          type: "text",
+          text: `You are a Swiss construction site safety advisor familiar with SUVA and BauAV fall-protection rules. ${contextLine} List 2-5 short, concrete safety observations or compliance notes. Respond ONLY with JSON: {"safety":["...", "..."]}`,
+        },
+      ]);
       const safety = parseJsonSafe(safetyText, { safety: [] }).safety || [];
 
       setInspectionModal((s) => ({ ...s, progress: 2, agentNote: t.agent2Note }));
       const materialsText = await callClaude([
         ...imageBlocks,
-        { type: "text", text: `You are a materials/tools estimator for a Swiss roofing crew. ${contextLine} Based on the note${imageBlocks.length ? " and attached photo(s)" : ""}, list materials or tools implied or visible. Respond ONLY with JSON: {"materials":[{"name":string,"qty":number,"unit":string}]}. Keep it short and practical.` },
+        {
+          type: "text",
+          text: `You are a materials/tools estimator for a Swiss roofing crew. ${contextLine} Based on the note${imageBlocks.length ? " and attached photo(s)" : ""}, list materials or tools implied or visible. Respond ONLY with JSON: {"materials":[{"name":string,"qty":number,"unit":string}]}. Keep it short and practical.`,
+        },
       ]);
-      const materials = (parseJsonSafe(materialsText, { materials: [] }).materials || []).map((it) => ({ ...it, id: uid(), checked: true }));
+      const materials = (parseJsonSafe(materialsText, { materials: [] }).materials || []).map((it) => ({
+        ...it,
+        id: uid(),
+        checked: true,
+      }));
 
       setInspectionModal((s) => ({ ...s, progress: 3, agentNote: t.agent3Note }));
-      const langNames = { en: "English", de: "German", fr: "French", it: "Italian", es: "Spanish", pt: "Portuguese", pl: "Polish", sk: "Slovak", cs: "Czech" };
-      const reportText = await callClaude([{ type: "text", text: `Compile a concise roof inspection report for a Swiss roofing company, in ${langNames[lang] || "English"}, plain text, no markdown symbols, under 180 words, with sections: Summary, Safety Notes, Materials, Recommendations. ${contextLine} Safety advisor findings: ${JSON.stringify(safety)}. Materials estimator findings: ${JSON.stringify(materials.map(({ name, qty, unit }) => ({ name, qty, unit })))}.` }]);
+      const langNames = {
+        en: "English",
+        de: "German",
+        fr: "French",
+        it: "Italian",
+        es: "Spanish",
+        pt: "Portuguese",
+        pl: "Polish",
+        sk: "Slovak",
+        cs: "Czech",
+      };
+      const reportText = await callClaude([
+        {
+          type: "text",
+          text: `Compile a concise roof inspection report for a Swiss roofing company, in ${langNames[lang] || "English"}, plain text, no markdown symbols, under 180 words, with sections: Summary, Safety Notes, Materials, Recommendations. ${contextLine} Safety advisor findings: ${JSON.stringify(safety)}. Materials estimator findings: ${JSON.stringify(materials.map(({ name, qty, unit }) => ({ name, qty, unit })))}.`,
+        },
+      ]);
 
       setInspectionModal((s) => ({ ...s, step: "result", report: reportText.trim(), materials, safety }));
     } catch (err) {
-      setInspectionModal((s) => ({ ...s, step: "form", error: t.couldntReach, detail: errDetail(err, inspectionModal.images) }));
+      setInspectionModal((s) => ({
+        ...s,
+        step: "form",
+        error: t.couldntReach,
+        detail: errDetail(err, inspectionModal.images),
+      }));
     }
   }
 
@@ -3646,18 +4818,35 @@ export default function SiteManager() {
     const waste = tilesWaste(tiles);
     const newEntries = [
       newEntry({
-        type: "inspection", projectId: inspectionModal.projectId, description: inspectionModal.report,
-        checklist: inspectionModal.checklist || {}, tiles, wasteKg: waste.wasteKg, areaM2: waste.areaM2,
-        startTime: inspectionModal.startTime || "", ladderLength: inspectionModal.ladderLength || "", psaCount: inspectionModal.psaCount || "",
+        type: "inspection",
+        projectId: inspectionModal.projectId,
+        description: inspectionModal.report,
+        checklist: inspectionModal.checklist || {},
+        tiles,
+        wasteKg: waste.wasteKg,
+        areaM2: waste.areaM2,
+        startTime: inspectionModal.startTime || "",
+        ladderLength: inspectionModal.ladderLength || "",
+        psaCount: inspectionModal.psaCount || "",
       }),
-      ...chosenMaterials.map((i) => newEntry({ type: "material", projectId: inspectionModal.projectId, description: i.name, qty: i.qty, unit: i.unit })),
+      ...chosenMaterials.map((i) =>
+        newEntry({
+          type: "material",
+          projectId: inspectionModal.projectId,
+          description: i.name,
+          qty: i.qty,
+          unit: i.unit,
+        }),
+      ),
     ];
     persist({ entries: [...newEntries, ...entries] });
     showToast(t.inspectionLogged);
     setInspectionModal(null);
   }
 
-  function projectName(id) { return projects.find((p) => p.id === id)?.name || ""; }
+  function projectName(id) {
+    return projects.find((p) => p.id === id)?.name || "";
+  }
 
   const todayEntries = entries.filter((e) => e.date === todayKey());
   const monthEntries = entries.filter((e) => e.date.slice(0, 7) === monthKey());
@@ -3674,20 +4863,30 @@ export default function SiteManager() {
     let materials = 0;
     let pricedCount = 0;
     let unpricedCount = 0;
-    list.filter((e) => e.type === "material" || e.type === "tool").forEach((e) => {
-      const price = parseFloat(e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()] ?? "");
-      const qty = parseFloat(e.qty || 0) || 0;
-      if (!isNaN(price) && price > 0) { materials += price * (qty || 1); pricedCount++; }
-      else unpricedCount++;
-    });
+    list
+      .filter((e) => e.type === "material" || e.type === "tool")
+      .forEach((e) => {
+        const price = parseFloat(e.unitPrice ?? materialPrices[(e.description || "").trim().toLowerCase()] ?? "");
+        const qty = parseFloat(e.qty || 0) || 0;
+        if (!isNaN(price) && price > 0) {
+          materials += price * (qty || 1);
+          pricedCount++;
+        } else unpricedCount++;
+      });
 
     const cost = labour + materials;
     const quoted = parseFloat(quotedAmount || 0) || 0;
     return {
-      hours, rate, labour, materials, cost, quoted,
+      hours,
+      rate,
+      labour,
+      materials,
+      cost,
+      quoted,
       margin: quoted ? quoted - cost : null,
       marginPct: quoted > 0 ? ((quoted - cost) / quoted) * 100 : null,
-      pricedCount, unpricedCount,
+      pricedCount,
+      unpricedCount,
       hasRate: rate > 0,
     };
   }
@@ -3706,12 +4905,19 @@ export default function SiteManager() {
     const invoices = documents.filter((d) => d.type === "invoice");
     const quotes = documents.filter((d) => d.type === "quote");
 
-    let outstanding = 0, overdue = 0, paidThisMonth = 0, overdueCount = 0;
+    let outstanding = 0,
+      overdue = 0,
+      paidThisMonth = 0,
+      overdueCount = 0;
     const overdueList = [];
     invoices.forEach((inv) => {
       const st = documentState(inv, today);
       if (st.key !== "draft") outstanding += st.outstanding;
-      if (st.overdue) { overdue += st.outstanding; overdueCount++; overdueList.push({ doc: inv, st }); }
+      if (st.overdue) {
+        overdue += st.outstanding;
+        overdueCount++;
+        overdueList.push({ doc: inv, st });
+      }
       if (st.paid > 0 && inv.paidDate && inv.paidDate.startsWith(month)) paidThisMonth += st.paid;
     });
 
@@ -3734,12 +4940,16 @@ export default function SiteManager() {
     // Hours this month per person.
     // Net of the breaks each person marked: Znüni and Mittag are not work.
     const hoursByUser = {};
-    entries.filter((e) => (e.type === "time" || e.type === "break") && (e.date || "").startsWith(month)).forEach((e) => {
-      const k = e.userId || "—";
-      const h = parseFloat(e.qty || 0) || 0;
-      hoursByUser[k] = (hoursByUser[k] || 0) + (e.type === "break" ? -h : h);
+    entries
+      .filter((e) => (e.type === "time" || e.type === "break") && (e.date || "").startsWith(month))
+      .forEach((e) => {
+        const k = e.userId || "—";
+        const h = parseFloat(e.qty || 0) || 0;
+        hoursByUser[k] = (hoursByUser[k] || 0) + (e.type === "break" ? -h : h);
+      });
+    Object.keys(hoursByUser).forEach((k) => {
+      hoursByUser[k] = Math.max(0, Math.round(hoursByUser[k] * 100) / 100);
     });
-    Object.keys(hoursByUser).forEach((k) => { hoursByUser[k] = Math.max(0, Math.round(hoursByUser[k] * 100) / 100); });
 
     const activeJobs = projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === "construction").length;
     const leads = projects.filter((p) => ["lead", "quoted"].includes(p.status || "")).length;
@@ -3747,17 +4957,31 @@ export default function SiteManager() {
     const dueFollow = dueFollowUps();
     const expiringCerts = certificates.filter((c) => {
       if (!c.expiryDate) return false;
-      const soon = new Date(); soon.setMonth(soon.getMonth() + 2);
+      const soon = new Date();
+      soon.setMonth(soon.getMonth() + 2);
       return c.expiryDate <= todayKey(soon);
     });
 
     return {
-      outstanding, overdue, overdueCount, overdueList, paidThisMonth, pipelineValue,
-      onSite, hoursByUser, activeJobs, leads, dueFollow, expiringCerts,
+      outstanding,
+      overdue,
+      overdueCount,
+      overdueList,
+      paidThisMonth,
+      pipelineValue,
+      onSite,
+      hoursByUser,
+      activeJobs,
+      leads,
+      dueFollow,
+      expiringCerts,
       plannedToday: assignments.filter((a) => a.date === today),
       pendingHours: pendingApproval(),
       pendingLeave: leaveRequests.filter((r) => (r.status || "pending") === "pending"),
-      unpaidCount: invoices.filter((i) => { const s = documentState(i, today); return s.key !== "paid" && s.key !== "draft"; }).length,
+      unpaidCount: invoices.filter((i) => {
+        const s = documentState(i, today);
+        return s.key !== "paid" && s.key !== "draft";
+      }).length,
     };
   }
 
@@ -3773,7 +4997,13 @@ export default function SiteManager() {
   // A newer build is live: offer a restart, on the sign-in screen as much as
   // inside the app, and never reload on our own.
   // Full-screen overlays that are not <Modal>: same dialog manners.
-  const quickAddRef = useDialog({ onClose: () => { setQuickAddOpen(false); setQuickAddSite(null); }, active: quickAddOpen });
+  const quickAddRef = useDialog({
+    onClose: () => {
+      setQuickAddOpen(false);
+      setQuickAddSite(null);
+    },
+    active: quickAddOpen,
+  });
   const menuRef = useDialog({ onClose: () => setMenuOpen(false), active: menuOpen });
   const fileViewerRef = useDialog({ onClose: () => closeFileViewer(), active: !!fileViewer });
   const sosRef = useDialog({ onClose: () => setSosOpen(false), active: sosOpen });
@@ -3781,34 +5011,91 @@ export default function SiteManager() {
 
   // The owner's first steps: shown on Heute until all four are done or the
   // card is dismissed on this device.
-  const firstStepsList = isOwner() ? firstSteps({ projects, customers, members: team.members, invites: team.invites, billing }) : null;
-  const firstStepsCard = firstStepsList && !firstStepsDismissed && firstStepsList.some((s) => !s.done) ? (
-    <div data-first-steps style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}66` }} className="rounded-xl p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div style={{ color: COLORS.accent }} className="text-xs uppercase tracking-wide font-bold">{t.firstStepsTitle}</div>
-        <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} data-first-steps-dismiss onClick={() => { setFirstStepsDismissed(true); try { localStorage.setItem("site-log-first-steps", "1"); } catch {} }} style={{ color: COLORS.muted }}><X size={14} /></button>
-      </div>
-      <div className="flex flex-col gap-1.5">
-        {firstStepsList.map((s) => (
-          <button key={s.key} data-first-step={s.key} data-done={s.done ? "1" : "0"} onClick={() => { if (s.key === "hours") { setBillingDraft({ ...billing }); setBillingModalOpen(true); } else if (s.key === "site") setNewProjectOpen(true); else if (s.key === "crew") openTeam(); else setTab("customers"); }} style={{ background: COLORS.cardAlt, opacity: s.done ? 0.6 : 1 }} className="w-full text-left rounded-lg px-3 py-2 flex items-center gap-2 text-sm">
-            <span style={{ background: s.done ? COLORS.success : COLORS.shell, border: `1px solid ${COLORS.border}` }} className="w-5 h-5 rounded-full flex items-center justify-center shrink-0">{s.done ? <Check size={12} color="#12210A" /> : null}</span>
-            <span className={s.done ? "line-through" : ""}>{t[`firstSteps${s.key.charAt(0).toUpperCase()}${s.key.slice(1)}`]}</span>
+  const firstStepsList = isOwner()
+    ? firstSteps({ projects, customers, members: team.members, invites: team.invites, billing })
+    : null;
+  const firstStepsCard =
+    firstStepsList && !firstStepsDismissed && firstStepsList.some((s) => !s.done) ? (
+      <div
+        data-first-steps
+        style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}66` }}
+        className="rounded-xl p-3"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div style={{ color: COLORS.accent }} className="text-xs uppercase tracking-wide font-bold">
+            {t.firstStepsTitle}
+          </div>
+          <button
+            className="tap"
+            aria-label={t.a11yClose}
+            title={t.a11yClose}
+            data-first-steps-dismiss
+            onClick={() => {
+              setFirstStepsDismissed(true);
+              try {
+                localStorage.setItem("site-log-first-steps", "1");
+              } catch {}
+            }}
+            style={{ color: COLORS.muted }}
+          >
+            <X size={14} />
           </button>
-        ))}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          {firstStepsList.map((s) => (
+            <button
+              key={s.key}
+              data-first-step={s.key}
+              data-done={s.done ? "1" : "0"}
+              onClick={() => {
+                if (s.key === "hours") {
+                  setBillingDraft({ ...billing });
+                  setBillingModalOpen(true);
+                } else if (s.key === "site") setNewProjectOpen(true);
+                else if (s.key === "crew") openTeam();
+                else setTab("customers");
+              }}
+              style={{ background: COLORS.cardAlt, opacity: s.done ? 0.6 : 1 }}
+              className="w-full text-left rounded-lg px-3 py-2 flex items-center gap-2 text-sm"
+            >
+              <span
+                style={{ background: s.done ? COLORS.success : COLORS.shell, border: `1px solid ${COLORS.border}` }}
+                className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+              >
+                {s.done ? <Check size={12} color="#12210A" /> : null}
+              </span>
+              <span className={s.done ? "line-through" : ""}>
+                {t[`firstSteps${s.key.charAt(0).toUpperCase()}${s.key.slice(1)}`]}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   const updateBar = updateReady ? (
-    <div data-update-bar style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="fixed left-3 right-3 bottom-3 lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3">
+    <div
+      data-update-bar
+      style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }}
+      className="fixed left-3 right-3 bottom-3 lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3"
+    >
       <span className="text-sm font-semibold flex-1">{t.updateReady}</span>
-      <button onClick={() => window.location.reload()} style={{ background: COLORS.accent }} className="px-3 py-2 rounded-lg text-xs font-bold uppercase">{t.reloadBtn}</button>
+      <button
+        onClick={() => window.location.reload()}
+        style={{ background: COLORS.accent }}
+        className="px-3 py-2 rounded-lg text-xs font-bold uppercase"
+      >
+        {t.reloadBtn}
+      </button>
     </div>
   ) : null;
 
   if (!authChecked) {
     return (
-      <div style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }} className="w-full h-screen flex items-center justify-center text-sm">
+      <div
+        style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }}
+        className="w-full h-screen flex items-center justify-center text-sm"
+      >
         …
       </div>
     );
@@ -3816,7 +5103,10 @@ export default function SiteManager() {
 
   if (!user) {
     return (
-      <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
+      <div
+        style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }}
+        className="w-full flex flex-col items-center justify-center px-6 py-10"
+      >
         <MountainBackground />
         {updateBar}
         <div className="relative w-full max-w-sm">
@@ -3824,28 +5114,45 @@ export default function SiteManager() {
             <SwissCross size={18} />
             <div className="font-black text-xl uppercase tracking-wide">{t.appLabel}</div>
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.authIntro}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-6">
+            {t.authIntro}
+          </div>
 
-          <input aria-label={t.authEmail}
-            type="email" inputMode="email" autoComplete="email"
+          <input
+            aria-label={t.authEmail}
+            type="email"
+            inputMode="email"
+            autoComplete="email"
             value={authForm.email}
             onChange={(e) => setAuthForm((s) => ({ ...s, email: e.target.value, error: null }))}
             placeholder={t.authEmail}
             style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-3 text-sm mb-2 outline-none"
           />
-          <input aria-label={t.authPassword}
-            type="password" autoComplete={authForm.mode === "signup" ? "new-password" : "current-password"}
+          <input
+            aria-label={t.authPassword}
+            type="password"
+            autoComplete={authForm.mode === "signup" ? "new-password" : "current-password"}
             value={authForm.password}
             onChange={(e) => setAuthForm((s) => ({ ...s, password: e.target.value, error: null }))}
-            onKeyDown={(e) => { if (e.key === "Enter") submitAuth(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") submitAuth();
+            }}
             placeholder={t.authPassword}
             style={{ background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-3 text-sm mb-3 outline-none"
           />
 
-          {authForm.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[authForm.error] || t.authErrGeneric}</div>}
-          {authForm.notice && <div style={{ color: COLORS.success }} className="text-xs mb-3">{t[authForm.notice]}</div>}
+          {authForm.error && (
+            <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+              {t[authForm.error] || t.authErrGeneric}
+            </div>
+          )}
+          {authForm.notice && (
+            <div style={{ color: COLORS.success }} className="text-xs mb-3">
+              {t[authForm.notice]}
+            </div>
+          )}
 
           <button
             onClick={submitAuth}
@@ -3859,19 +5166,38 @@ export default function SiteManager() {
 
           <div className="flex items-center justify-between mt-4">
             <button
-              onClick={() => setAuthForm((s) => ({ ...s, mode: s.mode === "signup" ? "signin" : "signup", error: null, notice: null }))}
+              onClick={() =>
+                setAuthForm((s) => ({
+                  ...s,
+                  mode: s.mode === "signup" ? "signin" : "signup",
+                  error: null,
+                  notice: null,
+                }))
+              }
               style={{ color: COLORS.accent }}
               className="text-xs font-bold"
             >
               {authForm.mode === "signup" ? t.authHaveAccount : t.authNeedAccount}
             </button>
-            <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">{t.authForgot}</button>
+            <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">
+              {t.authForgot}
+            </button>
           </div>
 
           <div style={{ color: COLORS.muted }} className="text-xs mt-8 leading-relaxed">
             {t.authPrivacyNote}{" "}
-            <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.amber }} className="underline">{t.privacyLink}</a>
-            {" · "}<span data-app-version>{SHELL_BUILD}</span>
+            <a
+              data-privacy-link
+              href="datenschutz.html"
+              target="_blank"
+              rel="noopener"
+              style={{ color: COLORS.amber }}
+              className="underline"
+            >
+              {t.privacyLink}
+            </a>
+            {" · "}
+            <span data-app-version>{SHELL_BUILD}</span>
           </div>
         </div>
       </div>
@@ -3884,7 +5210,10 @@ export default function SiteManager() {
     const inp = "w-full rounded-lg px-3 py-3 text-sm mb-2 outline-none";
     const inpStyle = { background: COLORS.card, border: `1px solid ${COLORS.border}`, color: COLORS.text };
     return (
-      <div style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }} className="w-full flex flex-col items-center justify-center px-6 py-10">
+      <div
+        style={{ background: COLORS.shell, color: COLORS.text, minHeight: "100dvh" }}
+        className="w-full flex flex-col items-center justify-center px-6 py-10"
+      >
         <MountainBackground />
         {updateBar}
         <div className="relative w-full max-w-sm">
@@ -3892,18 +5221,49 @@ export default function SiteManager() {
             <SwissCross size={18} />
             <div className="font-black text-xl uppercase tracking-wide">{t.appLabel}</div>
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-6">{t.onbIntro}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-6">
+            {t.onbIntro}
+          </div>
 
-          <input aria-label={t.yourName} value={onboarding.displayName} onChange={(e) => setOnboarding((s) => ({ ...s, displayName: e.target.value }))} placeholder={t.yourName} style={inpStyle} className={inp} />
+          <input
+            aria-label={t.yourName}
+            value={onboarding.displayName}
+            onChange={(e) => setOnboarding((s) => ({ ...s, displayName: e.target.value }))}
+            placeholder={t.yourName}
+            style={inpStyle}
+            className={inp}
+          />
 
           {onboarding.mode === "join" ? (
-            <input aria-label={t.onbCodePlaceholder} value={onboarding.code} onChange={(e) => setOnboarding((s) => ({ ...s, code: e.target.value.toUpperCase() }))} placeholder={t.onbCodePlaceholder} style={inpStyle} className={`${inp} font-mono tracking-widest`} />
+            <input
+              aria-label={t.onbCodePlaceholder}
+              value={onboarding.code}
+              onChange={(e) => setOnboarding((s) => ({ ...s, code: e.target.value.toUpperCase() }))}
+              placeholder={t.onbCodePlaceholder}
+              style={inpStyle}
+              className={`${inp} font-mono tracking-widest`}
+            />
           ) : (
-            <input aria-label={t.onbCompanyName} value={onboarding.companyName} onChange={(e) => setOnboarding((s) => ({ ...s, companyName: e.target.value }))} placeholder={t.onbCompanyName} style={inpStyle} className={inp} />
+            <input
+              aria-label={t.onbCompanyName}
+              value={onboarding.companyName}
+              onChange={(e) => setOnboarding((s) => ({ ...s, companyName: e.target.value }))}
+              placeholder={t.onbCompanyName}
+              style={inpStyle}
+              className={inp}
+            />
           )}
 
-          {onboarding.error && <div style={{ color: COLORS.danger }} className="text-xs mb-3">{t[onboarding.error] || t.onbErrGeneric}</div>}
-          {onboarding.detail && <div style={{ color: COLORS.muted }} className="text-xs mb-3 break-all">{onboarding.detail}</div>}
+          {onboarding.error && (
+            <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+              {t[onboarding.error] || t.onbErrGeneric}
+            </div>
+          )}
+          {onboarding.detail && (
+            <div style={{ color: COLORS.muted }} className="text-xs mb-3 break-all">
+              {onboarding.detail}
+            </div>
+          )}
 
           <button
             onClick={() => submitOnboarding(onboarding.mode === "join" ? "join" : "create")}
@@ -3923,8 +5283,19 @@ export default function SiteManager() {
             {onboarding.mode === "join" ? t.onbSwitchCreate : t.onbSwitchJoin}
           </button>
 
-          <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">{t.signOut}</button>
-          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-xs underline">{t.privacyLink}</a>
+          <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">
+            {t.signOut}
+          </button>
+          <a
+            data-privacy-link
+            href="datenschutz.html"
+            target="_blank"
+            rel="noopener"
+            style={{ color: COLORS.muted }}
+            className="block w-full mt-3 text-center text-xs underline"
+          >
+            {t.privacyLink}
+          </a>
         </div>
       </div>
     );
@@ -3932,7 +5303,10 @@ export default function SiteManager() {
 
   if (!ready) {
     return (
-      <div style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }} className="w-full h-screen flex items-center justify-center text-sm">
+      <div
+        style={{ background: COLORS.shell, color: COLORS.muted, height: "100dvh" }}
+        className="w-full h-screen flex items-center justify-center text-sm"
+      >
         …
       </div>
     );
@@ -3948,31 +5322,51 @@ export default function SiteManager() {
 
   // Active jobs plus this person's pins: what the dock shows, pinned first.
   const lastTouched = {};
-  if (dockSort === "recent") entries.forEach((e) => { if (e.projectId) lastTouched[e.projectId] = Math.max(lastTouched[e.projectId] || 0, e.createdAt || 0); });
+  if (dockSort === "recent")
+    entries.forEach((e) => {
+      if (e.projectId) lastTouched[e.projectId] = Math.max(lastTouched[e.projectId] || 0, e.createdAt || 0);
+    });
   const dockProjects = projects
     .filter((pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS))
     .filter((pr) => pinnedIds.includes(pr.id) || (pr.status || DEFAULT_PROJECT_STATUS) === "construction")
     .sort((a, b) => {
       const byName = String(a.name).localeCompare(String(b.name));
       if (dockSort === "name") return byName;
-      if (dockSort === "status") return PROJECT_STATUSES.findIndex((x) => x.key === (a.status || DEFAULT_PROJECT_STATUS)) - PROJECT_STATUSES.findIndex((x) => x.key === (b.status || DEFAULT_PROJECT_STATUS)) || byName;
+      if (dockSort === "status")
+        return (
+          PROJECT_STATUSES.findIndex((x) => x.key === (a.status || DEFAULT_PROJECT_STATUS)) -
+            PROJECT_STATUSES.findIndex((x) => x.key === (b.status || DEFAULT_PROJECT_STATUS)) || byName
+        );
       if (dockSort === "recent") return (lastTouched[b.id] || 0) - (lastTouched[a.id] || 0) || byName;
       return (pinnedIds.includes(b.id) ? 1 : 0) - (pinnedIds.includes(a.id) ? 1 : 0) || byName;
     });
 
   return (
-    <div style={{ background: COLORS.shell, color: COLORS.text, fontFamily: "system-ui, -apple-system, sans-serif", height: "100dvh" }} className="w-full h-screen max-w-md md:max-w-2xl lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden">
+    <div
+      style={{
+        background: COLORS.shell,
+        color: COLORS.text,
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        height: "100dvh",
+      }}
+      className="w-full h-screen max-w-md md:max-w-2xl lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden"
+    >
       <MountainBackground />
 
       {/* Office sidebar. The phone layout is right for a roof and wrong for a
           desk: a team leader planning a week needs everything at once, not a
           column with a thumb-sized nav at the bottom. Same app, same data —
           only the arrangement changes above 1024px. */}
-      <aside style={{ background: COLORS.card, borderRight: `1px solid ${COLORS.border}` }} className="hidden lg:flex lg:flex-col w-56 shrink-0 relative z-10">
+      <aside
+        style={{ background: COLORS.card, borderRight: `1px solid ${COLORS.border}` }}
+        className="hidden lg:flex lg:flex-col w-56 shrink-0 relative z-10"
+      >
         <div className="px-5 pt-6 pb-5">
           <div className="flex items-center gap-1.5">
             <SwissCross size={13} />
-            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</div>
+            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">
+              {t.appLabel}
+            </div>
           </div>
           {membership && (
             <div style={{ color: COLORS.muted }} className="text-xs mt-1 truncate">
@@ -3982,7 +5376,12 @@ export default function SiteManager() {
         </div>
         <nav className="flex-1 flex flex-col gap-0.5 px-3">
           {[
-            ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Ruler }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
+            ...(canManage()
+              ? [
+                  { id: "board", label: t.navBoard, icon: Ruler },
+                  { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck },
+                ]
+              : []),
             { id: "today", label: t.navToday, icon: Clock },
             { id: "projects", label: t.navProjects, icon: MapPin },
             { id: "customers", label: t.navCustomers, icon: User },
@@ -3999,7 +5398,10 @@ export default function SiteManager() {
             return (
               <button
                 key={it.id}
-                onClick={() => { setTab(it.id); setSelectedProject(null); }}
+                onClick={() => {
+                  setTab(it.id);
+                  setSelectedProject(null);
+                }}
                 style={{ background: active ? `${accent}1F` : "transparent", color: active ? accent : COLORS.text }}
                 className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2.5 text-left"
               >
@@ -4009,10 +5411,18 @@ export default function SiteManager() {
           })}
         </nav>
         <div className="px-3 pb-4 flex flex-col gap-0.5">
-          <button onClick={openProfile} style={{ color: COLORS.muted }} className="w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5">
+          <button
+            onClick={openProfile}
+            style={{ color: COLORS.muted }}
+            className="w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5"
+          >
             <User size={14} /> {t.profileTitle}
           </button>
-          <button onClick={() => setLangPickerOpen(true)} style={{ color: COLORS.muted }} className="w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5">
+          <button
+            onClick={() => setLangPickerOpen(true)}
+            style={{ color: COLORS.muted }}
+            className="w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5"
+          >
             <Globe size={14} /> {lang.toUpperCase()}
           </button>
         </div>
@@ -4022,969 +5432,2139 @@ export default function SiteManager() {
           content without it, so the scrolling area never gets a bounded
           height, the page grows past the viewport and scrolling breaks. */}
       <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
-      <div style={{ borderBottom: `1px solid ${COLORS.border}` }} className="relative px-4 lg:px-5 pt-6 pb-4 flex items-center justify-between gap-2">
-        {/* min-w-0 so the title gives way on a narrow phone; without it the
+        <div
+          style={{ borderBottom: `1px solid ${COLORS.border}` }}
+          className="relative px-4 lg:px-5 pt-6 pb-4 flex items-center justify-between gap-2"
+        >
+          {/* min-w-0 so the title gives way on a narrow phone; without it the
             icon cluster was pushed past the right edge and the menu button
             lost its last 13 px. */}
-        <div className="relative min-w-0">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <SwissCross size={13} />
-            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase truncate">{t.appLabel}</div>
+          <div className="relative min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <SwissCross size={13} />
+              <div
+                style={{ color: COLORS.accent, letterSpacing: "0.15em" }}
+                className="text-xs font-bold uppercase truncate"
+              >
+                {t.appLabel}
+              </div>
+            </div>
+            <div className="text-xl font-black uppercase tracking-tight truncate">
+              {{
+                today: t.navToday,
+                materials: t.navMaterials,
+                calendar: t.navCalendar,
+                projects: t.navProjects,
+                reports: t.navReports,
+                customers: t.navCustomers,
+                board: t.navBoard,
+                cockpit: t.navCockpit,
+                safety: t.navSafety,
+                team: t.navTeam,
+                transport: t.navTransport,
+              }[tab] || t.appLabel}
+            </div>
           </div>
-          <div className="text-xl font-black uppercase tracking-tight truncate">
-            {{
-              today: t.navToday, materials: t.navMaterials, calendar: t.navCalendar,
-              projects: t.navProjects, reports: t.navReports, customers: t.navCustomers,
-              board: t.navBoard, cockpit: t.navCockpit, safety: t.navSafety, team: t.navTeam, transport: t.navTransport,
-            }[tab] || t.appLabel}
-          </div>
-        </div>
-        <div className="relative flex items-center gap-2 shrink-0">
-          {activeClock ? (
-            <div style={{ background: "#2E2620", color: COLORS.amber, border: `1px solid ${COLORS.amber}` }} className="text-xs font-bold px-2 py-1 rounded uppercase">{t.onSite}</div>
-          ) : null}
-          {canManage() && (
-            <button aria-label={t.a11yOpen} onClick={() => setTab(tab === "cockpit" ? "today" : "cockpit")} title={t.navCockpit} style={{ background: tab === "cockpit" ? COLORS.accent : COLORS.card, border: `1px solid ${tab === "cockpit" ? COLORS.accent : COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full">
-              <ClipboardCheck size={14} color={tab === "cockpit" ? "#fff" : COLORS.muted} />
-            </button>
-          )}
-          <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setTab("safety")} style={{ background: tab === "safety" ? COLORS.danger : COLORS.card, border: `1px solid ${tab === "safety" ? COLORS.danger : COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full">
-            <ShieldAlert size={13} color={tab === "safety" ? "#fff" : COLORS.muted} />
-          </button>
-          <button aria-label={t.a11yProfile} title={t.a11yProfile} onClick={openProfile} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="tap flex items-center justify-center w-7 h-7 rounded-full lg:hidden">
-            <User size={13} color={COLORS.muted} />
-          </button>
-          <button onClick={() => setLangPickerOpen(true)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex items-center gap-1 px-2 py-1 rounded-full">
-            <Globe size={13} color={COLORS.muted} />
-            <span style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{lang}</span>
-          </button>
-        </div>
-      </div>
-
-      {(syncState.error || syncState.fromCache) && (
-        <div
-          style={{
-            background: syncState.error ? `${COLORS.danger}18` : `${COLORS.amber}18`,
-            borderBottom: `1px solid ${syncState.error ? COLORS.danger : COLORS.amber}55`,
-            color: syncState.error ? COLORS.danger : COLORS.amber,
-          }}
-          className="px-4 py-1.5 text-xs font-bold text-center break-all"
-        >
-          {syncState.error ? `${t.syncFailed} ${syncState.error}` : t.syncOffline}
-        </div>
-      )}
-
-      {errorBox && (() => {
-          const meta = ERROR_CODES[errorBox.code] || ERROR_CODES.E90;
-          const groupTitle = { save: t.errGroupSave, photo: t.errGroupPhoto, ai: t.errGroupAi, lang: t.errGroupLang, file: t.errGroupFile, other: t.errGroupOther }[meta.group] || t.errGroupOther;
-          const meaning = lang === "de" || lang === "gsw" ? meta.de : meta.en;
-          const report = errorReport(errorBox, SHELL_BUILD);
-          return (
-            <div data-error-panel className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.65)" }}>
-              <div ref={errorRef} role="alertdialog" aria-modal="true" aria-label={`${errorBox.code} ${errorBox.tag}`} tabIndex={-1} style={{ background: COLORS.card, border: `2px solid ${COLORS.danger}`, color: COLORS.text }} className="w-full max-w-md rounded-2xl p-5 shadow-2xl outline-none">
-                <div className="flex items-baseline gap-3">
-                  <div data-error-code style={{ color: COLORS.danger }} className="text-4xl font-black tracking-tight">{errorBox.code}</div>
-                  <div style={{ color: COLORS.muted }} className="font-mono text-xs">{errorBox.tag}</div>
-                </div>
-                <div className="text-lg font-bold mt-2">{groupTitle}</div>
-                <div className="text-sm mt-1 leading-relaxed">{meaning}</div>
-                {errorBox.detail && <div style={{ background: COLORS.shell, color: COLORS.muted }} className="font-mono text-xs mt-3 p-2 rounded-lg break-all">{errorBox.detail}</div>}
-                <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.errReportHint} · {t.versionLabel} {SHELL_BUILD}</div>
-                <div className="flex gap-2 mt-4">
-                  <button onClick={() => { try { navigator.clipboard.writeText(report); showToast(t.copyBtn); } catch (e) {} }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errCopy}</button>
-                  <button data-error-close onClick={() => setErrorBox(null)} style={{ background: COLORS.accent }} className="flex-1 py-3 rounded-lg text-xs font-bold uppercase">{t.errClose}</button>
-                </div>
+          <div className="relative flex items-center gap-2 shrink-0">
+            {activeClock ? (
+              <div
+                style={{ background: "#2E2620", color: COLORS.amber, border: `1px solid ${COLORS.amber}` }}
+                className="text-xs font-bold px-2 py-1 rounded uppercase"
+              >
+                {t.onSite}
               </div>
-            </div>
-          );
-      })()}
-      {updateBar}
-      {toast && (
-        <div style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold z-50 shadow-lg">
-          {toast}
-        </div>
-      )}
-
-      <div className="relative flex-1 overflow-y-auto px-5 pb-6 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
-        {tab === "today" && <TodayTab topCard={firstStepsCard} t={t} projects={projects} entries={entries} user={user} activeClock={activeClock} todayEntries={todayEntries} myAssignments={myAssignments} projectName={projectName} setTab={setTab} setSelectedProject={setSelectedProject} weather={weather} weatherLoc={weatherLoc} wCond={wCond} weatherEditOpen={weatherEditOpen} setWeatherEditOpen={setWeatherEditOpen} weatherCityInput={weatherCityInput} setWeatherCityInput={setWeatherCityInput} submitWeatherCity={submitWeatherCity} fetchWeather={fetchWeather} toggleBreak={toggleBreak} clockOut={clockOut} noteText={noteText} setNoteText={setNoteText} submitNote={submitNote} toggleVoiceInput={toggleVoiceInput} voiceListening={voiceListening} voiceTarget={voiceTarget} openEditTime={openEditTime} openEditEntry={openEditEntry} deleteEntryFn={deleteEntryFn} />}
-        {tab === "materials" && <Suspense fallback={null}><MaterialsTab materialDragProps={materialDragProps} addToBasket={addToBasket} articleMaster={articleMaster} basket={basket} catalogs={catalogs} deleteEntryFn={deleteEntryFn} deleteLibraryItem={deleteLibraryItem} entries={entries} lang={lang} librarySearch={librarySearch} materialSearch={materialSearch} materialsCatalogFor={materialsCatalogFor} materialsSubTab={materialsSubTab} openLibraryEdit={openLibraryEdit} openLibraryScan={openLibraryScan} openPickup={openPickup} openScan={openScan} priceFileRef={priceFileRef} projectName={projectName} projects={projects} removeBasketItem={removeBasketItem} setBasket={setBasket} setBasketMode={setBasketMode} setBasketProjectModalOpen={setBasketProjectModalOpen} setLibrarySearch={setLibrarySearch} setMaterialSearch={setMaterialSearch} setMaterialsSubTab={setMaterialsSubTab} setOrderStatus={setOrderStatus} setShopCat={setShopCat} setSortMode={setSortMode} shopCat={shopCat} sortMode={sortMode} stagePriceList={stagePriceList} t={t} techLibrary={techLibrary} toolsCatalogFor={toolsCatalogFor} updateBasketItem={updateBasketItem} user={user} /></Suspense>}
-        {tab === "calendar" && (() => {
-          const localeMap = { en: "en-US", de: "de-CH", fr: "fr-CH", it: "it-CH", es: "es-ES", pt: "pt-PT", pl: "pl-PL", sk: "sk-SK", cs: "cs-CZ" };
-          const locale = localeMap[lang] || "en-US";
-          const year = calMonth.getFullYear();
-          const month = calMonth.getMonth();
-          const monthLabel = calMonth.toLocaleDateString(locale, { month: "long", year: "numeric" });
-          const firstOfMonth = new Date(year, month, 1);
-          const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first
-          const daysInMonth = new Date(year, month + 1, 0).getDate();
-          const weekdayLabels = [0, 1, 2, 3, 4, 5, 6].map((i) => {
-            const d = new Date(2024, 0, 1 + i); // a known Monday
-            return d.toLocaleDateString(locale, { weekday: "short" }).slice(0, 2);
-          });
-          const pad = (n) => String(n).padStart(2, "0");
-          const cells = [];
-          for (let i = 0; i < startOffset; i++) cells.push(null);
-          for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-          return (
-            <div className="flex flex-col gap-4">
-              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-                <div className="flex items-center justify-between mb-3">
-                  <button className="tap" aria-label={t.a11yBack} title={t.a11yBack} onClick={() => setCalMonth(new Date(year, month - 1, 1))}><ChevronLeft size={18} color={COLORS.muted} /></button>
-                  <div className="font-bold text-sm capitalize">{monthLabel}</div>
-                  <button className="tap" aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setCalMonth(new Date(year, month + 1, 1))}><ChevronRight size={18} color={COLORS.muted} /></button>
-                </div>
-                <div className="grid grid-cols-7 gap-1 mb-1">
-                  {weekdayLabels.map((w, i) => (
-                    <div key={i} style={{ color: COLORS.muted }} className="text-center text-xs font-bold uppercase">{w}</div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1">
-                  {cells.map((d, i) => {
-                    if (d === null) return <div key={i} />;
-                    const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
-                    const hasEntries = entries.some((e) => e.date === dateStr);
-                    const leave = canManage() ? leaveRequests.find((r) => r.date === dateStr) : myLeaveFor(dateStr);
-                    const isToday = dateStr === todayKey();
-                    // The owner plans for everyone; a crew member only needs to
-                    // see the days they are themselves expected somewhere.
-                    const planned = canManage() ? assignmentsFor(dateStr) : myAssignments(dateStr);
-                    const leaveColor = leave ? (leave.status === "approved" ? COLORS.success : leave.status === "declined" ? COLORS.danger : COLORS.amber) : null;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => (canManage() ? setAssignModal({ date: dateStr }) : openDay(dateStr))}
-                        style={{
-                          background: leaveColor ? `${leaveColor}22` : COLORS.cardAlt,
-                          border: `1px solid ${isToday ? COLORS.accent : leaveColor || COLORS.border}`,
-                        }}
-                        className="aspect-square rounded-lg flex flex-col items-center justify-center relative"
-                      >
-                        <span style={{ color: isToday ? COLORS.accent : COLORS.text }} className="text-xs font-semibold">{d}</span>
-                        {planned.length > 0 && (
-                          <span style={{ color: "#6FB3D9" }} className="text-xs font-bold leading-none absolute top-0.5 right-1">{planned.length}</span>
-                        )}
-                        {hasEntries && <div style={{ background: COLORS.success }} className="w-1 h-1 rounded-full absolute bottom-1" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 px-1 text-xs" style={{ color: COLORS.muted }}>
-                <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.dayJournalHeading}</div>
-                <div className="flex items-center gap-1"><div style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" /> {t.statusPending}</div>
-                <div className="flex items-center gap-1"><div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.statusApproved}</div>
-              </div>
-              {canManage() && (
-                <div style={{ color: COLORS.muted }} className="text-xs px-1 -mt-2">{t.schedHintOwner}</div>
-              )}
-              <button onClick={() => setRangeLeaveModalOpen(true)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                <CalendarDays size={16} /> {t.rangeLeaveBtn}
+            ) : null}
+            {canManage() && (
+              <button
+                aria-label={t.a11yOpen}
+                onClick={() => setTab(tab === "cockpit" ? "today" : "cockpit")}
+                title={t.navCockpit}
+                style={{
+                  background: tab === "cockpit" ? COLORS.accent : COLORS.card,
+                  border: `1px solid ${tab === "cockpit" ? COLORS.accent : COLORS.border}`,
+                }}
+                className="tap flex items-center justify-center w-7 h-7 rounded-full"
+              >
+                <ClipboardCheck size={14} color={tab === "cockpit" ? "#fff" : COLORS.muted} />
               </button>
-            </div>
-          );
-        })()}
-
-        {tab === "board" && canManage() && <Suspense fallback={null}><BoardTab assignments={assignments} boardView={boardView} calMonth={calMonth} customers={customers} dragProject={dragProject} entries={entries} lang={lang} leaveRequests={leaveRequests} openBranch={openBranch} printRapport={printRapport} projects={projects} setAssignModal={setAssignModal} setBoardView={setBoardView} setCalMonth={setCalMonth} setDragProject={setDragProject} setOpenBranch={setOpenBranch} setSelectedProject={setSelectedProject} setShowFinishedJobs={setShowFinishedJobs} setTab={setTab} setWeekAnchor={setWeekAnchor} showFinishedJobs={showFinishedJobs} siteReports={siteReports} t={t} team={team} toggleAssignment={toggleAssignment} weekAnchor={weekAnchor} weekDays={weekDays} /></Suspense>}
-        {tab === "cockpit" && canManage() && <Suspense fallback={null}><CockpitTab approveEntry={approveEntry} billing={billing} commandCentre={commandCentre} customers={customers} documents={documents} entries={entries} leaveRequests={leaveRequests} hoursBalance={hoursBalance} money={money} projects={projects} setDocEditor={setDocEditor} setHoursModalOpen={setHoursModalOpen} setLeaveStatus={setLeaveStatus} setSelectedCustomer={setSelectedCustomer} setTab={setTab} t={t} team={team} /></Suspense>}
-        {tab === "customers" && (() => {
-          const due = dueFollowUps();
-          const q = customerSearch.trim().toLowerCase();
-          const shown = q
-            ? customers.filter((c) => [c.name, c.company, c.phone, c.email, c.address].some((v) => (v || "").toLowerCase().includes(q)))
-            : customers;
-          return (
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => openCustomerForm(null)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                  <Plus size={16} /> {t.newCustomer}
-                </button>
-                <button data-customers-import onClick={() => customerFileRef.current?.click()} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                  <FileUp size={16} /> {t.importCustomers}
-                </button>
-                <input ref={customerFileRef} type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; stageCustomersFile(f); }} />
-              </div>
-
-              {due.length > 0 && (
-                <div style={{ background: `${COLORS.amber}18`, border: `1px solid ${COLORS.amber}66` }} className="rounded-xl p-3">
-                  <div style={{ color: COLORS.amber }} className="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                    <CalendarDays size={13} /> {t.followUpsDue} ({due.length})
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    {due.slice(0, 5).map(({ customer, contact }) => (
-                      <button key={contact.id} onClick={() => setSelectedCustomer(customer.id)} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2">
-                        <div className="text-sm font-semibold">{customer.name}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs truncate">{contact.followUp} · {contact.note}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {customers.length > 3 && (
-                <input aria-label={t.searchCustomers} value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomers} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-              )}
-
-              {customers.length === 0 ? (
-                <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">{t.noCustomersYet}</div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {shown.map((c) => {
-                    const jobs = projects.filter((p) => p.customerId === c.id);
-                    const open = jobs.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS)).length;
-                    return (
-                      <button key={c.id} onClick={() => setSelectedCustomer(c.id)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-xl p-4 flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="font-bold truncate">{c.name}</div>
-                          {c.company && <div style={{ color: COLORS.muted }} className="text-xs truncate">{c.company}</div>}
-                          <div style={{ color: COLORS.muted }} className="text-xs mt-1">
-                            {jobs.length} {t.jobsLabel}{open > 0 ? ` · ${open} ${t.openLabel}` : ""}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {c.phone && (
-                            <a href={telHref(c.phone)} onClick={(e) => e.stopPropagation()} style={{ background: COLORS.cardAlt, color: COLORS.success }} className="w-8 h-8 rounded-full flex items-center justify-center">
-                              <Phone size={14} />
-                            </a>
-                          )}
-                          <ChevronRight size={18} color={COLORS.muted} />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {tab === "projects" && (
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setNewProjectOpen(true)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                <Plus size={16} /> {t.newProjectSite}
-              </button>
-              <button onClick={() => { setImportModalOpen(true); setImportCodeInput(""); setImportError(null); }} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                <ClipboardPaste size={16} /> {t.importProject}
-              </button>
-            </div>
-            <button onClick={() => { setReportProjectSelection([]); setReportProjectPickerOpen(true); }} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-              <FileText size={16} /> {t.generateReportBtn}
-            </button>
-            {projects.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pb-1">
-                {[{ key: "all", label: t.pipelineAll, color: COLORS.muted }, ...PROJECT_STATUSES.map((s) => ({ key: s.key, label: t[s.labelKey], color: s.color }))].map((f) => {
-                  const count = f.key === "all" ? projects.length : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === f.key).length;
-                  if (f.key !== "all" && count === 0) return null;
-                  const active = pipelineFilter === f.key;
-                  return (
-                    <button key={f.key} onClick={() => setPipelineFilter(f.key)} style={{ background: active ? `${f.color}33` : COLORS.card, border: `1px solid ${active ? f.color : COLORS.border}`, color: active ? f.color : COLORS.muted }} className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                      {f.label} {count}
-                    </button>
-                  );
-                })}
-              </div>
             )}
-            <ReorderList
-              items={pipelineFilter === "all" ? projects : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === pipelineFilter)}
-              gapClass="gap-2"
-              onReorder={reorderProjects}
-              renderItem={(p, handle) => {
-                const pEntries = entries.filter((e) => e.projectId === p.id);
-                const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
-                return (
-                  <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1">
-                    {handle}
-                    <span style={{ background: `${projectColour(p.id)}26`, color: projectColour(p.id) }} className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mr-2">
-                      <ProjectIcon category={p.category} size={24} color={projectColour(p.id)} />
-                    </span>
-                    <button onClick={() => setSelectedProject(p.id)} className="flex-1 min-w-0 text-left flex items-center justify-between gap-2">
-                      <div
-                        className="min-w-0 cursor-grab active:cursor-grabbing"
-                        draggable
-                        onDragStart={(e) => { e.stopPropagation(); e.dataTransfer.setData("text/project-id", p.id); e.dataTransfer.effectAllowed = "copy"; }}
-                      >
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <div className="font-bold">{p.name}</div>
-                          {p.category && (
-                            <span style={{ background: COLORS.cardAlt, color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full">
-                              {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
-                            </span>
-                          )}
-                          <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">
-                            {t[sm.labelKey]}
-                          </span>
-                        </div>
-                        {(customerFor(p) || p.client) && (
-                          <div style={{ color: COLORS.muted }} className="text-xs mt-0.5 flex items-center gap-1">
-                            <User size={10} /> {customerFor(p)?.name || p.client}
-                          </div>
-                        )}
-                        {p.address && (
-                          <a href={mapsUrl(p.address)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: COLORS.accent }} className="text-xs flex items-center gap-1 mt-0.5">
-                            <MapPin size={11} /> {p.address}
-                          </a>
-                        )}
-                        <div style={{ color: COLORS.muted }} className="text-xs mt-1">{pEntries.length} {t.entriesLabelFmt}</div>
-                      </div>
-                      <ChevronRight size={18} color={COLORS.muted} />
-                    </button>
-                  </div>
-                );
+            <button
+              aria-label={t.a11yOpen}
+              title={t.a11yOpen}
+              onClick={() => setTab("safety")}
+              style={{
+                background: tab === "safety" ? COLORS.danger : COLORS.card,
+                border: `1px solid ${tab === "safety" ? COLORS.danger : COLORS.border}`,
               }}
-            />
-            {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">{t.noProjectsYet}</div>}
+              className="tap flex items-center justify-center w-7 h-7 rounded-full"
+            >
+              <ShieldAlert size={13} color={tab === "safety" ? "#fff" : COLORS.muted} />
+            </button>
+            <button
+              aria-label={t.a11yProfile}
+              title={t.a11yProfile}
+              onClick={openProfile}
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+              className="tap flex items-center justify-center w-7 h-7 rounded-full lg:hidden"
+            >
+              <User size={13} color={COLORS.muted} />
+            </button>
+            <button
+              onClick={() => setLangPickerOpen(true)}
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+              className="flex items-center gap-1 px-2 py-1 rounded-full"
+            >
+              <Globe size={13} color={COLORS.muted} />
+              <span style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">
+                {lang}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {(syncState.error || syncState.fromCache) && (
+          <div
+            style={{
+              background: syncState.error ? `${COLORS.danger}18` : `${COLORS.amber}18`,
+              borderBottom: `1px solid ${syncState.error ? COLORS.danger : COLORS.amber}55`,
+              color: syncState.error ? COLORS.danger : COLORS.amber,
+            }}
+            className="px-4 py-1.5 text-xs font-bold text-center break-all"
+          >
+            {syncState.error ? `${t.syncFailed} ${syncState.error}` : t.syncOffline}
           </div>
         )}
 
-        {tab === "reports" && (() => {
-          // The day as the GAV reads it: the person's own entries, split into
-          // Normal / Überstunden / Reisezeit against the contract day.
-          const weekly = parseFloat(billing.weeklyHours || 0) || 0;
-          const contractDaily = weekly > 0 ? weekly / 5 : 0;
-          const todayMine = entries.filter((e) => e.date === todayKey() && e.userId === user?.uid);
-          const split = splitDayHours(todayMine, contractDaily);
-          const timeToday = todayMine.filter((e) => e.type === "time");
-          const approved = timeToday.length > 0 && timeToday.every((e) => e.approvedBy);
-          const personId = (canManage() && rapportPerson) || user?.uid;
-          const personName = (team.members.find((m) => m.uid === personId) || {}).name || (personId === user?.uid ? profile.name : "") || "";
-          const weekDates = weekOf(rapportWeekAnchor);
-          const week = weekRows(entries, personId, weekDates, weekly);
-          const shiftWeek = (n) => { const d = new Date(`${rapportWeekAnchor}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 7 * n); setRapportWeekAnchor(d.toISOString().slice(0, 10)); };
-          const downloadCsv = () => {
-            const csv = weekCsv(week, personName, { date: t.docDate, normal: t.hoursNormal, overtime: t.overtimeLabel, travel: t.hoursTravel, breaks: t.hoursBreaks, net: t.hoursTotal, total: t.hoursSum, target: t.hoursTarget, diff: t.hoursDiff });
-            downloadText(`woche-${(personName || "rapport").replace(/[^\w-]+/g, "_")}-${weekDates[0]}.csv`, csv);
-          };
-          const fmt = (x) => (Math.round(x * 100) / 100).toFixed(1);
-          const HourLine = ({ label, value, strong }) => (
-            <div className="flex items-center justify-between py-1" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-              <span style={{ color: strong ? COLORS.text : COLORS.muted }} className={strong ? "text-sm font-bold" : "text-sm"}>{label}</span>
-              <span style={{ color: strong ? COLORS.accent : COLORS.text }} className={strong ? "font-black text-lg" : "font-bold"}>{value}</span>
-            </div>
-          );
-          const dayNames = [t.dayMon, t.dayTue, t.dayWed, t.dayThu, t.dayFri, t.daySat, t.daySun];
-          return (
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-2">
-              {[["daily", t.rapportDay], ["week", t.rapportWeek], ["monthly", t.rapportMonth]].map(([v, l]) => (
-                <button key={v} data-rapport-view={v} onClick={() => setReportView(v)} style={{ background: reportView === v ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase">{l}</button>
-              ))}
-            </div>
-
-            {reportView === "daily" && (
-              <div data-tagesrapport style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.rapportTitleDay} · {todayKey()}</div>
-                  <span data-approval style={{ color: approved ? COLORS.success : COLORS.muted, border: `1px solid ${approved ? COLORS.success : COLORS.border}` }} className="text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0">{approved ? t.approvedAll : t.notApproved}</span>
-                </div>
-                {daily.projIds.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {daily.projIds.map((id) => <span key={id} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(id)}66` }} className="px-2 py-0.5 rounded-full text-xs font-semibold">{projectName(id)}</span>)}
+        {errorBox &&
+          (() => {
+            const meta = ERROR_CODES[errorBox.code] || ERROR_CODES.E90;
+            const groupTitle =
+              {
+                save: t.errGroupSave,
+                photo: t.errGroupPhoto,
+                ai: t.errGroupAi,
+                lang: t.errGroupLang,
+                file: t.errGroupFile,
+                other: t.errGroupOther,
+              }[meta.group] || t.errGroupOther;
+            const meaning = lang === "de" || lang === "gsw" ? meta.de : meta.en;
+            const report = errorReport(errorBox, SHELL_BUILD);
+            return (
+              <div
+                data-error-panel
+                className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+                style={{ background: "rgba(0,0,0,0.65)" }}
+              >
+                <div
+                  ref={errorRef}
+                  role="alertdialog"
+                  aria-modal="true"
+                  aria-label={`${errorBox.code} ${errorBox.tag}`}
+                  tabIndex={-1}
+                  style={{ background: COLORS.card, border: `2px solid ${COLORS.danger}`, color: COLORS.text }}
+                  className="w-full max-w-md rounded-2xl p-5 shadow-2xl outline-none"
+                >
+                  <div className="flex items-baseline gap-3">
+                    <div
+                      data-error-code
+                      style={{ color: COLORS.danger }}
+                      className="text-4xl font-black tracking-tight"
+                    >
+                      {errorBox.code}
+                    </div>
+                    <div style={{ color: COLORS.muted }} className="font-mono text-xs">
+                      {errorBox.tag}
+                    </div>
                   </div>
-                )}
-                <HourLine label={t.hoursNormal} value={fmt(split.normal)} />
-                <HourLine label={t.overtimeLabel} value={fmt(split.overtime)} />
-                <HourLine label={t.hoursTravel} value={fmt(split.travel)} />
-                <HourLine label={t.hoursBreaks} value={`−${fmt(split.breaks)}`} />
-                <HourLine label={`${t.hoursTotal}${split.target != null ? ` · ${t.hoursTarget} ${fmt(split.target)}` : ""}`} value={fmt(split.net)} strong />
-                <div className="mt-2">
-                  <Stat label={t.materialsLogged} value={daily.materials.length} color={COLORS.success} />
-                  <Stat label={t.tripTrips} value={todayMine.filter((e) => e.type === "transport").length} color="#C68B4F" />
-                  <Stat label={t.typePhoto} value={todayEntries.filter((e) => e.type === "photo").length} color="#7FA0C7" />
-                  <Stat label={t.typeNote} value={todayEntries.filter((e) => e.type === "note").length} color={COLORS.muted} />
-                </div>
-                <button onClick={() => sendReportToSupervisor("daily", daily, todayEntries)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
-                  <FileText size={15} /> {t.sendToSupervisor}
-                </button>
-              </div>
-            )}
-
-            {reportView === "week" && (
-              <div data-woche style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <button aria-label={t.a11yBack} title={t.a11yBack} data-week-prev onClick={() => shiftWeek(-1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap w-8 h-8 rounded-lg flex items-center justify-center"><ChevronLeft size={16} color={COLORS.muted} /></button>
-                  <div data-week-label style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide text-center">{weekDates[0]} – {weekDates[6]}</div>
-                  <button aria-label={t.a11yOpen} title={t.a11yOpen} data-week-next onClick={() => shiftWeek(1)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap w-8 h-8 rounded-lg flex items-center justify-center"><ChevronRight size={16} color={COLORS.muted} /></button>
-                </div>
-                {canManage() && team.members.length > 1 && (
-                  <select data-week-person value={personId || ""} onChange={(e) => setRapportPerson(e.target.value)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-sm outline-none mb-2">
-                    {team.members.map((m) => <option key={m.uid} value={m.uid}>{m.name || m.email || m.uid}</option>)}
-                  </select>
-                )}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
-                        <th className="text-left py-1">{t.docDate}</th><th className="text-right py-1">{t.hoursNormal}</th><th className="text-right py-1">{t.overtimeShort}</th><th className="text-right py-1">{t.hoursTravel}</th><th className="text-right py-1">{t.hoursBreaks}</th><th className="text-right py-1">{t.hoursTotal}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {week.rows.map((r, i) => (
-                        <tr key={r.date} data-week-row style={{ borderTop: `1px solid ${COLORS.border}`, color: r.net > 0 ? COLORS.text : COLORS.muted }}>
-                          <td className="py-1.5"><span className="font-bold">{dayNames[i]}</span> <span style={{ color: COLORS.muted }}>{r.date.slice(8)}.{r.date.slice(5, 7)}.</span></td>
-                          <td className="text-right tabular-nums">{fmt(r.normal)}</td><td className="text-right tabular-nums">{fmt(r.overtime)}</td><td className="text-right tabular-nums">{fmt(r.travel)}</td><td className="text-right tabular-nums">{fmt(r.breaks)}</td><td className="text-right tabular-nums font-bold">{fmt(r.net)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ borderTop: `2px solid ${COLORS.border}` }} className="font-bold">
-                        <td className="py-1.5">{t.hoursSum}</td><td className="text-right tabular-nums">{fmt(week.total.normal)}</td><td className="text-right tabular-nums">{fmt(week.total.overtime)}</td><td className="text-right tabular-nums">{fmt(week.total.travel)}</td><td className="text-right tabular-nums">{fmt(week.total.breaks)}</td><td className="text-right tabular-nums" style={{ color: COLORS.accent }}>{fmt(week.total.net)}</td>
-                      </tr>
-                      {week.target != null && (
-                        <tr style={{ color: COLORS.muted }}>
-                          <td className="py-1">{t.hoursTarget} / {t.hoursDiff}</td><td colSpan={4}></td><td className="text-right tabular-nums" style={{ color: week.diff >= 0 ? COLORS.success : COLORS.amber }}>{fmt(week.target)} / {week.diff >= 0 ? "+" : ""}{fmt(week.diff)}</td>
-                        </tr>
-                      )}
-                    </tfoot>
-                  </table>
-                </div>
-                {week.target == null && <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.hoursNotConfigured}</div>}
-                <button data-week-csv onClick={downloadCsv} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"><Download size={14} /> {t.weekCsv}</button>
-              </div>
-            )}
-
-            {reportView === "monthly" && (<>
-            {(() => {
-              const s = monthlyUnsent;
-              const list = monthUnsent.entries;
-              return (
-                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">{monthKey()}</div>
-                  <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
-                  {s.breaks > 0 && <div style={{ color: COLORS.muted }} className="text-xs mt-1 mb-2 text-right">{t.breaksDeducted}: −{s.breaks.toFixed(1)} h</div>}
-                  <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
-                  <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
-                  <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
-                  <div style={{ color: COLORS.muted }} className="text-xs mt-3 mb-1">{t.sitesLabel}: {s.projIds.map(projectName).join(", ") || "—"}</div>
-                  {reportView === "monthly" && monthUnsent.alreadySent > 0 && (
-                    <div style={{ color: COLORS.amber }} className="text-xs mb-1">{monthUnsent.alreadySent} {t.reportAlreadySentDaily}</div>
+                  <div className="text-lg font-bold mt-2">{groupTitle}</div>
+                  <div className="text-sm mt-1 leading-relaxed">{meaning}</div>
+                  {errorBox.detail && (
+                    <div
+                      style={{ background: COLORS.shell, color: COLORS.muted }}
+                      className="font-mono text-xs mt-3 p-2 rounded-lg break-all"
+                    >
+                      {errorBox.detail}
+                    </div>
                   )}
-                  <button onClick={() => sendReportToSupervisor("monthly", s, list)} style={{ background: COLORS.accentDim }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
-                    <FileText size={15} /> {t.sendToSupervisor}
+                  <div style={{ color: COLORS.muted }} className="text-xs mt-2">
+                    {t.errReportHint} · {t.versionLabel} {SHELL_BUILD}
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(report);
+                          showToast(t.copyBtn);
+                        } catch (e) {}
+                      }}
+                      style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                      className="flex-1 py-3 rounded-lg text-xs font-bold uppercase"
+                    >
+                      {t.errCopy}
+                    </button>
+                    <button
+                      data-error-close
+                      onClick={() => setErrorBox(null)}
+                      style={{ background: COLORS.accent }}
+                      className="flex-1 py-3 rounded-lg text-xs font-bold uppercase"
+                    >
+                      {t.errClose}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        {updateBar}
+        {toast && (
+          <div
+            style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }}
+            className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold z-50 shadow-lg"
+          >
+            {toast}
+          </div>
+        )}
+
+        <div
+          className="relative flex-1 overflow-y-auto px-5 pb-6 pt-4 lg:px-8 lg:pb-8 lg:pt-6"
+          style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
+        >
+          {tab === "today" && (
+            <TodayTab
+              topCard={firstStepsCard}
+              t={t}
+              projects={projects}
+              entries={entries}
+              user={user}
+              activeClock={activeClock}
+              todayEntries={todayEntries}
+              myAssignments={myAssignments}
+              projectName={projectName}
+              setTab={setTab}
+              setSelectedProject={setSelectedProject}
+              weather={weather}
+              weatherLoc={weatherLoc}
+              wCond={wCond}
+              weatherEditOpen={weatherEditOpen}
+              setWeatherEditOpen={setWeatherEditOpen}
+              weatherCityInput={weatherCityInput}
+              setWeatherCityInput={setWeatherCityInput}
+              submitWeatherCity={submitWeatherCity}
+              fetchWeather={fetchWeather}
+              toggleBreak={toggleBreak}
+              clockOut={clockOut}
+              noteText={noteText}
+              setNoteText={setNoteText}
+              submitNote={submitNote}
+              toggleVoiceInput={toggleVoiceInput}
+              voiceListening={voiceListening}
+              voiceTarget={voiceTarget}
+              openEditTime={openEditTime}
+              openEditEntry={openEditEntry}
+              deleteEntryFn={deleteEntryFn}
+            />
+          )}
+          {tab === "materials" && (
+            <Suspense fallback={null}>
+              <MaterialsTab
+                materialDragProps={materialDragProps}
+                addToBasket={addToBasket}
+                articleMaster={articleMaster}
+                basket={basket}
+                catalogs={catalogs}
+                deleteEntryFn={deleteEntryFn}
+                deleteLibraryItem={deleteLibraryItem}
+                entries={entries}
+                lang={lang}
+                librarySearch={librarySearch}
+                materialSearch={materialSearch}
+                materialsCatalogFor={materialsCatalogFor}
+                materialsSubTab={materialsSubTab}
+                openLibraryEdit={openLibraryEdit}
+                openLibraryScan={openLibraryScan}
+                openPickup={openPickup}
+                openScan={openScan}
+                priceFileRef={priceFileRef}
+                projectName={projectName}
+                projects={projects}
+                removeBasketItem={removeBasketItem}
+                setBasket={setBasket}
+                setBasketMode={setBasketMode}
+                setBasketProjectModalOpen={setBasketProjectModalOpen}
+                setLibrarySearch={setLibrarySearch}
+                setMaterialSearch={setMaterialSearch}
+                setMaterialsSubTab={setMaterialsSubTab}
+                setOrderStatus={setOrderStatus}
+                setShopCat={setShopCat}
+                setSortMode={setSortMode}
+                shopCat={shopCat}
+                sortMode={sortMode}
+                stagePriceList={stagePriceList}
+                t={t}
+                techLibrary={techLibrary}
+                toolsCatalogFor={toolsCatalogFor}
+                updateBasketItem={updateBasketItem}
+                user={user}
+              />
+            </Suspense>
+          )}
+          {tab === "calendar" &&
+            (() => {
+              const localeMap = {
+                en: "en-US",
+                de: "de-CH",
+                fr: "fr-CH",
+                it: "it-CH",
+                es: "es-ES",
+                pt: "pt-PT",
+                pl: "pl-PL",
+                sk: "sk-SK",
+                cs: "cs-CZ",
+              };
+              const locale = localeMap[lang] || "en-US";
+              const year = calMonth.getFullYear();
+              const month = calMonth.getMonth();
+              const monthLabel = calMonth.toLocaleDateString(locale, { month: "long", year: "numeric" });
+              const firstOfMonth = new Date(year, month, 1);
+              const startOffset = (firstOfMonth.getDay() + 6) % 7; // Monday-first
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const weekdayLabels = [0, 1, 2, 3, 4, 5, 6].map((i) => {
+                const d = new Date(2024, 0, 1 + i); // a known Monday
+                return d.toLocaleDateString(locale, { weekday: "short" }).slice(0, 2);
+              });
+              const pad = (n) => String(n).padStart(2, "0");
+              const cells = [];
+              for (let i = 0; i < startOffset; i++) cells.push(null);
+              for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+              return (
+                <div className="flex flex-col gap-4">
+                  <div
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="rounded-xl p-3"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <button
+                        className="tap"
+                        aria-label={t.a11yBack}
+                        title={t.a11yBack}
+                        onClick={() => setCalMonth(new Date(year, month - 1, 1))}
+                      >
+                        <ChevronLeft size={18} color={COLORS.muted} />
+                      </button>
+                      <div className="font-bold text-sm capitalize">{monthLabel}</div>
+                      <button
+                        className="tap"
+                        aria-label={t.a11yOpen}
+                        title={t.a11yOpen}
+                        onClick={() => setCalMonth(new Date(year, month + 1, 1))}
+                      >
+                        <ChevronRight size={18} color={COLORS.muted} />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-7 gap-1 mb-1">
+                      {weekdayLabels.map((w, i) => (
+                        <div
+                          key={i}
+                          style={{ color: COLORS.muted }}
+                          className="text-center text-xs font-bold uppercase"
+                        >
+                          {w}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                      {cells.map((d, i) => {
+                        if (d === null) return <div key={i} />;
+                        const dateStr = `${year}-${pad(month + 1)}-${pad(d)}`;
+                        const hasEntries = entries.some((e) => e.date === dateStr);
+                        const leave = canManage() ? leaveRequests.find((r) => r.date === dateStr) : myLeaveFor(dateStr);
+                        const isToday = dateStr === todayKey();
+                        // The owner plans for everyone; a crew member only needs to
+                        // see the days they are themselves expected somewhere.
+                        const planned = canManage() ? assignmentsFor(dateStr) : myAssignments(dateStr);
+                        const leaveColor = leave
+                          ? leave.status === "approved"
+                            ? COLORS.success
+                            : leave.status === "declined"
+                              ? COLORS.danger
+                              : COLORS.amber
+                          : null;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => (canManage() ? setAssignModal({ date: dateStr }) : openDay(dateStr))}
+                            style={{
+                              background: leaveColor ? `${leaveColor}22` : COLORS.cardAlt,
+                              border: `1px solid ${isToday ? COLORS.accent : leaveColor || COLORS.border}`,
+                            }}
+                            className="aspect-square rounded-lg flex flex-col items-center justify-center relative"
+                          >
+                            <span
+                              style={{ color: isToday ? COLORS.accent : COLORS.text }}
+                              className="text-xs font-semibold"
+                            >
+                              {d}
+                            </span>
+                            {planned.length > 0 && (
+                              <span
+                                style={{ color: "#6FB3D9" }}
+                                className="text-xs font-bold leading-none absolute top-0.5 right-1"
+                              >
+                                {planned.length}
+                              </span>
+                            )}
+                            {hasEntries && (
+                              <div
+                                style={{ background: COLORS.success }}
+                                className="w-1 h-1 rounded-full absolute bottom-1"
+                              />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 px-1 text-xs" style={{ color: COLORS.muted }}>
+                    <div className="flex items-center gap-1">
+                      <div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" />{" "}
+                      {t.dayJournalHeading}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" /> {t.statusPending}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div style={{ background: COLORS.success }} className="w-2 h-2 rounded-full" /> {t.statusApproved}
+                    </div>
+                  </div>
+                  {canManage() && (
+                    <div style={{ color: COLORS.muted }} className="text-xs px-1 -mt-2">
+                      {t.schedHintOwner}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setRangeLeaveModalOpen(true)}
+                    style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                    className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                  >
+                    <CalendarDays size={16} /> {t.rangeLeaveBtn}
                   </button>
                 </div>
               );
             })()}
-            </>)}
 
-            {reportView !== "week" && (
-              <>
-            <div>
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.entriesTitle}</div>
-              <EntryGroups entries={reportView === "daily" ? todayEntries : monthUnsent.entries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
-            </div>
-            <div>
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.sentReports}</div>
-              {sentReports.length === 0 ? (
-                <div style={{ color: COLORS.muted }} className="text-sm">{t.noReportsYet}</div>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {sentReports.map((r) => (
-                    <button key={r.id} onClick={() => setReportViewModal(r)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-lg p-3 flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-semibold">{(r.period === "daily" ? t.daily : t.monthly)} · {r.periodLabel}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs">
-                          {reportFigures(r).hours}h · {t.reportSentTimes} {(r.sends || []).length || 1}×
-                          {r.sentAt ? ` · ${t.reportLastSent} ${new Date(r.sentAt).toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}` : ""}
-                          {r.editedAt ? ` · ${t.editedTag}` : ""}
-                        </div>
-                      </div>
-                      <ChevronRight size={16} color={COLORS.muted} />
+          {tab === "board" && canManage() && (
+            <Suspense fallback={null}>
+              <BoardTab
+                assignments={assignments}
+                boardView={boardView}
+                calMonth={calMonth}
+                customers={customers}
+                dragProject={dragProject}
+                entries={entries}
+                lang={lang}
+                leaveRequests={leaveRequests}
+                openBranch={openBranch}
+                printRapport={printRapport}
+                projects={projects}
+                setAssignModal={setAssignModal}
+                setBoardView={setBoardView}
+                setCalMonth={setCalMonth}
+                setDragProject={setDragProject}
+                setOpenBranch={setOpenBranch}
+                setSelectedProject={setSelectedProject}
+                setShowFinishedJobs={setShowFinishedJobs}
+                setTab={setTab}
+                setWeekAnchor={setWeekAnchor}
+                showFinishedJobs={showFinishedJobs}
+                siteReports={siteReports}
+                t={t}
+                team={team}
+                toggleAssignment={toggleAssignment}
+                weekAnchor={weekAnchor}
+                weekDays={weekDays}
+              />
+            </Suspense>
+          )}
+          {tab === "cockpit" && canManage() && (
+            <Suspense fallback={null}>
+              <CockpitTab
+                approveEntry={approveEntry}
+                billing={billing}
+                commandCentre={commandCentre}
+                customers={customers}
+                documents={documents}
+                entries={entries}
+                leaveRequests={leaveRequests}
+                hoursBalance={hoursBalance}
+                money={money}
+                projects={projects}
+                setDocEditor={setDocEditor}
+                setHoursModalOpen={setHoursModalOpen}
+                setLeaveStatus={setLeaveStatus}
+                setSelectedCustomer={setSelectedCustomer}
+                setTab={setTab}
+                t={t}
+                team={team}
+              />
+            </Suspense>
+          )}
+          {tab === "customers" &&
+            (() => {
+              const due = dueFollowUps();
+              const q = customerSearch.trim().toLowerCase();
+              const shown = q
+                ? customers.filter((c) =>
+                    [c.name, c.company, c.phone, c.email, c.address].some((v) => (v || "").toLowerCase().includes(q)),
+                  )
+                : customers;
+              return (
+                <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => openCustomerForm(null)}
+                      style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                      className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                    >
+                      <Plus size={16} /> {t.newCustomer}
                     </button>
-                  ))}
+                    <button
+                      data-customers-import
+                      onClick={() => customerFileRef.current?.click()}
+                      style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                      className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                    >
+                      <FileUp size={16} /> {t.importCustomers}
+                    </button>
+                    <input
+                      ref={customerFileRef}
+                      type="file"
+                      accept=".csv,.txt,.tsv,text/csv,text/plain"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = "";
+                        stageCustomersFile(f);
+                      }}
+                    />
+                  </div>
+
+                  {due.length > 0 && (
+                    <div
+                      style={{ background: `${COLORS.amber}18`, border: `1px solid ${COLORS.amber}66` }}
+                      className="rounded-xl p-3"
+                    >
+                      <div
+                        style={{ color: COLORS.amber }}
+                        className="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1.5"
+                      >
+                        <CalendarDays size={13} /> {t.followUpsDue} ({due.length})
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        {due.slice(0, 5).map(({ customer, contact }) => (
+                          <button
+                            key={contact.id}
+                            onClick={() => setSelectedCustomer(customer.id)}
+                            style={{ background: COLORS.card }}
+                            className="w-full text-left rounded-lg px-3 py-2"
+                          >
+                            <div className="text-sm font-semibold">{customer.name}</div>
+                            <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                              {contact.followUp} · {contact.note}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {customers.length > 3 && (
+                    <input
+                      aria-label={t.searchCustomers}
+                      value={customerSearch}
+                      onChange={(e) => setCustomerSearch(e.target.value)}
+                      placeholder={t.searchCustomers}
+                      style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                      className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    />
+                  )}
+
+                  {customers.length === 0 ? (
+                    <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">
+                      {t.noCustomersYet}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {shown.map((c) => {
+                        const jobs = projects.filter((p) => p.customerId === c.id);
+                        const open = jobs.filter(
+                          (p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS),
+                        ).length;
+                        return (
+                          <button
+                            key={c.id}
+                            onClick={() => setSelectedCustomer(c.id)}
+                            style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                            className="w-full text-left rounded-xl p-4 flex items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0">
+                              <div className="font-bold truncate">{c.name}</div>
+                              {c.company && (
+                                <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                                  {c.company}
+                                </div>
+                              )}
+                              <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                                {jobs.length} {t.jobsLabel}
+                                {open > 0 ? ` · ${open} ${t.openLabel}` : ""}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {c.phone && (
+                                <a
+                                  href={telHref(c.phone)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{ background: COLORS.cardAlt, color: COLORS.success }}
+                                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                                >
+                                  <Phone size={14} />
+                                </a>
+                              )}
+                              <ChevronRight size={18} color={COLORS.muted} />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+          {tab === "projects" && (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setNewProjectOpen(true)}
+                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                  className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <Plus size={16} /> {t.newProjectSite}
+                </button>
+                <button
+                  onClick={() => {
+                    setImportModalOpen(true);
+                    setImportCodeInput("");
+                    setImportError(null);
+                  }}
+                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                  className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <ClipboardPaste size={16} /> {t.importProject}
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  setReportProjectSelection([]);
+                  setReportProjectPickerOpen(true);
+                }}
+                style={{ background: COLORS.accentDim }}
+                className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <FileText size={16} /> {t.generateReportBtn}
+              </button>
+              {projects.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {[
+                    { key: "all", label: t.pipelineAll, color: COLORS.muted },
+                    ...PROJECT_STATUSES.map((s) => ({ key: s.key, label: t[s.labelKey], color: s.color })),
+                  ].map((f) => {
+                    const count =
+                      f.key === "all"
+                        ? projects.length
+                        : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === f.key).length;
+                    if (f.key !== "all" && count === 0) return null;
+                    const active = pipelineFilter === f.key;
+                    return (
+                      <button
+                        key={f.key}
+                        onClick={() => setPipelineFilter(f.key)}
+                        style={{
+                          background: active ? `${f.color}33` : COLORS.card,
+                          border: `1px solid ${active ? f.color : COLORS.border}`,
+                          color: active ? f.color : COLORS.muted,
+                        }}
+                        className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                      >
+                        {f.label} {count}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <ReorderList
+                items={
+                  pipelineFilter === "all"
+                    ? projects
+                    : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === pipelineFilter)
+                }
+                gapClass="gap-2"
+                onReorder={reorderProjects}
+                renderItem={(p, handle) => {
+                  const pEntries = entries.filter((e) => e.projectId === p.id);
+                  const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
+                  return (
+                    <div
+                      style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                      className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1"
+                    >
+                      {handle}
+                      <span
+                        style={{ background: `${projectColour(p.id)}26`, color: projectColour(p.id) }}
+                        className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mr-2"
+                      >
+                        <ProjectIcon category={p.category} size={24} color={projectColour(p.id)} />
+                      </span>
+                      <button
+                        onClick={() => setSelectedProject(p.id)}
+                        className="flex-1 min-w-0 text-left flex items-center justify-between gap-2"
+                      >
+                        <div
+                          className="min-w-0 cursor-grab active:cursor-grabbing"
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation();
+                            e.dataTransfer.setData("text/project-id", p.id);
+                            e.dataTransfer.effectAllowed = "copy";
+                          }}
+                        >
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <div className="font-bold">{p.name}</div>
+                            {p.category && (
+                              <span
+                                style={{
+                                  background: COLORS.cardAlt,
+                                  color: COLORS.muted,
+                                  border: `1px solid ${COLORS.border}`,
+                                }}
+                                className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                              >
+                                {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                background: `${sm.color}22`,
+                                color: sm.color,
+                                border: `1px solid ${sm.color}66`,
+                              }}
+                              className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                            >
+                              {t[sm.labelKey]}
+                            </span>
+                          </div>
+                          {(customerFor(p) || p.client) && (
+                            <div style={{ color: COLORS.muted }} className="text-xs mt-0.5 flex items-center gap-1">
+                              <User size={10} /> {customerFor(p)?.name || p.client}
+                            </div>
+                          )}
+                          {p.address && (
+                            <a
+                              href={mapsUrl(p.address)}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ color: COLORS.accent }}
+                              className="text-xs flex items-center gap-1 mt-0.5"
+                            >
+                              <MapPin size={11} /> {p.address}
+                            </a>
+                          )}
+                          <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                            {pEntries.length} {t.entriesLabelFmt}
+                          </div>
+                        </div>
+                        <ChevronRight size={18} color={COLORS.muted} />
+                      </button>
+                    </div>
+                  );
+                }}
+              />
+              {projects.length === 0 && (
+                <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">
+                  {t.noProjectsYet}
                 </div>
               )}
             </div>
-              </>
-            )}
-          </div>
-          );
-        })()}
+          )}
 
-        {tab === "team" && (() => {
-          const roster = team.members;
-          const openJobs = projects.filter((pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS));
-          return (
-            <div className="px-4 pb-24">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <div className="font-black text-lg">{t.navTeam}</div>
-                {isOwner() && (
-                  <button onClick={() => openTeam()} style={{ background: COLORS.accent }} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase">
-                    {t.teamInviteBtn}
-                  </button>
-                )}
-              </div>
-              {roster.length === 0 && (
-                <div style={{ color: COLORS.muted }} className="text-xs">{t.teamNoMembers}</div>
-              )}
-              <div className="flex flex-col gap-2">
-                {roster.map((m) => {
-                  const jobs = openJobs.filter((pr) => projectCrew(pr).includes(m.uid));
-                  const todayProjects = assignments
-                    .filter((a) => a.date === todayKey() && a.userId === m.uid)
-                    .map((a) => projects.find((pr) => pr.id === a.projectId))
-                    .filter(Boolean);
-                  return (
+          {tab === "reports" &&
+            (() => {
+              // The day as the GAV reads it: the person's own entries, split into
+              // Normal / Überstunden / Reisezeit against the contract day.
+              const weekly = parseFloat(billing.weeklyHours || 0) || 0;
+              const contractDaily = weekly > 0 ? weekly / 5 : 0;
+              const todayMine = entries.filter((e) => e.date === todayKey() && e.userId === user?.uid);
+              const split = splitDayHours(todayMine, contractDaily);
+              const timeToday = todayMine.filter((e) => e.type === "time");
+              const approved = timeToday.length > 0 && timeToday.every((e) => e.approvedBy);
+              const personId = (canManage() && rapportPerson) || user?.uid;
+              const personName =
+                (team.members.find((m) => m.uid === personId) || {}).name ||
+                (personId === user?.uid ? profile.name : "") ||
+                "";
+              const weekDates = weekOf(rapportWeekAnchor);
+              const week = weekRows(entries, personId, weekDates, weekly);
+              const shiftWeek = (n) => {
+                const d = new Date(`${rapportWeekAnchor}T00:00:00Z`);
+                d.setUTCDate(d.getUTCDate() + 7 * n);
+                setRapportWeekAnchor(d.toISOString().slice(0, 10));
+              };
+              const downloadCsv = () => {
+                const csv = weekCsv(week, personName, {
+                  date: t.docDate,
+                  normal: t.hoursNormal,
+                  overtime: t.overtimeLabel,
+                  travel: t.hoursTravel,
+                  breaks: t.hoursBreaks,
+                  net: t.hoursTotal,
+                  total: t.hoursSum,
+                  target: t.hoursTarget,
+                  diff: t.hoursDiff,
+                });
+                downloadText(`woche-${(personName || "rapport").replace(/[^\w-]+/g, "_")}-${weekDates[0]}.csv`, csv);
+              };
+              const fmt = (x) => (Math.round(x * 100) / 100).toFixed(1);
+              const HourLine = ({ label, value, strong }) => (
+                <div
+                  className="flex items-center justify-between py-1"
+                  style={{ borderBottom: `1px solid ${COLORS.border}` }}
+                >
+                  <span
+                    style={{ color: strong ? COLORS.text : COLORS.muted }}
+                    className={strong ? "text-sm font-bold" : "text-sm"}
+                  >
+                    {label}
+                  </span>
+                  <span
+                    style={{ color: strong ? COLORS.accent : COLORS.text }}
+                    className={strong ? "font-black text-lg" : "font-bold"}
+                  >
+                    {value}
+                  </span>
+                </div>
+              );
+              const dayNames = [t.dayMon, t.dayTue, t.dayWed, t.dayThu, t.dayFri, t.daySat, t.daySun];
+              return (
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-2">
+                    {[
+                      ["daily", t.rapportDay],
+                      ["week", t.rapportWeek],
+                      ["monthly", t.rapportMonth],
+                    ].map(([v, l]) => (
+                      <button
+                        key={v}
+                        data-rapport-view={v}
+                        onClick={() => setReportView(v)}
+                        style={{
+                          background: reportView === v ? COLORS.accent : COLORS.card,
+                          border: `1px solid ${COLORS.border}`,
+                        }}
+                        className="flex-1 py-2.5 rounded-xl text-xs font-bold uppercase"
+                      >
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+
+                  {reportView === "daily" && (
                     <div
-                      key={m.uid}
-                      draggable={canManage()}
-                      onDragStart={(e) => e.dataTransfer.setData("text/member-uid", m.uid)}
+                      data-tagesrapport
                       style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
-                      className="rounded-xl p-3"
+                      className="rounded-xl p-4"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="text-sm font-bold truncate">{m.name || m.email || m.uid}</div>
-                          <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                            {m.role === "owner" ? t.roleOwner : m.role === "supervisor" ? t.roleSupervisor : t.roleCrew}
-                            {m.email && m.name ? ` · ${m.email}` : ""}
-                          </div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                          {t.rapportTitleDay} · {todayKey()}
                         </div>
-                        {todayProjects.length > 0 && (
-                          <span className="shrink-0 flex flex-wrap justify-end gap-1 max-w-[50%]">
-                            {todayProjects.map((tp) => (
-                              <span key={tp.id} style={{ background: `${projectColour(tp.id)}22`, color: projectColour(tp.id), border: `1px solid ${projectColour(tp.id)}66` }} className="text-xs font-bold px-2 py-0.5 rounded-full truncate max-w-[9rem]">
-                                {tp.name}
-                              </span>
-                            ))}
-                          </span>
-                        )}
-                      </div>
-                      {/* Which jobs this person is attached to, and a one-tap
-                          way to attach them to another without opening it. */}
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {jobs.map((pr) => (
-                          <button
-                            key={pr.id}
-                            onClick={() => { setTab("projects"); setSelectedProject(pr.id); }}
-                            style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(pr.id)}66`, color: COLORS.text }}
-                            className="px-2 py-1 rounded-full text-xs font-semibold"
-                          >
-                            {pr.name}
-                          </button>
-                        ))}
-                        {jobs.length === 0 && (
-                          <span style={{ color: COLORS.muted }} className="text-xs">{t.crewNoJobs}</span>
-                        )}
-                      </div>
-                      {isOwner() && m.role !== "owner" && m.uid !== user?.uid && (
-                        removeConfirm === m.uid ? (
-                          <div className="flex items-center gap-2 mt-2">
-                            <span style={{ color: COLORS.danger }} className="text-xs font-bold">{t.teamRemoveConfirm}</span>
-                            <button data-remove-yes onClick={() => removeMember(m.uid)} style={{ background: COLORS.danger }} className="px-2.5 py-1 rounded text-xs font-bold uppercase">{t.teamRemove}</button>
-                            <button onClick={() => setRemoveConfirm(null)} style={{ color: COLORS.muted }} className="px-2 py-1 text-xs font-bold uppercase">{t.back}</button>
-                          </div>
-                        ) : (
-                          <button data-remove-member onClick={() => setRemoveConfirm(m.uid)} style={{ color: COLORS.danger }} className="mt-2 text-xs font-bold uppercase flex items-center gap-1"><LogOut size={11} /> {t.teamRemove}</button>
-                        )
-                      )}
-                      {canManage() && (
-                        <select
-                          value=""
-                          onChange={(e) => { if (e.target.value) toggleProjectCrew(e.target.value, m.uid); e.target.value = ""; }}
-                          style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}
-                          className="w-full mt-2 rounded-lg px-2 py-1.5 text-xs outline-none"
+                        <span
+                          data-approval
+                          style={{
+                            color: approved ? COLORS.success : COLORS.muted,
+                            border: `1px solid ${approved ? COLORS.success : COLORS.border}`,
+                          }}
+                          className="text-xs font-bold uppercase px-2 py-0.5 rounded-full shrink-0"
                         >
-                          <option value="">{t.crewAddToJob}</option>
-                          {openJobs.filter((pr) => !projectCrew(pr).includes(m.uid)).map((pr) => (
-                            <option key={pr.id} value={pr.id}>{pr.name}</option>
+                          {approved ? t.approvedAll : t.notApproved}
+                        </span>
+                      </div>
+                      {daily.projIds.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {daily.projIds.map((id) => (
+                            <span
+                              key={id}
+                              style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(id)}66` }}
+                              className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                            >
+                              {projectName(id)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <HourLine label={t.hoursNormal} value={fmt(split.normal)} />
+                      <HourLine label={t.overtimeLabel} value={fmt(split.overtime)} />
+                      <HourLine label={t.hoursTravel} value={fmt(split.travel)} />
+                      <HourLine label={t.hoursBreaks} value={`−${fmt(split.breaks)}`} />
+                      <HourLine
+                        label={`${t.hoursTotal}${split.target != null ? ` · ${t.hoursTarget} ${fmt(split.target)}` : ""}`}
+                        value={fmt(split.net)}
+                        strong
+                      />
+                      <div className="mt-2">
+                        <Stat label={t.materialsLogged} value={daily.materials.length} color={COLORS.success} />
+                        <Stat
+                          label={t.tripTrips}
+                          value={todayMine.filter((e) => e.type === "transport").length}
+                          color="#C68B4F"
+                        />
+                        <Stat
+                          label={t.typePhoto}
+                          value={todayEntries.filter((e) => e.type === "photo").length}
+                          color="#7FA0C7"
+                        />
+                        <Stat
+                          label={t.typeNote}
+                          value={todayEntries.filter((e) => e.type === "note").length}
+                          color={COLORS.muted}
+                        />
+                      </div>
+                      <button
+                        onClick={() => sendReportToSupervisor("daily", daily, todayEntries)}
+                        style={{ background: COLORS.accentDim }}
+                        className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+                      >
+                        <FileText size={15} /> {t.sendToSupervisor}
+                      </button>
+                    </div>
+                  )}
+
+                  {reportView === "week" && (
+                    <div
+                      data-woche
+                      style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                      className="rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <button
+                          aria-label={t.a11yBack}
+                          title={t.a11yBack}
+                          data-week-prev
+                          onClick={() => shiftWeek(-1)}
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                          className="tap w-8 h-8 rounded-lg flex items-center justify-center"
+                        >
+                          <ChevronLeft size={16} color={COLORS.muted} />
+                        </button>
+                        <div
+                          data-week-label
+                          style={{ color: COLORS.muted }}
+                          className="text-xs uppercase tracking-wide text-center"
+                        >
+                          {weekDates[0]} – {weekDates[6]}
+                        </div>
+                        <button
+                          aria-label={t.a11yOpen}
+                          title={t.a11yOpen}
+                          data-week-next
+                          onClick={() => shiftWeek(1)}
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                          className="tap w-8 h-8 rounded-lg flex items-center justify-center"
+                        >
+                          <ChevronRight size={16} color={COLORS.muted} />
+                        </button>
+                      </div>
+                      {canManage() && team.members.length > 1 && (
+                        <select
+                          data-week-person
+                          value={personId || ""}
+                          onChange={(e) => setRapportPerson(e.target.value)}
+                          style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                          className="w-full rounded-lg px-2 py-2 text-sm outline-none mb-2"
+                        >
+                          {team.members.map((m) => (
+                            <option key={m.uid} value={m.uid}>
+                              {m.name || m.email || m.uid}
+                            </option>
                           ))}
                         </select>
                       )}
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                              <th className="text-left py-1">{t.docDate}</th>
+                              <th className="text-right py-1">{t.hoursNormal}</th>
+                              <th className="text-right py-1">{t.overtimeShort}</th>
+                              <th className="text-right py-1">{t.hoursTravel}</th>
+                              <th className="text-right py-1">{t.hoursBreaks}</th>
+                              <th className="text-right py-1">{t.hoursTotal}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {week.rows.map((r, i) => (
+                              <tr
+                                key={r.date}
+                                data-week-row
+                                style={{
+                                  borderTop: `1px solid ${COLORS.border}`,
+                                  color: r.net > 0 ? COLORS.text : COLORS.muted,
+                                }}
+                              >
+                                <td className="py-1.5">
+                                  <span className="font-bold">{dayNames[i]}</span>{" "}
+                                  <span style={{ color: COLORS.muted }}>
+                                    {r.date.slice(8)}.{r.date.slice(5, 7)}.
+                                  </span>
+                                </td>
+                                <td className="text-right tabular-nums">{fmt(r.normal)}</td>
+                                <td className="text-right tabular-nums">{fmt(r.overtime)}</td>
+                                <td className="text-right tabular-nums">{fmt(r.travel)}</td>
+                                <td className="text-right tabular-nums">{fmt(r.breaks)}</td>
+                                <td className="text-right tabular-nums font-bold">{fmt(r.net)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr style={{ borderTop: `2px solid ${COLORS.border}` }} className="font-bold">
+                              <td className="py-1.5">{t.hoursSum}</td>
+                              <td className="text-right tabular-nums">{fmt(week.total.normal)}</td>
+                              <td className="text-right tabular-nums">{fmt(week.total.overtime)}</td>
+                              <td className="text-right tabular-nums">{fmt(week.total.travel)}</td>
+                              <td className="text-right tabular-nums">{fmt(week.total.breaks)}</td>
+                              <td className="text-right tabular-nums" style={{ color: COLORS.accent }}>
+                                {fmt(week.total.net)}
+                              </td>
+                            </tr>
+                            {week.target != null && (
+                              <tr style={{ color: COLORS.muted }}>
+                                <td className="py-1">
+                                  {t.hoursTarget} / {t.hoursDiff}
+                                </td>
+                                <td colSpan={4}></td>
+                                <td
+                                  className="text-right tabular-nums"
+                                  style={{ color: week.diff >= 0 ? COLORS.success : COLORS.amber }}
+                                >
+                                  {fmt(week.target)} / {week.diff >= 0 ? "+" : ""}
+                                  {fmt(week.diff)}
+                                </td>
+                              </tr>
+                            )}
+                          </tfoot>
+                        </table>
+                      </div>
+                      {week.target == null && (
+                        <div style={{ color: COLORS.muted }} className="text-xs mt-2">
+                          {t.hoursNotConfigured}
+                        </div>
+                      )}
+                      <button
+                        data-week-csv
+                        onClick={downloadCsv}
+                        style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                        className="w-full mt-3 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+                      >
+                        <Download size={14} /> {t.weekCsv}
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
+                  )}
 
-        {tab === "transport" && (() => {
-          const trips = entries
-            .filter((e) => e.type === "transport" && (!transportFilter || e.projectId === transportFilter))
-            .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
-          const mk = monthKey();
-          const month = trips.filter((e) => (e.date || "").startsWith(mk));
-          const sum = (list, f) => Math.round(list.reduce((s, e) => s + (parseFloat(e[f]) || 0), 0) * 10) / 10;
-          const byDay = {};
-          trips.forEach((e) => { (byDay[e.date] = byDay[e.date] || []).push(e); });
-          const jobIds = [...new Set(entries.filter((e) => e.type === "transport" && e.projectId).map((e) => e.projectId))];
-          const driverName = (uid) => { const m = team?.members; if (!m || !uid) return ""; const r = Array.isArray(m) ? m.find((x) => x.uid === uid) : m[uid]; return r?.name || ""; };
-          return (
-            <div className="flex flex-col gap-4">
-              <button data-trip-add onClick={() => openTrip()} style={{ background: COLORS.accent }} className="w-full py-3.5 rounded-xl font-bold uppercase text-sm flex items-center justify-center gap-2"><Truck size={18} /> {t.tripAdd}</button>
-              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.thisMonth}</div>
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  {[[t.tripTrips, String(month.length), COLORS.accent], [t.tripHours, sum(month, "hours").toFixed(1), COLORS.amber], ["km", String(sum(month, "km")), COLORS.success], [t.tripWasteKg, String(sum(month.filter((e) => e.loadKind === "waste"), "weightKg")), "#C68B4F"]].map(([l, v, c]) => (
-                    <div key={l}><div style={{ color: c }} className="text-lg font-black leading-tight">{v}</div><div style={{ color: COLORS.muted }} className="text-xs uppercase">{l}</div></div>
-                  ))}
-                </div>
-              </div>
-              {jobIds.length > 1 && (
-                <div className="flex flex-wrap gap-1.5">
-                  <button onClick={() => setTransportFilter("")} style={{ background: !transportFilter ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1 rounded-full text-xs font-bold">{t.tripAllJobs}</button>
-                  {jobIds.map((id) => <button key={id} onClick={() => setTransportFilter(id)} style={{ background: transportFilter === id ? COLORS.accent : COLORS.card, border: `1px solid ${projectColour(id)}66` }} className="px-2.5 py-1 rounded-full text-xs font-bold">{projectName(id)}</button>)}
-                </div>
-              )}
-              {trips.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm text-center py-6">{t.tripEmpty}</div>}
-              {Object.keys(byDay).sort().reverse().map((day) => (
-                <div key={day} className="flex flex-col gap-2">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{day}{day === todayKey() ? ` · ${t.navToday}` : ""}</div>
-                  {byDay[day].map((e) => (
-                    <div key={e.id} data-trip-row style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 flex flex-col gap-1">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Truck size={14} color="#C68B4F" className="shrink-0" />
-                        <span className="text-sm font-bold truncate">{e.from || "?"} → {e.to || "?"}</span>
-                        <span style={{ color: COLORS.muted }} className="ml-auto text-xs shrink-0">{e.departTime}{e.arriveTime ? `–${e.arriveTime}` : ""}</span>
+                  {reportView === "monthly" && (
+                    <>
+                      {(() => {
+                        const s = monthlyUnsent;
+                        const list = monthUnsent.entries;
+                        return (
+                          <div
+                            style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                            className="rounded-xl p-4"
+                          >
+                            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">
+                              {monthKey()}
+                            </div>
+                            <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
+                            {s.breaks > 0 && (
+                              <div style={{ color: COLORS.muted }} className="text-xs mt-1 mb-2 text-right">
+                                {t.breaksDeducted}: −{s.breaks.toFixed(1)} h
+                              </div>
+                            )}
+                            <Stat label={t.materialsLogged} value={s.materials.length} color={COLORS.success} />
+                            <Stat label={t.toolsLogged} value={s.tools.length} color={COLORS.amber} />
+                            <Stat label={t.sitesVisited} value={s.projIds.length} color="#7FA0C7" />
+                            <div style={{ color: COLORS.muted }} className="text-xs mt-3 mb-1">
+                              {t.sitesLabel}: {s.projIds.map(projectName).join(", ") || "—"}
+                            </div>
+                            {reportView === "monthly" && monthUnsent.alreadySent > 0 && (
+                              <div style={{ color: COLORS.amber }} className="text-xs mb-1">
+                                {monthUnsent.alreadySent} {t.reportAlreadySentDaily}
+                              </div>
+                            )}
+                            <button
+                              onClick={() => sendReportToSupervisor("monthly", s, list)}
+                              style={{ background: COLORS.accentDim }}
+                              className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+                            >
+                              <FileText size={15} /> {t.sendToSupervisor}
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </>
+                  )}
+
+                  {reportView !== "week" && (
+                    <>
+                      <div>
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                          {t.entriesTitle}
+                        </div>
+                        <EntryGroups
+                          entries={reportView === "daily" ? todayEntries : monthUnsent.entries}
+                          projectName={projectName}
+                          t={t}
+                          emptyLabel={t.nothingLogged}
+                          onEditTime={openEditTime}
+                          onEditEntry={openEditEntry}
+                          onDelete={deleteEntryFn}
+                        />
                       </div>
-                      <div style={{ color: COLORS.muted }} className="text-xs flex flex-wrap gap-x-3 gap-y-0.5">
-                        <span>{t[`vehicle_${e.vehicle}`] || e.vehicle}</span>
-                        <span>{t[`load_${e.loadKind}`] || e.loadKind}{e.weightKg ? ` · ${e.weightKg} kg` : ""}</span>
-                        {e.hours ? <span>{e.hours} h</span> : null}
-                        {e.km ? <span>{e.km} km</span> : null}
-                        {e.mulde ? <span>{t.tripMulde} {e.mulde} m³</span> : null}
-                        {e.projectId && <span style={{ color: projectColour(e.projectId) }}>{projectName(e.projectId)}</span>}
-                        {e.disposalSite && <span>→ {e.disposalSite}</span>}
-                        {driverName(e.userId) && <span>{driverName(e.userId)}</span>}
+                      <div>
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                          {t.sentReports}
+                        </div>
+                        {sentReports.length === 0 ? (
+                          <div style={{ color: COLORS.muted }} className="text-sm">
+                            {t.noReportsYet}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            {sentReports.map((r) => (
+                              <button
+                                key={r.id}
+                                onClick={() => setReportViewModal(r)}
+                                style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                                className="w-full text-left rounded-lg p-3 flex items-center justify-between"
+                              >
+                                <div>
+                                  <div className="text-sm font-semibold">
+                                    {r.period === "daily" ? t.daily : t.monthly} · {r.periodLabel}
+                                  </div>
+                                  <div style={{ color: COLORS.muted }} className="text-xs">
+                                    {reportFigures(r).hours}h · {t.reportSentTimes} {(r.sends || []).length || 1}×
+                                    {r.sentAt
+                                      ? ` · ${t.reportLastSent} ${new Date(r.sentAt).toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`
+                                      : ""}
+                                    {r.editedAt ? ` · ${t.editedTag}` : ""}
+                                  </div>
+                                </div>
+                                <ChevronRight size={16} color={COLORS.muted} />
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {e.notes && <div className="text-xs">{e.notes}</div>}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          );
-        })()}
-        {tab === "safety" && (
-          <div className="flex flex-col gap-4">
-            <button onClick={() => { setSosOpen(true); setCprStep(0); }} style={{ background: COLORS.danger }} className="w-full py-5 rounded-xl font-black uppercase text-lg flex items-center justify-center gap-2">
-              <Siren size={22} /> {t.sosButton}
-            </button>
-            <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3 flex items-center gap-1"><Phone size={12} /> {t.emergencyNumbers}</div>
-              <div className="grid grid-cols-2 gap-2">
-                {[t.ambulance, t.police, t.fire, t.generalEmergency].map((label, i) => (
-                  <a key={SWISS_EMERGENCY_NUMS[i]} href={`tel:${SWISS_EMERGENCY_NUMS[i]}`} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg py-3 text-center">
-                    <div style={{ color: COLORS.danger }} className="text-2xl font-black">{SWISS_EMERGENCY_NUMS[i]}</div>
-                    <div style={{ color: COLORS.muted }} className="text-xs">{label}</div>
-                  </a>
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-4 gap-1.5">
-              {SAFETY_CATEGORIES.map((cat) => {
-                const CatIcon = cat.icon;
-                const active = safetyCat === cat.key;
-                return (
-                  <button key={cat.key} onClick={() => setSafetyCat(cat.key)} style={{ background: active ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-lg py-2 px-1 flex flex-col items-center gap-1">
-                    <CatIcon size={16} color={active ? "#fff" : COLORS.muted} />
-                    <span style={{ color: active ? "#fff" : COLORS.muted }} className="text-xs font-bold text-center leading-tight">{t[cat.labelKey]}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {(() => {
-              const cat = SAFETY_CATEGORIES.find((c) => c.key === safetyCat) || SAFETY_CATEGORIES[0];
-              const CatIcon = cat.icon;
-              return (
-                <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3 flex items-center gap-1"><CatIcon size={12} /> {t[cat.labelKey]}</div>
-                  <div className="flex flex-col gap-3">
-                    {cat.rules.map((r, i) => (
-                      <div key={i}>
-                        <div className="text-sm font-bold">{t[r + "T"]}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">{t[r + "X"]}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <a href={cat.url} target="_blank" rel="noreferrer" style={{ color: COLORS.accent, borderTop: `1px solid ${COLORS.border}` }} className="mt-3 pt-3 text-xs font-bold flex items-center gap-1">
-                    {t.fullRulesLink} <ExternalLink size={12} />
-                  </a>
-                  <div style={{ color: COLORS.muted }} className="text-xs mt-2">{t.summaryDisclaimer}</div>
+                    </>
+                  )}
                 </div>
               );
             })()}
-          </div>
-        )}
-      </div>
 
-      {/* The floating camera button is gone: it covered the dock and the
-          bottom of every list on a phone. Photos are added from the job view. */}
-
-      {/* The dock. Active jobs and pinned ones as a tray of tiles, the way a
-          game keeps its characters along the bottom: always there, scroll
-          sideways, drop things on them. It takes real height from the column
-          rather than floating, so nothing ever scrolls underneath it. */}
-      {membership && (() => {
-        if (dockProjects.length === 0) return null;
-        return (
-          <div
-            data-dock
-            onDragOver={(e) => { if (Array.from(e.dataTransfer?.types || []).includes("text/project-id")) { e.preventDefault(); if (!dockDragOver) setDockDragOver(true); } }}
-            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDockDragOver(false); }}
-            onDrop={(e) => { if (pinFromDrop(e.dataTransfer)) e.preventDefault(); setDockDragOver(false); }}
-            style={{ background: dockDragOver ? `${COLORS.accent}14` : COLORS.card, borderTop: `1px solid ${dockDragOver ? COLORS.accent : COLORS.border}`, transition: "background 0.1s" }}
-            className="shrink-0 relative z-20"
-          >
-            <div className="flex items-center gap-1 px-4 py-1">
-              <button onClick={() => setDockOpenRemembered(!dockOpen)} className="flex-1 min-w-0 flex items-center gap-1.5 py-0.5 text-left">
-                <MapPin size={11} color={COLORS.muted} />
-                <span style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide font-bold truncate">
-                  {dockDragOver ? t.dockDropProject : `${t.dockTitle} (${dockProjects.length})`}
-                </span>
-              </button>
-              {/* One tap cycles the order; the word next to it says which. */}
-              <button
-                data-dock-sort
-                onClick={cycleDockSort}
-                title={t[`dockSort_${dockSort}`]}
-                style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }}
-                className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-              >
-                <ArrowUpDown size={11} /> {t[`dockSort_${dockSort}`]}
-              </button>
-              <button aria-label={t.a11yOpen} title={t.a11yOpen} onClick={() => setDockOpenRemembered(!dockOpen)} className="tap shrink-0 pl-1">
-                <ChevronRight size={14} color={COLORS.muted} style={{ transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)", transition: "transform 0.15s" }} />
-              </button>
-            </div>
-            {dockOpen && (
-              <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ WebkitOverflowScrolling: "touch" }}>
-                {dockProjects.map((pr) => {
-                  const col = projectColour(pr.id);
-                  const over = dockOver === pr.id;
-                  const pinned = pinnedIds.includes(pr.id);
-                  const sm = statusMeta(pr.status || DEFAULT_PROJECT_STATUS);
-                  const mats = entries.filter((e) => e.projectId === pr.id && (e.type === "material" || e.type === "tool")).length;
-                  const crewN = projectCrew(pr).length;
-                  return (
-                    <div
-                      key={pr.id}
-                      data-dock-project={pr.id}
-                      role="button"
-                      tabIndex={0}
-                      title={canManage() ? t.dockDropHint : pr.name}
-                      onClick={() => { setTab("projects"); setSelectedProject(pr.id); }}
-                      onKeyDown={(e) => { if (e.key === "Enter") { setTab("projects"); setSelectedProject(pr.id); } }}
-                      onDragOver={(e) => { if (dockAccepts(e.dataTransfer)) { e.preventDefault(); if (!over) setDockOver(pr.id); } }}
-                      onDragLeave={() => setDockOver(null)}
-                      onDrop={(e) => { e.preventDefault(); setDockOver(null); dropOnProject(pr.id, e.dataTransfer); }}
-                      style={{
-                        background: over ? `${col}40` : `${col}1A`,
-                        borderTop: `1px solid ${over ? col : col + "55"}`,
-                        borderRight: `1px solid ${over ? col : col + "55"}`,
-                        borderBottom: `1px solid ${over ? col : col + "55"}`,
-                        borderLeft: `4px solid ${col}`,
-                        transform: over ? "scale(1.04)" : "none",
-                        transition: "transform 0.1s, background 0.1s",
-                      }}
-                      className="shrink-0 w-24 rounded-xl px-1.5 py-2 cursor-pointer select-none flex flex-col items-center gap-1 text-center"
-                    >
-                      {/* The tile is the picture. Status is the ring colour's
-                          little dot; the name sits underneath, two lines at most. */}
-                      <div style={{ background: `${col}2A`, border: `2px solid ${col}`, color: col }} className="relative w-14 h-14 rounded-2xl flex items-center justify-center" title={t[(PROJECT_CATEGORIES.find((c) => c.key === pr.category) || PROJECT_CATEGORIES[3]).labelKey]}>
-                        <ProjectIcon category={pr.category} size={38} color={col} />
-                        {pinned && (
-                          <span style={{ background: COLORS.card, color: col }} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"><Pin size={11} /></span>
-                        )}
-                        <span style={{ background: sm.color, border: `2px solid ${COLORS.card}` }} className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 rounded-full" title={t[sm.labelKey]} />
-                      </div>
-                      <div className="text-xs font-bold leading-tight w-full overflow-hidden" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{pr.name}</div>
-                      <div style={{ color: COLORS.muted }} className="flex items-center gap-1.5 text-xs tabular-nums">
-                        <span className="flex items-center gap-0.5"><Users size={9} /> {crewN}</span>
-                        <span className="flex items-center gap-0.5"><Package size={9} /> {mats}</span>
-                      </div>
+          {tab === "team" &&
+            (() => {
+              const roster = team.members;
+              const openJobs = projects.filter(
+                (pr) => !["completed", "lost"].includes(pr.status || DEFAULT_PROJECT_STATUS),
+              );
+              return (
+                <div className="px-4 pb-24">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="font-black text-lg">{t.navTeam}</div>
+                    {isOwner() && (
+                      <button
+                        onClick={() => openTeam()}
+                        style={{ background: COLORS.accent }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase"
+                      >
+                        {t.teamInviteBtn}
+                      </button>
+                    )}
+                  </div>
+                  {roster.length === 0 && (
+                    <div style={{ color: COLORS.muted }} className="text-xs">
+                      {t.teamNoMembers}
                     </div>
+                  )}
+                  <div className="flex flex-col gap-2">
+                    {roster.map((m) => {
+                      const jobs = openJobs.filter((pr) => projectCrew(pr).includes(m.uid));
+                      const todayProjects = assignments
+                        .filter((a) => a.date === todayKey() && a.userId === m.uid)
+                        .map((a) => projects.find((pr) => pr.id === a.projectId))
+                        .filter(Boolean);
+                      return (
+                        <div
+                          key={m.uid}
+                          draggable={canManage()}
+                          onDragStart={(e) => e.dataTransfer.setData("text/member-uid", m.uid)}
+                          style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                          className="rounded-xl p-3"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-sm font-bold truncate">{m.name || m.email || m.uid}</div>
+                              <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                                {m.role === "owner"
+                                  ? t.roleOwner
+                                  : m.role === "supervisor"
+                                    ? t.roleSupervisor
+                                    : t.roleCrew}
+                                {m.email && m.name ? ` · ${m.email}` : ""}
+                              </div>
+                            </div>
+                            {todayProjects.length > 0 && (
+                              <span className="shrink-0 flex flex-wrap justify-end gap-1 max-w-[50%]">
+                                {todayProjects.map((tp) => (
+                                  <span
+                                    key={tp.id}
+                                    style={{
+                                      background: `${projectColour(tp.id)}22`,
+                                      color: projectColour(tp.id),
+                                      border: `1px solid ${projectColour(tp.id)}66`,
+                                    }}
+                                    className="text-xs font-bold px-2 py-0.5 rounded-full truncate max-w-[9rem]"
+                                  >
+                                    {tp.name}
+                                  </span>
+                                ))}
+                              </span>
+                            )}
+                          </div>
+                          {/* Which jobs this person is attached to, and a one-tap
+                          way to attach them to another without opening it. */}
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {jobs.map((pr) => (
+                              <button
+                                key={pr.id}
+                                onClick={() => {
+                                  setTab("projects");
+                                  setSelectedProject(pr.id);
+                                }}
+                                style={{
+                                  background: COLORS.cardAlt,
+                                  border: `1px solid ${projectColour(pr.id)}66`,
+                                  color: COLORS.text,
+                                }}
+                                className="px-2 py-1 rounded-full text-xs font-semibold"
+                              >
+                                {pr.name}
+                              </button>
+                            ))}
+                            {jobs.length === 0 && (
+                              <span style={{ color: COLORS.muted }} className="text-xs">
+                                {t.crewNoJobs}
+                              </span>
+                            )}
+                          </div>
+                          {isOwner() &&
+                            m.role !== "owner" &&
+                            m.uid !== user?.uid &&
+                            (removeConfirm === m.uid ? (
+                              <div className="flex items-center gap-2 mt-2">
+                                <span style={{ color: COLORS.danger }} className="text-xs font-bold">
+                                  {t.teamRemoveConfirm}
+                                </span>
+                                <button
+                                  data-remove-yes
+                                  onClick={() => removeMember(m.uid)}
+                                  style={{ background: COLORS.danger }}
+                                  className="px-2.5 py-1 rounded text-xs font-bold uppercase"
+                                >
+                                  {t.teamRemove}
+                                </button>
+                                <button
+                                  onClick={() => setRemoveConfirm(null)}
+                                  style={{ color: COLORS.muted }}
+                                  className="px-2 py-1 text-xs font-bold uppercase"
+                                >
+                                  {t.back}
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                data-remove-member
+                                onClick={() => setRemoveConfirm(m.uid)}
+                                style={{ color: COLORS.danger }}
+                                className="mt-2 text-xs font-bold uppercase flex items-center gap-1"
+                              >
+                                <LogOut size={11} /> {t.teamRemove}
+                              </button>
+                            ))}
+                          {canManage() && (
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) toggleProjectCrew(e.target.value, m.uid);
+                                e.target.value = "";
+                              }}
+                              style={{
+                                background: COLORS.shell,
+                                border: `1px solid ${COLORS.border}`,
+                                color: COLORS.muted,
+                              }}
+                              className="w-full mt-2 rounded-lg px-2 py-1.5 text-xs outline-none"
+                            >
+                              <option value="">{t.crewAddToJob}</option>
+                              {openJobs
+                                .filter((pr) => !projectCrew(pr).includes(m.uid))
+                                .map((pr) => (
+                                  <option key={pr.id} value={pr.id}>
+                                    {pr.name}
+                                  </option>
+                                ))}
+                            </select>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
+          {tab === "transport" &&
+            (() => {
+              const trips = entries
+                .filter((e) => e.type === "transport" && (!transportFilter || e.projectId === transportFilter))
+                .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || 0) - (a.createdAt || 0));
+              const mk = monthKey();
+              const month = trips.filter((e) => (e.date || "").startsWith(mk));
+              const sum = (list, f) => Math.round(list.reduce((s, e) => s + (parseFloat(e[f]) || 0), 0) * 10) / 10;
+              const byDay = {};
+              trips.forEach((e) => {
+                (byDay[e.date] = byDay[e.date] || []).push(e);
+              });
+              const jobIds = [
+                ...new Set(entries.filter((e) => e.type === "transport" && e.projectId).map((e) => e.projectId)),
+              ];
+              const driverName = (uid) => {
+                const m = team?.members;
+                if (!m || !uid) return "";
+                const r = Array.isArray(m) ? m.find((x) => x.uid === uid) : m[uid];
+                return r?.name || "";
+              };
+              return (
+                <div className="flex flex-col gap-4">
+                  <button
+                    data-trip-add
+                    onClick={() => openTrip()}
+                    style={{ background: COLORS.accent }}
+                    className="w-full py-3.5 rounded-xl font-bold uppercase text-sm flex items-center justify-center gap-2"
+                  >
+                    <Truck size={18} /> {t.tripAdd}
+                  </button>
+                  <div
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="rounded-xl p-3"
+                  >
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                      {t.thisMonth}
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      {[
+                        [t.tripTrips, String(month.length), COLORS.accent],
+                        [t.tripHours, sum(month, "hours").toFixed(1), COLORS.amber],
+                        ["km", String(sum(month, "km")), COLORS.success],
+                        [
+                          t.tripWasteKg,
+                          String(
+                            sum(
+                              month.filter((e) => e.loadKind === "waste"),
+                              "weightKg",
+                            ),
+                          ),
+                          "#C68B4F",
+                        ],
+                      ].map(([l, v, c]) => (
+                        <div key={l}>
+                          <div style={{ color: c }} className="text-lg font-black leading-tight">
+                            {v}
+                          </div>
+                          <div style={{ color: COLORS.muted }} className="text-xs uppercase">
+                            {l}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {jobIds.length > 1 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => setTransportFilter("")}
+                        style={{
+                          background: !transportFilter ? COLORS.accent : COLORS.card,
+                          border: `1px solid ${COLORS.border}`,
+                        }}
+                        className="px-2.5 py-1 rounded-full text-xs font-bold"
+                      >
+                        {t.tripAllJobs}
+                      </button>
+                      {jobIds.map((id) => (
+                        <button
+                          key={id}
+                          onClick={() => setTransportFilter(id)}
+                          style={{
+                            background: transportFilter === id ? COLORS.accent : COLORS.card,
+                            border: `1px solid ${projectColour(id)}66`,
+                          }}
+                          className="px-2.5 py-1 rounded-full text-xs font-bold"
+                        >
+                          {projectName(id)}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {trips.length === 0 && (
+                    <div style={{ color: COLORS.muted }} className="text-sm text-center py-6">
+                      {t.tripEmpty}
+                    </div>
+                  )}
+                  {Object.keys(byDay)
+                    .sort()
+                    .reverse()
+                    .map((day) => (
+                      <div key={day} className="flex flex-col gap-2">
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                          {day}
+                          {day === todayKey() ? ` · ${t.navToday}` : ""}
+                        </div>
+                        {byDay[day].map((e) => (
+                          <div
+                            key={e.id}
+                            data-trip-row
+                            style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                            className="rounded-xl p-3 flex flex-col gap-1"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Truck size={14} color="#C68B4F" className="shrink-0" />
+                              <span className="text-sm font-bold truncate">
+                                {e.from || "?"} → {e.to || "?"}
+                              </span>
+                              <span style={{ color: COLORS.muted }} className="ml-auto text-xs shrink-0">
+                                {e.departTime}
+                                {e.arriveTime ? `–${e.arriveTime}` : ""}
+                              </span>
+                            </div>
+                            <div style={{ color: COLORS.muted }} className="text-xs flex flex-wrap gap-x-3 gap-y-0.5">
+                              <span>{t[`vehicle_${e.vehicle}`] || e.vehicle}</span>
+                              <span>
+                                {t[`load_${e.loadKind}`] || e.loadKind}
+                                {e.weightKg ? ` · ${e.weightKg} kg` : ""}
+                              </span>
+                              {e.hours ? <span>{e.hours} h</span> : null}
+                              {e.km ? <span>{e.km} km</span> : null}
+                              {e.mulde ? (
+                                <span>
+                                  {t.tripMulde} {e.mulde} m³
+                                </span>
+                              ) : null}
+                              {e.projectId && (
+                                <span style={{ color: projectColour(e.projectId) }}>{projectName(e.projectId)}</span>
+                              )}
+                              {e.disposalSite && <span>→ {e.disposalSite}</span>}
+                              {driverName(e.userId) && <span>{driverName(e.userId)}</span>}
+                            </div>
+                            {e.notes && <div className="text-xs">{e.notes}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                </div>
+              );
+            })()}
+          {tab === "safety" && (
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => {
+                  setSosOpen(true);
+                  setCprStep(0);
+                }}
+                style={{ background: COLORS.danger }}
+                className="w-full py-5 rounded-xl font-black uppercase text-lg flex items-center justify-center gap-2"
+              >
+                <Siren size={22} /> {t.sosButton}
+              </button>
+              <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
+                <div
+                  style={{ color: COLORS.muted }}
+                  className="text-xs uppercase tracking-wide mb-3 flex items-center gap-1"
+                >
+                  <Phone size={12} /> {t.emergencyNumbers}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[t.ambulance, t.police, t.fire, t.generalEmergency].map((label, i) => (
+                    <a
+                      key={SWISS_EMERGENCY_NUMS[i]}
+                      href={`tel:${SWISS_EMERGENCY_NUMS[i]}`}
+                      style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                      className="rounded-lg py-3 text-center"
+                    >
+                      <div style={{ color: COLORS.danger }} className="text-2xl font-black">
+                        {SWISS_EMERGENCY_NUMS[i]}
+                      </div>
+                      <div style={{ color: COLORS.muted }} className="text-xs">
+                        {label}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                {SAFETY_CATEGORIES.map((cat) => {
+                  const CatIcon = cat.icon;
+                  const active = safetyCat === cat.key;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => setSafetyCat(cat.key)}
+                      style={{ background: active ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }}
+                      className="rounded-lg py-2 px-1 flex flex-col items-center gap-1"
+                    >
+                      <CatIcon size={16} color={active ? "#fff" : COLORS.muted} />
+                      <span
+                        style={{ color: active ? "#fff" : COLORS.muted }}
+                        className="text-xs font-bold text-center leading-tight"
+                      >
+                        {t[cat.labelKey]}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
-            )}
-          </div>
-        );
-      })()}
+              {(() => {
+                const cat = SAFETY_CATEGORIES.find((c) => c.key === safetyCat) || SAFETY_CATEGORIES[0];
+                const CatIcon = cat.icon;
+                return (
+                  <div
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="rounded-xl p-4"
+                  >
+                    <div
+                      style={{ color: COLORS.muted }}
+                      className="text-xs uppercase tracking-wide mb-3 flex items-center gap-1"
+                    >
+                      <CatIcon size={12} /> {t[cat.labelKey]}
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {cat.rules.map((r, i) => (
+                        <div key={i}>
+                          <div className="text-sm font-bold">{t[r + "T"]}</div>
+                          <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
+                            {t[r + "X"]}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <a
+                      href={cat.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: COLORS.accent, borderTop: `1px solid ${COLORS.border}` }}
+                      className="mt-3 pt-3 text-xs font-bold flex items-center gap-1"
+                    >
+                      {t.fullRulesLink} <ExternalLink size={12} />
+                    </a>
+                    <div style={{ color: COLORS.muted }} className="text-xs mt-2">
+                      {t.summaryDisclaimer}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
 
-      {/* The phone's main navigation: four tabs and a «+» under the thumb, the
+        {/* The floating camera button is gone: it covered the dock and the
+          bottom of every list on a phone. Photos are added from the job view. */}
+
+        {/* The dock. Active jobs and pinned ones as a tray of tiles, the way a
+          game keeps its characters along the bottom: always there, scroll
+          sideways, drop things on them. It takes real height from the column
+          rather than floating, so nothing ever scrolls underneath it. */}
+        {membership &&
+          (() => {
+            if (dockProjects.length === 0) return null;
+            return (
+              <div
+                data-dock
+                onDragOver={(e) => {
+                  if (Array.from(e.dataTransfer?.types || []).includes("text/project-id")) {
+                    e.preventDefault();
+                    if (!dockDragOver) setDockDragOver(true);
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) setDockDragOver(false);
+                }}
+                onDrop={(e) => {
+                  if (pinFromDrop(e.dataTransfer)) e.preventDefault();
+                  setDockDragOver(false);
+                }}
+                style={{
+                  background: dockDragOver ? `${COLORS.accent}14` : COLORS.card,
+                  borderTop: `1px solid ${dockDragOver ? COLORS.accent : COLORS.border}`,
+                  transition: "background 0.1s",
+                }}
+                className="shrink-0 relative z-20"
+              >
+                <div className="flex items-center gap-1 px-4 py-1">
+                  <button
+                    onClick={() => setDockOpenRemembered(!dockOpen)}
+                    className="flex-1 min-w-0 flex items-center gap-1.5 py-0.5 text-left"
+                  >
+                    <MapPin size={11} color={COLORS.muted} />
+                    <span
+                      style={{ color: COLORS.muted }}
+                      className="text-xs uppercase tracking-wide font-bold truncate"
+                    >
+                      {dockDragOver ? t.dockDropProject : `${t.dockTitle} (${dockProjects.length})`}
+                    </span>
+                  </button>
+                  {/* One tap cycles the order; the word next to it says which. */}
+                  <button
+                    data-dock-sort
+                    onClick={cycleDockSort}
+                    title={t[`dockSort_${dockSort}`]}
+                    style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }}
+                    className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                  >
+                    <ArrowUpDown size={11} /> {t[`dockSort_${dockSort}`]}
+                  </button>
+                  <button
+                    aria-label={t.a11yOpen}
+                    title={t.a11yOpen}
+                    onClick={() => setDockOpenRemembered(!dockOpen)}
+                    className="tap shrink-0 pl-1"
+                  >
+                    <ChevronRight
+                      size={14}
+                      color={COLORS.muted}
+                      style={{
+                        transform: dockOpen ? "rotate(90deg)" : "rotate(-90deg)",
+                        transition: "transform 0.15s",
+                      }}
+                    />
+                  </button>
+                </div>
+                {dockOpen && (
+                  <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ WebkitOverflowScrolling: "touch" }}>
+                    {dockProjects.map((pr) => {
+                      const col = projectColour(pr.id);
+                      const over = dockOver === pr.id;
+                      const pinned = pinnedIds.includes(pr.id);
+                      const sm = statusMeta(pr.status || DEFAULT_PROJECT_STATUS);
+                      const mats = entries.filter(
+                        (e) => e.projectId === pr.id && (e.type === "material" || e.type === "tool"),
+                      ).length;
+                      const crewN = projectCrew(pr).length;
+                      return (
+                        <div
+                          key={pr.id}
+                          data-dock-project={pr.id}
+                          role="button"
+                          tabIndex={0}
+                          title={canManage() ? t.dockDropHint : pr.name}
+                          onClick={() => {
+                            setTab("projects");
+                            setSelectedProject(pr.id);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setTab("projects");
+                              setSelectedProject(pr.id);
+                            }
+                          }}
+                          onDragOver={(e) => {
+                            if (dockAccepts(e.dataTransfer)) {
+                              e.preventDefault();
+                              if (!over) setDockOver(pr.id);
+                            }
+                          }}
+                          onDragLeave={() => setDockOver(null)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setDockOver(null);
+                            dropOnProject(pr.id, e.dataTransfer);
+                          }}
+                          style={{
+                            background: over ? `${col}40` : `${col}1A`,
+                            borderTop: `1px solid ${over ? col : col + "55"}`,
+                            borderRight: `1px solid ${over ? col : col + "55"}`,
+                            borderBottom: `1px solid ${over ? col : col + "55"}`,
+                            borderLeft: `4px solid ${col}`,
+                            transform: over ? "scale(1.04)" : "none",
+                            transition: "transform 0.1s, background 0.1s",
+                          }}
+                          className="shrink-0 w-24 rounded-xl px-1.5 py-2 cursor-pointer select-none flex flex-col items-center gap-1 text-center"
+                        >
+                          {/* The tile is the picture. Status is the ring colour's
+                          little dot; the name sits underneath, two lines at most. */}
+                          <div
+                            style={{ background: `${col}2A`, border: `2px solid ${col}`, color: col }}
+                            className="relative w-14 h-14 rounded-2xl flex items-center justify-center"
+                            title={
+                              t[
+                                (PROJECT_CATEGORIES.find((c) => c.key === pr.category) || PROJECT_CATEGORIES[3])
+                                  .labelKey
+                              ]
+                            }
+                          >
+                            <ProjectIcon category={pr.category} size={38} color={col} />
+                            {pinned && (
+                              <span
+                                style={{ background: COLORS.card, color: col }}
+                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center"
+                              >
+                                <Pin size={11} />
+                              </span>
+                            )}
+                            <span
+                              style={{ background: sm.color, border: `2px solid ${COLORS.card}` }}
+                              className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 rounded-full"
+                              title={t[sm.labelKey]}
+                            />
+                          </div>
+                          <div
+                            className="text-xs font-bold leading-tight w-full overflow-hidden"
+                            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}
+                          >
+                            {pr.name}
+                          </div>
+                          <div
+                            style={{ color: COLORS.muted }}
+                            className="flex items-center gap-1.5 text-xs tabular-nums"
+                          >
+                            <span className="flex items-center gap-0.5">
+                              <Users size={9} /> {crewN}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <Package size={9} /> {mats}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+        {/* The phone's main navigation: four tabs and a «+» under the thumb, the
           way every site app on the market does it. Real height in the column
           like the dock above it, so nothing ever scrolls underneath. */}
-      {membership && (
-        <nav data-tab-bar style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="lg:hidden shrink-0 grid grid-cols-5 items-end px-1 pt-1 pb-[max(6px,env(safe-area-inset-bottom))]">
-          {[
-            { id: "today", label: t.navToday, icon: Clock },
-            { id: "projects", label: t.navSites, icon: MapPin },
-            null,
-            { id: "reports", label: t.navReports, icon: FileText },
-            { id: "more", label: t.navMore, icon: Menu },
-          ].map((it, idx) => {
-            if (!it) {
+        {membership && (
+          <nav
+            data-tab-bar
+            style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }}
+            className="lg:hidden shrink-0 grid grid-cols-5 items-end px-1 pt-1 pb-[max(6px,env(safe-area-inset-bottom))]"
+          >
+            {[
+              { id: "today", label: t.navToday, icon: Clock },
+              { id: "projects", label: t.navSites, icon: MapPin },
+              null,
+              { id: "reports", label: t.navReports, icon: FileText },
+              { id: "more", label: t.navMore, icon: Menu },
+            ].map((it, idx) => {
+              if (!it) {
+                return (
+                  <button
+                    key="plus"
+                    data-quick-add-button
+                    onClick={() => setQuickAddOpen(true)}
+                    title={t.quickAddTitle}
+                    className="flex flex-col items-center justify-end pb-0.5"
+                  >
+                    <span
+                      style={{ background: COLORS.accent }}
+                      className="w-12 h-12 -mt-5 rounded-full flex items-center justify-center shadow-lg"
+                    >
+                      <Plus size={24} color="#fff" />
+                    </span>
+                  </button>
+                );
+              }
+              const Icon = it.icon;
+              const active = it.id === "more" ? menuOpen : tab === it.id && !selectedProject;
+              const onClick =
+                it.id === "more"
+                  ? () => setMenuOpen(true)
+                  : () => {
+                      setTab(it.id);
+                      setSelectedProject(null);
+                      setMenuOpen(false);
+                    };
               return (
-                <button key="plus" data-quick-add-button onClick={() => setQuickAddOpen(true)} title={t.quickAddTitle} className="flex flex-col items-center justify-end pb-0.5">
-                  <span style={{ background: COLORS.accent }} className="w-12 h-12 -mt-5 rounded-full flex items-center justify-center shadow-lg"><Plus size={24} color="#fff" /></span>
+                <button
+                  key={it.id}
+                  data-tab={it.id}
+                  {...(it.id === "more" ? { "data-menu-button": true } : {})}
+                  onClick={onClick}
+                  style={{ color: active ? COLORS.accent : COLORS.muted }}
+                  className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase tracking-wide"
+                >
+                  <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
+                  <span className="truncate max-w-full">{it.label}</span>
                 </button>
               );
-            }
-            const Icon = it.icon;
-            const active = it.id === "more" ? menuOpen : tab === it.id && !selectedProject;
-            const onClick = it.id === "more" ? () => setMenuOpen(true) : () => { setTab(it.id); setSelectedProject(null); setMenuOpen(false); };
-            return (
-              <button key={it.id} data-tab={it.id} {...(it.id === "more" ? { "data-menu-button": true } : {})} onClick={onClick} style={{ color: active ? COLORS.accent : COLORS.muted }} className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase tracking-wide">
-                <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
-                <span className="truncate max-w-full">{it.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      )}
-
+            })}
+          </nav>
+        )}
       </div>
 
       {/* No bottom bar on a phone any more: the hamburger in the header holds
           every tab, and the dock has the bottom edge to itself. */}
 
-      {docEditor && (() => {
-        const totals = documentTotals(docEditor);
-        const isInvoice = docEditor.type === "invoice";
-        const cur = billing.currency || "CHF";
-        const setLine = (id, field, value) =>
-          setDocEditor((s) => ({ ...s, lineItems: s.lineItems.map((li) => (li.id === id ? { ...li, [field]: value } : li)) }));
-        return (
-          <Modal t={t} onClose={() => setDocEditor(null)} title={`${isInvoice ? t.invoiceLabel : t.quoteLabel} ${docEditor.number}`}>
-            <div className="flex gap-2 mb-3">
-              <div className="w-1/2">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">{t.docDate}</div>
-                <input type="date" value={docEditor.date} onChange={(e) => setDocEditor((s) => ({ ...s, date: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
-              </div>
-              {isInvoice && (
+      {docEditor &&
+        (() => {
+          const totals = documentTotals(docEditor);
+          const isInvoice = docEditor.type === "invoice";
+          const cur = billing.currency || "CHF";
+          const setLine = (id, field, value) =>
+            setDocEditor((s) => ({
+              ...s,
+              lineItems: s.lineItems.map((li) => (li.id === id ? { ...li, [field]: value } : li)),
+            }));
+          return (
+            <Modal
+              t={t}
+              onClose={() => setDocEditor(null)}
+              title={`${isInvoice ? t.invoiceLabel : t.quoteLabel} ${docEditor.number}`}
+            >
+              <div className="flex gap-2 mb-3">
                 <div className="w-1/2">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">{t.docDue}</div>
-                  <input type="date" value={docEditor.dueDate} onChange={(e) => setDocEditor((s) => ({ ...s, dueDate: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-2 py-2 text-xs outline-none" />
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">
+                    {t.docDate}
+                  </div>
+                  <input
+                    type="date"
+                    value={docEditor.date}
+                    onChange={(e) => setDocEditor((s) => ({ ...s, date: e.target.value }))}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-2 py-2 text-xs outline-none"
+                  />
                 </div>
-              )}
-            </div>
-
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.docLines}</div>
-            <div className="flex flex-col gap-2 mb-3">
-              {docEditor.lineItems.map((li) => (
-                <div key={li.id} style={{ background: COLORS.card }} className="rounded-lg p-2">
-                  <div className="flex gap-1.5 mb-1.5">
-                    <input aria-label={t.docDescription} value={li.description} onChange={(e) => setLine(li.id, "description", e.target.value)} placeholder={t.docDescription} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 min-w-0 rounded px-2 py-1.5 text-xs outline-none" />
-                    <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))} style={{ color: COLORS.danger }} className="tap shrink-0 px-1"><Trash2 size={13} /></button>
+                {isInvoice && (
+                  <div className="w-1/2">
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase mb-1">
+                      {t.docDue}
+                    </div>
+                    <input
+                      type="date"
+                      value={docEditor.dueDate}
+                      onChange={(e) => setDocEditor((s) => ({ ...s, dueDate: e.target.value }))}
+                      style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                      className="w-full rounded-lg px-2 py-2 text-xs outline-none"
+                    />
                   </div>
-                  <div className="flex gap-1.5">
-                    <input aria-label={t.qtyPlaceholder} type="number" inputMode="decimal" value={li.qty} onChange={(e) => setLine(li.id, "qty", e.target.value)} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
-                    <input aria-label={t.unitPlaceholder} value={li.unit} onChange={(e) => setLine(li.id, "unit", e.target.value)} placeholder={t.unitPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
-                    <input aria-label={t.unitPriceLabel} type="number" inputMode="decimal" step="0.05" value={li.unitPrice} onChange={(e) => setLine(li.id, "unitPrice", e.target.value)} placeholder={t.unitPriceLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/3 rounded px-2 py-1.5 text-xs outline-none" />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setDocEditor((s) => ({ ...s, lineItems: [...s.lineItems, { id: uid(), description: "", qty: "1", unit: "", unitPrice: "" }] }))} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold mb-3 flex items-center justify-center gap-1">
-              <Plus size={13} /> {t.docAddLine}
-            </button>
-
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.docVat}</div>
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {VAT_RATES.map((v) => (
-                <button key={v.key} onClick={() => setDocEditor((s) => ({ ...s, vatRate: v.rate }))} style={{ background: docEditor.vatRate === v.rate ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-3 py-1.5 rounded-full text-xs font-bold">
-                  {t[v.labelKey]} {v.rate > 0 ? `${v.rate}%` : ""}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-sm flex flex-col gap-1">
-              <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docNet}</span><span>{totals.net.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docVat} {totals.rate}%</span><span>{totals.vat.toFixed(2)}</span></div>
-              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="flex justify-between pt-1 mt-1 font-bold"><span>{t.docTotal} {cur}</span><span>{totals.gross.toFixed(2)}</span></div>
-            </div>
-
-            {(() => {
-              const st = documentState(docEditor, todayKey());
-              const statusSet = DOC_STATUSES[docEditor.type] || DOC_STATUSES.invoice;
-              // Paid and partial are derived from the amount received, so they
-              // are shown but not directly selectable.
-              const selectable = statusSet.filter((s) => !["paid", "partial"].includes(s.key));
-              return (
-                <>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.docStatusLabel}</div>
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {selectable.map((s) => {
-                      const active = (docEditor.status || "draft") === s.key;
-                      return (
-                        <button key={s.key} onClick={() => setDocEditor((d) => ({ ...d, status: s.key }))} style={{ background: active ? `${s.color}33` : COLORS.cardAlt, border: `1px solid ${active ? s.color : COLORS.border}`, color: active ? s.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold">
-                          {t[s.labelKey]}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {isInvoice && (docEditor.status || "draft") !== "draft" && (
-                    <>
-                      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.paymentTitle}</div>
-                      <div className="flex gap-2 mb-2">
-                        <input aria-label={t.paidAmountLabel}
-                          type="number" inputMode="decimal" step="0.05"
-                          value={docEditor.paidAmount || ""}
-                          onChange={(e) => setDocEditor((d) => ({ ...d, paidAmount: e.target.value }))}
-                          placeholder={t.paidAmountLabel}
-                          style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                          className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
-                        />
-                        <input
-                          type="date"
-                          value={docEditor.paidDate || ""}
-                          onChange={(e) => setDocEditor((d) => ({ ...d, paidDate: e.target.value }))}
-                          style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                          className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
-                        />
-                      </div>
-                      <button
-                        onClick={() => setDocEditor((d) => ({ ...d, paidAmount: String(documentTotals(d).gross), paidDate: d.paidDate || todayKey() }))}
-                        style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
-                        className="w-full py-2 rounded-lg text-xs font-bold uppercase mb-2"
-                      >
-                        {t.markPaidBtn}
-                      </button>
-                      <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-sm flex items-center justify-between">
-                        <span style={{ color: COLORS.muted }}>{st.overdue ? t.overdueLabel : t.outstandingLabel}</span>
-                        <span style={{ color: st.outstanding === 0 ? COLORS.success : st.overdue ? COLORS.danger : COLORS.text }} className="font-bold">
-                          {money(st.outstanding)}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </>
-              );
-            })()}
-
-            <textarea aria-label={t.notesLabel} value={docEditor.notes} onChange={(e) => setDocEditor((s) => ({ ...s, notes: e.target.value }))} placeholder={t.notesLabel} rows={2} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none" />
-
-            {isInvoice && validateBillingProfile(billing).length > 0 && (
-              <button onClick={() => { setBillingDraft({ ...billing }); setBillingModalOpen(true); }} style={{ background: `${COLORS.amber}22`, border: `1px solid ${COLORS.amber}66`, color: COLORS.amber }} className="w-full py-2.5 rounded-lg text-xs font-bold mb-3">
-                {t.qrMissingBilling}
-              </button>
-            )}
-
-            <button onClick={saveDocument} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mb-2">{t.saveLabel}</button>
-            {docEditor.id && (
-              <div className="flex gap-2">
-                <button onClick={() => printDocument(docEditor)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1.5">
-                  <Printer size={13} /> {t.savePdfBtn}
-                </button>
-                {!isInvoice && (
-                  <button onClick={() => convertQuoteToInvoice(docEditor)} style={{ background: COLORS.success, color: "#12210A" }} className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase">
-                    {t.convertToInvoice}
-                  </button>
                 )}
               </div>
-            )}
-            {docEditor.id && (
-              <button onClick={() => deleteDocument(docEditor.id)} style={{ color: COLORS.danger }} className="w-full py-3 text-xs font-bold uppercase">{t.deleteLabel}</button>
-            )}
-          </Modal>
-        );
-      })()}
+
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                {t.docLines}
+              </div>
+              <div className="flex flex-col gap-2 mb-3">
+                {docEditor.lineItems.map((li) => (
+                  <div key={li.id} style={{ background: COLORS.card }} className="rounded-lg p-2">
+                    <div className="flex gap-1.5 mb-1.5">
+                      <input
+                        aria-label={t.docDescription}
+                        value={li.description}
+                        onChange={(e) => setLine(li.id, "description", e.target.value)}
+                        placeholder={t.docDescription}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="flex-1 min-w-0 rounded px-2 py-1.5 text-xs outline-none"
+                      />
+                      <button
+                        aria-label={t.a11yDelete}
+                        title={t.a11yDelete}
+                        onClick={() =>
+                          setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))
+                        }
+                        style={{ color: COLORS.danger }}
+                        className="tap shrink-0 px-1"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <input
+                        aria-label={t.qtyPlaceholder}
+                        type="number"
+                        inputMode="decimal"
+                        value={li.qty}
+                        onChange={(e) => setLine(li.id, "qty", e.target.value)}
+                        placeholder={t.qtyPlaceholder}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="w-1/3 rounded px-2 py-1.5 text-xs outline-none"
+                      />
+                      <input
+                        aria-label={t.unitPlaceholder}
+                        value={li.unit}
+                        onChange={(e) => setLine(li.id, "unit", e.target.value)}
+                        placeholder={t.unitPlaceholder}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="w-1/3 rounded px-2 py-1.5 text-xs outline-none"
+                      />
+                      <input
+                        aria-label={t.unitPriceLabel}
+                        type="number"
+                        inputMode="decimal"
+                        step="0.05"
+                        value={li.unitPrice}
+                        onChange={(e) => setLine(li.id, "unitPrice", e.target.value)}
+                        placeholder={t.unitPriceLabel}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="w-1/3 rounded px-2 py-1.5 text-xs outline-none"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() =>
+                  setDocEditor((s) => ({
+                    ...s,
+                    lineItems: [...s.lineItems, { id: uid(), description: "", qty: "1", unit: "", unitPrice: "" }],
+                  }))
+                }
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+                className="w-full py-2 rounded-lg text-xs font-bold mb-3 flex items-center justify-center gap-1"
+              >
+                <Plus size={13} /> {t.docAddLine}
+              </button>
+
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.docVat}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {VAT_RATES.map((v) => (
+                  <button
+                    key={v.key}
+                    onClick={() => setDocEditor((s) => ({ ...s, vatRate: v.rate }))}
+                    style={{
+                      background: docEditor.vatRate === v.rate ? COLORS.accent : COLORS.cardAlt,
+                      border: `1px solid ${COLORS.border}`,
+                    }}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold"
+                  >
+                    {t[v.labelKey]} {v.rate > 0 ? `${v.rate}%` : ""}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-sm flex flex-col gap-1">
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.docNet}</span>
+                  <span>{totals.net.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>
+                    {t.docVat} {totals.rate}%
+                  </span>
+                  <span>{totals.vat.toFixed(2)}</span>
+                </div>
+                <div
+                  style={{ borderTop: `1px solid ${COLORS.border}` }}
+                  className="flex justify-between pt-1 mt-1 font-bold"
+                >
+                  <span>
+                    {t.docTotal} {cur}
+                  </span>
+                  <span>{totals.gross.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {(() => {
+                const st = documentState(docEditor, todayKey());
+                const statusSet = DOC_STATUSES[docEditor.type] || DOC_STATUSES.invoice;
+                // Paid and partial are derived from the amount received, so they
+                // are shown but not directly selectable.
+                const selectable = statusSet.filter((s) => !["paid", "partial"].includes(s.key));
+                return (
+                  <>
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                      {t.docStatusLabel}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {selectable.map((s) => {
+                        const active = (docEditor.status || "draft") === s.key;
+                        return (
+                          <button
+                            key={s.key}
+                            onClick={() => setDocEditor((d) => ({ ...d, status: s.key }))}
+                            style={{
+                              background: active ? `${s.color}33` : COLORS.cardAlt,
+                              border: `1px solid ${active ? s.color : COLORS.border}`,
+                              color: active ? s.color : COLORS.text,
+                            }}
+                            className="px-3 py-1.5 rounded-full text-xs font-bold"
+                          >
+                            {t[s.labelKey]}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {isInvoice && (docEditor.status || "draft") !== "draft" && (
+                      <>
+                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                          {t.paymentTitle}
+                        </div>
+                        <div className="flex gap-2 mb-2">
+                          <input
+                            aria-label={t.paidAmountLabel}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.05"
+                            value={docEditor.paidAmount || ""}
+                            onChange={(e) => setDocEditor((d) => ({ ...d, paidAmount: e.target.value }))}
+                            placeholder={t.paidAmountLabel}
+                            style={{
+                              background: COLORS.shell,
+                              border: `1px solid ${COLORS.border}`,
+                              color: COLORS.text,
+                            }}
+                            className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
+                          />
+                          <input
+                            type="date"
+                            value={docEditor.paidDate || ""}
+                            onChange={(e) => setDocEditor((d) => ({ ...d, paidDate: e.target.value }))}
+                            style={{
+                              background: COLORS.shell,
+                              border: `1px solid ${COLORS.border}`,
+                              color: COLORS.text,
+                            }}
+                            className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
+                          />
+                        </div>
+                        <button
+                          onClick={() =>
+                            setDocEditor((d) => ({
+                              ...d,
+                              paidAmount: String(documentTotals(d).gross),
+                              paidDate: d.paidDate || todayKey(),
+                            }))
+                          }
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                          className="w-full py-2 rounded-lg text-xs font-bold uppercase mb-2"
+                        >
+                          {t.markPaidBtn}
+                        </button>
+                        <div
+                          style={{ background: COLORS.card }}
+                          className="rounded-lg p-3 mb-3 text-sm flex items-center justify-between"
+                        >
+                          <span style={{ color: COLORS.muted }}>
+                            {st.overdue ? t.overdueLabel : t.outstandingLabel}
+                          </span>
+                          <span
+                            style={{
+                              color: st.outstanding === 0 ? COLORS.success : st.overdue ? COLORS.danger : COLORS.text,
+                            }}
+                            className="font-bold"
+                          >
+                            {money(st.outstanding)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+
+              <textarea
+                aria-label={t.notesLabel}
+                value={docEditor.notes}
+                onChange={(e) => setDocEditor((s) => ({ ...s, notes: e.target.value }))}
+                placeholder={t.notesLabel}
+                rows={2}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+              />
+
+              {isInvoice && validateBillingProfile(billing).length > 0 && (
+                <button
+                  onClick={() => {
+                    setBillingDraft({ ...billing });
+                    setBillingModalOpen(true);
+                  }}
+                  style={{
+                    background: `${COLORS.amber}22`,
+                    border: `1px solid ${COLORS.amber}66`,
+                    color: COLORS.amber,
+                  }}
+                  className="w-full py-2.5 rounded-lg text-xs font-bold mb-3"
+                >
+                  {t.qrMissingBilling}
+                </button>
+              )}
+
+              <button
+                onClick={saveDocument}
+                style={{ background: COLORS.accent }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm mb-2"
+              >
+                {t.saveLabel}
+              </button>
+              {docEditor.id && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => printDocument(docEditor)}
+                    style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                    className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1.5"
+                  >
+                    <Printer size={13} /> {t.savePdfBtn}
+                  </button>
+                  {!isInvoice && (
+                    <button
+                      onClick={() => convertQuoteToInvoice(docEditor)}
+                      style={{ background: COLORS.success, color: "#12210A" }}
+                      className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase"
+                    >
+                      {t.convertToInvoice}
+                    </button>
+                  )}
+                </div>
+              )}
+              {docEditor.id && (
+                <button
+                  onClick={() => deleteDocument(docEditor.id)}
+                  style={{ color: COLORS.danger }}
+                  className="w-full py-3 text-xs font-bold uppercase"
+                >
+                  {t.deleteLabel}
+                </button>
+              )}
+            </Modal>
+          );
+        })()}
 
       {billingModalOpen && billingDraft && (
         <Modal t={t} onClose={() => setBillingModalOpen(false)} title={t.billingTitle}>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.billingHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+            {t.billingHint}
+          </div>
           {[
             ["companyName", t.billingCompany],
             ["street", t.billingStreet],
@@ -4993,9 +7573,18 @@ export default function SiteManager() {
             ["town", t.billingTown],
             ["vatNumber", t.vatNumberLabel],
           ].map(([f, label]) => (
-            <input aria-label={label} key={f} value={billingDraft[f] || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, [f]: e.target.value }))} placeholder={label} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
+            <input
+              aria-label={label}
+              key={f}
+              value={billingDraft[f] || ""}
+              onChange={(e) => setBillingDraft((s) => ({ ...s, [f]: e.target.value }))}
+              placeholder={label}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+            />
           ))}
-          <input aria-label="IBAN (CH…)"
+          <input
+            aria-label="IBAN (CH…)"
             value={billingDraft.iban || ""}
             onChange={(e) => setBillingDraft((s) => ({ ...s, iban: e.target.value }))}
             placeholder="IBAN (CH…)"
@@ -5007,21 +7596,39 @@ export default function SiteManager() {
             className="w-full rounded-lg px-3 py-2 text-sm mb-1 outline-none"
           />
           {billingDraft.iban && !isSwissIban(billingDraft.iban) && (
-            <div style={{ color: COLORS.danger }} className="text-xs mb-2">{t.qrErrIban}</div>
+            <div style={{ color: COLORS.danger }} className="text-xs mb-2">
+              {t.qrErrIban}
+            </div>
           )}
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.paymentDaysLabel}</div>
-          <input aria-label="30" type="number" value={billingDraft.paymentDays || ""} onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))} placeholder="30" style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none" />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.costingTitle}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">
+            {t.paymentDaysLabel}
+          </div>
+          <input
+            aria-label="30"
+            type="number"
+            value={billingDraft.paymentDays || ""}
+            onChange={(e) => setBillingDraft((s) => ({ ...s, paymentDays: e.target.value }))}
+            placeholder="30"
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none"
+          />
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.costingTitle}
+          </div>
           <div className="flex gap-2 mb-1">
-            <input aria-label={t.labourRateLabel}
-              type="number" inputMode="decimal" step="0.05"
+            <input
+              aria-label={t.labourRateLabel}
+              type="number"
+              inputMode="decimal"
+              step="0.05"
               value={billingDraft.labourRate || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, labourRate: e.target.value }))}
               placeholder={t.labourRateLabel}
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-2/3 rounded-lg px-3 py-2 text-sm outline-none"
             />
-            <input aria-label="CHF"
+            <input
+              aria-label="CHF"
               value={billingDraft.currency ?? "CHF"}
               onChange={(e) => setBillingDraft((s) => ({ ...s, currency: e.target.value }))}
               placeholder="CHF"
@@ -5029,19 +7636,28 @@ export default function SiteManager() {
               className="w-1/3 rounded-lg px-3 py-2 text-sm outline-none"
             />
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.labourRateHint}</div>
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.hoursSettings}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+            {t.labourRateHint}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.hoursSettings}
+          </div>
           <div className="flex gap-2 mb-1">
-            <input aria-label={t.weeklyHoursLabel}
-              type="number" inputMode="decimal" step="0.5"
+            <input
+              aria-label={t.weeklyHoursLabel}
+              type="number"
+              inputMode="decimal"
+              step="0.5"
               value={billingDraft.weeklyHours || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, weeklyHours: e.target.value }))}
               placeholder={t.weeklyHoursLabel}
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
             />
-            <input aria-label={t.holidayDaysLabel}
-              type="number" inputMode="numeric"
+            <input
+              aria-label={t.holidayDaysLabel}
+              type="number"
+              inputMode="numeric"
               value={billingDraft.holidayDays || ""}
               onChange={(e) => setBillingDraft((s) => ({ ...s, holidayDays: e.target.value }))}
               placeholder={t.holidayDaysLabel}
@@ -5049,8 +7665,16 @@ export default function SiteManager() {
               className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
             />
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.hoursSettingsHint}</div>
-          <button onClick={saveBilling} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+            {t.hoursSettingsHint}
+          </div>
+          <button
+            onClick={saveBilling}
+            style={{ background: COLORS.accent }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.saveLabel}
+          </button>
         </Modal>
       )}
 
@@ -5058,24 +7682,56 @@ export default function SiteManager() {
         <Modal t={t} onClose={() => setCompanyMigration(null)} title={t.migrateTitle}>
           {companyMigration.result ? (
             <>
-              <div style={{ color: COLORS.success }} className="text-sm mb-3">{t.migrateDone}</div>
+              <div style={{ color: COLORS.success }} className="text-sm mb-3">
+                {t.migrateDone}
+              </div>
               <div style={{ background: COLORS.card }} className="rounded-lg p-3 text-xs flex flex-col gap-1 mb-3">
                 {Object.entries(companyMigration.result).map(([k, v]) => (
-                  <div key={k} className="flex justify-between"><span style={{ color: COLORS.muted }}>{k}</span><span>{v}</span></div>
+                  <div key={k} className="flex justify-between">
+                    <span style={{ color: COLORS.muted }}>{k}</span>
+                    <span>{v}</span>
+                  </div>
                 ))}
               </div>
-              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.migrateKeptOriginal}</div>
-              <button onClick={() => window.location.reload()} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.doneLabel}</button>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+                {t.migrateKeptOriginal}
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                style={{ background: COLORS.accent }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+              >
+                {t.doneLabel}
+              </button>
             </>
           ) : (
             <>
-              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.migrateHint}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+                {t.migrateHint}
+              </div>
               <div style={{ background: COLORS.card }} className="rounded-lg p-3 text-xs flex flex-col gap-1 mb-4">
-                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.navProjects}</span><span>{companyMigration.summary.projects}</span></div>
-                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.entriesTitle}</span><span>{companyMigration.summary.entries}</span></div>
-                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.navCustomers}</span><span>{companyMigration.summary.customers}</span></div>
-                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.docLines}</span><span>{companyMigration.summary.documents}</span></div>
-                <div className="flex justify-between"><span style={{ color: COLORS.muted }}>{t.photoLabel} / {t.libraryTab}</span><span>{companyMigration.summary.otherDocs}</span></div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.navProjects}</span>
+                  <span>{companyMigration.summary.projects}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.entriesTitle}</span>
+                  <span>{companyMigration.summary.entries}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.navCustomers}</span>
+                  <span>{companyMigration.summary.customers}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>{t.docLines}</span>
+                  <span>{companyMigration.summary.documents}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: COLORS.muted }}>
+                    {t.photoLabel} / {t.libraryTab}
+                  </span>
+                  <span>{companyMigration.summary.otherDocs}</span>
+                </div>
               </div>
               <button
                 onClick={runCompanyMigration}
@@ -5086,134 +7742,179 @@ export default function SiteManager() {
                 {companyMigration.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardPaste size={15} />}
                 {t.migrateBtn}
               </button>
-              <button onClick={() => setCompanyMigration(null)} style={{ color: COLORS.muted }} className="w-full py-3 text-xs font-bold uppercase">{t.legacyImportSkip}</button>
+              <button
+                onClick={() => setCompanyMigration(null)}
+                style={{ color: COLORS.muted }}
+                className="w-full py-3 text-xs font-bold uppercase"
+              >
+                {t.legacyImportSkip}
+              </button>
             </>
           )}
         </Modal>
       )}
 
-      {rapportModal && (() => {
-        const pr = projects.find((x) => x.id === rapportModal.projectId);
-        const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
-        return (
-          <Modal t={t} onClose={() => setRapportModal(null)} title={t.rapportTitle}>
-            <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3">
-              <div className="text-sm font-bold">{pr ? pr.name : ""}</div>
-              <div style={{ color: COLORS.muted }} className="text-xs">
-                {rapportModal.date}{cust ? " · " + cust.name : ""}
+      {rapportModal &&
+        (() => {
+          const pr = projects.find((x) => x.id === rapportModal.projectId);
+          const cust = pr ? customers.find((c) => c.id === pr.customerId) : null;
+          return (
+            <Modal t={t} onClose={() => setRapportModal(null)} title={t.rapportTitle}>
+              <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3">
+                <div className="text-sm font-bold">{pr ? pr.name : ""}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs">
+                  {rapportModal.date}
+                  {cust ? " · " + cust.name : ""}
+                </div>
+                <div
+                  style={{ borderTop: `1px solid ${COLORS.border}` }}
+                  className="mt-2 pt-2 flex justify-between text-sm"
+                >
+                  <span style={{ color: COLORS.muted }}>{t.hoursWorked}</span>
+                  <span className="font-bold">{rapportModal.hours.toFixed(1)} h</span>
+                </div>
+                {rapportModal.lines.length > 0 && (
+                  <div className="mt-2 flex flex-col gap-1">
+                    {rapportModal.lines.map((li, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="truncate">{li.description}</span>
+                        <span style={{ color: COLORS.muted }} className="shrink-0">
+                          {li.qty} {li.unit}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-2 pt-2 flex justify-between text-sm">
-                <span style={{ color: COLORS.muted }}>{t.hoursWorked}</span>
-                <span className="font-bold">{rapportModal.hours.toFixed(1)} h</span>
+
+              <textarea
+                aria-label={t.rapportNotePlaceholder}
+                value={rapportModal.note}
+                onChange={(e) => setRapportModal((r) => ({ ...r, note: e.target.value }))}
+                placeholder={t.rapportNotePlaceholder}
+                rows={2}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
+              />
+
+              <input
+                aria-label={t.sigNameLabel}
+                value={rapportModal.signerName}
+                onChange={(e) => setRapportModal((r) => ({ ...r, signerName: e.target.value }))}
+                placeholder={t.sigNameLabel}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+              />
+
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.sigHere}
               </div>
-              {rapportModal.lines.length > 0 && (
-                <div className="mt-2 flex flex-col gap-1">
-                  {rapportModal.lines.map((li, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span className="truncate">{li.description}</span>
-                      <span style={{ color: COLORS.muted }} className="shrink-0">{li.qty} {li.unit}</span>
-                    </div>
-                  ))}
+              <SignaturePad onChange={(sig) => setRapportModal((r) => ({ ...r, signature: sig }))} t={t} />
+
+              <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+                {t.sigLockNote}
+              </div>
+
+              <button
+                onClick={saveRapport}
+                disabled={rapportModal.busy}
+                style={{ background: COLORS.accent, opacity: rapportModal.busy ? 0.6 : 1 }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+              >
+                {rapportModal.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardCheck size={15} />}
+                {t.sigSaveBtn}
+              </button>
+            </Modal>
+          );
+        })()}
+
+      {assignModal &&
+        canManage() &&
+        (() => {
+          const date = assignModal.date;
+          const openProjects = projects.filter(
+            (p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS),
+          );
+          const dayLeave = leaveRequests.filter((r) => r.date === date);
+          return (
+            <Modal t={t} onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
+              {team.members.length === 0 ? (
+                <div style={{ color: COLORS.muted }} className="text-xs mb-3">
+                  {t.schedNoTeam}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {team.members.map((m) => {
+                    const current = assignments.find((a) => a.date === date && a.userId === m.uid);
+                    const away = dayLeave.find((r) => r.userId === m.uid);
+                    return (
+                      <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-sm font-semibold truncate">{m.name || m.email || m.uid}</div>
+                          {away && (
+                            <span
+                              style={{
+                                background: `${COLORS.amber}22`,
+                                color: COLORS.amber,
+                                border: `1px solid ${COLORS.amber}66`,
+                              }}
+                              className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full"
+                            >
+                              {t[
+                                `leave${(away.type || "other").charAt(0).toUpperCase()}${(away.type || "other").slice(1)}`
+                              ] || t.leaveOther}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {openProjects.map((pr) => {
+                            const active = current && current.projectId === pr.id;
+                            return (
+                              <button
+                                key={pr.id}
+                                onClick={() => toggleAssignment(date, m.uid, pr.id)}
+                                style={{
+                                  background: active ? "#6FB3D933" : COLORS.cardAlt,
+                                  border: `1px solid ${active ? "#6FB3D9" : COLORS.border}`,
+                                  color: active ? "#6FB3D9" : COLORS.text,
+                                }}
+                                className="px-2.5 py-1.5 rounded-full text-xs font-bold"
+                              >
+                                {pr.name}
+                              </button>
+                            );
+                          })}
+                          {openProjects.length === 0 && (
+                            <div style={{ color: COLORS.muted }} className="text-xs">
+                              {t.noProjectsYet}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-            </div>
-
-            <textarea aria-label={t.rapportNotePlaceholder}
-              value={rapportModal.note}
-              onChange={(e) => setRapportModal((r) => ({ ...r, note: e.target.value }))}
-              placeholder={t.rapportNotePlaceholder}
-              rows={2}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
-            />
-
-            <input aria-label={t.sigNameLabel}
-              value={rapportModal.signerName}
-              onChange={(e) => setRapportModal((r) => ({ ...r, signerName: e.target.value }))}
-              placeholder={t.sigNameLabel}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
-            />
-
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.sigHere}</div>
-            <SignaturePad onChange={(sig) => setRapportModal((r) => ({ ...r, signature: sig }))} t={t} />
-
-            <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.sigLockNote}</div>
-
-            <button
-              onClick={saveRapport}
-              disabled={rapportModal.busy}
-              style={{ background: COLORS.accent, opacity: rapportModal.busy ? 0.6 : 1 }}
-              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
-            >
-              {rapportModal.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardCheck size={15} />}
-              {t.sigSaveBtn}
-            </button>
-          </Modal>
-        );
-      })()}
-
-      {assignModal && canManage() && (() => {
-        const date = assignModal.date;
-        const openProjects = projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
-        const dayLeave = leaveRequests.filter((r) => r.date === date);
-        return (
-          <Modal t={t} onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
-            {team.members.length === 0 ? (
-              <div style={{ color: COLORS.muted }} className="text-xs mb-3">{t.schedNoTeam}</div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {team.members.map((m) => {
-                  const current = assignments.find((a) => a.date === date && a.userId === m.uid);
-                  const away = dayLeave.find((r) => r.userId === m.uid);
-                  return (
-                    <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm font-semibold truncate">{m.name || m.email || m.uid}</div>
-                        {away && (
-                          <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full">
-                            {t[`leave${(away.type || "other").charAt(0).toUpperCase()}${(away.type || "other").slice(1)}`] || t.leaveOther}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {openProjects.map((pr) => {
-                          const active = current && current.projectId === pr.id;
-                          return (
-                            <button
-                              key={pr.id}
-                              onClick={() => toggleAssignment(date, m.uid, pr.id)}
-                              style={{
-                                background: active ? "#6FB3D933" : COLORS.cardAlt,
-                                border: `1px solid ${active ? "#6FB3D9" : COLORS.border}`,
-                                color: active ? "#6FB3D9" : COLORS.text,
-                              }}
-                              className="px-2.5 py-1.5 rounded-full text-xs font-bold"
-                            >
-                              {pr.name}
-                            </button>
-                          );
-                        })}
-                        {openProjects.length === 0 && (
-                          <div style={{ color: COLORS.muted }} className="text-xs">{t.noProjectsYet}</div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            <button onClick={() => { setAssignModal(null); openDay(date); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full mt-4 py-2.5 rounded-lg text-xs font-bold uppercase">
-              {t.dayJournalHeading}
-            </button>
-          </Modal>
-        );
-      })()}
+              <button
+                onClick={() => {
+                  setAssignModal(null);
+                  openDay(date);
+                }}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                className="w-full mt-4 py-2.5 rounded-lg text-xs font-bold uppercase"
+              >
+                {t.dayJournalHeading}
+              </button>
+            </Modal>
+          );
+        })()}
 
       {hoursModalOpen && (
         <Modal t={t} onClose={() => setHoursModalOpen(false)} title={t.hoursDetailTitle}>
           {!billing.weeklyHours ? (
-            <div style={{ color: COLORS.amber }} className="text-xs mb-3 leading-relaxed">{t.hoursNotConfigured}</div>
+            <div style={{ color: COLORS.amber }} className="text-xs mb-3 leading-relaxed">
+              {t.hoursNotConfigured}
+            </div>
           ) : null}
           <div className="flex flex-col gap-2">
             {team.members.map((m) => {
@@ -5227,13 +7928,23 @@ export default function SiteManager() {
                     <span style={{ color: COLORS.muted }}>{t.hoursExpected}</span>
                     <span className="text-right">{year.configured ? `${year.expected.toFixed(1)} h` : "—"}</span>
                     <span style={{ color: COLORS.muted }}>{t.overtimeLabel}</span>
-                    <span className="text-right font-bold" style={{ color: year.overtime > 0 ? COLORS.amber : year.overtime < 0 ? COLORS.danger : COLORS.text }}>
+                    <span
+                      className="text-right font-bold"
+                      style={{
+                        color: year.overtime > 0 ? COLORS.amber : year.overtime < 0 ? COLORS.danger : COLORS.text,
+                      }}
+                    >
                       {year.configured ? `${year.overtime > 0 ? "+" : ""}${year.overtime.toFixed(1)} h` : "—"}
                     </span>
                     <span style={{ color: COLORS.muted }}>{t.holidayTaken}</span>
-                    <span className="text-right">{year.leaveTaken} {t.daysShort}</span>
+                    <span className="text-right">
+                      {year.leaveTaken} {t.daysShort}
+                    </span>
                     <span style={{ color: COLORS.muted }}>{t.holidayLeft}</span>
-                    <span className="text-right font-bold" style={{ color: year.holidayLeft !== null && year.holidayLeft < 0 ? COLORS.danger : COLORS.text }}>
+                    <span
+                      className="text-right font-bold"
+                      style={{ color: year.holidayLeft !== null && year.holidayLeft < 0 ? COLORS.danger : COLORS.text }}
+                    >
                       {year.holidayLeft !== null ? `${year.holidayLeft} ${t.daysShort}` : "—"}
                     </span>
                   </div>
@@ -5241,52 +7952,135 @@ export default function SiteManager() {
               );
             })}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs mt-3 leading-relaxed">{t.hoursFootnote}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mt-3 leading-relaxed">
+            {t.hoursFootnote}
+          </div>
         </Modal>
       )}
 
       {teamModalOpen && (
         <Modal t={t} onClose={() => setTeamModalOpen(false)} title={t.teamTitle}>
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamMembers} ({team.members.length})</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+            {t.teamMembers} ({team.members.length})
+          </div>
           <div className="flex flex-col gap-1.5 mb-4">
             {team.members.map((m) => (
-              <div key={m.uid} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+              <div
+                key={m.uid}
+                style={{ background: COLORS.card }}
+                className="rounded-lg px-3 py-2 flex items-center justify-between gap-2"
+              >
                 <div className="min-w-0">
                   <div className="text-sm truncate">{m.name || m.email || m.uid}</div>
-                  {m.email && m.name && <div style={{ color: COLORS.muted }} className="text-xs truncate">{m.email}</div>}
+                  {m.email && m.name && (
+                    <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                      {m.email}
+                    </div>
+                  )}
                 </div>
-                <span style={{ background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt, color: m.role === "owner" ? COLORS.accent : COLORS.muted, border: `1px solid ${COLORS.border}` }} className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full uppercase">
+                <span
+                  style={{
+                    background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt,
+                    color: m.role === "owner" ? COLORS.accent : COLORS.muted,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                  className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full uppercase"
+                >
                   {m.role === "owner" ? t.roleOwner : m.role === "supervisor" ? t.roleSupervisor : t.roleCrew}
                 </span>
               </div>
             ))}
           </div>
 
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.teamInvites}</div>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-2 leading-relaxed">{t.teamInviteHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+            {t.teamInvites}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-2 leading-relaxed">
+            {t.teamInviteHint}
+          </div>
           <div className="flex flex-col gap-1.5 mb-3">
             {team.invites.map((i) => (
-              <div key={i.code} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+              <div
+                key={i.code}
+                style={{ background: COLORS.card }}
+                className="rounded-lg px-3 py-2 flex items-center justify-between gap-2"
+              >
                 <div className="min-w-0">
                   <div className="text-sm font-mono tracking-widest">{i.code}</div>
-                  <div style={{ color: COLORS.muted }} className="text-xs">{t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs">
+                    {t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button className="tap" aria-label={t.a11yShare} data-invite-share onClick={() => shareInvite(i.code)} title={t.inviteShare} style={{ color: COLORS.accent }}><Share2 size={14} /></button>
-                  <button className="tap" aria-label={t.a11yCopyLink} data-invite-link onClick={() => { navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href)); showToast(t.inviteLinkCopy); }} title={t.inviteLinkCopy} style={{ color: COLORS.muted }}><Link2 size={14} /></button>
-                  <button className="tap" aria-label={t.copyBtn} onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={14} /></button>
-                  <button className="tap" aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => dropInvite(i.code)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>
+                  <button
+                    className="tap"
+                    aria-label={t.a11yShare}
+                    data-invite-share
+                    onClick={() => shareInvite(i.code)}
+                    title={t.inviteShare}
+                    style={{ color: COLORS.accent }}
+                  >
+                    <Share2 size={14} />
+                  </button>
+                  <button
+                    className="tap"
+                    aria-label={t.a11yCopyLink}
+                    data-invite-link
+                    onClick={() => {
+                      navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href));
+                      showToast(t.inviteLinkCopy);
+                    }}
+                    title={t.inviteLinkCopy}
+                    style={{ color: COLORS.muted }}
+                  >
+                    <Link2 size={14} />
+                  </button>
+                  <button
+                    className="tap"
+                    aria-label={t.copyBtn}
+                    onClick={() => {
+                      navigator.clipboard?.writeText(i.code);
+                      showToast(t.copyBtn);
+                    }}
+                    title={t.copyBtn}
+                    style={{ color: COLORS.muted }}
+                  >
+                    <Copy size={14} />
+                  </button>
+                  <button
+                    className="tap"
+                    aria-label={t.a11yDelete}
+                    title={t.a11yDelete}
+                    onClick={() => dropInvite(i.code)}
+                    style={{ color: COLORS.danger }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             ))}
-            {team.invites.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.teamNoInvites}</div>}
+            {team.invites.length === 0 && (
+              <div style={{ color: COLORS.muted }} className="text-xs">
+                {t.teamNoInvites}
+              </div>
+            )}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.inviteRoleLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.inviteRoleLabel}
+          </div>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => makeInvite("crew")} style={{ background: COLORS.accent }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5">
+            <button
+              onClick={() => makeInvite("crew")}
+              style={{ background: COLORS.accent }}
+              className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5"
+            >
               <Plus size={14} /> {t.roleCrew}
             </button>
-            <button onClick={() => makeInvite("supervisor")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.accent}`, color: COLORS.accent }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5">
+            <button
+              onClick={() => makeInvite("supervisor")}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.accent}`, color: COLORS.accent }}
+              className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5"
+            >
               <Plus size={14} /> {t.roleSupervisor}
             </button>
           </div>
@@ -5295,7 +8089,9 @@ export default function SiteManager() {
 
       {legacyImport && (
         <Modal t={t} onClose={() => setLegacyImport(null)} title={t.legacyImportTitle}>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">{t.legacyImportHint}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 leading-relaxed">
+            {t.legacyImportHint}
+          </div>
           <div style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 text-sm mb-4">
             {legacyImport.docs.length} {t.legacyImportCount}
           </div>
@@ -5308,103 +8104,203 @@ export default function SiteManager() {
             {legacyImport.busy ? <Loader2 size={16} className="animate-spin" /> : <ClipboardPaste size={15} />}
             {t.legacyImportBtn}
           </button>
-          <button onClick={() => setLegacyImport(null)} style={{ color: COLORS.muted }} className="w-full py-3 text-xs font-bold uppercase">{t.legacyImportSkip}</button>
+          <button
+            onClick={() => setLegacyImport(null)}
+            style={{ color: COLORS.muted }}
+            className="w-full py-3 text-xs font-bold uppercase"
+          >
+            {t.legacyImportSkip}
+          </button>
         </Modal>
       )}
 
-      {selectedCustomer && (() => {
-        const c = customers.find((x) => x.id === selectedCustomer);
-        if (!c) return null;
-        const jobs = projects.filter((p) => p.customerId === c.id);
-        const contacts = c.contacts || [];
-        return (
-          <Modal t={t} onClose={() => setSelectedCustomer(null)} title={c.name}>
-            {c.company && <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-3">{c.company}</div>}
+      {selectedCustomer &&
+        (() => {
+          const c = customers.find((x) => x.id === selectedCustomer);
+          if (!c) return null;
+          const jobs = projects.filter((p) => p.customerId === c.id);
+          const contacts = c.contacts || [];
+          return (
+            <Modal t={t} onClose={() => setSelectedCustomer(null)} title={c.name}>
+              {c.company && (
+                <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-3">
+                  {c.company}
+                </div>
+              )}
 
-            <div className="grid grid-cols-4 gap-2 mb-4">
-              {c.phone ? (
-                <a href={telHref(c.phone)} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <Phone size={15} color={COLORS.success} /><span className="text-xs font-bold">{t.callLabel}</span>
-                </a>
-              ) : <div />}
-              {c.phone ? (
-                <a href={waHref(c.phone)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <MessageSquare size={15} color="#25D366" /><span className="text-xs font-bold">WhatsApp</span>
-                </a>
-              ) : <div />}
-              {c.email ? (
-                <a href={`mailto:${c.email}`} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <Mail size={15} color="#B48EAD" /><span className="text-xs font-bold">{t.emailLabel}</span>
-                </a>
-              ) : <div />}
-              {c.address ? (
-                <a href={mapsUrl(c.address)} target="_blank" rel="noreferrer" style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg flex flex-col items-center gap-1">
-                  <MapPin size={15} color={COLORS.accent} /><span className="text-xs font-bold">{t.routeLabel}</span>
-                </a>
-              ) : <div />}
-            </div>
-
-            {(c.phone || c.email || c.address) && (
-              <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs flex flex-col gap-1">
-                {c.phone && <div style={{ color: COLORS.muted }}>{c.phone}</div>}
-                {c.email && <div style={{ color: COLORS.muted }} className="break-all">{c.email}</div>}
-                {c.address && <div style={{ color: COLORS.muted }}>{c.address}</div>}
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {c.phone ? (
+                  <a
+                    href={telHref(c.phone)}
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="py-2.5 rounded-lg flex flex-col items-center gap-1"
+                  >
+                    <Phone size={15} color={COLORS.success} />
+                    <span className="text-xs font-bold">{t.callLabel}</span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+                {c.phone ? (
+                  <a
+                    href={waHref(c.phone)}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="py-2.5 rounded-lg flex flex-col items-center gap-1"
+                  >
+                    <MessageSquare size={15} color="#25D366" />
+                    <span className="text-xs font-bold">WhatsApp</span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+                {c.email ? (
+                  <a
+                    href={`mailto:${c.email}`}
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="py-2.5 rounded-lg flex flex-col items-center gap-1"
+                  >
+                    <Mail size={15} color="#B48EAD" />
+                    <span className="text-xs font-bold">{t.emailLabel}</span>
+                  </a>
+                ) : (
+                  <div />
+                )}
+                {c.address ? (
+                  <a
+                    href={mapsUrl(c.address)}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                    className="py-2.5 rounded-lg flex flex-col items-center gap-1"
+                  >
+                    <MapPin size={15} color={COLORS.accent} />
+                    <span className="text-xs font-bold">{t.routeLabel}</span>
+                  </a>
+                ) : (
+                  <div />
+                )}
               </div>
-            )}
-            {c.notes && <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs whitespace-pre-wrap">{c.notes}</div>}
 
-            <div className="flex gap-2 mb-4">
-              <button onClick={() => openCustomerForm(c)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.editLabel}</button>
-              <button onClick={() => openContactForm(c.id)} style={{ background: COLORS.accent }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.logContact}</button>
-            </div>
-
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.jobsLabel} ({jobs.length})</div>
-            {jobs.length === 0 ? (
-              <div style={{ color: COLORS.muted }} className="text-xs mb-4">{t.noJobsForCustomer}</div>
-            ) : (
-              <div className="flex flex-col gap-1.5 mb-4">
-                {jobs.map((p) => {
-                  const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
-                  return (
-                    <button key={p.id} onClick={() => { setSelectedCustomer(null); setTab("projects"); setSelectedProject(p.id); }} style={{ background: COLORS.card }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2">
-                      <span className="text-sm truncate">{p.name}</span>
-                      <span style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }} className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full">{t[sm.labelKey]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.contactHistory} ({contacts.length})</div>
-            {contacts.length === 0 ? (
-              <div style={{ color: COLORS.muted }} className="text-xs">{t.noContactsYet}</div>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                {contacts.map((k) => {
-                  const km = contactKindMeta(k.kind);
-                  const KIcon = km.icon;
-                  const overdue = k.followUp && k.followUp <= todayKey();
-                  return (
-                    <div key={k.id} style={{ background: COLORS.card }} className="rounded-lg px-3 py-2 flex items-start gap-2">
-                      <KIcon size={13} color={km.color} className="mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm break-words">{k.note}</div>
-                        <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
-                          {new Date(k.at).toLocaleDateString()} · {t[km.labelKey]}
-                          {k.followUp && (
-                            <span style={{ color: overdue ? COLORS.amber : COLORS.muted }} className="font-bold"> · {t.followUpLabel} {k.followUp}</span>
-                          )}
-                        </div>
-                      </div>
-                      <button aria-label={t.a11yDelete} title={t.a11yDelete} onClick={() => deleteContact(c.id, k.id)} style={{ color: COLORS.danger }} className="tap shrink-0"><Trash2 size={12} /></button>
+              {(c.phone || c.email || c.address) && (
+                <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs flex flex-col gap-1">
+                  {c.phone && <div style={{ color: COLORS.muted }}>{c.phone}</div>}
+                  {c.email && (
+                    <div style={{ color: COLORS.muted }} className="break-all">
+                      {c.email}
                     </div>
-                  );
-                })}
+                  )}
+                  {c.address && <div style={{ color: COLORS.muted }}>{c.address}</div>}
+                </div>
+              )}
+              {c.notes && (
+                <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs whitespace-pre-wrap">
+                  {c.notes}
+                </div>
+              )}
+
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => openCustomerForm(c)}
+                  style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                >
+                  {t.editLabel}
+                </button>
+                <button
+                  onClick={() => openContactForm(c.id)}
+                  style={{ background: COLORS.accent }}
+                  className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                >
+                  {t.logContact}
+                </button>
               </div>
-            )}
-          </Modal>
-        );
-      })()}
+
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                {t.jobsLabel} ({jobs.length})
+              </div>
+              {jobs.length === 0 ? (
+                <div style={{ color: COLORS.muted }} className="text-xs mb-4">
+                  {t.noJobsForCustomer}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5 mb-4">
+                  {jobs.map((p) => {
+                    const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setSelectedCustomer(null);
+                          setTab("projects");
+                          setSelectedProject(p.id);
+                        }}
+                        style={{ background: COLORS.card }}
+                        className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between gap-2"
+                      >
+                        <span className="text-sm truncate">{p.name}</span>
+                        <span
+                          style={{ background: `${sm.color}22`, color: sm.color, border: `1px solid ${sm.color}66` }}
+                          className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full"
+                        >
+                          {t[sm.labelKey]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                {t.contactHistory} ({contacts.length})
+              </div>
+              {contacts.length === 0 ? (
+                <div style={{ color: COLORS.muted }} className="text-xs">
+                  {t.noContactsYet}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5">
+                  {contacts.map((k) => {
+                    const km = contactKindMeta(k.kind);
+                    const KIcon = km.icon;
+                    const overdue = k.followUp && k.followUp <= todayKey();
+                    return (
+                      <div
+                        key={k.id}
+                        style={{ background: COLORS.card }}
+                        className="rounded-lg px-3 py-2 flex items-start gap-2"
+                      >
+                        <KIcon size={13} color={km.color} className="mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm break-words">{k.note}</div>
+                          <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
+                            {new Date(k.at).toLocaleDateString()} · {t[km.labelKey]}
+                            {k.followUp && (
+                              <span style={{ color: overdue ? COLORS.amber : COLORS.muted }} className="font-bold">
+                                {" "}
+                                · {t.followUpLabel} {k.followUp}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          aria-label={t.a11yDelete}
+                          title={t.a11yDelete}
+                          onClick={() => deleteContact(c.id, k.id)}
+                          style={{ color: COLORS.danger }}
+                          className="tap shrink-0"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Modal>
+          );
+        })()}
 
       {customerForm && (
         <Modal t={t} onClose={() => setCustomerForm(null)} title={customerForm.id ? t.editCustomer : t.newCustomer}>
@@ -5415,7 +8311,8 @@ export default function SiteManager() {
             ["email", t.emailLabel],
             ["address", t.addressLabel],
           ].map(([field, label]) => (
-            <input aria-label={label}
+            <input
+              aria-label={label}
               key={field}
               value={customerForm[field] || ""}
               onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
@@ -5425,7 +8322,8 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
             />
           ))}
-          <textarea aria-label={t.notesLabel}
+          <textarea
+            aria-label={t.notesLabel}
             value={customerForm.notes || ""}
             onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
             placeholder={t.notesLabel}
@@ -5433,9 +8331,21 @@ export default function SiteManager() {
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
           />
-          <button onClick={submitCustomer} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          <button
+            onClick={submitCustomer}
+            style={{ background: COLORS.accent }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.saveLabel}
+          </button>
           {customerForm.id && (
-            <button onClick={() => deleteCustomer(customerForm.id)} style={{ color: COLORS.danger }} className="w-full py-3 text-xs font-bold uppercase">{t.deleteLabel}</button>
+            <button
+              onClick={() => deleteCustomer(customerForm.id)}
+              style={{ color: COLORS.danger }}
+              className="w-full py-3 text-xs font-bold uppercase"
+            >
+              {t.deleteLabel}
+            </button>
           )}
         </Modal>
       )}
@@ -5447,13 +8357,23 @@ export default function SiteManager() {
               const active = contactForm.kind === k.key;
               const KIcon = k.icon;
               return (
-                <button key={k.key} onClick={() => setContactForm((s) => ({ ...s, kind: k.key }))} style={{ background: active ? `${k.color}33` : COLORS.cardAlt, border: `1px solid ${active ? k.color : COLORS.border}`, color: active ? k.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+                <button
+                  key={k.key}
+                  onClick={() => setContactForm((s) => ({ ...s, kind: k.key }))}
+                  style={{
+                    background: active ? `${k.color}33` : COLORS.cardAlt,
+                    border: `1px solid ${active ? k.color : COLORS.border}`,
+                    color: active ? k.color : COLORS.text,
+                  }}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5"
+                >
                   <KIcon size={12} /> {t[k.labelKey]}
                 </button>
               );
             })}
           </div>
-          <textarea aria-label={t.contactNotePlaceholder}
+          <textarea
+            aria-label={t.contactNotePlaceholder}
             value={contactForm.note}
             onChange={(e) => setContactForm((s) => ({ ...s, note: e.target.value }))}
             placeholder={t.contactNotePlaceholder}
@@ -5461,7 +8381,9 @@ export default function SiteManager() {
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
           />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.followUpLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.followUpLabel}
+          </div>
           <input
             type="date"
             value={contactForm.followUp}
@@ -5469,7 +8391,13 @@ export default function SiteManager() {
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none"
           />
-          <button onClick={submitContact} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          <button
+            onClick={submitContact}
+            style={{ background: COLORS.accent }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.saveLabel}
+          </button>
         </Modal>
       )}
 
@@ -5477,7 +8405,15 @@ export default function SiteManager() {
         <Modal t={t} onClose={() => setLangPickerOpen(false)} title="Language / Sprache / Langue">
           <div className="grid grid-cols-2 gap-2">
             {LANGS.map((l) => (
-              <button key={l.code} onClick={() => changeLang(l.code)} style={{ background: lang === l.code ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-3 rounded-lg text-sm font-semibold">
+              <button
+                key={l.code}
+                onClick={() => changeLang(l.code)}
+                style={{
+                  background: lang === l.code ? COLORS.accent : COLORS.cardAlt,
+                  border: `1px solid ${COLORS.border}`,
+                }}
+                className="py-3 rounded-lg text-sm font-semibold"
+              >
                 {l.label}
               </button>
             ))}
@@ -5488,31 +8424,124 @@ export default function SiteManager() {
       {profileModalOpen && profileDraft && (
         <Modal t={t} onClose={() => setProfileModalOpen(false)} title={t.profileTitle}>
           <div className="flex flex-col gap-2">
-            <input aria-label={t.yourName} value={profileDraft.name} onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))} placeholder={t.yourName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.yourPhone} value={profileDraft.phone} onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))} placeholder={t.yourPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.emergencyContact}</div>
-            <input aria-label={t.contactName} value={profileDraft.contactName} onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))} placeholder={t.contactName} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.contactRelationship} value={profileDraft.contactRelationship} onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))} placeholder={t.contactRelationship} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.contactPhone} value={profileDraft.contactPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))} placeholder={t.contactPhone} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.supervisorContactHeading}</div>
-            <input aria-label={t.supervisorNameLabel} value={profileDraft.supervisorName} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))} placeholder={t.supervisorNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.supervisorEmailLabel} value={profileDraft.supervisorEmail} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))} placeholder={t.supervisorEmailLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.supervisorPhoneLabel} value={profileDraft.supervisorPhone} onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))} placeholder={t.supervisorPhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-2 pt-3">{t.webhookLabel}</div>
-            <input aria-label={t.webhookPlaceholder} value={profileDraft.webhookUrl} onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))} placeholder={t.webhookPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <div style={{ color: COLORS.muted }} className="text-xs">{t.webhookHint}</div>
-            <button onClick={saveProfileInfo} style={{ background: COLORS.accent }} className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm">{t.saveProfile}</button>
+            <input
+              aria-label={t.yourName}
+              value={profileDraft.name}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, name: e.target.value }))}
+              placeholder={t.yourName}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.yourPhone}
+              value={profileDraft.phone}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, phone: e.target.value }))}
+              placeholder={t.yourPhone}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-2 pt-3"
+            >
+              {t.emergencyContact}
+            </div>
+            <input
+              aria-label={t.contactName}
+              value={profileDraft.contactName}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, contactName: e.target.value }))}
+              placeholder={t.contactName}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.contactRelationship}
+              value={profileDraft.contactRelationship}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, contactRelationship: e.target.value }))}
+              placeholder={t.contactRelationship}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.contactPhone}
+              value={profileDraft.contactPhone}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, contactPhone: e.target.value }))}
+              placeholder={t.contactPhone}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-2 pt-3"
+            >
+              {t.supervisorContactHeading}
+            </div>
+            <input
+              aria-label={t.supervisorNameLabel}
+              value={profileDraft.supervisorName}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorName: e.target.value }))}
+              placeholder={t.supervisorNameLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.supervisorEmailLabel}
+              value={profileDraft.supervisorEmail}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorEmail: e.target.value }))}
+              placeholder={t.supervisorEmailLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.supervisorPhoneLabel}
+              value={profileDraft.supervisorPhone}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, supervisorPhone: e.target.value }))}
+              placeholder={t.supervisorPhoneLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-2 pt-3"
+            >
+              {t.webhookLabel}
+            </div>
+            <input
+              aria-label={t.webhookPlaceholder}
+              value={profileDraft.webhookUrl}
+              onChange={(e) => setProfileDraft((s) => ({ ...s, webhookUrl: e.target.value }))}
+              placeholder={t.webhookPlaceholder}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <div style={{ color: COLORS.muted }} className="text-xs">
+              {t.webhookHint}
+            </div>
+            <button
+              onClick={saveProfileInfo}
+              style={{ background: COLORS.accent }}
+              className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.saveProfile}
+            </button>
             {isOwner() && (
               <>
                 <button
-                  onClick={() => { setProfileModalOpen(false); setBillingDraft({ ...billing }); setBillingModalOpen(true); }}
+                  onClick={() => {
+                    setProfileModalOpen(false);
+                    setBillingDraft({ ...billing });
+                    setBillingModalOpen(true);
+                  }}
                   style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
                   className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
                 >
                   <CreditCard size={14} /> {t.billingTitle}
                 </button>
                 <button
-                  onClick={() => { setProfileModalOpen(false); openTeam(); }}
+                  onClick={() => {
+                    setProfileModalOpen(false);
+                    openTeam();
+                  }}
                   style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
                   className="w-full mt-2 py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
                 >
@@ -5521,52 +8550,142 @@ export default function SiteManager() {
               </>
             )}
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-4 pt-3">
-              <div style={{ color: COLORS.muted }} className="text-xs mb-2 break-all">{t.signedInAs} {user?.email}</div>
-              <button onClick={doSignOut} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }} className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2">
+              <div style={{ color: COLORS.muted }} className="text-xs mb-2 break-all">
+                {t.signedInAs} {user?.email}
+              </div>
+              <button
+                onClick={doSignOut}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }}
+                className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+              >
                 <LogOut size={14} /> {t.signOut}
               </button>
-              <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-xs">{t.versionLabel} {SHELL_BUILD}</div>
-          <button data-force-reload onClick={forceReload} style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }} className="w-full mt-2 py-2 rounded-lg text-xs font-bold uppercase">{t.forceReloadBtn}</button>
-          <a data-privacy-link href="datenschutz.html" target="_blank" rel="noopener" style={{ color: COLORS.muted }} className="block w-full mt-3 text-center text-xs underline">{t.privacyLink}</a>
+              <div data-app-version style={{ color: COLORS.muted }} className="mt-4 text-center text-xs">
+                {t.versionLabel} {SHELL_BUILD}
+              </div>
+              <button
+                data-force-reload
+                onClick={forceReload}
+                style={{ color: COLORS.muted, border: `1px solid ${COLORS.border}` }}
+                className="w-full mt-2 py-2 rounded-lg text-xs font-bold uppercase"
+              >
+                {t.forceReloadBtn}
+              </button>
+              <a
+                data-privacy-link
+                href="datenschutz.html"
+                target="_blank"
+                rel="noopener"
+                style={{ color: COLORS.muted }}
+                className="block w-full mt-3 text-center text-xs underline"
+              >
+                {t.privacyLink}
+              </a>
             </div>
 
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"
+            >
+              <CreditCard size={12} /> {t.profileInsurance}
+            </div>
             <div className="flex flex-col gap-1.5">
-              {insuranceCards.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.noDocsYet}</div>}
+              {insuranceCards.length === 0 && (
+                <div style={{ color: COLORS.muted }} className="text-xs">
+                  {t.noDocsYet}
+                </div>
+              )}
               {insuranceCards.map((c) => (
-                <button key={c.id} onClick={() => openInsuranceForm(c)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between">
+                <button
+                  key={c.id}
+                  onClick={() => openInsuranceForm(c)}
+                  style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between"
+                >
                   <div>
                     <div className="text-sm font-semibold">{c.label || c.provider}</div>
-                    <div style={{ color: COLORS.muted }} className="text-xs">{c.provider}{c.policyNumber ? ` · ${c.policyNumber}` : ""}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs">
+                      {c.provider}
+                      {c.policyNumber ? ` · ${c.policyNumber}` : ""}
+                    </div>
                   </div>
                   <ChevronRight size={16} color={COLORS.muted} />
                 </button>
               ))}
-              <button onClick={() => openInsuranceForm(null)} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addInsuranceCard}</button>
+              <button
+                onClick={() => openInsuranceForm(null)}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+              >
+                <Plus size={13} /> {t.addInsuranceCard}
+              </button>
             </div>
 
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"><Award size={12} /> {t.profileCertificates}</div>
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-4 pt-3 flex items-center gap-1"
+            >
+              <Award size={12} /> {t.profileCertificates}
+            </div>
             <div className="flex flex-col gap-1.5">
-              {certificates.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.noDocsYet}</div>}
+              {certificates.length === 0 && (
+                <div style={{ color: COLORS.muted }} className="text-xs">
+                  {t.noDocsYet}
+                </div>
+              )}
               {certificates.map((c) => {
                 const expired = c.expiryDate && c.expiryDate < todayKey();
                 return (
-                  <button key={c.id} onClick={() => openCertForm(c)} style={{ background: COLORS.cardAlt, border: `1px solid ${expired ? COLORS.danger : COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between">
+                  <button
+                    key={c.id}
+                    onClick={() => openCertForm(c)}
+                    style={{
+                      background: COLORS.cardAlt,
+                      border: `1px solid ${expired ? COLORS.danger : COLORS.border}`,
+                    }}
+                    className="w-full text-left rounded-lg px-3 py-2 flex items-center justify-between"
+                  >
                     <div>
                       <div className="text-sm font-semibold">{c.title}</div>
-                      <div style={{ color: expired ? COLORS.danger : COLORS.muted }} className="text-xs">{c.issuer}{c.expiryDate ? ` · ${expired ? t.expiredLabel + " " : ""}${c.expiryDate}` : ""}</div>
+                      <div style={{ color: expired ? COLORS.danger : COLORS.muted }} className="text-xs">
+                        {c.issuer}
+                        {c.expiryDate ? ` · ${expired ? t.expiredLabel + " " : ""}${c.expiryDate}` : ""}
+                      </div>
                     </div>
                     <ChevronRight size={16} color={COLORS.muted} />
                   </button>
                 );
               })}
-              <button onClick={() => openCertForm(null)} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addCertificate}</button>
+              <button
+                onClick={() => openCertForm(null)}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+              >
+                <Plus size={13} /> {t.addCertificate}
+              </button>
             </div>
 
-            <div style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }} className="text-xs uppercase tracking-wide mt-4 pt-3">{t.backupTitle}</div>
+            <div
+              style={{ color: COLORS.muted, borderTop: `1px solid ${COLORS.border}` }}
+              className="text-xs uppercase tracking-wide mt-4 pt-3"
+            >
+              {t.backupTitle}
+            </div>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={openBackupExport} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg text-xs font-bold">{t.exportBackup}</button>
-              <button onClick={openBackupImport} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-2.5 rounded-lg text-xs font-bold">{t.importBackupBtn}</button>
+              <button
+                onClick={openBackupExport}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                className="py-2.5 rounded-lg text-xs font-bold"
+              >
+                {t.exportBackup}
+              </button>
+              <button
+                onClick={openBackupImport}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                className="py-2.5 rounded-lg text-xs font-bold"
+              >
+                {t.importBackupBtn}
+              </button>
             </div>
           </div>
         </Modal>
@@ -5575,12 +8694,20 @@ export default function SiteManager() {
       {backupModal === "export" && (
         <Modal t={t} onClose={() => setBackupModal(null)} title={t.exportBackup}>
           <div className="flex flex-col gap-3">
-            <button onClick={downloadFullBackup} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+            <button
+              onClick={downloadFullBackup}
+              style={{ background: COLORS.accent }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+            >
               <FileText size={15} /> {t.backupFullBtn}
             </button>
-            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">{t.backupFullHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">
+              {t.backupFullHint}
+            </div>
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-3" />
-            <div style={{ color: COLORS.muted }} className="text-xs">{t.backupHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs">
+              {t.backupHint}
+            </div>
             <textarea
               ref={backupTextareaRef}
               readOnly
@@ -5590,8 +8717,16 @@ export default function SiteManager() {
               style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none font-mono"
             />
-            <div style={{ color: COLORS.muted }} className="text-xs">{backupCodeOutput.length.toLocaleString()} {t.charactersLabel}</div>
-            <button onClick={copyBackupCode} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"><Copy size={15} /> {t.copyBtn}</button>
+            <div style={{ color: COLORS.muted }} className="text-xs">
+              {backupCodeOutput.length.toLocaleString()} {t.charactersLabel}
+            </div>
+            <button
+              onClick={copyBackupCode}
+              style={{ background: COLORS.accent }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+            >
+              <Copy size={15} /> {t.copyBtn}
+            </button>
           </div>
         </Modal>
       )}
@@ -5599,22 +8734,50 @@ export default function SiteManager() {
       {backupModal === "import" && (
         <Modal t={t} onClose={() => setBackupModal(null)} title={t.importBackupBtn}>
           <div className="flex flex-col gap-2">
-            <label style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2 cursor-pointer">
+            <label
+              style={{ background: COLORS.accent }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2 cursor-pointer"
+            >
               <ClipboardPaste size={15} /> {t.backupRestoreFileBtn}
-              <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) restoreFullBackup(f); }} />
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) restoreFullBackup(f);
+                }}
+              />
             </label>
-            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed mb-1">{t.backupRestoreFileHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed mb-1">
+              {t.backupRestoreFileHint}
+            </div>
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-2" />
-            <textarea aria-label={t.pasteCodePlaceholder}
+            <textarea
+              aria-label={t.pasteCodePlaceholder}
               value={backupCodeInput}
-              onChange={(e) => { setBackupCodeInput(e.target.value); setBackupError(null); }}
+              onChange={(e) => {
+                setBackupCodeInput(e.target.value);
+                setBackupError(null);
+              }}
               placeholder={t.pasteCodePlaceholder}
               rows={6}
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none font-mono"
             />
-            {backupError && <div style={{ color: COLORS.danger }} className="text-xs">{backupError}</div>}
-            <button onClick={submitBackupImport} disabled={!backupCodeInput.trim()} style={{ background: COLORS.accent, opacity: backupCodeInput.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.importBackupBtn}</button>
+            {backupError && (
+              <div style={{ color: COLORS.danger }} className="text-xs">
+                {backupError}
+              </div>
+            )}
+            <button
+              onClick={submitBackupImport}
+              disabled={!backupCodeInput.trim()}
+              style={{ background: COLORS.accent, opacity: backupCodeInput.trim() ? 1 : 0.5 }}
+              className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.importBackupBtn}
+            </button>
           </div>
         </Modal>
       )}
@@ -5622,18 +8785,74 @@ export default function SiteManager() {
       {insuranceForm && (
         <Modal t={t} onClose={() => setInsuranceForm(null)} title={t.addInsuranceCard}>
           <div className="flex flex-col gap-2">
-            <input aria-label={t.insuranceTypeLabel} value={insuranceForm.label} onChange={(e) => setInsuranceForm((s) => ({ ...s, label: e.target.value }))} placeholder={t.insuranceTypeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.providerLabel} value={insuranceForm.provider} onChange={(e) => setInsuranceForm((s) => ({ ...s, provider: e.target.value }))} placeholder={t.providerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.policyNumberLabel} value={insuranceForm.policyNumber} onChange={(e) => setInsuranceForm((s) => ({ ...s, policyNumber: e.target.value }))} placeholder={t.policyNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.insurancePhoneLabel} value={insuranceForm.phone} onChange={(e) => setInsuranceForm((s) => ({ ...s, phone: e.target.value }))} placeholder={t.insurancePhoneLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input ref={docFileRef} type="file" accept="image/*" onChange={(e) => handleDocPhoto(e, setInsuranceForm)} className="hidden" />
-            <button onClick={() => docFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-3 rounded-lg flex items-center justify-center gap-2">
+            <input
+              aria-label={t.insuranceTypeLabel}
+              value={insuranceForm.label}
+              onChange={(e) => setInsuranceForm((s) => ({ ...s, label: e.target.value }))}
+              placeholder={t.insuranceTypeLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.providerLabel}
+              value={insuranceForm.provider}
+              onChange={(e) => setInsuranceForm((s) => ({ ...s, provider: e.target.value }))}
+              placeholder={t.providerLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.policyNumberLabel}
+              value={insuranceForm.policyNumber}
+              onChange={(e) => setInsuranceForm((s) => ({ ...s, policyNumber: e.target.value }))}
+              placeholder={t.policyNumberLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.insurancePhoneLabel}
+              value={insuranceForm.phone}
+              onChange={(e) => setInsuranceForm((s) => ({ ...s, phone: e.target.value }))}
+              placeholder={t.insurancePhoneLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              ref={docFileRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleDocPhoto(e, setInsuranceForm)}
+              className="hidden"
+            />
+            <button
+              onClick={() => docFileRef.current?.click()}
+              style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+              className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
+            >
               <Camera size={16} color={COLORS.accent} />
-              <span style={{ color: COLORS.accent }} className="text-sm font-bold">{t.attachPhotoTitle}</span>
+              <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+                {t.attachPhotoTitle}
+              </span>
             </button>
-            {insuranceForm.photo && <img src={insuranceForm.photo} alt="" className="w-full rounded-lg max-h-40 object-cover" />}
-            <button onClick={submitInsurance} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
-            {insuranceForm.id && <button onClick={() => deleteInsurance(insuranceForm.id)} style={{ color: COLORS.danger }} className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"><Trash2 size={13} /> {t.deleteLabel}</button>}
+            {insuranceForm.photo && (
+              <img src={insuranceForm.photo} alt="" className="w-full rounded-lg max-h-40 object-cover" />
+            )}
+            <button
+              onClick={submitInsurance}
+              style={{ background: COLORS.accent }}
+              className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.saveLabel}
+            </button>
+            {insuranceForm.id && (
+              <button
+                onClick={() => deleteInsurance(insuranceForm.id)}
+                style={{ color: COLORS.danger }}
+                className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
+              >
+                <Trash2 size={13} /> {t.deleteLabel}
+              </button>
+            )}
           </div>
         </Modal>
       )}
@@ -5641,20 +8860,76 @@ export default function SiteManager() {
       {certForm && (
         <Modal t={t} onClose={() => setCertForm(null)} title={t.addCertificate}>
           <div className="flex flex-col gap-2">
-            <input aria-label={t.certTitleLabel} value={certForm.title} onChange={(e) => setCertForm((s) => ({ ...s, title: e.target.value }))} placeholder={t.certTitleLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.issuerLabel} value={certForm.issuer} onChange={(e) => setCertForm((s) => ({ ...s, issuer: e.target.value }))} placeholder={t.issuerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input
+              aria-label={t.certTitleLabel}
+              value={certForm.title}
+              onChange={(e) => setCertForm((s) => ({ ...s, title: e.target.value }))}
+              placeholder={t.certTitleLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.issuerLabel}
+              value={certForm.issuer}
+              onChange={(e) => setCertForm((s) => ({ ...s, issuer: e.target.value }))}
+              placeholder={t.issuerLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
             <div className="flex gap-2">
-              <input aria-label={t.issueDateLabel} type="date" value={certForm.issueDate} onChange={(e) => setCertForm((s) => ({ ...s, issueDate: e.target.value }))} placeholder={t.issueDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
-              <input aria-label={t.expiryDateLabel} type="date" value={certForm.expiryDate} onChange={(e) => setCertForm((s) => ({ ...s, expiryDate: e.target.value }))} placeholder={t.expiryDateLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+              <input
+                aria-label={t.issueDateLabel}
+                type="date"
+                value={certForm.issueDate}
+                onChange={(e) => setCertForm((s) => ({ ...s, issueDate: e.target.value }))}
+                placeholder={t.issueDateLabel}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
+              />
+              <input
+                aria-label={t.expiryDateLabel}
+                type="date"
+                value={certForm.expiryDate}
+                onChange={(e) => setCertForm((s) => ({ ...s, expiryDate: e.target.value }))}
+                placeholder={t.expiryDateLabel}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
+              />
             </div>
-            <input ref={certFileRef} type="file" accept="image/*" onChange={(e) => handleDocPhoto(e, setCertForm)} className="hidden" />
-            <button onClick={() => certFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-3 rounded-lg flex items-center justify-center gap-2">
+            <input
+              ref={certFileRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleDocPhoto(e, setCertForm)}
+              className="hidden"
+            />
+            <button
+              onClick={() => certFileRef.current?.click()}
+              style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+              className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
+            >
               <Camera size={16} color={COLORS.accent} />
-              <span style={{ color: COLORS.accent }} className="text-sm font-bold">{t.attachPhotoTitle}</span>
+              <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+                {t.attachPhotoTitle}
+              </span>
             </button>
             {certForm.photo && <img src={certForm.photo} alt="" className="w-full rounded-lg max-h-40 object-cover" />}
-            <button onClick={submitCert} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
-            {certForm.id && <button onClick={() => deleteCert(certForm.id)} style={{ color: COLORS.danger }} className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"><Trash2 size={13} /> {t.deleteLabel}</button>}
+            <button
+              onClick={submitCert}
+              style={{ background: COLORS.accent }}
+              className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.saveLabel}
+            </button>
+            {certForm.id && (
+              <button
+                onClick={() => deleteCert(certForm.id)}
+                style={{ color: COLORS.danger }}
+                className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
+              >
+                <Trash2 size={13} /> {t.deleteLabel}
+              </button>
+            )}
           </div>
         </Modal>
       )}
@@ -5662,9 +8937,21 @@ export default function SiteManager() {
       {basketProjectModalOpen && (
         <Modal t={t} onClose={() => setBasketProjectModalOpen(false)} title={t.chooseProjectLabel}>
           <div className="flex flex-col gap-2">
-            {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
+            {projects.length === 0 && (
+              <div style={{ color: COLORS.muted }} className="text-sm">
+                {t.noProjectsYet}
+              </div>
+            )}
             {projects.map((p) => (
-              <button key={p.id} onClick={() => (basketMode === "order" ? requestBasketForProject(p.id) : transferBasketToProject(p.id))} style={{ background: COLORS.cardAlt, border: `1px solid ${basketMode === "order" ? "#C68B4F" : COLORS.border}` }} className="w-full text-left rounded-lg px-3 py-2.5 text-sm font-semibold">
+              <button
+                key={p.id}
+                onClick={() => (basketMode === "order" ? requestBasketForProject(p.id) : transferBasketToProject(p.id))}
+                style={{
+                  background: COLORS.cardAlt,
+                  border: `1px solid ${basketMode === "order" ? "#C68B4F" : COLORS.border}`,
+                }}
+                className="w-full text-left rounded-lg px-3 py-2.5 text-sm font-semibold"
+              >
                 {p.name}
               </button>
             ))}
@@ -5675,7 +8962,11 @@ export default function SiteManager() {
       {reportProjectPickerOpen && (
         <Modal t={t} onClose={() => setReportProjectPickerOpen(false)} title={t.chooseProjectLabel}>
           <div className="flex flex-col gap-2">
-            {projects.length === 0 && <div style={{ color: COLORS.muted }} className="text-sm">{t.noProjectsYet}</div>}
+            {projects.length === 0 && (
+              <div style={{ color: COLORS.muted }} className="text-sm">
+                {t.noProjectsYet}
+              </div>
+            )}
             {projects.map((p) => {
               const selectedIndex = reportProjectSelection.indexOf(p.id);
               const isSelected = selectedIndex !== -1;
@@ -5683,19 +8974,39 @@ export default function SiteManager() {
                 <button
                   key={p.id}
                   onClick={() => toggleReportProject(p.id)}
-                  style={{ background: isSelected ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  style={{
+                    background: isSelected ? COLORS.success : COLORS.cardAlt,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
                   className="w-full text-left rounded-lg px-3 py-2.5 flex items-center justify-between gap-2"
                 >
                   <div className="min-w-0">
                     <div className="text-sm font-semibold truncate">{p.name}</div>
-                    {p.address && <div style={{ color: isSelected ? "rgba(0,0,0,0.6)" : COLORS.muted }} className="text-xs truncate">{p.address}</div>}
+                    {p.address && (
+                      <div
+                        style={{ color: isSelected ? "rgba(0,0,0,0.6)" : COLORS.muted }}
+                        className="text-xs truncate"
+                      >
+                        {p.address}
+                      </div>
+                    )}
                   </div>
-                  {isSelected && <span style={{ background: "rgba(0,0,0,0.25)" }} className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white">{selectedIndex + 1}</span>}
+                  {isSelected && (
+                    <span
+                      style={{ background: "rgba(0,0,0,0.25)" }}
+                      className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                    >
+                      {selectedIndex + 1}
+                    </span>
+                  )}
                 </button>
               );
             })}
             <button
-              onClick={() => { setReportProjectPickerOpen(false); generateProjectsReport(reportProjectSelection); }}
+              onClick={() => {
+                setReportProjectPickerOpen(false);
+                generateProjectsReport(reportProjectSelection);
+              }}
               disabled={reportProjectSelection.length === 0}
               style={{ background: COLORS.accent, opacity: reportProjectSelection.length === 0 ? 0.5 : 1 }}
               className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
@@ -5711,206 +9022,437 @@ export default function SiteManager() {
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <div className="flex-1">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.dateFromLabel}</div>
-                <input type="date" value={rangeLeaveForm.from} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, from: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                  {t.dateFromLabel}
+                </div>
+                <input
+                  type="date"
+                  value={rangeLeaveForm.from}
+                  onChange={(e) => setRangeLeaveForm((f) => ({ ...f, from: e.target.value }))}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
               </div>
               <div className="flex-1">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.dateToLabel}</div>
-                <input type="date" value={rangeLeaveForm.to} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, to: e.target.value }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                  {t.dateToLabel}
+                </div>
+                <input
+                  type="date"
+                  value={rangeLeaveForm.to}
+                  onChange={(e) => setRangeLeaveForm((f) => ({ ...f, to: e.target.value }))}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
               </div>
             </div>
             <div className="flex gap-2 mt-1">
               {["vacation", "sick", "other"].map((ty) => (
-                <button key={ty} onClick={() => setRangeLeaveForm((f) => ({ ...f, type: ty }))} style={{ background: rangeLeaveForm.type === ty ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">
+                <button
+                  key={ty}
+                  onClick={() => setRangeLeaveForm((f) => ({ ...f, type: ty }))}
+                  style={{
+                    background: rangeLeaveForm.type === ty ? COLORS.accent : COLORS.cardAlt,
+                    border: `1px solid ${COLORS.border}`,
+                  }}
+                  className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                >
                   {ty === "vacation" ? t.leaveVacation : ty === "sick" ? t.leaveSick : t.leaveOther}
                 </button>
               ))}
             </div>
-            <input aria-label={t.leaveNotePlaceholder} value={rangeLeaveForm.note} onChange={(e) => setRangeLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <button onClick={submitRangeLeave} disabled={!rangeLeaveForm.from || !rangeLeaveForm.to} style={{ background: COLORS.accent, opacity: rangeLeaveForm.from && rangeLeaveForm.to ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.requestLeave}</button>
+            <input
+              aria-label={t.leaveNotePlaceholder}
+              value={rangeLeaveForm.note}
+              onChange={(e) => setRangeLeaveForm((f) => ({ ...f, note: e.target.value }))}
+              placeholder={t.leaveNotePlaceholder}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <button
+              onClick={submitRangeLeave}
+              disabled={!rangeLeaveForm.from || !rangeLeaveForm.to}
+              style={{ background: COLORS.accent, opacity: rangeLeaveForm.from && rangeLeaveForm.to ? 1 : 0.5 }}
+              className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.requestLeave}
+            </button>
           </div>
         </Modal>
       )}
 
-      {selectedDay && (() => {
-        const dayEntries = entries.filter((e) => e.date === selectedDay);
-        const leave = myLeaveFor(selectedDay);
-        return (
-          <Modal t={t} onClose={() => setSelectedDay(null)} title={selectedDay}>
-            <div className="flex flex-col gap-4">
-              <div>
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">{t.dayJournalHeading}</div>
-                <EntryGroups entries={dayEntries} projectName={projectName} t={t} emptyLabel={t.nothingLogged} onEditTime={openEditTime} onEditEntry={openEditEntry} onDelete={deleteEntryFn} />
-              </div>
-
-              {dayEntries.length > 0 && (
-                <button onClick={() => generateDayReport(selectedDay)} style={{ background: COLORS.accentDim }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
-                  <FileText size={15} /> {t.generateReportBtn}
-                </button>
-              )}
-
-              <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-4">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 flex items-center gap-1"><CalendarDays size={12} /> {t.requestLeave}</div>
-                <div className="flex gap-2 mb-2">
-                  {["vacation", "sick", "other"].map((ty) => (
-                    <button key={ty} onClick={() => setLeaveForm((f) => ({ ...f, type: ty }))} style={{ background: leaveForm.type === ty ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">
-                      {ty === "vacation" ? t.leaveVacation : ty === "sick" ? t.leaveSick : t.leaveOther}
-                    </button>
-                  ))}
-                </div>
-                <input aria-label={t.leaveNotePlaceholder} value={leaveForm.note} onChange={(e) => setLeaveForm((f) => ({ ...f, note: e.target.value }))} placeholder={t.leaveNotePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2" />
-                <button onClick={submitLeaveRequest} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="w-full py-2.5 rounded-lg font-bold uppercase text-xs mb-2">{leave ? t.saveLabel : t.requestLeave}</button>
-
-                {leave && (
-                  <div style={{ background: COLORS.cardAlt }} className="rounded-lg p-3 flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span style={{ color: leave.status === "approved" ? COLORS.success : leave.status === "declined" ? COLORS.danger : COLORS.amber }} className="text-xs font-bold uppercase">
-                        {leave.status === "approved" ? t.statusApproved : leave.status === "declined" ? t.statusDeclined : t.statusPending}
-                      </span>
-                      <button onClick={() => sendLeaveToSupervisor(leave)} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase flex items-center gap-1"><Mail size={12} /> {t.sendRequestBtn}</button>
-                    </div>
-                    {leave.status === "pending" && (
-                      <div className="flex gap-2">
-                        <button onClick={() => setLeaveStatus(leave.id, "approved")} style={{ background: COLORS.success }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.markApproved}</button>
-                        <button onClick={() => setLeaveStatus(leave.id, "declined")} style={{ background: COLORS.danger }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase">{t.markDeclined}</button>
-                      </div>
-                    )}
+      {selectedDay &&
+        (() => {
+          const dayEntries = entries.filter((e) => e.date === selectedDay);
+          const leave = myLeaveFor(selectedDay);
+          return (
+            <Modal t={t} onClose={() => setSelectedDay(null)} title={selectedDay}>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+                    {t.dayJournalHeading}
                   </div>
+                  <EntryGroups
+                    entries={dayEntries}
+                    projectName={projectName}
+                    t={t}
+                    emptyLabel={t.nothingLogged}
+                    onEditTime={openEditTime}
+                    onEditEntry={openEditEntry}
+                    onDelete={deleteEntryFn}
+                  />
+                </div>
+
+                {dayEntries.length > 0 && (
+                  <button
+                    onClick={() => generateDayReport(selectedDay)}
+                    style={{ background: COLORS.accentDim }}
+                    className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+                  >
+                    <FileText size={15} /> {t.generateReportBtn}
+                  </button>
                 )}
+
+                <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="pt-4">
+                  <div
+                    style={{ color: COLORS.muted }}
+                    className="text-xs uppercase tracking-wide mb-2 flex items-center gap-1"
+                  >
+                    <CalendarDays size={12} /> {t.requestLeave}
+                  </div>
+                  <div className="flex gap-2 mb-2">
+                    {["vacation", "sick", "other"].map((ty) => (
+                      <button
+                        key={ty}
+                        onClick={() => setLeaveForm((f) => ({ ...f, type: ty }))}
+                        style={{
+                          background: leaveForm.type === ty ? COLORS.accent : COLORS.cardAlt,
+                          border: `1px solid ${COLORS.border}`,
+                        }}
+                        className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                      >
+                        {ty === "vacation" ? t.leaveVacation : ty === "sick" ? t.leaveSick : t.leaveOther}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    aria-label={t.leaveNotePlaceholder}
+                    value={leaveForm.note}
+                    onChange={(e) => setLeaveForm((f) => ({ ...f, note: e.target.value }))}
+                    placeholder={t.leaveNotePlaceholder}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-2"
+                  />
+                  <button
+                    onClick={submitLeaveRequest}
+                    style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                    className="w-full py-2.5 rounded-lg font-bold uppercase text-xs mb-2"
+                  >
+                    {leave ? t.saveLabel : t.requestLeave}
+                  </button>
+
+                  {leave && (
+                    <div style={{ background: COLORS.cardAlt }} className="rounded-lg p-3 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span
+                          style={{
+                            color:
+                              leave.status === "approved"
+                                ? COLORS.success
+                                : leave.status === "declined"
+                                  ? COLORS.danger
+                                  : COLORS.amber,
+                          }}
+                          className="text-xs font-bold uppercase"
+                        >
+                          {leave.status === "approved"
+                            ? t.statusApproved
+                            : leave.status === "declined"
+                              ? t.statusDeclined
+                              : t.statusPending}
+                        </span>
+                        <button
+                          onClick={() => sendLeaveToSupervisor(leave)}
+                          style={{ color: COLORS.accent }}
+                          className="text-xs font-bold uppercase flex items-center gap-1"
+                        >
+                          <Mail size={12} /> {t.sendRequestBtn}
+                        </button>
+                      </div>
+                      {leave.status === "pending" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setLeaveStatus(leave.id, "approved")}
+                            style={{ background: COLORS.success }}
+                            className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                          >
+                            {t.markApproved}
+                          </button>
+                          <button
+                            onClick={() => setLeaveStatus(leave.id, "declined")}
+                            style={{ background: COLORS.danger }}
+                            className="flex-1 py-2 rounded-lg text-xs font-bold uppercase"
+                          >
+                            {t.markDeclined}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </Modal>
-        );
-      })()}
+            </Modal>
+          );
+        })()}
 
       {selectedProject && (
         <Suspense fallback={null}>
-        <ProjectDetail
-          project={projects.find((p) => p.id === selectedProject)}
-          entries={entries.filter((e) => e.projectId === selectedProject)}
-          onClose={() => setSelectedProject(null)}
-          onAdd={(type) => openAdd(type, selectedProject)}
-          onEditEntry={openEditEntry}
-          onCopyEntry={copyEntryFn}
-          onDeleteEntry={deleteEntryFn}
-          onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
-          onScanCompare={(projectId) => openScan("compare", projectId)}
-          onReorderEntries={reorderEntries}
-          costing={projectCosting(selectedProject, projects.find((p) => p.id === selectedProject)?.quotedAmount)}
-          money={money}
-          documents={documents.filter((d) => d.projectId === selectedProject)}
-          onNewDocument={(type) => newDocumentFor(projects.find((p) => p.id === selectedProject), type)}
-          onOpenDocument={(d) => setDocEditor({ ...d })}
-          onPrintDocument={printDocument}
-          canBill={isOwner()}
-          reports={siteReports.filter((r) => r.projectId === selectedProject)}
-          onOpenRapport={(pid) => openRapport(pid)}
-          onPrintRapport={printRapport}
-          regie={regieSummary(selectedProject, { unbilledOnly: true })}
-          onRegieDocument={(type) => createRegieDocument(projects.find((p) => p.id === selectedProject), type)}
-          customer={customerFor(projects.find((p) => p.id === selectedProject))}
-          onEditCustomer={(c) => openCustomerForm(c)}
-          crew={projectCrew(projects.find((x) => x.id === selectedProject))}
-          pinned={pinnedIds.includes(selectedProject)}
-          files={projectFiles.filter((f) => f.projectId === selectedProject)}
-          onUploadFiles={(list, kind) => uploadFiles(selectedProject, list, kind)}
-          onOpenFile={openFile}
-          onDeleteFile={deleteFile}
-          canDeleteFile={canDeleteFile}
-          onAddLink={() => setLinkForm({ projectId: selectedProject, url: "", name: "", kind: "plan" })}
-          fileBusy={fileBusy}
-          activeClock={activeClock}
-          onStartDay={startDayOn}
-          onStopDay={clockOut}
-          translations={noteTranslations[selectedProject] || {}}
-          onTranslate={(n, code) => translateNote(n, selectedProject, code)}
-          langOptions={[...new Set([lang, "de", "en", ...memberLangs])]}
-          onTranslateAll={() => translateAllNotes(selectedProject)}
-          translatingIds={translatingIds}
-          lang={lang}
-          onOpenPhoto={openPhoto}
-          onInspect={(pid) => openInspection(pid)}
-          onEditInspection={(entry) => openInspection(entry.projectId, entry)}
-          canEditInspection={canEditInspection}
-          currentUid={user?.uid}
-          onTogglePin={() => togglePin(selectedProject)}
-          roster={team.members}
-          canManageCrew={canManage()}
-          onToggleCrew={(memberUid) => toggleProjectCrew(selectedProject, memberUid)}
-          noteDraft={projectNote}
-          onNoteDraftChange={setProjectNote}
-          onVoiceNote={() => toggleVoiceInput(setProjectNote, "projectNote")}
-          voiceActive={voiceListening && voiceTarget === "projectNote"}
-          onSaveNote={() => {
-            if (!projectNote.trim()) return;
-            const noteEntry = newEntry({ type: "note", projectId: selectedProject, description: projectNote.trim() });
-            persist({ entries: [noteEntry, ...entries] });
-            autoTranslateNote(noteEntry);
-            setProjectNote("");
-            showToast(t.commentSaved);
-          }}
-          onEdit={() => {
-            const p = projects.find((pr) => pr.id === selectedProject);
-            setEditProject({ id: p.id, name: p.name, client: p.client || "", customerId: p.customerId || null, address: p.address || "", category: p.category || "flat", status: p.status || DEFAULT_PROJECT_STATUS, quotedAmount: p.quotedAmount || "" });
-          }}
-          t={t}
-        />
+          <ProjectDetail
+            project={projects.find((p) => p.id === selectedProject)}
+            entries={entries.filter((e) => e.projectId === selectedProject)}
+            onClose={() => setSelectedProject(null)}
+            onAdd={(type) => openAdd(type, selectedProject)}
+            onEditEntry={openEditEntry}
+            onCopyEntry={copyEntryFn}
+            onDeleteEntry={deleteEntryFn}
+            onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
+            onScanCompare={(projectId) => openScan("compare", projectId)}
+            onReorderEntries={reorderEntries}
+            costing={projectCosting(selectedProject, projects.find((p) => p.id === selectedProject)?.quotedAmount)}
+            money={money}
+            documents={documents.filter((d) => d.projectId === selectedProject)}
+            onNewDocument={(type) =>
+              newDocumentFor(
+                projects.find((p) => p.id === selectedProject),
+                type,
+              )
+            }
+            onOpenDocument={(d) => setDocEditor({ ...d })}
+            onPrintDocument={printDocument}
+            canBill={isOwner()}
+            reports={siteReports.filter((r) => r.projectId === selectedProject)}
+            onOpenRapport={(pid) => openRapport(pid)}
+            onPrintRapport={printRapport}
+            regie={regieSummary(selectedProject, { unbilledOnly: true })}
+            onRegieDocument={(type) =>
+              createRegieDocument(
+                projects.find((p) => p.id === selectedProject),
+                type,
+              )
+            }
+            customer={customerFor(projects.find((p) => p.id === selectedProject))}
+            onEditCustomer={(c) => openCustomerForm(c)}
+            crew={projectCrew(projects.find((x) => x.id === selectedProject))}
+            pinned={pinnedIds.includes(selectedProject)}
+            files={projectFiles.filter((f) => f.projectId === selectedProject)}
+            onUploadFiles={(list, kind) => uploadFiles(selectedProject, list, kind)}
+            onOpenFile={openFile}
+            onDeleteFile={deleteFile}
+            canDeleteFile={canDeleteFile}
+            onAddLink={() => setLinkForm({ projectId: selectedProject, url: "", name: "", kind: "plan" })}
+            fileBusy={fileBusy}
+            activeClock={activeClock}
+            onStartDay={startDayOn}
+            onStopDay={clockOut}
+            translations={noteTranslations[selectedProject] || {}}
+            onTranslate={(n, code) => translateNote(n, selectedProject, code)}
+            langOptions={[...new Set([lang, "de", "en", ...memberLangs])]}
+            onTranslateAll={() => translateAllNotes(selectedProject)}
+            translatingIds={translatingIds}
+            lang={lang}
+            onOpenPhoto={openPhoto}
+            onInspect={(pid) => openInspection(pid)}
+            onEditInspection={(entry) => openInspection(entry.projectId, entry)}
+            canEditInspection={canEditInspection}
+            currentUid={user?.uid}
+            onTogglePin={() => togglePin(selectedProject)}
+            roster={team.members}
+            canManageCrew={canManage()}
+            onToggleCrew={(memberUid) => toggleProjectCrew(selectedProject, memberUid)}
+            noteDraft={projectNote}
+            onNoteDraftChange={setProjectNote}
+            onVoiceNote={() => toggleVoiceInput(setProjectNote, "projectNote")}
+            voiceActive={voiceListening && voiceTarget === "projectNote"}
+            onSaveNote={() => {
+              if (!projectNote.trim()) return;
+              const noteEntry = newEntry({ type: "note", projectId: selectedProject, description: projectNote.trim() });
+              persist({ entries: [noteEntry, ...entries] });
+              autoTranslateNote(noteEntry);
+              setProjectNote("");
+              showToast(t.commentSaved);
+            }}
+            onEdit={() => {
+              const p = projects.find((pr) => pr.id === selectedProject);
+              setEditProject({
+                id: p.id,
+                name: p.name,
+                client: p.client || "",
+                customerId: p.customerId || null,
+                address: p.address || "",
+                category: p.category || "flat",
+                status: p.status || DEFAULT_PROJECT_STATUS,
+                quotedAmount: p.quotedAmount || "",
+              });
+            }}
+            t={t}
+          />
         </Suspense>
       )}
 
       {newProjectOpen && (
         <Modal t={t} onClose={() => setNewProjectOpen(false)} title={t.newProjectTitle}>
-          <input aria-label={t.projectNameLabel} value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input aria-label={t.clientNameLabel} value={newProjectClient} onChange={(e) => setNewProjectClient(e.target.value)} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input aria-label={t.addressLabel} value={newProjectAddr} onChange={(e) => setNewProjectAddr(e.target.value)} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.categoryLabel}</div>
+          <input
+            aria-label={t.projectNameLabel}
+            value={newProjectName}
+            onChange={(e) => setNewProjectName(e.target.value)}
+            placeholder={t.projectNameLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <input
+            aria-label={t.clientNameLabel}
+            value={newProjectClient}
+            onChange={(e) => setNewProjectClient(e.target.value)}
+            placeholder={t.clientNameLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <input
+            aria-label={t.addressLabel}
+            value={newProjectAddr}
+            onChange={(e) => setNewProjectAddr(e.target.value)}
+            placeholder={t.addressLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.categoryLabel}
+          </div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_CATEGORIES.map((c) => (
-              <button key={c.key} onClick={() => setNewProjectCat(c.key)} style={{ background: newProjectCat === c.key ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+              <button
+                key={c.key}
+                onClick={() => setNewProjectCat(c.key)}
+                style={{
+                  background: newProjectCat === c.key ? COLORS.accent : COLORS.cardAlt,
+                  border: `1px solid ${COLORS.border}`,
+                }}
+                className="px-3 py-1.5 rounded-full text-xs font-bold"
+              >
                 {t[c.labelKey]}
               </button>
             ))}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.projStatusLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.projStatusLabel}
+          </div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_STATUSES.map((s) => (
-              <button key={s.key} onClick={() => setNewProjectStatus(s.key)} style={{ background: newProjectStatus === s.key ? `${s.color}33` : COLORS.cardAlt, border: `1px solid ${newProjectStatus === s.key ? s.color : COLORS.border}`, color: newProjectStatus === s.key ? s.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+              <button
+                key={s.key}
+                onClick={() => setNewProjectStatus(s.key)}
+                style={{
+                  background: newProjectStatus === s.key ? `${s.color}33` : COLORS.cardAlt,
+                  border: `1px solid ${newProjectStatus === s.key ? s.color : COLORS.border}`,
+                  color: newProjectStatus === s.key ? s.color : COLORS.text,
+                }}
+                className="px-3 py-1.5 rounded-full text-xs font-bold"
+              >
                 {t[s.labelKey]}
               </button>
             ))}
           </div>
           {customers.length > 0 && (
             <>
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.customerLabel}</div>
-              <select value={newProjectCustomerId} onChange={(e) => setNewProjectCustomerId(e.target.value)} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none">
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.customerLabel}
+              </div>
+              <select
+                value={newProjectCustomerId}
+                onChange={(e) => setNewProjectCustomerId(e.target.value)}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none"
+              >
                 <option value="">{t.noCustomerLabel}</option>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
             </>
           )}
-          <button onClick={addProject} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.addProjectBtn}</button>
+          <button
+            onClick={addProject}
+            style={{ background: COLORS.accent }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.addProjectBtn}
+          </button>
         </Modal>
       )}
 
       {editProject && (
         <Modal t={t} onClose={() => setEditProject(null)} title={t.editProjectTitle}>
-          <input aria-label={t.projectNameLabel} value={editProject.name} onChange={(e) => setEditProject((s) => ({ ...s, name: e.target.value }))} placeholder={t.projectNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input aria-label={t.clientNameLabel} value={editProject.client} onChange={(e) => setEditProject((s) => ({ ...s, client: e.target.value }))} placeholder={t.clientNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <input aria-label={t.addressLabel} value={editProject.address} onChange={(e) => setEditProject((s) => ({ ...s, address: e.target.value }))} placeholder={t.addressLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none" />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.categoryLabel}</div>
+          <input
+            aria-label={t.projectNameLabel}
+            value={editProject.name}
+            onChange={(e) => setEditProject((s) => ({ ...s, name: e.target.value }))}
+            placeholder={t.projectNameLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <input
+            aria-label={t.clientNameLabel}
+            value={editProject.client}
+            onChange={(e) => setEditProject((s) => ({ ...s, client: e.target.value }))}
+            placeholder={t.clientNameLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <input
+            aria-label={t.addressLabel}
+            value={editProject.address}
+            onChange={(e) => setEditProject((s) => ({ ...s, address: e.target.value }))}
+            placeholder={t.addressLabel}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
+          />
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.categoryLabel}
+          </div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_CATEGORIES.map((c) => (
-              <button key={c.key} onClick={() => setEditProject((s) => ({ ...s, category: c.key }))} style={{ background: editProject.category === c.key ? COLORS.accent : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+              <button
+                key={c.key}
+                onClick={() => setEditProject((s) => ({ ...s, category: c.key }))}
+                style={{
+                  background: editProject.category === c.key ? COLORS.accent : COLORS.cardAlt,
+                  border: `1px solid ${COLORS.border}`,
+                }}
+                className="px-3 py-1.5 rounded-full text-xs font-bold"
+              >
                 {t[c.labelKey]}
               </button>
             ))}
           </div>
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.projStatusLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.projStatusLabel}
+          </div>
           <div className="flex flex-wrap gap-1.5 mb-4">
             {PROJECT_STATUSES.map((s) => {
               const active = (editProject.status || DEFAULT_PROJECT_STATUS) === s.key;
               return (
-                <button key={s.key} onClick={() => setEditProject((st) => ({ ...st, status: s.key }))} style={{ background: active ? `${s.color}33` : COLORS.cardAlt, border: `1px solid ${active ? s.color : COLORS.border}`, color: active ? s.color : COLORS.text }} className="px-3 py-1.5 rounded-full text-xs font-bold">
+                <button
+                  key={s.key}
+                  onClick={() => setEditProject((st) => ({ ...st, status: s.key }))}
+                  style={{
+                    background: active ? `${s.color}33` : COLORS.cardAlt,
+                    border: `1px solid ${active ? s.color : COLORS.border}`,
+                    color: active ? s.color : COLORS.text,
+                  }}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold"
+                >
                   {t[s.labelKey]}
                 </button>
               );
@@ -5918,39 +9460,78 @@ export default function SiteManager() {
           </div>
           {customers.length > 0 && (
             <>
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.customerLabel}</div>
-              <select value={editProject.customerId || ""} onChange={(e) => setEditProject((s) => ({ ...s, customerId: e.target.value || null }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none">
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.customerLabel}
+              </div>
+              <select
+                value={editProject.customerId || ""}
+                onChange={(e) => setEditProject((s) => ({ ...s, customerId: e.target.value || null }))}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none"
+              >
                 <option value="">{t.noCustomerLabel}</option>
-                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
             </>
           )}
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.quotedLabel}</div>
-          <input aria-label={`${t.quotedPlaceholder} (${billing.currency || "CHF"})`}
-            type="number" inputMode="decimal" step="0.05"
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+            {t.quotedLabel}
+          </div>
+          <input
+            aria-label={`${t.quotedPlaceholder} (${billing.currency || "CHF"})`}
+            type="number"
+            inputMode="decimal"
+            step="0.05"
             value={editProject.quotedAmount || ""}
             onChange={(e) => setEditProject((s) => ({ ...s, quotedAmount: e.target.value }))}
             placeholder={`${t.quotedPlaceholder} (${billing.currency || "CHF"})`}
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm mb-4 outline-none"
           />
-          <button onClick={saveProjectEdit} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          <button
+            onClick={saveProjectEdit}
+            style={{ background: COLORS.accent }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.saveLabel}
+          </button>
         </Modal>
       )}
 
       {shareProjectModal && (
         <Modal t={t} onClose={() => setShareProjectModal(null)} title={t.shareProject}>
           <div className="flex flex-col gap-3">
-            <div style={{ color: COLORS.muted }} className="text-xs">{t.shareHint}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs">
+              {t.shareHint}
+            </div>
             <div style={{ color: COLORS.muted }} className="text-xs">
               {shareProjectModal.entries.length} {t.entriesLabelFmt}
             </div>
-            <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-3 text-xs break-all font-mono">
+            <div
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+              className="rounded-lg p-3 text-xs break-all font-mono"
+            >
               {encodeProjectCode(shareProjectModal.project, shareProjectModal.entries)}
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => shareProjectVia(shareProjectModal.project, shareProjectModal.entries, "whatsapp")} style={{ background: COLORS.success }} className="py-3 rounded-lg font-bold uppercase text-xs">WhatsApp</button>
-              <button onClick={() => shareProjectVia(shareProjectModal.project, shareProjectModal.entries, "email")} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Mail size={14} /> Email</button>
+              <button
+                onClick={() => shareProjectVia(shareProjectModal.project, shareProjectModal.entries, "whatsapp")}
+                style={{ background: COLORS.success }}
+                className="py-3 rounded-lg font-bold uppercase text-xs"
+              >
+                WhatsApp
+              </button>
+              <button
+                onClick={() => shareProjectVia(shareProjectModal.project, shareProjectModal.entries, "email")}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"
+              >
+                <Mail size={14} /> Email
+              </button>
             </div>
           </div>
         </Modal>
@@ -5959,17 +9540,34 @@ export default function SiteManager() {
       {importModalOpen && (
         <Modal t={t} onClose={() => setImportModalOpen(false)} title={t.importProject}>
           <div className="flex flex-col gap-2">
-            <div style={{ color: COLORS.muted }} className="text-xs mb-1">{t.shareHint}</div>
-            <textarea aria-label={t.pasteCodePlaceholder}
+            <div style={{ color: COLORS.muted }} className="text-xs mb-1">
+              {t.shareHint}
+            </div>
+            <textarea
+              aria-label={t.pasteCodePlaceholder}
               value={importCodeInput}
-              onChange={(e) => { setImportCodeInput(e.target.value); setImportError(null); }}
+              onChange={(e) => {
+                setImportCodeInput(e.target.value);
+                setImportError(null);
+              }}
               placeholder={t.pasteCodePlaceholder}
               rows={3}
               style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
               className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none font-mono"
             />
-            {importError && <div style={{ color: COLORS.danger }} className="text-xs">{importError}</div>}
-            <button onClick={submitImportProject} disabled={!importCodeInput.trim()} style={{ background: COLORS.accent, opacity: importCodeInput.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.importBtn}</button>
+            {importError && (
+              <div style={{ color: COLORS.danger }} className="text-xs">
+                {importError}
+              </div>
+            )}
+            <button
+              onClick={submitImportProject}
+              disabled={!importCodeInput.trim()}
+              style={{ background: COLORS.accent, opacity: importCodeInput.trim() ? 1 : 0.5 }}
+              className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.importBtn}
+            </button>
           </div>
         </Modal>
       )}
@@ -5977,11 +9575,16 @@ export default function SiteManager() {
       {editTimeModal && (
         <Modal t={t} onClose={() => setEditTimeModal(null)} title={t.adjustHoursTitle}>
           <div className="flex flex-col gap-2">
-            <div style={{ color: COLORS.muted }} className="text-xs mb-1">{editTimeModal.date}{editTimeModal.projectId ? ` · ${projectName(editTimeModal.projectId)}` : ""}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs mb-1">
+              {editTimeModal.date}
+              {editTimeModal.projectId ? ` · ${projectName(editTimeModal.projectId)}` : ""}
+            </div>
             {editTimeModal.startTime ? (
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.startTimeLabel}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                    {t.startTimeLabel}
+                  </div>
                   <input
                     type="time"
                     autoFocus
@@ -5992,7 +9595,9 @@ export default function SiteManager() {
                   />
                 </div>
                 <div className="flex-1">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.endTimeLabel}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                    {t.endTimeLabel}
+                  </div>
                   <input
                     type="time"
                     value={editEndTime}
@@ -6003,7 +9608,8 @@ export default function SiteManager() {
                 </div>
               </div>
             ) : (
-              <input aria-label={t.hoursFieldLabel}
+              <input
+                aria-label={t.hoursFieldLabel}
                 type="number"
                 inputMode="decimal"
                 step="0.1"
@@ -6017,9 +9623,18 @@ export default function SiteManager() {
                 className="w-full rounded-lg px-3 py-2 text-sm outline-none"
               />
             )}
-            <button onClick={saveEditTime} style={{ background: COLORS.accent }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
             <button
-              onClick={() => { deleteEntryFn(editTimeModal); setEditTimeModal(null); }}
+              onClick={saveEditTime}
+              style={{ background: COLORS.accent }}
+              className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.saveLabel}
+            </button>
+            <button
+              onClick={() => {
+                deleteEntryFn(editTimeModal);
+                setEditTimeModal(null);
+              }}
               style={{ color: COLORS.danger }}
               className="w-full mt-2 py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
             >
@@ -6029,103 +9644,258 @@ export default function SiteManager() {
         </Modal>
       )}
 
-      {reportViewModal && (() => {
-        const live = Array.isArray(reportViewModal.entryIds);
-        const f = reportFigures(reportViewModal);
-        const excludedRows = live
-          ? (reportViewModal.excludedIds || []).map((id) => entries.find((e) => e.id === id) || { id, description: (reportViewModal.entryLabels || {})[id] || "", deleted: true })
-          : [];
-        return (
-        <Modal t={t} onClose={() => setReportViewModal(null)} title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}>
-          <div className="flex flex-col gap-3">
-            <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-3">
-              <Stat label={t.sitesLabel} value={f.sites.join(", ") || "—"} color={COLORS.text} />
-              <Stat label={t.hoursWorked} value={f.hours.toFixed(1)} color={COLORS.accent} />
-              {f.transportHours > 0 && <Stat label={t.reportTransportHours} value={f.transportHours.toFixed(1)} color="#C68B4F" />}
-              <Stat label={t.materialsLogged} value={f.materialsCount} color={COLORS.success} />
-              <Stat label={t.toolsLogged} value={f.toolsCount} color={COLORS.amber} />
-              {(reportViewModal.sends || []).length > 0 && (
-                <div style={{ color: COLORS.muted }} className="text-xs mt-1">
-                  {t.reportSentTimes} {reportViewModal.sends.length}× · {t.reportLastSent} {new Date(reportViewModal.sends[reportViewModal.sends.length - 1].at).toLocaleString()}
-                </div>
-              )}
-            </div>
-            <div style={{ color: COLORS.muted }} className="text-xs">{t.editReportHint}</div>
-            {!live && (<div className="flex items-center gap-2">
-              <span style={{ color: COLORS.muted }} className="text-xs">{t.hoursFieldLabel}</span>
-              <input type="number" inputMode="decimal" step="0.1" value={reportViewModal.hours} onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-            </div>)}
-            <textarea aria-label={t.notesLabel} value={reportViewModal.notes} onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))} placeholder={t.notesLabel} rows={3} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
-            <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
-              {f.rows.map((e) => {
-                const meta = typeMeta(e.type, t) || typeMeta("note", t);
-                return (
-                  <div key={e.id} style={{ background: COLORS.cardAlt, opacity: e.deleted ? 0.6 : 1 }} className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2">
-                    <span className="min-w-0 truncate">
-                      {e.description}{e.deleted ? ` ${t.reportDeletedEntry}` : ""}
-                    </span>
-                    <span className="flex items-center gap-2 shrink-0">
-                      <span style={{ color: COLORS.muted }}>{e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}</span>
-                      {live && (
-                        <button className="tap" aria-label={t.a11yClose} onClick={() => toggleReportEntry(e.id)} title={t.reportExclude} style={{ color: COLORS.muted }}><X size={12} /></button>
-                      )}
-                    </span>
-                  </div>
-                );
-              })}
-              {excludedRows.length > 0 && (
-                <>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-2">{t.reportExcludedTitle} ({excludedRows.length})</div>
-                  {excludedRows.map((e) => (
-                    <div key={e.id} style={{ background: COLORS.cardAlt, opacity: 0.55 }} className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2">
-                      <span className="min-w-0 truncate line-through">{e.description}</span>
-                      <button onClick={() => toggleReportEntry(e.id)} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase shrink-0">{t.reportRestore}</button>
+      {reportViewModal &&
+        (() => {
+          const live = Array.isArray(reportViewModal.entryIds);
+          const f = reportFigures(reportViewModal);
+          const excludedRows = live
+            ? (reportViewModal.excludedIds || []).map(
+                (id) =>
+                  entries.find((e) => e.id === id) || {
+                    id,
+                    description: (reportViewModal.entryLabels || {})[id] || "",
+                    deleted: true,
+                  },
+              )
+            : [];
+          return (
+            <Modal
+              t={t}
+              onClose={() => setReportViewModal(null)}
+              title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}
+            >
+              <div className="flex flex-col gap-3">
+                <div
+                  style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                  className="rounded-lg p-3"
+                >
+                  <Stat label={t.sitesLabel} value={f.sites.join(", ") || "—"} color={COLORS.text} />
+                  <Stat label={t.hoursWorked} value={f.hours.toFixed(1)} color={COLORS.accent} />
+                  {f.transportHours > 0 && (
+                    <Stat label={t.reportTransportHours} value={f.transportHours.toFixed(1)} color="#C68B4F" />
+                  )}
+                  <Stat label={t.materialsLogged} value={f.materialsCount} color={COLORS.success} />
+                  <Stat label={t.toolsLogged} value={f.toolsCount} color={COLORS.amber} />
+                  {(reportViewModal.sends || []).length > 0 && (
+                    <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                      {t.reportSentTimes} {reportViewModal.sends.length}× · {t.reportLastSent}{" "}
+                      {new Date(reportViewModal.sends[reportViewModal.sends.length - 1].at).toLocaleString()}
                     </div>
-                  ))}
-                </>
-              )}
-            </div>
-            <button onClick={saveReportEdits} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => saveReportAsPdf(reportViewModal)} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Printer size={14} /> {t.savePdfBtn}</button>
-              <button onClick={() => resendReport(reportViewModal)} style={{ background: COLORS.accentDim }} className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"><Send size={14} /> {t.resendBtn}</button>
-            </div>
-          </div>
-        </Modal>
-        );
-      })()}
+                  )}
+                </div>
+                <div style={{ color: COLORS.muted }} className="text-xs">
+                  {t.editReportHint}
+                </div>
+                {!live && (
+                  <div className="flex items-center gap-2">
+                    <span style={{ color: COLORS.muted }} className="text-xs">
+                      {t.hoursFieldLabel}
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.1"
+                      value={reportViewModal.hours}
+                      onChange={(e) => setReportViewModal((r) => ({ ...r, hours: parseFloat(e.target.value) || 0 }))}
+                      style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                      className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                    />
+                  </div>
+                )}
+                <textarea
+                  aria-label={t.notesLabel}
+                  value={reportViewModal.notes}
+                  onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))}
+                  placeholder={t.notesLabel}
+                  rows={3}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                />
+                <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
+                  {f.rows.map((e) => {
+                    const meta = typeMeta(e.type, t) || typeMeta("note", t);
+                    return (
+                      <div
+                        key={e.id}
+                        style={{ background: COLORS.cardAlt, opacity: e.deleted ? 0.6 : 1 }}
+                        className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2"
+                      >
+                        <span className="min-w-0 truncate">
+                          {e.description}
+                          {e.deleted ? ` ${t.reportDeletedEntry}` : ""}
+                        </span>
+                        <span className="flex items-center gap-2 shrink-0">
+                          <span style={{ color: COLORS.muted }}>
+                            {e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}
+                          </span>
+                          {live && (
+                            <button
+                              className="tap"
+                              aria-label={t.a11yClose}
+                              onClick={() => toggleReportEntry(e.id)}
+                              title={t.reportExclude}
+                              style={{ color: COLORS.muted }}
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {excludedRows.length > 0 && (
+                    <>
+                      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-2">
+                        {t.reportExcludedTitle} ({excludedRows.length})
+                      </div>
+                      {excludedRows.map((e) => (
+                        <div
+                          key={e.id}
+                          style={{ background: COLORS.cardAlt, opacity: 0.55 }}
+                          className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2"
+                        >
+                          <span className="min-w-0 truncate line-through">{e.description}</span>
+                          <button
+                            onClick={() => toggleReportEntry(e.id)}
+                            style={{ color: COLORS.accent }}
+                            className="text-xs font-bold uppercase shrink-0"
+                          >
+                            {t.reportRestore}
+                          </button>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+                <button
+                  onClick={saveReportEdits}
+                  style={{ background: COLORS.accent }}
+                  className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+                >
+                  {t.saveLabel}
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => saveReportAsPdf(reportViewModal)}
+                    style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                    className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"
+                  >
+                    <Printer size={14} /> {t.savePdfBtn}
+                  </button>
+                  <button
+                    onClick={() => resendReport(reportViewModal)}
+                    style={{ background: COLORS.accentDim }}
+                    className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"
+                  >
+                    <Send size={14} /> {t.resendBtn}
+                  </button>
+                </div>
+              </div>
+            </Modal>
+          );
+        })()}
 
-      {quickAddOpen && (() => {
+      {quickAddOpen &&
+        (() => {
           // The site the action is for: clocked in, else the open job, else the
           // only active one; otherwise the sheet asks.
-          const candidates = dockProjects.length ? dockProjects : projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
-          const pid = activeClock?.projectId || selectedProject || (candidates.length === 1 ? candidates[0].id : quickAddSite) || null;
+          const candidates = dockProjects.length
+            ? dockProjects
+            : projects.filter((p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS));
+          const pid =
+            activeClock?.projectId ||
+            selectedProject ||
+            (candidates.length === 1 ? candidates[0].id : quickAddSite) ||
+            null;
           const site = projects.find((p) => p.id === pid);
-          const close = () => { setQuickAddOpen(false); setQuickAddSite(null); };
+          const close = () => {
+            setQuickAddOpen(false);
+            setQuickAddSite(null);
+          };
           const actions = [
             activeClock
-              ? { key: "stop", label: t.clockOut, icon: Square, color: COLORS.danger, run: () => { clockOut(); } }
-              : { key: "start", label: t.startYourDay, icon: Play, color: COLORS.success, run: () => { if (pid) startDayOn(pid); } },
-            { key: "material", label: t.materials, icon: Package, color: COLORS.success, run: () => openAdd("material", pid) },
+              ? {
+                  key: "stop",
+                  label: t.clockOut,
+                  icon: Square,
+                  color: COLORS.danger,
+                  run: () => {
+                    clockOut();
+                  },
+                }
+              : {
+                  key: "start",
+                  label: t.startYourDay,
+                  icon: Play,
+                  color: COLORS.success,
+                  run: () => {
+                    if (pid) startDayOn(pid);
+                  },
+                },
+            {
+              key: "material",
+              label: t.materials,
+              icon: Package,
+              color: COLORS.success,
+              run: () => openAdd("material", pid),
+            },
             { key: "photo", label: t.photoLabel, icon: Camera, color: "#7FA0C7", run: () => openAdd("photo", pid) },
-            { key: "note", label: t.typeNote, icon: MessageSquare, color: COLORS.muted, run: () => openAdd("note", pid) },
+            {
+              key: "note",
+              label: t.typeNote,
+              icon: MessageSquare,
+              color: COLORS.muted,
+              run: () => openAdd("note", pid),
+            },
             { key: "trip", label: t.tripAdd, icon: Truck, color: "#C68B4F", run: () => openTrip(pid) },
-            { key: "inspection", label: t.newInspection, icon: ClipboardCheck, color: "#6FB3D9", run: () => { if (pid) openInspection(pid); } },
+            {
+              key: "inspection",
+              label: t.newInspection,
+              icon: ClipboardCheck,
+              color: "#6FB3D9",
+              run: () => {
+                if (pid) openInspection(pid);
+              },
+            },
           ];
           return (
             <div className="fixed inset-0 z-50 flex items-end lg:hidden">
               <div onClick={close} className="absolute inset-0 bg-black/60" />
-              <div ref={quickAddRef} role="dialog" aria-modal="true" aria-label={t.a11yQuickAdd} tabIndex={-1} data-quick-add style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }} className="outline-none relative w-full rounded-t-2xl px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+              <div
+                ref={quickAddRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t.a11yQuickAdd}
+                tabIndex={-1}
+                data-quick-add
+                style={{ background: COLORS.card, borderTop: `1px solid ${COLORS.border}` }}
+                className="outline-none relative w-full rounded-t-2xl px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.quickAddTitle}{site ? ` · ${site.name}` : ""}</div>
-                  <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={close}><X size={18} color={COLORS.muted} /></button>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                    {t.quickAddTitle}
+                    {site ? ` · ${site.name}` : ""}
+                  </div>
+                  <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={close}>
+                    <X size={18} color={COLORS.muted} />
+                  </button>
                 </div>
                 {!pid && candidates.length > 1 && (
                   <div className="mb-3">
-                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.quickPickSite}</div>
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                      {t.quickPickSite}
+                    </div>
                     <div className="flex flex-wrap gap-1.5">
                       {candidates.map((p) => (
-                        <button key={p.id} data-quick-site={p.id} onClick={() => setQuickAddSite(p.id)} style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(p.id)}66` }} className="px-2.5 py-1.5 rounded-full text-xs font-bold">{p.name}</button>
+                        <button
+                          key={p.id}
+                          data-quick-site={p.id}
+                          onClick={() => setQuickAddSite(p.id)}
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${projectColour(p.id)}66` }}
+                          className="px-2.5 py-1.5 rounded-full text-xs font-bold"
+                        >
+                          {p.name}
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -6135,7 +9905,21 @@ export default function SiteManager() {
                     const Icon = a.icon;
                     const needsSite = a.key !== "stop" && !pid;
                     return (
-                      <button key={a.key} data-quick-action={a.key} disabled={needsSite} onClick={() => { close(); a.run(); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, opacity: needsSite ? 0.4 : 1 }} className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-xs font-bold">
+                      <button
+                        key={a.key}
+                        data-quick-action={a.key}
+                        disabled={needsSite}
+                        onClick={() => {
+                          close();
+                          a.run();
+                        }}
+                        style={{
+                          background: COLORS.cardAlt,
+                          border: `1px solid ${COLORS.border}`,
+                          opacity: needsSite ? 0.4 : 1,
+                        }}
+                        className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-xs font-bold"
+                      >
                         <Icon size={20} color={a.color} />
                         <span className="truncate max-w-full">{a.label}</span>
                       </button>
@@ -6145,20 +9929,38 @@ export default function SiteManager() {
               </div>
             </div>
           );
-      })()}
+        })()}
       {menuOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div onClick={() => setMenuOpen(false)} className="absolute inset-0 bg-black/60" />
-          <div ref={menuRef} role="dialog" aria-modal="true" aria-label={t.a11yMenu} tabIndex={-1} data-menu-drawer style={{ background: COLORS.card, borderLeft: `1px solid ${COLORS.border}` }} className="outline-none relative ml-auto h-full w-72 max-w-[85vw] flex flex-col pt-4 pb-6 px-3 overflow-y-auto">
+          <div
+            ref={menuRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.a11yMenu}
+            tabIndex={-1}
+            data-menu-drawer
+            style={{ background: COLORS.card, borderLeft: `1px solid ${COLORS.border}` }}
+            className="outline-none relative ml-auto h-full w-72 max-w-[85vw] flex flex-col pt-4 pb-6 px-3 overflow-y-auto"
+          >
             <div className="flex items-center justify-between px-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <SwissCross size={12} />
-                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">{t.appLabel}</span>
+                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">
+                  {t.appLabel}
+                </span>
               </div>
-              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setMenuOpen(false)}><X size={18} color={COLORS.muted} /></button>
+              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setMenuOpen(false)}>
+                <X size={18} color={COLORS.muted} />
+              </button>
             </div>
             {[
-              ...(canManage() ? [{ id: "board", label: t.navBoard, icon: Ruler }, { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck }] : []),
+              ...(canManage()
+                ? [
+                    { id: "board", label: t.navBoard, icon: Ruler },
+                    { id: "cockpit", label: t.navCockpit, icon: ClipboardCheck },
+                  ]
+                : []),
               { id: "today", label: t.navToday, icon: Clock },
               { id: "projects", label: t.navProjects, icon: MapPin },
               { id: "customers", label: t.navCustomers, icon: User },
@@ -6175,7 +9977,11 @@ export default function SiteManager() {
               return (
                 <button
                   key={it.id}
-                  onClick={() => { setTab(it.id); setMenuOpen(false); setSelectedProject(null); }}
+                  onClick={() => {
+                    setTab(it.id);
+                    setMenuOpen(false);
+                    setSelectedProject(null);
+                  }}
                   style={{ background: active ? `${accent}1F` : "transparent", color: active ? accent : COLORS.text }}
                   className="w-full px-3 py-3 rounded-lg text-sm font-semibold flex items-center gap-3 text-left"
                 >
@@ -6184,10 +9990,24 @@ export default function SiteManager() {
               );
             })}
             <div style={{ borderTop: `1px solid ${COLORS.border}` }} className="mt-3 pt-3 flex flex-col gap-0.5">
-              <button onClick={() => { setMenuOpen(false); openProfile(); }} style={{ color: COLORS.muted }} className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  openProfile();
+                }}
+                style={{ color: COLORS.muted }}
+                className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left"
+              >
                 <User size={16} /> {t.profileTitle}
               </button>
-              <button onClick={() => { setMenuOpen(false); setLangPickerOpen(true); }} style={{ color: COLORS.muted }} className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setLangPickerOpen(true);
+                }}
+                style={{ color: COLORS.muted }}
+                className="w-full px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 text-left"
+              >
                 <Globe size={16} /> {lang.toUpperCase()}
               </button>
             </div>
@@ -6197,48 +10017,80 @@ export default function SiteManager() {
 
       {photoView && !photoEdit && (
         <Suspense fallback={null}>
-        <PhotoViewer
-          src={photoView.src}
-          entry={photoView.entry}
-          onClose={() => setPhotoView(null)}
-          onEdit={() => setPhotoEdit({ entry: photoView.entry, src: photoView.src })}
-          onRestore={photoView.entry.originalPhotoId && (canManage() || photoView.entry.userId === user?.uid) ? () => restorePhotoOriginal(photoView.entry) : null}
-          canEdit={canManage() || photoView.entry.userId === user?.uid}
-          t={t}
-        />
+          <PhotoViewer
+            src={photoView.src}
+            entry={photoView.entry}
+            onClose={() => setPhotoView(null)}
+            onEdit={() => setPhotoEdit({ entry: photoView.entry, src: photoView.src })}
+            onRestore={
+              photoView.entry.originalPhotoId && (canManage() || photoView.entry.userId === user?.uid)
+                ? () => restorePhotoOriginal(photoView.entry)
+                : null
+            }
+            canEdit={canManage() || photoView.entry.userId === user?.uid}
+            t={t}
+          />
         </Suspense>
       )}
       {photoEdit && (
         <Suspense fallback={null}>
-        <PhotoEditor
-          src={photoEdit.src}
-          onCancel={() => setPhotoEdit(null)}
-          onSave={(dataUrl) => savePhotoEdit(photoEdit.entry, dataUrl)}
-          t={t}
-        />
+          <PhotoEditor
+            src={photoEdit.src}
+            onCancel={() => setPhotoEdit(null)}
+            onSave={(dataUrl) => savePhotoEdit(photoEdit.entry, dataUrl)}
+            t={t}
+          />
         </Suspense>
       )}
 
       {fileViewer && (
-        <div ref={fileViewerRef} role="dialog" aria-modal="true" aria-label={fileViewer.file.name} tabIndex={-1} className="fixed inset-0 z-50 flex flex-col outline-none" style={{ background: "rgba(0,0,0,0.94)" }}>
-          <div style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }} className="flex items-center justify-between gap-3 px-4 py-2">
+        <div
+          ref={fileViewerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={fileViewer.file.name}
+          tabIndex={-1}
+          className="fixed inset-0 z-50 flex flex-col outline-none"
+          style={{ background: "rgba(0,0,0,0.94)" }}
+        >
+          <div
+            style={{ background: COLORS.card, borderBottom: `1px solid ${COLORS.border}` }}
+            className="flex items-center justify-between gap-3 px-4 py-2"
+          >
             <div className="text-sm font-bold truncate">{fileViewer.file.name}</div>
             <div className="flex items-center gap-4 shrink-0">
-              <a href={fileViewer.url} download={fileViewer.file.name} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">{t.filesDownload}</a>
-              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={closeFileViewer}><X size={20} color={COLORS.muted} /></button>
+              <a
+                href={fileViewer.url}
+                download={fileViewer.file.name}
+                style={{ color: COLORS.muted }}
+                className="text-xs font-bold uppercase"
+              >
+                {t.filesDownload}
+              </a>
+              <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={closeFileViewer}>
+                <X size={20} color={COLORS.muted} />
+              </button>
             </div>
           </div>
           <div className="flex-1 min-h-0">
-            {isImage(fileViewer.file.type)
-              ? <img src={fileViewer.url} alt={fileViewer.file.name} className="w-full h-full object-contain" />
-              : <iframe src={fileViewer.url} title={fileViewer.file.name} className="w-full h-full" style={{ border: 0, background: "#fff" }} />}
+            {isImage(fileViewer.file.type) ? (
+              <img src={fileViewer.url} alt={fileViewer.file.name} className="w-full h-full object-contain" />
+            ) : (
+              <iframe
+                src={fileViewer.url}
+                title={fileViewer.file.name}
+                className="w-full h-full"
+                style={{ border: 0, background: "#fff" }}
+              />
+            )}
           </div>
         </div>
       )}
 
       {linkForm && (
         <Modal t={t} onClose={() => setLinkForm(null)} title={t.filesAddLink}>
-          <input aria-label={t.filesLinkPlaceholder}
+          <input
+            aria-label={t.filesLinkPlaceholder}
             value={linkForm.url}
             onChange={(e) => setLinkForm((f) => ({ ...f, url: e.target.value }))}
             placeholder={t.filesLinkPlaceholder}
@@ -6246,25 +10098,47 @@ export default function SiteManager() {
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full rounded-lg px-3 py-2 text-sm outline-none"
           />
-          <input aria-label={t.filesLinkName}
+          <input
+            aria-label={t.filesLinkName}
             value={linkForm.name}
             onChange={(e) => setLinkForm((f) => ({ ...f, name: e.target.value }))}
             placeholder={t.filesLinkName}
             style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
             className="w-full mt-2 rounded-lg px-3 py-2 text-sm outline-none"
           />
-          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">{t.filesKindLabel}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-3 mb-1.5">
+            {t.filesKindLabel}
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {FILE_KINDS.map((k) => {
               const on = linkForm.kind === k;
               return (
-                <button key={k} onClick={() => setLinkForm((f) => ({ ...f, kind: k }))} style={{ background: on ? `${COLORS.accent}22` : COLORS.cardAlt, border: `1px solid ${on ? COLORS.accent : COLORS.border}`, color: on ? COLORS.accent : COLORS.muted }} className="px-2.5 py-1.5 rounded-lg text-xs font-bold">
+                <button
+                  key={k}
+                  onClick={() => setLinkForm((f) => ({ ...f, kind: k }))}
+                  style={{
+                    background: on ? `${COLORS.accent}22` : COLORS.cardAlt,
+                    border: `1px solid ${on ? COLORS.accent : COLORS.border}`,
+                    color: on ? COLORS.accent : COLORS.muted,
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
+                >
                   {t[`fileKind_${k}`]}
                 </button>
               );
             })}
           </div>
-          <button onClick={addFileLink} disabled={!normaliseLink(linkForm.url)} style={{ background: normaliseLink(linkForm.url) ? COLORS.accent : COLORS.cardAlt, opacity: normaliseLink(linkForm.url) ? 1 : 0.5 }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{t.saveLabel}</button>
+          <button
+            onClick={addFileLink}
+            disabled={!normaliseLink(linkForm.url)}
+            style={{
+              background: normaliseLink(linkForm.url) ? COLORS.accent : COLORS.cardAlt,
+              opacity: normaliseLink(linkForm.url) ? 1 : 0.5,
+            }}
+            className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.saveLabel}
+          </button>
         </Modal>
       )}
 
@@ -6274,8 +10148,28 @@ export default function SiteManager() {
             {projectName(rapportExists.projectId)} · {rapportExists.date} · {rapportExists.existing.signerName}
           </div>
           <div className="grid grid-cols-1 gap-2">
-            <button onClick={() => { const r = rapportExists.existing; setRapportExists(null); printRapport(r); }} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.rapportOpenExisting}</button>
-            <button onClick={() => { const { projectId, date } = rapportExists; setRapportExists(null); openRapport(projectId, date, true); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.muted }} className="w-full py-3 rounded-lg font-bold uppercase text-xs">{t.rapportCreateNew}</button>
+            <button
+              onClick={() => {
+                const r = rapportExists.existing;
+                setRapportExists(null);
+                printRapport(r);
+              }}
+              style={{ background: COLORS.accent }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.rapportOpenExisting}
+            </button>
+            <button
+              onClick={() => {
+                const { projectId, date } = rapportExists;
+                setRapportExists(null);
+                openRapport(projectId, date, true);
+              }}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.muted }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-xs"
+            >
+              {t.rapportCreateNew}
+            </button>
           </div>
         </Modal>
       )}
@@ -6283,25 +10177,52 @@ export default function SiteManager() {
       {customerImport && (
         <Modal t={t} onClose={() => setCustomerImport(null)} title={t.importCustomers}>
           <div data-customers-import-preview>
-            <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{customerImport.fileName}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">
+              {customerImport.fileName}
+            </div>
             {customerImport.rows.length === 0 ? (
-              <div style={{ color: COLORS.danger }} className="text-sm mb-3">{t.importCustomersNothing}</div>
+              <div style={{ color: COLORS.danger }} className="text-sm mb-3">
+                {t.importCustomersNothing}
+              </div>
             ) : (
-              <div className="text-sm mb-3">{(t.importCustomersPreview || "").replace("{n}", String(customerImport.rows.length)).replace("{added}", String(customerImport.added)).replace("{skipped}", String(customerImport.skipped))}</div>
+              <div className="text-sm mb-3">
+                {(t.importCustomersPreview || "")
+                  .replace("{n}", String(customerImport.rows.length))
+                  .replace("{added}", String(customerImport.added))
+                  .replace("{skipped}", String(customerImport.skipped))}
+              </div>
             )}
-            {customerImport.warnings.length > 0 && <div style={{ color: COLORS.amber }} className="text-xs mb-3">{customerImport.warnings.join(" \u00b7 ")}</div>}
-            <button data-customers-import-apply disabled={!customerImport.added} onClick={applyCustomersImport} style={{ background: COLORS.accent, opacity: customerImport.added ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.importApply}</button>
+            {customerImport.warnings.length > 0 && (
+              <div style={{ color: COLORS.amber }} className="text-xs mb-3">
+                {customerImport.warnings.join(" \u00b7 ")}
+              </div>
+            )}
+            <button
+              data-customers-import-apply
+              disabled={!customerImport.added}
+              onClick={applyCustomersImport}
+              style={{ background: COLORS.accent, opacity: customerImport.added ? 1 : 0.5 }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+            >
+              {t.importApply}
+            </button>
           </div>
         </Modal>
       )}
 
       {priceImport && (
         <Modal t={t} onClose={() => setPriceImport(null)} title={t.importPriceList}>
-          <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{priceImport.fileName}</div>
+          <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">
+            {priceImport.fileName}
+          </div>
           {priceImport.rows.length === 0 ? (
             <div>
-              <div style={{ color: COLORS.danger }} className="text-sm font-semibold mb-2">{t.importNothingFound}</div>
-              <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">{t.importNeedsHeaders}</div>
+              <div style={{ color: COLORS.danger }} className="text-sm font-semibold mb-2">
+                {t.importNothingFound}
+              </div>
+              <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">
+                {t.importNeedsHeaders}
+              </div>
             </div>
           ) : (
             <>
@@ -6311,16 +10232,26 @@ export default function SiteManager() {
                   [priceImport.updated, t.importUpdated, COLORS.accent],
                   [priceImport.repriced, t.importRepriced, COLORS.amber],
                 ].map(([n, label, colour]) => (
-                  <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2 text-center">
-                    <div style={{ color: colour }} className="text-lg font-black tabular-nums">{n}</div>
-                    <div style={{ color: COLORS.muted }} className="text-xs uppercase">{label}</div>
+                  <div
+                    key={label}
+                    style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                    className="rounded-lg p-2 text-center"
+                  >
+                    <div style={{ color: colour }} className="text-lg font-black tabular-nums">
+                      {n}
+                    </div>
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase">
+                      {label}
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Naming the merchant on import is what makes the purchase-order
                   grouping work later, and most exports do not carry it. */}
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.supplierLabel}
+              </div>
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {KNOWN_SUPPLIERS.map((sup) => {
                   const on = priceImport.supplier === sup;
@@ -6342,28 +10273,53 @@ export default function SiteManager() {
               </div>
 
               {priceImport.warnings.length > 0 && (
-                <div style={{ background: `${COLORS.amber}14`, border: `1px solid ${COLORS.amber}55`, color: COLORS.amber }} className="rounded-lg p-2.5 mb-3 text-xs leading-relaxed">
+                <div
+                  style={{
+                    background: `${COLORS.amber}14`,
+                    border: `1px solid ${COLORS.amber}55`,
+                    color: COLORS.amber,
+                  }}
+                  className="rounded-lg p-2.5 mb-3 text-xs leading-relaxed"
+                >
                   {priceImport.warnings.map((w) => (
                     <div key={w}>{t[`importWarn_${w}`] || w}</div>
                   ))}
                 </div>
               )}
 
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.importPreview}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.importPreview}
+              </div>
               <div style={{ border: `1px solid ${COLORS.border}` }} className="rounded-lg overflow-hidden mb-3">
                 {priceImport.rows.slice(0, 8).map((r, i) => (
-                  <div key={i} style={{ background: i % 2 ? COLORS.cardAlt : COLORS.card }} className="px-2.5 py-1.5 flex items-center justify-between gap-2 text-xs">
+                  <div
+                    key={i}
+                    style={{ background: i % 2 ? COLORS.cardAlt : COLORS.card }}
+                    className="px-2.5 py-1.5 flex items-center justify-between gap-2 text-xs"
+                  >
                     <span className="truncate flex-1 min-w-0">{r.name}</span>
-                    {r.artNo && <span style={{ color: COLORS.muted }} className="shrink-0">{r.artNo}</span>}
-                    <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{r.price ? `${r.price}${r.unit ? "/" + r.unit : ""}` : ""}</span>
+                    {r.artNo && (
+                      <span style={{ color: COLORS.muted }} className="shrink-0">
+                        {r.artNo}
+                      </span>
+                    )}
+                    <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">
+                      {r.price ? `${r.price}${r.unit ? "/" + r.unit : ""}` : ""}
+                    </span>
                   </div>
                 ))}
               </div>
               {priceImport.rows.length > 8 && (
-                <div style={{ color: COLORS.muted }} className="text-xs mb-3">+{priceImport.rows.length - 8} {t.importMoreRows}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs mb-3">
+                  +{priceImport.rows.length - 8} {t.importMoreRows}
+                </div>
               )}
 
-              <button onClick={applyPriceList} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">
+              <button
+                onClick={applyPriceList}
+                style={{ background: COLORS.accent }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+              >
                 {t.importApply}
               </button>
             </>
@@ -6372,103 +10328,230 @@ export default function SiteManager() {
       )}
 
       {addModal && (
-        <Modal t={t} onClose={() => setAddModal(null)} title={addModal.editingId ? t.editLabel : (addModal.type === "material" ? t.addMaterialTitle : addModal.type === "tool" ? t.addToolTitle : t.attachPhotoTitle)}>
+        <Modal
+          t={t}
+          onClose={() => setAddModal(null)}
+          title={
+            addModal.editingId
+              ? t.editLabel
+              : addModal.type === "material"
+                ? t.addMaterialTitle
+                : addModal.type === "tool"
+                  ? t.addToolTitle
+                  : t.attachPhotoTitle
+          }
+        >
           {addModal.type === "photo" ? (
             <div className="flex flex-col gap-3">
-              <input ref={fileRef} data-photo-input type="file" accept="image/*" multiple={!addModal.editingId} onChange={handleFile} className="hidden" />
-              <button onClick={() => fileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="w-full py-6 rounded-xl flex flex-col items-center gap-2">
+              <input
+                ref={fileRef}
+                data-photo-input
+                type="file"
+                accept="image/*"
+                multiple={!addModal.editingId}
+                onChange={handleFile}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileRef.current?.click()}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+                className="w-full py-6 rounded-xl flex flex-col items-center gap-2"
+              >
                 <Camera size={22} color={COLORS.accent} />
-                <span style={{ color: COLORS.accent }} className="text-sm font-bold">{photoPreview && !addModal.editingId ? t.addMorePhotos : t.attachPhotoTitle}</span>
+                <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+                  {photoPreview && !addModal.editingId ? t.addMorePhotos : t.attachPhotoTitle}
+                </span>
               </button>
-              {photoPreview && <img src={photoPreview} alt="preview" className="w-full rounded-lg max-h-48 object-cover" />}
+              {photoPreview && (
+                <img src={photoPreview} alt="preview" className="w-full rounded-lg max-h-48 object-cover" />
+              )}
               {photoExtra.length > 0 && (
                 <div>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{1 + photoExtra.length} {t.photosSelected}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                    {1 + photoExtra.length} {t.photosSelected}
+                  </div>
                   <div data-photo-extra className="grid grid-cols-4 gap-1.5">
                     {photoExtra.map((src, i) => (
                       <div key={i} className="relative">
                         <img src={src} alt="" className="w-full h-16 object-cover rounded-md" />
-                        <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setPhotoExtra((x) => x.filter((_, j) => j !== i))} style={{ background: "rgba(0,0,0,0.65)" }} className="tap absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"><X size={11} color="#fff" /></button>
+                        <button
+                          aria-label={t.a11yClose}
+                          title={t.a11yClose}
+                          onClick={() => setPhotoExtra((x) => x.filter((_, j) => j !== i))}
+                          style={{ background: "rgba(0,0,0,0.65)" }}
+                          className="tap absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center"
+                        >
+                          <X size={11} color="#fff" />
+                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              <input aria-label={t.captionPlaceholder} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t.captionPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input
+                aria-label={t.captionPlaceholder}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder={t.captionPlaceholder}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <input aria-label={t.whatUsedPlaceholder} value={form.description} onChange={(e) => setDescriptionWithUnitMemory(e.target.value)} placeholder={t.whatUsedPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+              <input
+                aria-label={t.whatUsedPlaceholder}
+                value={form.description}
+                onChange={(e) => setDescriptionWithUnitMemory(e.target.value)}
+                placeholder={t.whatUsedPlaceholder}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
 
-              {addModal.type === "material" && (() => {
-                const catalog = materialsCatalogFor(lang);
-                const q = form.description.trim().toLowerCase();
-                const flattenCat = (catKey) => catalog.items[catKey].flatMap((g) => g.items.map((name) => ({ name, catKey })));
-                const flattenAll = () => Object.keys(catalog.items).flatMap((catKey) => flattenCat(catKey));
-                const searchScope = suggestCat ? flattenCat(suggestCat) : flattenAll();
-                const searchResults = q.length > 0 ? searchScope.filter((i) => i.name.toLowerCase().includes(q)).slice(0, suggestCat ? 40 : 6) : [];
-                const showGrouped = suggestCat && q.length === 0;
-                return (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-1.5 overflow-x-auto pb-1">
-                      {Object.entries(catalog.cats).map(([key, label]) => (
-                        <button key={key} onClick={() => setSuggestCat((c) => (c === key ? null : key))} style={{ background: suggestCat === key ? COLORS.success : COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    {pendingSuggestion ? (
-                      <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.success}` }} className="rounded-lg p-2.5 flex flex-col gap-2">
-                        <div className="text-xs font-semibold">{pendingSuggestion.name}</div>
-                        <div className="flex gap-2">
-                          <input aria-label={t.sizePlaceholder}
-                            autoFocus
-                            value={sizeInput}
-                            onChange={(e) => setSizeInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && confirmSuggestion()}
-                            placeholder={t.sizePlaceholder}
-                            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                            className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
-                          />
-                          <button aria-label={t.a11yConfirm} title={t.a11yConfirm} onClick={confirmSuggestion} style={{ background: COLORS.success }} className="tap rounded-lg px-3 flex items-center justify-center"><Check size={16} /></button>
-                          <button aria-label={t.a11yClose} title={t.a11yClose} onClick={() => { setPendingSuggestion(null); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="tap rounded-lg px-3 flex items-center justify-center"><X size={16} color={COLORS.muted} /></button>
-                        </div>
-                      </div>
-                    ) : q.length > 0 && searchResults.length > 0 ? (
-                      <div>
-                        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">{t.suggestionsTitle}</div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {searchResults.map((it) => (
-                            <button key={it.name} onClick={() => { setDescriptionWithUnitMemory(it.name); setPendingSuggestion(it); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
-                              {it.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : showGrouped ? (
-                      <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
-                        {catalog.items[suggestCat].map((grp) => (
-                          <div key={grp.group}>
-                            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1 mt-1">{grp.group}</div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {grp.items.map((name) => (
-                                <button key={name} onClick={() => { setDescriptionWithUnitMemory(name); setPendingSuggestion({ name, catKey: suggestCat }); setSizeInput(""); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-lg text-xs">
-                                  {name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+              {addModal.type === "material" &&
+                (() => {
+                  const catalog = materialsCatalogFor(lang);
+                  const q = form.description.trim().toLowerCase();
+                  const flattenCat = (catKey) =>
+                    catalog.items[catKey].flatMap((g) => g.items.map((name) => ({ name, catKey })));
+                  const flattenAll = () => Object.keys(catalog.items).flatMap((catKey) => flattenCat(catKey));
+                  const searchScope = suggestCat ? flattenCat(suggestCat) : flattenAll();
+                  const searchResults =
+                    q.length > 0
+                      ? searchScope.filter((i) => i.name.toLowerCase().includes(q)).slice(0, suggestCat ? 40 : 6)
+                      : [];
+                  const showGrouped = suggestCat && q.length === 0;
+                  return (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {Object.entries(catalog.cats).map(([key, label]) => (
+                          <button
+                            key={key}
+                            onClick={() => setSuggestCat((c) => (c === key ? null : key))}
+                            style={{
+                              background: suggestCat === key ? COLORS.success : COLORS.cardAlt,
+                              border: `1px solid ${COLORS.border}`,
+                            }}
+                            className="shrink-0 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                          >
+                            {label}
+                          </button>
                         ))}
                       </div>
-                    ) : null}
-                  </div>
-                );
-              })()}
+                      {pendingSuggestion ? (
+                        <div
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.success}` }}
+                          className="rounded-lg p-2.5 flex flex-col gap-2"
+                        >
+                          <div className="text-xs font-semibold">{pendingSuggestion.name}</div>
+                          <div className="flex gap-2">
+                            <input
+                              aria-label={t.sizePlaceholder}
+                              autoFocus
+                              value={sizeInput}
+                              onChange={(e) => setSizeInput(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && confirmSuggestion()}
+                              placeholder={t.sizePlaceholder}
+                              style={{
+                                background: COLORS.shell,
+                                border: `1px solid ${COLORS.border}`,
+                                color: COLORS.text,
+                              }}
+                              className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                            />
+                            <button
+                              aria-label={t.a11yConfirm}
+                              title={t.a11yConfirm}
+                              onClick={confirmSuggestion}
+                              style={{ background: COLORS.success }}
+                              className="tap rounded-lg px-3 flex items-center justify-center"
+                            >
+                              <Check size={16} />
+                            </button>
+                            <button
+                              aria-label={t.a11yClose}
+                              title={t.a11yClose}
+                              onClick={() => {
+                                setPendingSuggestion(null);
+                                setSizeInput("");
+                              }}
+                              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                              className="tap rounded-lg px-3 flex items-center justify-center"
+                            >
+                              <X size={16} color={COLORS.muted} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : q.length > 0 && searchResults.length > 0 ? (
+                        <div>
+                          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                            {t.suggestionsTitle}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {searchResults.map((it) => (
+                              <button
+                                key={it.name}
+                                onClick={() => {
+                                  setDescriptionWithUnitMemory(it.name);
+                                  setPendingSuggestion(it);
+                                  setSizeInput("");
+                                }}
+                                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                                className="px-2.5 py-1.5 rounded-lg text-xs"
+                              >
+                                {it.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : showGrouped ? (
+                        <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+                          {catalog.items[suggestCat].map((grp) => (
+                            <div key={grp.group}>
+                              <div
+                                style={{ color: COLORS.muted }}
+                                className="text-xs uppercase tracking-wide mb-1 mt-1"
+                              >
+                                {grp.group}
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {grp.items.map((name) => (
+                                  <button
+                                    key={name}
+                                    onClick={() => {
+                                      setDescriptionWithUnitMemory(name);
+                                      setPendingSuggestion({ name, catKey: suggestCat });
+                                      setSizeInput("");
+                                    }}
+                                    style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs"
+                                  >
+                                    {name}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })()}
 
               <div className="flex gap-2">
-                <input aria-label={t.qtyPlaceholder} type="number" inputMode="decimal" value={form.qty} onChange={(e) => setForm({ ...form, qty: e.target.value })} placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input
+                  aria-label={t.qtyPlaceholder}
+                  type="number"
+                  inputMode="decimal"
+                  value={form.qty}
+                  onChange={(e) => setForm({ ...form, qty: e.target.value })}
+                  placeholder={t.qtyPlaceholder}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-1/2 rounded-lg px-3 py-2 text-sm outline-none"
+                />
                 <div className="w-1/2 relative">
-                  <input aria-label={t.unitPlaceholder}
+                  <input
+                    aria-label={t.unitPlaceholder}
                     value={form.unit}
                     onChange={(e) => setForm({ ...form, unit: e.target.value })}
                     onFocus={() => setUnitSuggestFocused(true)}
@@ -6477,24 +10560,39 @@ export default function SiteManager() {
                     style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                     className="w-full rounded-lg px-3 py-2 text-sm outline-none"
                   />
-                  {unitSuggestFocused && (() => {
-                    const q = form.unit.trim().toLowerCase();
-                    const matches = (q ? UNIT_SUGGESTIONS.filter((u) => u.toLowerCase().startsWith(q)) : UNIT_SUGGESTIONS).slice(0, 6);
-                    if (matches.length === 0) return null;
-                    return (
-                      <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="absolute z-10 mt-1 left-0 right-0 rounded-lg p-1.5 flex flex-wrap gap-1">
-                        {matches.map((u) => (
-                          <button key={u} onMouseDown={(e) => e.preventDefault()} onClick={() => setForm((f) => ({ ...f, unit: u }))} style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2 py-1 rounded text-xs">
-                            {u}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                  {unitSuggestFocused &&
+                    (() => {
+                      const q = form.unit.trim().toLowerCase();
+                      const matches = (
+                        q ? UNIT_SUGGESTIONS.filter((u) => u.toLowerCase().startsWith(q)) : UNIT_SUGGESTIONS
+                      ).slice(0, 6);
+                      if (matches.length === 0) return null;
+                      return (
+                        <div
+                          style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                          className="absolute z-10 mt-1 left-0 right-0 rounded-lg p-1.5 flex flex-wrap gap-1"
+                        >
+                          {matches.map((u) => (
+                            <button
+                              key={u}
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => setForm((f) => ({ ...f, unit: u }))}
+                              style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                              className="px-2 py-1 rounded text-xs"
+                            >
+                              {u}
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
                 </div>
               </div>
-              <input aria-label={`${t.unitPriceLabel} (${billing.currency || "CHF"})`}
-                type="number" inputMode="decimal" step="0.01"
+              <input
+                aria-label={`${t.unitPriceLabel} (${billing.currency || "CHF"})`}
+                type="number"
+                inputMode="decimal"
+                step="0.01"
                 value={form.unitPrice || ""}
                 onChange={(e) => setForm({ ...form, unitPrice: e.target.value })}
                 placeholder={`${t.unitPriceLabel} (${billing.currency || "CHF"})`}
@@ -6514,12 +10612,16 @@ export default function SiteManager() {
               >
                 {form.regie ? <Check size={14} /> : <Plus size={14} />} {t.regieToggle}
               </button>
-              <div style={{ color: COLORS.muted }} className="text-xs mt-1 leading-relaxed">{t.regieHint}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs mt-1 leading-relaxed">
+                {t.regieHint}
+              </div>
             </div>
           )}
           {addModal.type !== "photo" && (
             <div className="mt-3">
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.supplierLabel}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.supplierLabel}
+              </div>
               {/* The known wholesalers as one tap, but the field stays free
                   text: half the material on a Swiss roof comes from a merchant
                   nobody put in a list. */}
@@ -6543,14 +10645,16 @@ export default function SiteManager() {
                 })}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input aria-label={t.supplierPlaceholder}
+                <input
+                  aria-label={t.supplierPlaceholder}
                   value={form.supplier || ""}
                   onChange={(e) => setForm({ ...form, supplier: e.target.value })}
                   placeholder={t.supplierPlaceholder}
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                   className="rounded-lg px-3 py-2 text-sm outline-none"
                 />
-                <input aria-label={t.artNoPlaceholder}
+                <input
+                  aria-label={t.artNoPlaceholder}
                   value={form.artNo || ""}
                   onChange={(e) => setForm({ ...form, artNo: e.target.value })}
                   placeholder={t.artNoPlaceholder}
@@ -6561,7 +10665,9 @@ export default function SiteManager() {
             </div>
           )}
           <div className="mt-4">
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">{t.tradeLabel}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+              {t.tradeLabel}
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {TRADES.map((tr) => {
                 const on = (form.trade || DEFAULT_TRADE) === tr.key;
@@ -6582,7 +10688,13 @@ export default function SiteManager() {
               })}
             </div>
           </div>
-          <button onClick={submitAdd} style={{ background: COLORS.accent }} className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm">{addModal.editingId ? t.saveLabel : t.logItBtn}</button>
+          <button
+            onClick={submitAdd}
+            style={{ background: COLORS.accent }}
+            className="w-full mt-4 py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {addModal.editingId ? t.saveLabel : t.logItBtn}
+          </button>
           {addModal.editingId && (
             <button
               onClick={() => {
@@ -6599,15 +10711,39 @@ export default function SiteManager() {
       )}
 
       {sosOpen && (
-        <div ref={sosRef} role="dialog" aria-modal="true" aria-label={t.emergencyTitle} tabIndex={-1} className="fixed inset-0 z-[60] flex flex-col outline-none" style={{ background: "#150000" }}>
+        <div
+          ref={sosRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t.emergencyTitle}
+          tabIndex={-1}
+          className="fixed inset-0 z-[60] flex flex-col outline-none"
+          style={{ background: "#150000" }}
+        >
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
-            <div style={{ color: COLORS.danger }} className="text-lg font-black uppercase flex items-center gap-2"><Siren size={20} /> {t.emergencyTitle}</div>
-            <button onClick={() => { setSosOpen(false); logIncident(); }} className="text-xs font-bold uppercase" style={{ color: COLORS.muted }}>{t.closeAndLog}</button>
+            <div style={{ color: COLORS.danger }} className="text-lg font-black uppercase flex items-center gap-2">
+              <Siren size={20} /> {t.emergencyTitle}
+            </div>
+            <button
+              onClick={() => {
+                setSosOpen(false);
+                logIncident();
+              }}
+              className="text-xs font-bold uppercase"
+              style={{ color: COLORS.muted }}
+            >
+              {t.closeAndLog}
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto px-5 pb-8 flex flex-col gap-4">
             <div className="grid grid-cols-2 gap-2">
               {[t.ambulance, t.police, t.fire, t.generalEmergency].map((label, i) => (
-                <a key={SWISS_EMERGENCY_NUMS[i]} href={`tel:${SWISS_EMERGENCY_NUMS[i]}`} style={{ background: COLORS.danger }} className="rounded-xl py-4 text-center">
+                <a
+                  key={SWISS_EMERGENCY_NUMS[i]}
+                  href={`tel:${SWISS_EMERGENCY_NUMS[i]}`}
+                  style={{ background: COLORS.danger }}
+                  className="rounded-xl py-4 text-center"
+                >
                   <div className="text-3xl font-black text-white">{SWISS_EMERGENCY_NUMS[i]}</div>
                   <div className="text-xs text-white/80">{label}</div>
                 </a>
@@ -6615,33 +10751,75 @@ export default function SiteManager() {
             </div>
             <div style={{ background: "#241414", border: `1px solid ${COLORS.danger}` }} className="rounded-xl p-4">
               <div className="text-white text-xs uppercase tracking-wide mb-2 opacity-70">{t.notBreathingHint}</div>
-              <div className="text-white text-2xl font-black mb-1">{cprStep + 1}. {CPR_STEPS[cprStep].title}</div>
+              <div className="text-white text-2xl font-black mb-1">
+                {cprStep + 1}. {CPR_STEPS[cprStep].title}
+              </div>
               <div className="text-white text-lg leading-snug">{CPR_STEPS[cprStep].text}</div>
               <div className="flex gap-2 mt-4">
-                <button disabled={cprStep === 0} onClick={() => setCprStep((s) => Math.max(0, s - 1))} style={{ background: "#3A1F1F", opacity: cprStep === 0 ? 0.4 : 1 }} className="flex-1 py-3 rounded-lg text-white text-sm font-bold uppercase">{t.back}</button>
-                <button disabled={cprStep === CPR_STEPS.length - 1} onClick={() => setCprStep((s) => Math.min(CPR_STEPS.length - 1, s + 1))} style={{ background: COLORS.danger, opacity: cprStep === CPR_STEPS.length - 1 ? 0.4 : 1 }} className="flex-1 py-3 rounded-lg text-white text-sm font-bold uppercase">{t.nextStep}</button>
+                <button
+                  disabled={cprStep === 0}
+                  onClick={() => setCprStep((s) => Math.max(0, s - 1))}
+                  style={{ background: "#3A1F1F", opacity: cprStep === 0 ? 0.4 : 1 }}
+                  className="flex-1 py-3 rounded-lg text-white text-sm font-bold uppercase"
+                >
+                  {t.back}
+                </button>
+                <button
+                  disabled={cprStep === CPR_STEPS.length - 1}
+                  onClick={() => setCprStep((s) => Math.min(CPR_STEPS.length - 1, s + 1))}
+                  style={{ background: COLORS.danger, opacity: cprStep === CPR_STEPS.length - 1 ? 0.4 : 1 }}
+                  className="flex-1 py-3 rounded-lg text-white text-sm font-bold uppercase"
+                >
+                  {t.nextStep}
+                </button>
               </div>
             </div>
-            <div style={{ color: "#B98888" }} className="text-xs text-center">{t.cprDisclaimer}</div>
+            <div style={{ color: "#B98888" }} className="text-xs text-center">
+              {t.cprDisclaimer}
+            </div>
             {profile.contactPhone && (
-              <a href={`tel:${profile.contactPhone}`} style={{ background: "#241414", border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 flex items-center justify-between">
+              <a
+                href={`tel:${profile.contactPhone}`}
+                style={{ background: "#241414", border: `1px solid ${COLORS.border}` }}
+                className="rounded-xl p-4 flex items-center justify-between"
+              >
                 <div>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.emergencyContact}</div>
-                  <div className="text-white font-bold">{profile.contactName || profile.contactPhone}{profile.contactRelationship ? ` · ${profile.contactRelationship}` : ""}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                    {t.emergencyContact}
+                  </div>
+                  <div className="text-white font-bold">
+                    {profile.contactName || profile.contactPhone}
+                    {profile.contactRelationship ? ` · ${profile.contactRelationship}` : ""}
+                  </div>
                 </div>
                 <Phone size={18} color={COLORS.muted} />
               </a>
             )}
             {insuranceCards.length > 0 && (
-              <div style={{ background: "#241414", border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4 flex flex-col gap-2">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide flex items-center gap-1"><CreditCard size={12} /> {t.profileInsurance}</div>
+              <div
+                style={{ background: "#241414", border: `1px solid ${COLORS.border}` }}
+                className="rounded-xl p-4 flex flex-col gap-2"
+              >
+                <div
+                  style={{ color: COLORS.muted }}
+                  className="text-xs uppercase tracking-wide flex items-center gap-1"
+                >
+                  <CreditCard size={12} /> {t.profileInsurance}
+                </div>
                 {insuranceCards.map((c) => (
                   <div key={c.id} className="flex items-center justify-between">
                     <div className="text-white text-sm">
                       <div className="font-bold">{c.label || c.provider}</div>
-                      <div style={{ color: COLORS.muted }} className="text-xs">{c.provider}{c.policyNumber ? ` · ${c.policyNumber}` : ""}</div>
+                      <div style={{ color: COLORS.muted }} className="text-xs">
+                        {c.provider}
+                        {c.policyNumber ? ` · ${c.policyNumber}` : ""}
+                      </div>
                     </div>
-                    {c.phone && <a href={`tel:${c.phone}`}><Phone size={16} color={COLORS.muted} /></a>}
+                    {c.phone && (
+                      <a href={`tel:${c.phone}`}>
+                        <Phone size={16} color={COLORS.muted} />
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
@@ -6651,38 +10829,98 @@ export default function SiteManager() {
       )}
 
       {scanModal && (
-        <Modal t={t} onClose={() => setScanModal(null)} title={scanModal.mode === "compare" ? t.scanTitleCompare : t.scanTitleSingle}>
+        <Modal
+          t={t}
+          onClose={() => setScanModal(null)}
+          title={scanModal.mode === "compare" ? t.scanTitleCompare : t.scanTitleSingle}
+        >
           <div className="flex flex-col gap-3">
-            {scanModal.mode === "compare" && <div style={{ color: COLORS.muted }} className="text-xs">{t.scanHintCompare}</div>}
+            {scanModal.mode === "compare" && (
+              <div style={{ color: COLORS.muted }} className="text-xs">
+                {t.scanHintCompare}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              {scanModal.images.map((img, i) => (<img key={i} src={`data:${img.mediaType};base64,${img.b64}`} alt="" className="w-full h-24 object-cover rounded-lg" />))}
+              {scanModal.images.map((img, i) => (
+                <img
+                  key={i}
+                  src={`data:${img.mediaType};base64,${img.b64}`}
+                  alt=""
+                  className="w-full h-24 object-cover rounded-lg"
+                />
+              ))}
               {(scanModal.mode === "single" ? scanModal.images.length < 1 : scanModal.images.length < 2) && (
-                <button onClick={() => scanFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="h-24 rounded-lg flex flex-col items-center justify-center gap-1">
+                <button
+                  onClick={() => scanFileRef.current?.click()}
+                  style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+                  className="h-24 rounded-lg flex flex-col items-center justify-center gap-1"
+                >
                   <ImagePlus size={18} color={COLORS.muted} />
-                  <span style={{ color: COLORS.muted }} className="text-xs">{scanModal.images.length === 0 ? t.before : t.after}</span>
+                  <span style={{ color: COLORS.muted }} className="text-xs">
+                    {scanModal.images.length === 0 ? t.before : t.after}
+                  </span>
                 </button>
               )}
             </div>
             <input ref={scanFileRef} type="file" accept="image/*" onChange={addScanImage} className="hidden" />
-            {scanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{scanModal.error}</div>}
-            {scanModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{scanModal.detail}</div>}
+            {scanModal.error && (
+              <div style={{ color: COLORS.danger }} className="text-xs">
+                {scanModal.error}
+              </div>
+            )}
+            {scanModal.detail && (
+              <div style={{ color: COLORS.muted }} className="text-xs break-all">
+                {scanModal.detail}
+              </div>
+            )}
             {!scanModal.items && (
-              <button onClick={runScan} disabled={scanModal.loading || (scanModal.mode === "single" ? scanModal.images.length < 1 : scanModal.images.length < 2)} style={{ background: COLORS.success, opacity: scanModal.loading ? 0.7 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+              <button
+                onClick={runScan}
+                disabled={
+                  scanModal.loading ||
+                  (scanModal.mode === "single" ? scanModal.images.length < 1 : scanModal.images.length < 2)
+                }
+                style={{ background: COLORS.success, opacity: scanModal.loading ? 0.7 : 1 }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+              >
                 {scanModal.loading ? <Loader2 size={16} className="animate-spin" /> : <ScanLine size={16} />}
                 {scanModal.loading ? t.readingPhoto : t.readMaterials}
               </button>
             )}
             {scanModal.items && (
               <div className="flex flex-col gap-2">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.detectedHint}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                  {t.detectedHint}
+                </div>
                 {scanModal.items.map((it) => (
-                  <label key={it.id} style={{ background: COLORS.cardAlt }} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
-                    <input type="checkbox" checked={it.checked} onChange={() => setScanModal((s) => ({ ...s, items: s.items.map((x) => (x.id === it.id ? { ...x, checked: !x.checked } : x)) }))} />
+                  <label
+                    key={it.id}
+                    style={{ background: COLORS.cardAlt }}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={it.checked}
+                      onChange={() =>
+                        setScanModal((s) => ({
+                          ...s,
+                          items: s.items.map((x) => (x.id === it.id ? { ...x, checked: !x.checked } : x)),
+                        }))
+                      }
+                    />
                     <span className="flex-1">{it.name}</span>
-                    <span style={{ color: COLORS.muted }}>{it.qty} {it.unit}</span>
+                    <span style={{ color: COLORS.muted }}>
+                      {it.qty} {it.unit}
+                    </span>
                   </label>
                 ))}
-                <button onClick={confirmScan} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2">{t.addToMaterialsLog}</button>
+                <button
+                  onClick={confirmScan}
+                  style={{ background: COLORS.accent }}
+                  className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2"
+                >
+                  {t.addToMaterialsLog}
+                </button>
               </div>
             )}
           </div>
@@ -6693,19 +10931,52 @@ export default function SiteManager() {
         <Modal t={t} onClose={() => setLibraryScanModal(null)} title={t.scanSpecSheet}>
           <div className="flex flex-col gap-3">
             {!libraryScanModal.image ? (
-              <button onClick={() => libraryScanFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="h-32 rounded-lg flex flex-col items-center justify-center gap-1">
+              <button
+                onClick={() => libraryScanFileRef.current?.click()}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+                className="h-32 rounded-lg flex flex-col items-center justify-center gap-1"
+              >
                 <ImagePlus size={20} color={COLORS.muted} />
-                <span style={{ color: COLORS.muted }} className="text-xs">{t.photoLabel}</span>
+                <span style={{ color: COLORS.muted }} className="text-xs">
+                  {t.photoLabel}
+                </span>
               </button>
             ) : (
-              <img src={`data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}`} alt="" className="w-full h-40 object-cover rounded-lg" />
+              <img
+                src={`data:${libraryScanModal.image.mediaType};base64,${libraryScanModal.image.b64}`}
+                alt=""
+                className="w-full h-40 object-cover rounded-lg"
+              />
             )}
-            <input ref={libraryScanFileRef} type="file" accept="image/*" capture="environment" onChange={addLibraryScanImage} className="hidden" />
-            {libraryScanModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{libraryScanModal.error}</div>}
-            {libraryScanModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{libraryScanModal.detail}</div>}
+            <input
+              ref={libraryScanFileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={addLibraryScanImage}
+              className="hidden"
+            />
+            {libraryScanModal.error && (
+              <div style={{ color: COLORS.danger }} className="text-xs">
+                {libraryScanModal.error}
+              </div>
+            )}
+            {libraryScanModal.detail && (
+              <div style={{ color: COLORS.muted }} className="text-xs break-all">
+                {libraryScanModal.detail}
+              </div>
+            )}
 
             {!libraryScanModal.result && (
-              <button onClick={runLibraryScan} disabled={!libraryScanModal.image || libraryScanModal.loading} style={{ background: COLORS.success, opacity: !libraryScanModal.image || libraryScanModal.loading ? 0.6 : 1 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2">
+              <button
+                onClick={runLibraryScan}
+                disabled={!libraryScanModal.image || libraryScanModal.loading}
+                style={{
+                  background: COLORS.success,
+                  opacity: !libraryScanModal.image || libraryScanModal.loading ? 0.6 : 1,
+                }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
+              >
                 {libraryScanModal.loading ? <Loader2 size={16} className="animate-spin" /> : <ScanLine size={16} />}
                 {libraryScanModal.loading ? t.readingSpecSheet : t.scanSpecSheet}
               </button>
@@ -6713,28 +10984,136 @@ export default function SiteManager() {
 
             {libraryScanModal.result && (
               <div className="flex flex-col gap-2">
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.reviewBeforeSaving}</div>
-                <input aria-label={t.itemNameLabel} value={libraryScanModal.result.name} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, name: e.target.value } }))} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input aria-label={t.manufacturerLabel} value={libraryScanModal.result.supplier} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, supplier: e.target.value } }))} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input aria-label={t.articleNumberLabel} value={libraryScanModal.result.articleNumber} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, articleNumber: e.target.value } }))} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-                <input aria-label={t.techCategoryLabel} value={libraryScanModal.result.category} onChange={(e) => setLibraryScanModal((s) => ({ ...s, result: { ...s.result, category: e.target.value } }))} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                  {t.reviewBeforeSaving}
+                </div>
+                <input
+                  aria-label={t.itemNameLabel}
+                  value={libraryScanModal.result.name}
+                  onChange={(e) =>
+                    setLibraryScanModal((s) => ({ ...s, result: { ...s.result, name: e.target.value } }))
+                  }
+                  placeholder={t.itemNameLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  aria-label={t.manufacturerLabel}
+                  value={libraryScanModal.result.supplier}
+                  onChange={(e) =>
+                    setLibraryScanModal((s) => ({ ...s, result: { ...s.result, supplier: e.target.value } }))
+                  }
+                  placeholder={t.manufacturerLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  aria-label={t.articleNumberLabel}
+                  value={libraryScanModal.result.articleNumber}
+                  onChange={(e) =>
+                    setLibraryScanModal((s) => ({ ...s, result: { ...s.result, articleNumber: e.target.value } }))
+                  }
+                  placeholder={t.articleNumberLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  aria-label={t.techCategoryLabel}
+                  value={libraryScanModal.result.category}
+                  onChange={(e) =>
+                    setLibraryScanModal((s) => ({ ...s, result: { ...s.result, category: e.target.value } }))
+                  }
+                  placeholder={t.techCategoryLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                />
 
-                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">
+                  {t.specsLabel}
+                </div>
                 {libraryScanModal.result.specs.map((s) => (
                   <div key={s.id} className="flex gap-2">
-                    <input aria-label={t.specKeyPlaceholder} value={s.key} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, key: e.target.value } : x)) } }))} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                    <input aria-label={t.specValuePlaceholder} value={s.value} onChange={(e) => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, value: e.target.value } : x)) } }))} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                    <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) } }))} style={{ color: COLORS.danger }}><X size={16} /></button>
+                    <input
+                      aria-label={t.specKeyPlaceholder}
+                      value={s.key}
+                      onChange={(e) =>
+                        setLibraryScanModal((st) => ({
+                          ...st,
+                          result: {
+                            ...st.result,
+                            specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, key: e.target.value } : x)),
+                          },
+                        }))
+                      }
+                      placeholder={t.specKeyPlaceholder}
+                      style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                      className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none"
+                    />
+                    <input
+                      aria-label={t.specValuePlaceholder}
+                      value={s.value}
+                      onChange={(e) =>
+                        setLibraryScanModal((st) => ({
+                          ...st,
+                          result: {
+                            ...st.result,
+                            specs: st.result.specs.map((x) => (x.id === s.id ? { ...x, value: e.target.value } : x)),
+                          },
+                        }))
+                      }
+                      placeholder={t.specValuePlaceholder}
+                      style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                      className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none"
+                    />
+                    <button
+                      className="tap"
+                      aria-label={t.a11yClose}
+                      title={t.a11yClose}
+                      onClick={() =>
+                        setLibraryScanModal((st) => ({
+                          ...st,
+                          result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) },
+                        }))
+                      }
+                      style={{ color: COLORS.danger }}
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
                 ))}
-                <button onClick={() => setLibraryScanModal((st) => ({ ...st, result: { ...st.result, specs: [...st.result.specs, { id: uid(), key: "", value: "" }] } }))} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
+                <button
+                  onClick={() =>
+                    setLibraryScanModal((st) => ({
+                      ...st,
+                      result: { ...st.result, specs: [...st.result.specs, { id: uid(), key: "", value: "" }] },
+                    }))
+                  }
+                  style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }}
+                  className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                >
+                  <Plus size={13} /> {t.addSpecRowBtn}
+                </button>
 
-                <label style={{ background: COLORS.cardAlt }} className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs mt-1">
-                  <input type="checkbox" checked={libraryScanModal.keepPhoto} onChange={(e) => setLibraryScanModal((s) => ({ ...s, keepPhoto: e.target.checked }))} />
+                <label
+                  style={{ background: COLORS.cardAlt }}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs mt-1"
+                >
+                  <input
+                    type="checkbox"
+                    checked={libraryScanModal.keepPhoto}
+                    onChange={(e) => setLibraryScanModal((s) => ({ ...s, keepPhoto: e.target.checked }))}
+                  />
                   {t.keepPhotoLabel}
                 </label>
 
-                <button onClick={confirmLibraryScan} disabled={!libraryScanModal.result.name.trim()} style={{ background: COLORS.accent, opacity: libraryScanModal.result.name.trim() ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-1">{t.saveToLibraryBtn}</button>
+                <button
+                  onClick={confirmLibraryScan}
+                  disabled={!libraryScanModal.result.name.trim()}
+                  style={{ background: COLORS.accent, opacity: libraryScanModal.result.name.trim() ? 1 : 0.5 }}
+                  className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-1"
+                >
+                  {t.saveToLibraryBtn}
+                </button>
               </div>
             )}
           </div>
@@ -6742,24 +11121,93 @@ export default function SiteManager() {
       )}
 
       {libraryEditModal && (
-        <Modal t={t} onClose={() => setLibraryEditModal(null)} title={libraryEditModal.id ? t.editLibraryItemTitle : t.newLibraryItemTitle}>
+        <Modal
+          t={t}
+          onClose={() => setLibraryEditModal(null)}
+          title={libraryEditModal.id ? t.editLibraryItemTitle : t.newLibraryItemTitle}
+        >
           <div className="flex flex-col gap-2">
-            <input aria-label={t.itemNameLabel} value={libraryEditModal.name} onChange={(e) => updateLibraryEditField("name", e.target.value)} placeholder={t.itemNameLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.manufacturerLabel} value={libraryEditModal.supplier} onChange={(e) => updateLibraryEditField("supplier", e.target.value)} placeholder={t.manufacturerLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.articleNumberLabel} value={libraryEditModal.articleNumber} onChange={(e) => updateLibraryEditField("articleNumber", e.target.value)} placeholder={t.articleNumberLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-            <input aria-label={t.techCategoryLabel} value={libraryEditModal.category} onChange={(e) => updateLibraryEditField("category", e.target.value)} placeholder={t.techCategoryLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
+            <input
+              aria-label={t.itemNameLabel}
+              value={libraryEditModal.name}
+              onChange={(e) => updateLibraryEditField("name", e.target.value)}
+              placeholder={t.itemNameLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.manufacturerLabel}
+              value={libraryEditModal.supplier}
+              onChange={(e) => updateLibraryEditField("supplier", e.target.value)}
+              placeholder={t.manufacturerLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.articleNumberLabel}
+              value={libraryEditModal.articleNumber}
+              onChange={(e) => updateLibraryEditField("articleNumber", e.target.value)}
+              placeholder={t.articleNumberLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
+            <input
+              aria-label={t.techCategoryLabel}
+              value={libraryEditModal.category}
+              onChange={(e) => updateLibraryEditField("category", e.target.value)}
+              placeholder={t.techCategoryLabel}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+            />
 
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.specsLabel}</div>
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">
+              {t.specsLabel}
+            </div>
             {libraryEditModal.specs.map((s) => (
               <div key={s.id} className="flex gap-2">
-                <input aria-label={t.specKeyPlaceholder} value={s.key} onChange={(e) => updateLibrarySpecRow(s.id, "key", e.target.value)} placeholder={t.specKeyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                <input aria-label={t.specValuePlaceholder} value={s.value} onChange={(e) => updateLibrarySpecRow(s.id, "value", e.target.value)} placeholder={t.specValuePlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none" />
-                <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={() => removeLibrarySpecRow(s.id)} style={{ color: COLORS.danger }}><X size={16} /></button>
+                <input
+                  aria-label={t.specKeyPlaceholder}
+                  value={s.key}
+                  onChange={(e) => updateLibrarySpecRow(s.id, "key", e.target.value)}
+                  placeholder={t.specKeyPlaceholder}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none"
+                />
+                <input
+                  aria-label={t.specValuePlaceholder}
+                  value={s.value}
+                  onChange={(e) => updateLibrarySpecRow(s.id, "value", e.target.value)}
+                  placeholder={t.specValuePlaceholder}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none"
+                />
+                <button
+                  className="tap"
+                  aria-label={t.a11yClose}
+                  title={t.a11yClose}
+                  onClick={() => removeLibrarySpecRow(s.id)}
+                  style={{ color: COLORS.danger }}
+                >
+                  <X size={16} />
+                </button>
               </div>
             ))}
-            <button onClick={addLibrarySpecRow} style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }} className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={13} /> {t.addSpecRowBtn}</button>
+            <button
+              onClick={addLibrarySpecRow}
+              style={{ color: COLORS.muted, border: `1px dashed ${COLORS.border}` }}
+              className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+            >
+              <Plus size={13} /> {t.addSpecRowBtn}
+            </button>
 
-            <button onClick={submitLibraryEdit} disabled={!libraryEditModal.name.trim()} style={{ background: COLORS.accent, opacity: libraryEditModal.name.trim() ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2">{t.saveToLibraryBtn}</button>
+            <button
+              onClick={submitLibraryEdit}
+              disabled={!libraryEditModal.name.trim()}
+              style={{ background: COLORS.accent, opacity: libraryEditModal.name.trim() ? 1 : 0.5 }}
+              className="w-full py-3 rounded-lg font-bold uppercase text-sm mt-2"
+            >
+              {t.saveToLibraryBtn}
+            </button>
           </div>
         </Modal>
       )}
@@ -6768,130 +11216,433 @@ export default function SiteManager() {
         <Modal t={t} onClose={() => setPickupModal(null)} title={t.pickupTitle}>
           {pickupModal.step === "form" ? (
             <div className="flex flex-col gap-2">
-              <div style={{ color: COLORS.muted }} className="text-xs mb-1">{t.pickupHint}</div>
-              <input aria-label={t.orderPlaceholder} value={pickupModal.orderRef} onChange={(e) => setPickupModal((s) => ({ ...s, orderRef: e.target.value }))} placeholder={t.orderPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-              <input aria-label={t.supplierPlaceholder} value={pickupModal.supplier} onChange={(e) => setPickupModal((s) => ({ ...s, supplier: e.target.value }))} placeholder={t.supplierPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none" />
-              <div className="flex gap-2 mt-1">
-                <button onClick={() => setPickupModal((s) => ({ ...s, codeType: "qr" }))} style={{ background: pickupModal.codeType === "qr" ? "#C9A6F5" : COLORS.cardAlt }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"><QrCode size={14} /> {t.qrLabel}</button>
-                <button onClick={() => setPickupModal((s) => ({ ...s, codeType: "barcode" }))} style={{ background: pickupModal.codeType === "barcode" ? "#C9A6F5" : COLORS.cardAlt }} className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"><Barcode size={14} /> {t.barcodeLabel}</button>
+              <div style={{ color: COLORS.muted }} className="text-xs mb-1">
+                {t.pickupHint}
               </div>
-              <button onClick={generatePickupCode} disabled={!pickupModal.orderRef.trim()} style={{ background: "#C9A6F5", opacity: pickupModal.orderRef.trim() ? 1 : 0.5 }} className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.generateCode}</button>
+              <input
+                aria-label={t.orderPlaceholder}
+                value={pickupModal.orderRef}
+                onChange={(e) => setPickupModal((s) => ({ ...s, orderRef: e.target.value }))}
+                placeholder={t.orderPlaceholder}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+              <input
+                aria-label={t.supplierPlaceholder}
+                value={pickupModal.supplier}
+                onChange={(e) => setPickupModal((s) => ({ ...s, supplier: e.target.value }))}
+                placeholder={t.supplierPlaceholder}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+              />
+              <div className="flex gap-2 mt-1">
+                <button
+                  onClick={() => setPickupModal((s) => ({ ...s, codeType: "qr" }))}
+                  style={{ background: pickupModal.codeType === "qr" ? "#C9A6F5" : COLORS.cardAlt }}
+                  className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"
+                >
+                  <QrCode size={14} /> {t.qrLabel}
+                </button>
+                <button
+                  onClick={() => setPickupModal((s) => ({ ...s, codeType: "barcode" }))}
+                  style={{ background: pickupModal.codeType === "barcode" ? "#C9A6F5" : COLORS.cardAlt }}
+                  className="flex-1 py-2 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-1"
+                >
+                  <Barcode size={14} /> {t.barcodeLabel}
+                </button>
+              </div>
+              <button
+                onClick={generatePickupCode}
+                disabled={!pickupModal.orderRef.trim()}
+                style={{ background: "#C9A6F5", opacity: pickupModal.orderRef.trim() ? 1 : 0.5 }}
+                className="w-full mt-2 py-3 rounded-lg font-bold uppercase text-sm text-black"
+              >
+                {t.generateCode}
+              </button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
               <div style={{ background: "#fff" }} className="rounded-xl p-4 w-full flex items-center justify-center">
                 {pickupModal.codeType === "qr" ? (
-                  pickupModal.qr ? <img data-pickup-qr alt={`QR ${pickupModal.orderRef}`} className="w-56 h-56" src={pickupModal.qr} /> : <Loader2 size={24} className="animate-spin" color="#333" />
+                  pickupModal.qr ? (
+                    <img data-pickup-qr alt={`QR ${pickupModal.orderRef}`} className="w-56 h-56" src={pickupModal.qr} />
+                  ) : (
+                    <Loader2 size={24} className="animate-spin" color="#333" />
+                  )
                 ) : pickupModal.barcode ? (
-                  <svg data-pickup-barcode role="img" aria-label={`Code 128 ${pickupModal.orderRef}`} viewBox={`0 0 ${pickupModal.barcode.width} 60`} preserveAspectRatio="none" className="w-full h-28" shapeRendering="crispEdges">
-                    {pickupModal.barcode.bars.map((b, i) => <rect key={i} x={b.x} y={0} width={b.w} height={60} fill="#000" />)}
+                  <svg
+                    data-pickup-barcode
+                    role="img"
+                    aria-label={`Code 128 ${pickupModal.orderRef}`}
+                    viewBox={`0 0 ${pickupModal.barcode.width} 60`}
+                    preserveAspectRatio="none"
+                    className="w-full h-28"
+                    shapeRendering="crispEdges"
+                  >
+                    {pickupModal.barcode.bars.map((b, i) => (
+                      <rect key={i} x={b.x} y={0} width={b.w} height={60} fill="#000" />
+                    ))}
                   </svg>
                 ) : (
-                  <div style={{ color: "#333" }} className="text-xs">{t.pickupCodeUnavailable}</div>
+                  <div style={{ color: "#333" }} className="text-xs">
+                    {t.pickupCodeUnavailable}
+                  </div>
                 )}
               </div>
               <div className="text-center">
                 <div className="font-bold">{pickupModal.orderRef}</div>
-                {pickupModal.supplier && <div style={{ color: COLORS.muted }} className="text-xs">{pickupModal.supplier}</div>}
+                {pickupModal.supplier && (
+                  <div style={{ color: COLORS.muted }} className="text-xs">
+                    {pickupModal.supplier}
+                  </div>
+                )}
               </div>
-              <div style={{ color: COLORS.muted }} className="text-xs text-center">{t.showScreenHint}</div>
-              <button onClick={() => setPickupModal(null)} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.doneLabel}</button>
+              <div style={{ color: COLORS.muted }} className="text-xs text-center">
+                {t.showScreenHint}
+              </div>
+              <button
+                onClick={() => setPickupModal(null)}
+                style={{ background: COLORS.accent }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+              >
+                {t.doneLabel}
+              </button>
             </div>
           )}
         </Modal>
       )}
 
-      {tripModal && (() => {
+      {tripModal &&
+        (() => {
           const wasteOpen = tripModal.loadKind === "waste" ? openWasteKg(tripModal.projectId) : 0;
           const hours = tripHours(tripModal.departTime, tripModal.arriveTime);
           const field = { background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text };
-          const lbl = (s) => <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{s}</div>;
+          const lbl = (s) => (
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+              {s}
+            </div>
+          );
           return (
             <Modal t={t} onClose={() => setTripModal(null)} title={t.tripAdd}>
               <div className="flex flex-col gap-2.5">
                 {lbl(t.tripProject)}
-                <select data-trip-project value={tripModal.projectId || ""} onChange={(e) => setTripField("projectId", e.target.value)} style={field} className="rounded-lg px-2 py-2 text-sm outline-none">
+                <select
+                  data-trip-project
+                  value={tripModal.projectId || ""}
+                  onChange={(e) => setTripField("projectId", e.target.value)}
+                  style={field}
+                  className="rounded-lg px-2 py-2 text-sm outline-none"
+                >
                   <option value="">—</option>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
                 <div className="grid grid-cols-2 gap-2">
-                  <div>{lbl(t.tripVehicle)}<select data-trip-vehicle value={tripModal.vehicle} onChange={(e) => setTripField("vehicle", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none">{VEHICLES.map((v) => <option key={v} value={v}>{t[`vehicle_${v}`]}</option>)}</select></div>
-                  <div>{lbl(t.tripDate)}<input type="date" value={tripModal.date} onChange={(e) => setTripField("date", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>
+                    {lbl(t.tripVehicle)}
+                    <select
+                      data-trip-vehicle
+                      value={tripModal.vehicle}
+                      onChange={(e) => setTripField("vehicle", e.target.value)}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    >
+                      {VEHICLES.map((v) => (
+                        <option key={v} value={v}>
+                          {t[`vehicle_${v}`]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    {lbl(t.tripDate)}
+                    <input
+                      type="date"
+                      value={tripModal.date}
+                      onChange={(e) => setTripField("date", e.target.value)}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div>{lbl(t.tripFrom)}<input aria-label={t.tripFromPh} data-trip-from value={tripModal.from} onChange={(e) => setTripField("from", e.target.value)} placeholder={t.tripFromPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
-                  <div>{lbl(t.tripTo)}<input aria-label={t.tripToPh} data-trip-to value={tripModal.to} onChange={(e) => setTripField("to", e.target.value)} placeholder={t.tripToPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>
+                    {lbl(t.tripFrom)}
+                    <input
+                      aria-label={t.tripFromPh}
+                      data-trip-from
+                      value={tripModal.from}
+                      onChange={(e) => setTripField("from", e.target.value)}
+                      placeholder={t.tripFromPh}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    {lbl(t.tripTo)}
+                    <input
+                      aria-label={t.tripToPh}
+                      data-trip-to
+                      value={tripModal.to}
+                      onChange={(e) => setTripField("to", e.target.value)}
+                      placeholder={t.tripToPh}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <div>{lbl(t.tripDepart)}<input data-trip-depart type="time" value={tripModal.departTime} onChange={(e) => setTripField("departTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
-                  <div>{lbl(t.tripArrive)}<input data-trip-arrive type="time" value={tripModal.arriveTime} onChange={(e) => setTripField("arriveTime", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
-                  <div>{lbl(t.tripKm)}<input aria-label="0" data-trip-km value={tripModal.km} onChange={(e) => setTripField("km", e.target.value)} inputMode="decimal" placeholder="0" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>
+                    {lbl(t.tripDepart)}
+                    <input
+                      data-trip-depart
+                      type="time"
+                      value={tripModal.departTime}
+                      onChange={(e) => setTripField("departTime", e.target.value)}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    {lbl(t.tripArrive)}
+                    <input
+                      data-trip-arrive
+                      type="time"
+                      value={tripModal.arriveTime}
+                      onChange={(e) => setTripField("arriveTime", e.target.value)}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    {lbl(t.tripKm)}
+                    <input
+                      aria-label="0"
+                      data-trip-km
+                      value={tripModal.km}
+                      onChange={(e) => setTripField("km", e.target.value)}
+                      inputMode="decimal"
+                      placeholder="0"
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
                 </div>
-                {hours > 0 && <div data-trip-hours style={{ color: COLORS.amber }} className="text-xs font-bold">{t.tripHours}: {hours} h</div>}
+                {hours > 0 && (
+                  <div data-trip-hours style={{ color: COLORS.amber }} className="text-xs font-bold">
+                    {t.tripHours}: {hours} h
+                  </div>
+                )}
                 {lbl(t.tripLoad)}
                 <div className="flex flex-wrap gap-1.5">
                   {LOAD_KINDS.map((k) => (
-                    <button key={k} data-trip-load={k} onClick={() => setTripField("loadKind", k)} style={{ background: tripModal.loadKind === k ? COLORS.accent : COLORS.card, border: `1px solid ${COLORS.border}` }} className="px-2.5 py-1.5 rounded-full text-xs font-bold">{t[`load_${k}`]}</button>
+                    <button
+                      key={k}
+                      data-trip-load={k}
+                      onClick={() => setTripField("loadKind", k)}
+                      style={{
+                        background: tripModal.loadKind === k ? COLORS.accent : COLORS.card,
+                        border: `1px solid ${COLORS.border}`,
+                      }}
+                      className="px-2.5 py-1.5 rounded-full text-xs font-bold"
+                    >
+                      {t[`load_${k}`]}
+                    </button>
                   ))}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div>{lbl(t.tripWeight)}<input aria-label="kg" data-trip-weight value={tripModal.weightKg} onChange={(e) => setTripField("weightKg", e.target.value)} inputMode="decimal" placeholder="kg" style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>
+                    {lbl(t.tripWeight)}
+                    <input
+                      aria-label="kg"
+                      data-trip-weight
+                      value={tripModal.weightKg}
+                      onChange={(e) => setTripField("weightKg", e.target.value)}
+                      inputMode="decimal"
+                      placeholder="kg"
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
                   {tripModal.loadKind === "waste" && (
-                    <div>{lbl(t.tripMulde)}<select data-trip-mulde value={tripModal.mulde} onChange={(e) => setTripField("mulde", e.target.value)} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none">{MULDE_SIZES.map((m) => <option key={m} value={m}>{m ? `${m} m³` : "—"}</option>)}</select></div>
+                    <div>
+                      {lbl(t.tripMulde)}
+                      <select
+                        data-trip-mulde
+                        value={tripModal.mulde}
+                        onChange={(e) => setTripField("mulde", e.target.value)}
+                        style={field}
+                        className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                      >
+                        {MULDE_SIZES.map((m) => (
+                          <option key={m} value={m}>
+                            {m ? `${m} m³` : "—"}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   )}
                 </div>
                 {tripModal.loadKind === "waste" && wasteOpen > 0 && (
-                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-xs">{t.tripWasteOpen.replace("{kg}", String(wasteOpen))}</div>
+                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-xs">
+                    {t.tripWasteOpen.replace("{kg}", String(wasteOpen))}
+                  </div>
                 )}
                 {tripModal.loadKind === "waste" && (
-                  <div>{lbl(t.tripDisposal)}<input aria-label={t.tripDisposalPh} data-trip-disposal value={tripModal.disposalSite} onChange={(e) => setTripField("disposalSite", e.target.value)} placeholder={t.tripDisposalPh} style={field} className="w-full rounded-lg px-2 py-2 text-sm outline-none" /></div>
+                  <div>
+                    {lbl(t.tripDisposal)}
+                    <input
+                      aria-label={t.tripDisposalPh}
+                      data-trip-disposal
+                      value={tripModal.disposalSite}
+                      onChange={(e) => setTripField("disposalSite", e.target.value)}
+                      placeholder={t.tripDisposalPh}
+                      style={field}
+                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
+                    />
+                  </div>
                 )}
                 {lbl(t.notesLabel)}
-                <textarea value={tripModal.notes} onChange={(e) => setTripField("notes", e.target.value)} rows={2} style={field} className="rounded-lg px-2 py-2 text-sm outline-none resize-none" />
-                <button data-trip-save onClick={saveTrip} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.tripSave}</button>
+                <textarea
+                  value={tripModal.notes}
+                  onChange={(e) => setTripField("notes", e.target.value)}
+                  rows={2}
+                  style={field}
+                  className="rounded-lg px-2 py-2 text-sm outline-none resize-none"
+                />
+                <button
+                  data-trip-save
+                  onClick={saveTrip}
+                  style={{ background: COLORS.accent }}
+                  className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+                >
+                  {t.tripSave}
+                </button>
               </div>
             </Modal>
           );
-      })()}
+        })()}
       {inspectionModal && (
-        <Modal t={t} onClose={() => setInspectionModal(null)} title={inspectionModal.editingId ? t.inspectEditTitle : t.inspectionTitle}>
+        <Modal
+          t={t}
+          onClose={() => setInspectionModal(null)}
+          title={inspectionModal.editingId ? t.inspectEditTitle : t.inspectionTitle}
+        >
           {inspectionModal.step === "form" && (
             <div className="flex flex-col gap-2">
-              <textarea aria-label={t.inspectionPlaceholder} value={inspectionModal.text} onChange={(e) => setInspectionModal((s) => ({ ...s, text: e.target.value }))} placeholder={t.inspectionPlaceholder} rows={4} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none" />
+              <textarea
+                aria-label={t.inspectionPlaceholder}
+                value={inspectionModal.text}
+                onChange={(e) => setInspectionModal((s) => ({ ...s, text: e.target.value }))}
+                placeholder={t.inspectionPlaceholder}
+                rows={4}
+                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+              />
               <div className="flex gap-2">
-                <input aria-label={t.startTimeLabel} value={inspectionModal.startTime} onChange={(e) => setInspectionModal((s) => ({ ...s, startTime: e.target.value }))} placeholder={t.startTimeLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                <input aria-label={t.ladderLabel} value={inspectionModal.ladderLength} onChange={(e) => setInspectionModal((s) => ({ ...s, ladderLength: e.target.value }))} placeholder={t.ladderLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
-                <input aria-label={t.psaLabel} value={inspectionModal.psaCount} onChange={(e) => setInspectionModal((s) => ({ ...s, psaCount: e.target.value }))} placeholder={t.psaLabel} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="flex-1 rounded-lg px-3 py-2 text-sm outline-none" />
+                <input
+                  aria-label={t.startTimeLabel}
+                  value={inspectionModal.startTime}
+                  onChange={(e) => setInspectionModal((s) => ({ ...s, startTime: e.target.value }))}
+                  placeholder={t.startTimeLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  aria-label={t.ladderLabel}
+                  value={inspectionModal.ladderLength}
+                  onChange={(e) => setInspectionModal((s) => ({ ...s, ladderLength: e.target.value }))}
+                  placeholder={t.ladderLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                />
+                <input
+                  aria-label={t.psaLabel}
+                  value={inspectionModal.psaCount}
+                  onChange={(e) => setInspectionModal((s) => ({ ...s, psaCount: e.target.value }))}
+                  placeholder={t.psaLabel}
+                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                />
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {inspectionModal.images.map((img, i) => (<img key={i} src={`data:${img.mediaType};base64,${img.b64}`} alt="" className="w-full h-16 object-cover rounded-lg" />))}
+                {inspectionModal.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={`data:${img.mediaType};base64,${img.b64}`}
+                    alt=""
+                    className="w-full h-16 object-cover rounded-lg"
+                  />
+                ))}
                 {inspectionModal.images.length < 3 && (
-                  <button aria-label={t.a11yPhoto} title={t.a11yPhoto} onClick={() => inspectionFileRef.current?.click()} style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }} className="tap h-16 rounded-lg flex items-center justify-center">
+                  <button
+                    aria-label={t.a11yPhoto}
+                    title={t.a11yPhoto}
+                    onClick={() => inspectionFileRef.current?.click()}
+                    style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}` }}
+                    className="tap h-16 rounded-lg flex items-center justify-center"
+                  >
                     <ImagePlus size={16} color={COLORS.muted} />
                   </button>
                 )}
               </div>
-              <input ref={inspectionFileRef} type="file" accept="image/*" onChange={addInspectionImage} className="hidden" />
-              {inspectionModal.error && <div style={{ color: COLORS.danger }} className="text-xs">{inspectionModal.error}</div>}
-              {inspectionModal.detail && <div style={{ color: COLORS.muted }} className="text-xs break-all">{inspectionModal.detail}</div>}
+              <input
+                ref={inspectionFileRef}
+                type="file"
+                accept="image/*"
+                onChange={addInspectionImage}
+                className="hidden"
+              />
+              {inspectionModal.error && (
+                <div style={{ color: COLORS.danger }} className="text-xs">
+                  {inspectionModal.error}
+                </div>
+              )}
+              {inspectionModal.detail && (
+                <div style={{ color: COLORS.muted }} className="text-xs break-all">
+                  {inspectionModal.detail}
+                </div>
+              )}
               {/* Tiles: what was looked at. Tap cycles none → OK → Mangel. */}
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.inspectChecklist}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">
+                {t.inspectChecklist}
+              </div>
               <div className="grid grid-cols-3 gap-1.5">
                 {INSPECTION_ITEMS.map((k) => {
                   const st = (inspectionModal.checklist || {})[k];
                   const col = st === "ok" ? COLORS.success : st === "mangel" ? COLORS.danger : COLORS.muted;
                   return (
-                    <button key={k} data-inspect-tile={k} onClick={() => cycleInspectionItem(k)} style={{ background: st ? `${col}22` : COLORS.cardAlt, border: `1px solid ${st ? col : COLORS.border}`, color: st ? col : COLORS.text }} className="rounded-lg px-2 py-2 text-xs font-bold leading-tight text-left flex items-center gap-1.5">
-                      <span style={{ background: st ? col : COLORS.border }} className="w-2 h-2 rounded-full shrink-0" />
+                    <button
+                      key={k}
+                      data-inspect-tile={k}
+                      onClick={() => cycleInspectionItem(k)}
+                      style={{
+                        background: st ? `${col}22` : COLORS.cardAlt,
+                        border: `1px solid ${st ? col : COLORS.border}`,
+                        color: st ? col : COLORS.text,
+                      }}
+                      className="rounded-lg px-2 py-2 text-xs font-bold leading-tight text-left flex items-center gap-1.5"
+                    >
+                      <span
+                        style={{ background: st ? col : COLORS.border }}
+                        className="w-2 h-2 rounded-full shrink-0"
+                      />
                       <span className="truncate">{t[`inspect_${k}`]}</span>
-                      {st && <span className="ml-auto text-xs uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>}
+                      {st && (
+                        <span className="ml-auto text-xs uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>
+                      )}
                     </button>
                   );
                 })}
               </div>
               {/* Replaced tiles: model from the reference, count, and what that
                   weighs -- the number the skip is ordered by. */}
-              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">{t.inspectReplacedTiles}</div>
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">
+                {t.inspectReplacedTiles}
+              </div>
               {(inspectionModal.tiles || []).map((row, i) => {
                 const meta = tileMeta(row.model);
                 const w = tileWaste(row.model, row.count);
@@ -6900,35 +11651,107 @@ export default function SiteManager() {
                     <div className="flex gap-2">
                       <select
                         data-tile-model
-                        value={ROOF_TILES.some((x) => x.key === row.model) ? row.model : (row.model ? "__free" : "")}
-                        onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value === "__free" ? " " : e.target.value }; return { ...s, tiles }; })}
+                        value={ROOF_TILES.some((x) => x.key === row.model) ? row.model : row.model ? "__free" : ""}
+                        onChange={(e) =>
+                          setInspectionModal((s) => {
+                            const tiles = s.tiles.slice();
+                            tiles[i] = { ...tiles[i], model: e.target.value === "__free" ? " " : e.target.value };
+                            return { ...s, tiles };
+                          })
+                        }
                         style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                         className="flex-1 min-w-0 rounded-lg px-2 py-2 text-sm outline-none"
                       >
                         <option value="">{t.inspectTileModel}</option>
-                        {ROOF_TILES.map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
+                        {ROOF_TILES.map((x) => (
+                          <option key={x.key} value={x.key}>
+                            {x.label}
+                          </option>
+                        ))}
                         <option value="__free">{t.inspectTileOther}</option>
                       </select>
-                      <input aria-label={t.qtyPlaceholder} data-tile-count value={row.count} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], count: e.target.value }; return { ...s, tiles }; })} inputMode="numeric" placeholder={t.qtyPlaceholder} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="w-20 rounded-lg px-2 py-2 text-sm outline-none" />
+                      <input
+                        aria-label={t.qtyPlaceholder}
+                        data-tile-count
+                        value={row.count}
+                        onChange={(e) =>
+                          setInspectionModal((s) => {
+                            const tiles = s.tiles.slice();
+                            tiles[i] = { ...tiles[i], count: e.target.value };
+                            return { ...s, tiles };
+                          })
+                        }
+                        inputMode="numeric"
+                        placeholder={t.qtyPlaceholder}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="w-20 rounded-lg px-2 py-2 text-sm outline-none"
+                      />
                     </div>
                     {row.model && !meta && (
-                      <input aria-label={t.inspectTileOther} value={row.model.trim()} onChange={(e) => setInspectionModal((s) => { const tiles = s.tiles.slice(); tiles[i] = { ...tiles[i], model: e.target.value || " " }; return { ...s, tiles }; })} placeholder={t.inspectTileOther} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }} className="rounded-lg px-2 py-1.5 text-xs outline-none" />
+                      <input
+                        aria-label={t.inspectTileOther}
+                        value={row.model.trim()}
+                        onChange={(e) =>
+                          setInspectionModal((s) => {
+                            const tiles = s.tiles.slice();
+                            tiles[i] = { ...tiles[i], model: e.target.value || " " };
+                            return { ...s, tiles };
+                          })
+                        }
+                        placeholder={t.inspectTileOther}
+                        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                        className="rounded-lg px-2 py-1.5 text-xs outline-none"
+                      />
                     )}
                     {meta && (
                       <div style={{ color: COLORS.muted }} className="text-xs">
-                        {meta.kgPerPiece} kg/Stk{meta.perM2 ? ` · ${meta.perM2} Stk/m²` : ""}{parseFloat(row.count) > 0 ? ` → ~${w.wasteKg} kg${w.areaM2 ? ` · ${w.areaM2} m²` : ""}` : ""}
+                        {meta.kgPerPiece} kg/Stk{meta.perM2 ? ` · ${meta.perM2} Stk/m²` : ""}
+                        {parseFloat(row.count) > 0 ? ` → ~${w.wasteKg} kg${w.areaM2 ? ` · ${w.areaM2} m²` : ""}` : ""}
                       </div>
                     )}
                   </div>
                 );
               })}
               <div className="flex items-center justify-between">
-                <button onClick={() => setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))} style={{ color: COLORS.accent }} className="text-xs font-bold uppercase flex items-center gap-1"><Plus size={11} /> {t.inspectAddTile}</button>
-                {(() => { const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0)); return w.wasteKg > 0 ? <span data-waste-kg style={{ color: COLORS.amber }} className="text-xs font-bold">{t.inspectWaste}: ~{w.wasteKg} kg</span> : null; })()}
+                <button
+                  onClick={() =>
+                    setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))
+                  }
+                  style={{ color: COLORS.accent }}
+                  className="text-xs font-bold uppercase flex items-center gap-1"
+                >
+                  <Plus size={11} /> {t.inspectAddTile}
+                </button>
+                {(() => {
+                  const w = tilesWaste((inspectionModal.tiles || []).filter((r) => r.model && parseFloat(r.count) > 0));
+                  return w.wasteKg > 0 ? (
+                    <span data-waste-kg style={{ color: COLORS.amber }} className="text-xs font-bold">
+                      {t.inspectWaste}: ~{w.wasteKg} kg
+                    </span>
+                  ) : null;
+                })()}
               </div>
-              <button data-inspect-save onClick={saveInspectionPlain} style={{ background: COLORS.accent }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm">{t.inspectSave}</button>
-              {!inspectionModal.editingId && <button onClick={runInspection} disabled={!inspectionModal.text.trim()} style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }} className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black">{t.sendToAdvisors}</button>}
-              <div style={{ color: COLORS.muted }} className="text-xs">{t.advisorsHint}</div>
+              <button
+                data-inspect-save
+                onClick={saveInspectionPlain}
+                style={{ background: COLORS.accent }}
+                className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm"
+              >
+                {t.inspectSave}
+              </button>
+              {!inspectionModal.editingId && (
+                <button
+                  onClick={runInspection}
+                  disabled={!inspectionModal.text.trim()}
+                  style={{ background: "#6FB3D9", opacity: inspectionModal.text.trim() ? 1 : 0.5 }}
+                  className="w-full mt-1 py-3 rounded-lg font-bold uppercase text-sm text-black"
+                >
+                  {t.sendToAdvisors}
+                </button>
+              )}
+              <div style={{ color: COLORS.muted }} className="text-xs">
+                {t.advisorsHint}
+              </div>
             </div>
           )}
           {inspectionModal.step === "running" && (
@@ -6936,26 +11759,60 @@ export default function SiteManager() {
               <Loader2 size={28} className="animate-spin" color="#6FB3D9" />
               <div className="text-sm font-semibold text-center">{inspectionModal.agentNote}</div>
               <div className="flex gap-1.5">
-                {[1, 2, 3].map((n) => (<div key={n} className="w-2 h-2 rounded-full" style={{ background: n <= inspectionModal.progress ? "#6FB3D9" : COLORS.border }} />))}
+                {[1, 2, 3].map((n) => (
+                  <div
+                    key={n}
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: n <= inspectionModal.progress ? "#6FB3D9" : COLORS.border }}
+                  />
+                ))}
               </div>
             </div>
           )}
           {inspectionModal.step === "result" && (
             <div className="flex flex-col gap-3">
-              <div style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, whiteSpace: "pre-wrap" }} className="rounded-lg p-3 text-sm leading-relaxed">{inspectionModal.report}</div>
+              <div
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, whiteSpace: "pre-wrap" }}
+                className="rounded-lg p-3 text-sm leading-relaxed"
+              >
+                {inspectionModal.report}
+              </div>
               {inspectionModal.materials && inspectionModal.materials.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">{t.materialsAlsoLog}</div>
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                    {t.materialsAlsoLog}
+                  </div>
                   {inspectionModal.materials.map((it) => (
-                    <label key={it.id} style={{ background: COLORS.cardAlt }} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
-                      <input type="checkbox" checked={it.checked} onChange={() => setInspectionModal((s) => ({ ...s, materials: s.materials.map((x) => (x.id === it.id ? { ...x, checked: !x.checked } : x)) }))} />
+                    <label
+                      key={it.id}
+                      style={{ background: COLORS.cardAlt }}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={it.checked}
+                        onChange={() =>
+                          setInspectionModal((s) => ({
+                            ...s,
+                            materials: s.materials.map((x) => (x.id === it.id ? { ...x, checked: !x.checked } : x)),
+                          }))
+                        }
+                      />
                       <span className="flex-1">{it.name}</span>
-                      <span style={{ color: COLORS.muted }}>{it.qty} {it.unit}</span>
+                      <span style={{ color: COLORS.muted }}>
+                        {it.qty} {it.unit}
+                      </span>
                     </label>
                   ))}
                 </div>
               )}
-              <button onClick={confirmInspection} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.logInspection}</button>
+              <button
+                onClick={confirmInspection}
+                style={{ background: COLORS.accent }}
+                className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+              >
+                {t.logInspection}
+              </button>
             </div>
           )}
         </Modal>
@@ -6969,18 +11826,30 @@ function MountainBackground() {
     <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
       <svg viewBox="0 0 400 900" preserveAspectRatio="xMidYMax slice" className="w-full h-full">
         {/* Layer 1 — furthest, palest, tallest peaks */}
-        <path d="M0,900 L0,520 L40,420 L80,480 L130,340 L180,460 L230,380 L280,470 L330,360 L400,450 L400,900 Z" fill="#3A4550" opacity="0.5" />
+        <path
+          d="M0,900 L0,520 L40,420 L80,480 L130,340 L180,460 L230,380 L280,470 L330,360 L400,450 L400,900 Z"
+          fill="#3A4550"
+          opacity="0.5"
+        />
         <polygon points="112,375 130,340 150,372" fill={COLORS.text} opacity="0.4" />
         <polygon points="312,393 330,360 350,392" fill={COLORS.text} opacity="0.4" />
         <polygon points="213,410 230,380 249,412" fill={COLORS.text} opacity="0.35" />
 
         {/* Layer 2 — mid distance */}
-        <path d="M0,900 L0,620 L50,540 L100,600 L150,500 L200,610 L260,520 L310,600 L360,540 L400,610 L400,900 Z" fill="#2C343B" opacity="0.65" />
+        <path
+          d="M0,900 L0,620 L50,540 L100,600 L150,500 L200,610 L260,520 L310,600 L360,540 L400,610 L400,900 Z"
+          fill="#2C343B"
+          opacity="0.65"
+        />
         <polygon points="133,532 150,500 168,530" fill={COLORS.text} opacity="0.3" />
         <polygon points="243,550 260,520 277,548" fill={COLORS.text} opacity="0.3" />
 
         {/* Layer 3 — closest foothills, blends into the app shell */}
-        <path d="M0,900 L0,760 L60,700 L120,750 L190,680 L260,740 L330,690 L400,750 L400,900 Z" fill="#20262B" opacity="0.9" />
+        <path
+          d="M0,900 L0,760 L60,700 L120,750 L190,680 L260,740 L330,690 L400,750 L400,900 Z"
+          fill="#20262B"
+          opacity="0.9"
+        />
       </svg>
     </div>
   );
@@ -7005,23 +11874,42 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
 
   const sorted = (() => {
     const copy = items.slice();
-    if (sort === "name") return copy.sort((a, b) => String(a.description || "").localeCompare(String(b.description || ""), undefined, { sensitivity: "base" }));
+    if (sort === "name")
+      return copy.sort((a, b) =>
+        String(a.description || "").localeCompare(String(b.description || ""), undefined, { sensitivity: "base" }),
+      );
     if (sort === "qty") return copy.sort((a, b) => (parseFloat(b.qty || 0) || 0) - (parseFloat(a.qty || 0) || 0));
-    if (sort === "unit") return copy.sort((a, b) => String(a.unit || "").localeCompare(String(b.unit || "")) || String(a.description || "").localeCompare(String(b.description || "")));
+    if (sort === "unit")
+      return copy.sort(
+        (a, b) =>
+          String(a.unit || "").localeCompare(String(b.unit || "")) ||
+          String(a.description || "").localeCompare(String(b.description || "")),
+      );
     // Grouping by merchant is how a purchase order gets written, so it earns
     // a sort of its own.
-    if (sort === "supplier") return copy.sort((a, b) => String(a.supplier || "￿").localeCompare(String(b.supplier || "￿")) || String(a.description || "").localeCompare(String(b.description || "")));
+    if (sort === "supplier")
+      return copy.sort(
+        (a, b) =>
+          String(a.supplier || "￿").localeCompare(String(b.supplier || "￿")) ||
+          String(a.description || "").localeCompare(String(b.description || "")),
+      );
     if (sort === "date") return copy.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
     return copy; // manual
   })();
 
   const row = (i, handle) => (
-    <div style={{ background: COLORS.cardAlt }} className="rounded-lg pl-1 pr-3 py-2 text-sm flex items-center justify-between gap-2">
+    <div
+      style={{ background: COLORS.cardAlt }}
+      className="rounded-lg pl-1 pr-3 py-2 text-sm flex items-center justify-between gap-2"
+    >
       {handle}
       <div className="flex-1 min-w-0">
         <div className="truncate flex items-center gap-1.5">
           {i.regie && (
-            <span style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }} className="shrink-0 text-xs font-bold px-1 py-0.5 rounded uppercase">
+            <span
+              style={{ background: `${COLORS.amber}22`, color: COLORS.amber, border: `1px solid ${COLORS.amber}66` }}
+              className="shrink-0 text-xs font-bold px-1 py-0.5 rounded uppercase"
+            >
               {t.regieShort}
             </span>
           )}
@@ -7033,11 +11921,37 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
           </div>
         )}
       </div>
-      <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">{i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}</span>
+      <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">
+        {i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}
+      </span>
       <div className="flex items-center gap-2 shrink-0">
-        <button className="tap" aria-label={t.copyBtn} onClick={() => onCopyItem(i)} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={13} /></button>
-        <button className="tap" aria-label={t.a11yEdit} onClick={() => onEditItem(i)} title={t.editLabel} style={{ color: COLORS.muted }}><Pencil size={13} /></button>
-        <button className="tap" aria-label={t.a11yDelete} onClick={() => onDeleteItem(i)} title={t.deleteLabel} style={{ color: COLORS.danger }}><Trash2 size={13} /></button>
+        <button
+          className="tap"
+          aria-label={t.copyBtn}
+          onClick={() => onCopyItem(i)}
+          title={t.copyBtn}
+          style={{ color: COLORS.muted }}
+        >
+          <Copy size={13} />
+        </button>
+        <button
+          className="tap"
+          aria-label={t.a11yEdit}
+          onClick={() => onEditItem(i)}
+          title={t.editLabel}
+          style={{ color: COLORS.muted }}
+        >
+          <Pencil size={13} />
+        </button>
+        <button
+          className="tap"
+          aria-label={t.a11yDelete}
+          onClick={() => onDeleteItem(i)}
+          title={t.deleteLabel}
+          style={{ color: COLORS.danger }}
+        >
+          <Trash2 size={13} />
+        </button>
       </div>
     </div>
   );
@@ -7045,7 +11959,9 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
   return (
     <div className="mb-3">
       <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
-        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide truncate min-w-0">{title}</div>
+        <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide truncate min-w-0">
+          {title}
+        </div>
         {/* One picker instead of six chips: the chips ran off the right edge
             of a phone. A native select opens the system list on Android. */}
         <label
@@ -7068,7 +11984,9 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
               ["date", t.sortDate],
               ["manual", t.sortManual],
             ].map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
+              <option key={key} value={key}>
+                {label}
+              </option>
             ))}
           </select>
         </label>
@@ -7101,7 +12019,9 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
   function beginDrag(e, id) {
     e.preventDefault();
     e.stopPropagation();
-    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     startedRef.current = false;
     setDragId(id);
     setOrder(items.map((i) => i.id));
@@ -7117,7 +12037,10 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
       const el = rowRefs.current[order[idx]];
       if (!el) continue;
       const r = el.getBoundingClientRect();
-      if (y < r.top + r.height / 2) { to = idx; break; }
+      if (y < r.top + r.height / 2) {
+        to = idx;
+        break;
+      }
       to = idx;
     }
     if (to !== from) {
@@ -7142,7 +12065,9 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
       {view.map((item) => (
         <div
           key={item.id}
-          ref={(el) => { rowRefs.current[item.id] = el; }}
+          ref={(el) => {
+            rowRefs.current[item.id] = el;
+          }}
           style={{
             opacity: dragId === item.id ? 0.85 : 1,
             transform: dragId === item.id ? "scale(1.02)" : "none",
@@ -7151,7 +12076,8 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
           }}
           className="relative"
         >
-          {renderItem(item, (
+          {renderItem(
+            item,
             <button
               onPointerDown={(e) => beginDrag(e, item.id)}
               onPointerMove={onMove}
@@ -7162,8 +12088,8 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
               aria-label="Reorder"
             >
               <GripVertical size={15} />
-            </button>
-          ))}
+            </button>,
+          )}
         </div>
       ))}
     </div>
@@ -7203,7 +12129,9 @@ function SignaturePad({ onChange, t }) {
 
   function start(e) {
     e.preventDefault();
-    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch (err) {} // a pointer the browser does not know must not cancel the gesture
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    } catch (err) {} // a pointer the browser does not know must not cancel the gesture
     const ctx = canvasRef.current.getContext("2d");
     const { x, y } = pos(e);
     ctx.beginPath();
@@ -7262,10 +12190,28 @@ function Modal({ title, onClose, children, t = {} }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end lg:items-center justify-center">
       <div onClick={onClose} className="absolute inset-0 bg-black/60" />
-      <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId.current} tabIndex={-1} style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }} className="relative w-full max-w-md lg:max-w-xl rounded-t-2xl lg:rounded-2xl p-5 lg:p-6 max-h-[85vh] overflow-y-auto outline-none">
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId.current}
+        tabIndex={-1}
+        style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }}
+        className="relative w-full max-w-md lg:max-w-xl rounded-t-2xl lg:rounded-2xl p-5 lg:p-6 max-h-[85vh] overflow-y-auto outline-none"
+      >
         <div className="flex items-center justify-between mb-4">
-          <div id={titleId.current} className="font-black text-lg uppercase">{title}</div>
-          <button data-dialog-close onClick={onClose} aria-label={t.a11yClose || "Close"} title={t.a11yClose || "Close"} className="tap"><X size={20} color={COLORS.muted} /></button>
+          <div id={titleId.current} className="font-black text-lg uppercase">
+            {title}
+          </div>
+          <button
+            data-dialog-close
+            onClick={onClose}
+            aria-label={t.a11yClose || "Close"}
+            title={t.a11yClose || "Close"}
+            className="tap"
+          >
+            <X size={20} color={COLORS.muted} />
+          </button>
         </div>
         {children}
       </div>

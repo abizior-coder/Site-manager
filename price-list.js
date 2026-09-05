@@ -13,15 +13,75 @@
 const HEADERS = {
   // What merchants actually call these columns, across the languages their
   // portals ship in.
-  name: ["name", "bezeichnung", "artikelbezeichnung", "artikel", "kurztext", "beschreibung", "description", "designation", "nazwa", "descrizione", "denominazione"],
-  artNo: ["artikelnummer", "artikel-nr", "artikelnr", "art-nr", "artnr", "art. nr", "artikel nr", "nummer", "article number", "article no", "art no", "sku", "ref", "référence", "reference", "codice", "nr artykulu", "nr artykułu", "indeks"],
-  price: ["preis", "einzelpreis", "nettopreis", "verkaufspreis", "ep", "price", "unit price", "prix", "prezzo", "cena", "cena netto"],
-  unit: ["einheit", "mengeneinheit", "me", "verpackungseinheit", "unit", "uom", "unité", "unita", "unità", "jednostka", "jm"],
+  name: [
+    "name",
+    "bezeichnung",
+    "artikelbezeichnung",
+    "artikel",
+    "kurztext",
+    "beschreibung",
+    "description",
+    "designation",
+    "nazwa",
+    "descrizione",
+    "denominazione",
+  ],
+  artNo: [
+    "artikelnummer",
+    "artikel-nr",
+    "artikelnr",
+    "art-nr",
+    "artnr",
+    "art. nr",
+    "artikel nr",
+    "nummer",
+    "article number",
+    "article no",
+    "art no",
+    "sku",
+    "ref",
+    "référence",
+    "reference",
+    "codice",
+    "nr artykulu",
+    "nr artykułu",
+    "indeks",
+  ],
+  price: [
+    "preis",
+    "einzelpreis",
+    "nettopreis",
+    "verkaufspreis",
+    "ep",
+    "price",
+    "unit price",
+    "prix",
+    "prezzo",
+    "cena",
+    "cena netto",
+  ],
+  unit: [
+    "einheit",
+    "mengeneinheit",
+    "me",
+    "verpackungseinheit",
+    "unit",
+    "uom",
+    "unité",
+    "unita",
+    "unità",
+    "jednostka",
+    "jm",
+  ],
   supplier: ["lieferant", "hersteller", "supplier", "vendor", "fournisseur", "fornitore", "dostawca"],
 };
 
 function normHeader(h) {
-  return String(h || "").trim().toLowerCase().replace(/^\uFEFF/, "").replace(/[."']/g, "");
+  return String(h || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\uFEFF/, "")
+    .replace(/[."']/g, "");
 }
 
 function matchColumn(header) {
@@ -69,12 +129,16 @@ export function splitRow(line, delim) {
     const ch = line[i];
     if (quoted) {
       if (ch === '"') {
-        if (line[i + 1] === '"') { cur += '"'; i++; }
-        else quoted = false;
+        if (line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else quoted = false;
       } else cur += ch;
     } else if (ch === '"') quoted = true;
-    else if (ch === delim) { out.push(cur); cur = ""; }
-    else cur += ch;
+    else if (ch === delim) {
+      out.push(cur);
+      cur = "";
+    } else cur += ch;
   }
   out.push(cur);
   return out.map((c) => c.trim());
@@ -88,7 +152,10 @@ function parseDatanorm(lines, warnings) {
   for (const line of lines) {
     if (!/^A\s*;/i.test(line)) continue;
     const f = line.split(";");
-    const name = [f[4], f[5]].filter((x) => x && x.trim()).join(" ").trim();
+    const name = [f[4], f[5]]
+      .filter((x) => x && x.trim())
+      .join(" ")
+      .trim();
     if (!name) continue;
     rows.push({
       name,
@@ -104,7 +171,9 @@ function parseDatanorm(lines, warnings) {
 
 export function parsePriceList(text) {
   const warnings = [];
-  const lines = String(text || "").split(/\r\n|\r|\n/).filter((l) => l.trim());
+  const lines = String(text || "")
+    .split(/\r\n|\r|\n/)
+    .filter((l) => l.trim());
   if (!lines.length) return { rows: [], format: "empty", warnings: ["emptyFile"] };
 
   if (lines.some((l) => /^A\s*;/i.test(l))) {
@@ -147,7 +216,9 @@ export function parsePriceList(text) {
 // change, so the user sees "412 new, 38 repriced" before committing.
 export function mergeIntoCatalog(catalog, rows, defaultSupplier) {
   const next = { ...catalog };
-  let added = 0, updated = 0, repriced = 0;
+  let added = 0,
+    updated = 0,
+    repriced = 0;
   for (const r of rows) {
     const key = r.name.trim().toLowerCase();
     if (!key) continue;
@@ -174,24 +245,49 @@ export function mergeIntoCatalog(catalog, rows, defaultSupplier) {
 // A supplier key ("hgc") against the free text an import wrote ("HGC",
 // "HG Commerciale AG"): letters only, either contains the other.
 export function supplierMatches(supplierText, key) {
-  const a = String(supplierText || "").toLowerCase().replace(/[^a-z]/g, "");
-  const b = String(key || "").toLowerCase().replace(/[^a-z]/g, "");
+  const a = String(supplierText || "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
+  const b = String(key || "")
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
   return !!a && !!b && (a.includes(b) || b.includes(a));
 }
 
 // Every article the firm has for a supplier: the imported price list, or,
 // while there is none, the catalogue's demo groups for it, marked as such.
 export function articlesFor(master, catalogue, key) {
-  const own = Object.values(master || {}).filter((a) => supplierMatches(a.supplier, key))
-    .map((a) => ({ name: a.name, unit: a.unit || "", price: a.price || "", artNo: a.artNo || "", supplier: a.supplier || key, demo: false }));
+  const own = Object.values(master || {})
+    .filter((a) => supplierMatches(a.supplier, key))
+    .map((a) => ({
+      name: a.name,
+      unit: a.unit || "",
+      price: a.price || "",
+      artNo: a.artNo || "",
+      supplier: a.supplier || key,
+      demo: false,
+    }));
   if (own.length) return own;
-  const groups = ((catalogue && catalogue.items && catalogue.items[key]) || []);
-  return groups.flatMap((g) => (g.items || []).map((name) => ({ name, unit: "", price: "", artNo: "", supplier: key, group: g.group, demo: true })));
+  const groups = (catalogue && catalogue.items && catalogue.items[key]) || [];
+  return groups.flatMap((g) =>
+    (g.items || []).map((name) => ({
+      name,
+      unit: "",
+      price: "",
+      artNo: "",
+      supplier: key,
+      group: g.group,
+      demo: true,
+    })),
+  );
 }
 
 // Every word of the query must appear in the name or the article number.
 export function filterArticles(rows, query) {
-  const words = String(query || "").toLowerCase().split(/\s+/).filter(Boolean);
+  const words = String(query || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
   if (!words.length) return rows;
   return rows.filter((r) => {
     const hay = `${r.name} ${r.artNo}`.toLowerCase();
@@ -199,7 +295,14 @@ export function filterArticles(rows, query) {
   });
 }
 
-const PRICE_NUM = (p) => { const n = parseFloat(String(p || "").replace(/'/g, "").replace(",", ".")); return Number.isFinite(n) ? n : null; };
+const PRICE_NUM = (p) => {
+  const n = parseFloat(
+    String(p || "")
+      .replace(/'/g, "")
+      .replace(",", "."),
+  );
+  return Number.isFinite(n) ? n : null;
+};
 
 // Sort by a column; prices numerically with blanks last, the rest by text.
 export function sortArticles(rows, key = "name", dir = "asc") {
@@ -207,13 +310,15 @@ export function sortArticles(rows, key = "name", dir = "asc") {
   const out = rows.slice();
   out.sort((a, b) => {
     if (key === "price") {
-      const x = PRICE_NUM(a.price), y = PRICE_NUM(b.price);
+      const x = PRICE_NUM(a.price),
+        y = PRICE_NUM(b.price);
       if (x == null && y == null) return 0;
       if (x == null) return 1;
       if (y == null) return -1;
       return (x - y) * sign;
     }
-    const x = String(a[key] || ""), y = String(b[key] || "");
+    const x = String(a[key] || ""),
+      y = String(b[key] || "");
     if (!x && y) return 1;
     if (x && !y) return -1;
     return x.localeCompare(y, undefined, { numeric: true, sensitivity: "base" }) * sign;

@@ -6,12 +6,16 @@
 // Counters live in KV and expire on their own. Everything is injected so the
 // arithmetic can be tested without Cloudflare.
 
-export const ACCOUNT_DAILY_LIMIT = 200;   // scans + translations per account per day
-export const COMPANY_DAILY_LIMIT = 600;   // per company per day, across every member
-export const ACCOUNT_MINUTE_LIMIT = 20;   // per account per minute: a loop, not a person
+export const ACCOUNT_DAILY_LIMIT = 200; // scans + translations per account per day
+export const COMPANY_DAILY_LIMIT = 600; // per company per day, across every member
+export const ACCOUNT_MINUTE_LIMIT = 20; // per account per minute: a loop, not a person
 
-function day(now) { return new Date(now).toISOString().slice(0, 10); }
-function minute(now) { return Math.floor(now / 60000); }
+function day(now) {
+  return new Date(now).toISOString().slice(0, 10);
+}
+function minute(now) {
+  return Math.floor(now / 60000);
+}
 
 async function bump(kv, key, ttl) {
   const used = parseInt((await kv.get(key)) || "0", 10);
@@ -30,6 +34,7 @@ export async function checkLimits(kv, { uid, cid }, now = Date.now()) {
   ]);
   if (perMinute >= ACCOUNT_MINUTE_LIMIT) return { status: 429, error: "too many requests — wait a minute" };
   if (perDay >= ACCOUNT_DAILY_LIMIT) return { status: 429, error: "daily scan limit reached — try again tomorrow" };
-  if (perCompany >= COMPANY_DAILY_LIMIT) return { status: 429, error: "the company's daily limit is reached — try again tomorrow" };
+  if (perCompany >= COMPANY_DAILY_LIMIT)
+    return { status: 429, error: "the company's daily limit is reached — try again tomorrow" };
   return null;
 }

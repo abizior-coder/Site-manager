@@ -12,7 +12,11 @@
 export function routeFor({ url, mode, method }, scope) {
   if (method && method !== "GET") return "network";
   let u;
-  try { u = new URL(url); } catch { return "network"; }
+  try {
+    u = new URL(url);
+  } catch {
+    return "network";
+  }
   const s = new URL(scope);
   if (u.origin !== s.origin || !u.pathname.startsWith(s.pathname)) return "network";
   const rel = u.pathname.slice(s.pathname.length);
@@ -21,7 +25,8 @@ export function routeFor({ url, mode, method }, scope) {
   // answered with the app.
   if (rel === "" || rel === "index.html") return "shell";
   if (mode === "navigate") return "network";
-  if (rel.startsWith("build/") || rel === "tailwind.css" || rel === "manifest.webmanifest" || rel.endsWith(".svg")) return "immutable";
+  if (rel.startsWith("build/") || rel === "tailwind.css" || rel === "manifest.webmanifest" || rel.endsWith(".svg"))
+    return "immutable";
   return "network";
 }
 

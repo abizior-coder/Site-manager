@@ -10,7 +10,10 @@ const FIREBASE_PROJECT_ID = "site-log-ab6a9";
 const FIREBASE_API_KEY = "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw";
 
 function corsHeaders(origin, allowedOrigins) {
-  const allowed = (allowedOrigins || "").split(",").map((o) => o.trim()).filter(Boolean);
+  const allowed = (allowedOrigins || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
   const allowOrigin = allowed.includes(origin) ? origin : allowed[0] || "*";
   return {
     "Access-Control-Allow-Origin": allowOrigin,
@@ -37,14 +40,11 @@ async function verifyUser(request) {
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token) return { ok: false, status: 401, error: "sign-in required" };
 
-  const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: token }),
-    }
-  );
+  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken: token }),
+  });
   if (!res.ok) return { ok: false, status: 401, error: "invalid or expired sign-in" };
 
   const data = await res.json().catch(() => null);
@@ -65,21 +65,27 @@ export default {
     // everything else is the AI proxy.
     if (new URL(request.url).pathname.startsWith("/metrics")) {
       return handleMetrics({
-        request, env, headers,
+        request,
+        env,
+        headers,
         verify: verifyUser,
         isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
       });
     }
     if (new URL(request.url).pathname.startsWith("/errors")) {
       return handleErrors({
-        request, env, headers,
+        request,
+        env,
+        headers,
         verify: verifyUser,
         isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
       });
     }
     if (new URL(request.url).pathname.startsWith("/files")) {
       return handleFiles({
-        request, env, headers,
+        request,
+        env,
+        headers,
         verify: verifyUser,
         isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
       });

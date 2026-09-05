@@ -61,7 +61,9 @@ async function boot() {
     console.info("Firebase: using local emulators");
   }
   // Survive app restarts on a phone without asking for the password again.
-  try { await authMod.setPersistence(auth, authMod.browserLocalPersistence); } catch {}
+  try {
+    await authMod.setPersistence(auth, authMod.browserLocalPersistence);
+  } catch {}
   sdk = { app, db, auth, fs: fsMod, authApi: authMod };
   return sdk;
 }
@@ -119,7 +121,9 @@ export const storage = {
     if (!uid) throw new Error("not signed in");
     const snaps = await sdk.fs.getDocs(sdk.fs.collection(sdk.db, "users", uid, "kv"));
     const keys = [];
-    snaps.forEach((d) => { if (!prefix || d.id.startsWith(prefix)) keys.push(d.id); });
+    snaps.forEach((d) => {
+      if (!prefix || d.id.startsWith(prefix)) keys.push(d.id);
+    });
     return { keys, prefix: prefix || "" };
   },
 };
@@ -173,7 +177,8 @@ export function authErrorKey(err) {
   if (code.includes("invalid-email")) return "authErrInvalidEmail";
   if (code.includes("missing-password") || code.includes("weak-password")) return "authErrWeakPassword";
   if (code.includes("email-already-in-use")) return "authErrEmailInUse";
-  if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found")) return "authErrBadLogin";
+  if (code.includes("invalid-credential") || code.includes("wrong-password") || code.includes("user-not-found"))
+    return "authErrBadLogin";
   // Fires when Email/Password is still disabled in the Firebase console —
   // the most likely first-run failure, so name it instead of saying "oops".
   if (code.includes("operation-not-allowed")) return "authErrProviderOff";

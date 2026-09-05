@@ -15,15 +15,22 @@ export const MAX_COUNT_PER_EVENT = 1000;
 export const RETENTION_SECONDS = 400 * 86400;
 export const MAX_DAYS = 90;
 
-export function dayKey(now) { return new Date(now).toISOString().slice(0, 10); }
-export function kvKey(cid, day) { return `m:${cid}:${day}`; }
+export function dayKey(now) {
+  return new Date(now).toISOString().slice(0, 10);
+}
+export function kvKey(cid, day) {
+  return `m:${cid}:${day}`;
+}
 
 // A hash the Worker can compute anywhere; 12 hex chars is plenty for
 // counting people and useless for naming them.
 export async function hashUid(uid) {
   const data = new TextEncoder().encode(`site-log:${uid}`);
   const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)].slice(0, 6).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...new Uint8Array(digest)]
+    .slice(0, 6)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // Fold a batch of events from one person into a day's record. Pure.
@@ -42,7 +49,11 @@ export function mergeDay(existing, { events, uidHash }) {
 
 // Daily rows plus the totals the Cockpit shows. Pure.
 export function summarise(rows) {
-  const days = (rows || []).map((r) => ({ date: r.date, active: Object.keys((r.day && r.day.users) || {}).length, events: (r.day && r.day.events) || {} }));
+  const days = (rows || []).map((r) => ({
+    date: r.date,
+    active: Object.keys((r.day && r.day.users) || {}).length,
+    events: (r.day && r.day.events) || {},
+  }));
   const totals = {};
   const people = new Set();
   for (const r of rows || []) {
@@ -77,7 +88,11 @@ export async function handleMetrics({ request, env, headers, verify, isMember, n
 
   if (request.method === "POST") {
     let body;
-    try { body = await request.json(); } catch { return json({ error: "invalid JSON body" }, 400, headers); }
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: "invalid JSON body" }, 400, headers);
+    }
     const events = body && typeof body.events === "object" && body.events ? body.events : null;
     if (!events) return json({ error: "events missing" }, 400, headers);
     if (Object.keys(events).length > MAX_EVENTS_PER_POST) return json({ error: "too many events" }, 400, headers);
@@ -94,7 +109,9 @@ export async function handleMetrics({ request, env, headers, verify, isMember, n
     const days = Math.min(MAX_DAYS, Math.max(1, parseInt(url.searchParams.get("days") || "30", 10) || 30));
     const dates = [];
     for (let i = days - 1; i >= 0; i--) dates.push(dayKey(now - i * 86400000));
-    const rows = await Promise.all(dates.map(async (date) => ({ date, day: JSON.parse((await kv.get(kvKey(cid, date))) || "null") })));
+    const rows = await Promise.all(
+      dates.map(async (date) => ({ date, day: JSON.parse((await kv.get(kvKey(cid, date))) || "null") })),
+    );
     return json(summarise(rows), 200, headers);
   }
 

@@ -45,9 +45,7 @@ export function documentState(doc, today) {
     else if (paid > 0) key = "partial";
     else key = "open";
   }
-  const overdue =
-    doc.type === "invoice" && key !== "paid" && key !== "draft" &&
-    !!doc.dueDate && doc.dueDate < today;
+  const overdue = doc.type === "invoice" && key !== "paid" && key !== "draft" && !!doc.dueDate && doc.dueDate < today;
   const set = DOC_STATUSES[doc.type] || DOC_STATUSES.invoice;
   const meta = set.find((s) => s.key === key) || set[0];
   return { key, meta, totals, paid, outstanding, overdue };

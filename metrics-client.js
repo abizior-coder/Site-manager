@@ -7,7 +7,12 @@
 export const MAX_DISTINCT = 40;
 export const MAX_COUNT = 1000;
 
-export function createTracker({ send, flushMs = 120000, schedule = (fn, ms) => setTimeout(fn, ms), cancel = (h) => clearTimeout(h) } = {}) {
+export function createTracker({
+  send,
+  flushMs = 120000,
+  schedule = (fn, ms) => setTimeout(fn, ms),
+  cancel = (h) => clearTimeout(h),
+} = {}) {
   let pending = {};
   let timer = null;
   let sending = false;
@@ -18,7 +23,11 @@ export function createTracker({ send, flushMs = 120000, schedule = (fn, ms) => s
     if (!count) return;
     if (!(name in pending) && Object.keys(pending).length >= MAX_DISTINCT) return;
     pending[name] = Math.min(MAX_COUNT, (pending[name] || 0) + count);
-    if (!timer) timer = schedule(() => { timer = null; flush(); }, flushMs);
+    if (!timer)
+      timer = schedule(() => {
+        timer = null;
+        flush();
+      }, flushMs);
   }
 
   function mergeBack(batch) {
@@ -26,7 +35,10 @@ export function createTracker({ send, flushMs = 120000, schedule = (fn, ms) => s
   }
 
   async function flush() {
-    if (timer) { cancel(timer); timer = null; }
+    if (timer) {
+      cancel(timer);
+      timer = null;
+    }
     if (sending) return false;
     const batch = pending;
     pending = {};
@@ -44,7 +56,9 @@ export function createTracker({ send, flushMs = 120000, schedule = (fn, ms) => s
     }
   }
 
-  function pendingEvents() { return { ...pending }; }
+  function pendingEvents() {
+    return { ...pending };
+  }
 
   return { track, flush, pendingEvents };
 }

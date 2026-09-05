@@ -35,5 +35,7 @@ export function netHours(list) {
 }
 
 export function breakTaken(list, key, date, userId) {
-  return (list || []).some((e) => e.type === "break" && e.breakKey === key && (!date || e.date === date) && (!userId || e.userId === userId));
+  return (list || []).some(
+    (e) => e.type === "break" && e.breakKey === key && (!date || e.date === date) && (!userId || e.userId === userId),
+  );
 }

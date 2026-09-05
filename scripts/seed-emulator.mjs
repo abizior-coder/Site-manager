@@ -8,13 +8,13 @@
 
 import { initializeApp } from "firebase/app";
 import {
-  getAuth, connectAuthEmulator, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, signOut,
+  getAuth,
+  connectAuthEmulator,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
-import {
-  getFirestore, connectFirestoreEmulator, doc, setDoc, 
-  writeBatch,
-} from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, doc, setDoc, writeBatch } from "firebase/firestore";
 
 const app = initializeApp({ projectId: "site-log-ab6a9", apiKey: "fake-api-key" });
 const auth = getAuth(app);
@@ -84,7 +84,9 @@ await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);
 const CID = "test-company";
 console.log("seeding company…");
 await setDoc(doc(db, "companies", CID), {
-  name: "Muster Bedachungen AG", ownerUid: uids.chef, createdAt: Date.now(),
+  name: "Muster Bedachungen AG",
+  ownerUid: uids.chef,
+  createdAt: Date.now(),
   publicSettings: { currency: "CHF" },
 });
 
@@ -92,7 +94,11 @@ await setDoc(doc(db, "companies", CID), {
 // redeeming an invite. The rules enforce that, so seeding has to follow the
 // real flow — which means this also exercises invites end-to-end.
 await setDoc(doc(db, "companies", CID, "members", uids.chef), {
-  role: "owner", name: "Chef Muster", email: "chef@test.local", active: true, joinedAt: Date.now(),
+  role: "owner",
+  name: "Chef Muster",
+  email: "chef@test.local",
+  active: true,
+  joinedAt: Date.now(),
 });
 await setDoc(doc(db, "users", uids.chef), { companyId: CID, displayName: "Chef Muster" });
 
@@ -100,7 +106,11 @@ for (const p of PEOPLE.filter((x) => x.key !== "chef")) {
   const code = `SEED${p.key.toUpperCase()}`;
   await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);
   await setDoc(doc(db, "invites", code), {
-    companyId: CID, role: p.role, expiresAt: Date.now() + 86400000, createdAt: Date.now(), usedBy: null,
+    companyId: CID,
+    role: p.role,
+    expiresAt: Date.now() + 86400000,
+    createdAt: Date.now(),
+    usedBy: null,
   });
 
   await signOut(auth);
@@ -109,7 +119,12 @@ for (const p of PEOPLE.filter((x) => x.key !== "chef")) {
   // with the membership it creates.
   const join = writeBatch(db);
   join.set(doc(db, "companies", CID, "members", uids[p.key]), {
-    role: p.role, name: p.name, email: p.email, active: true, joinedAt: Date.now(), inviteCode: code,
+    role: p.role,
+    name: p.name,
+    email: p.email,
+    active: true,
+    joinedAt: Date.now(),
+    inviteCode: code,
   });
   join.set(doc(db, "users", uids[p.key]), { companyId: CID, displayName: p.name });
   join.update(doc(db, "invites", code), { usedBy: uids[p.key] });
@@ -121,42 +136,196 @@ await signOut(auth);
 await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);
 
 await setDoc(doc(db, "companies", CID, "private", "finance"), {
-  companyName: "Muster Bedachungen AG", street: "Musterstrasse", buildingNumber: "12",
-  postalCode: "8000", town: "Zürich", country: "CH",
-  iban: "CH9300762011623852957", vatNumber: "CHE-123.456.789",
-  labourRate: "85", currency: "CHF", paymentDays: "30", defaultVatKey: "standard",
+  companyName: "Muster Bedachungen AG",
+  street: "Musterstrasse",
+  buildingNumber: "12",
+  postalCode: "8000",
+  town: "Zürich",
+  country: "CH",
+  iban: "CH9300762011623852957",
+  vatNumber: "CHE-123.456.789",
+  labourRate: "85",
+  currency: "CHF",
+  paymentDays: "30",
+  defaultVatKey: "standard",
 });
 
 const projects = [
-  { id: "p1", name: "Steildach Lettenring", customerId: "c1", client: "", address: "Lettenring 21, 8144 Dannikon", category: "pitched", status: "construction", quotedAmount: "12500" },
-  { id: "p2", name: "Flachdach Werkstatt", customerId: "c2", client: "", address: "Industriestrasse 4, 8600 Dübendorf", category: "flat", status: "quoted" },
-  { id: "p3", name: "Fassade Birmensdorf", customerId: "c1", client: "", address: "Schürenstrasse 7, Birmensdorf", category: "facade", status: "lead" },
-  { id: "p4", name: "Dachfenster Alt", customerId: "c2", client: "", address: "Alte Gasse 1", category: "pitched", status: "completed" },
+  {
+    id: "p1",
+    name: "Steildach Lettenring",
+    customerId: "c1",
+    client: "",
+    address: "Lettenring 21, 8144 Dannikon",
+    category: "pitched",
+    status: "construction",
+    quotedAmount: "12500",
+  },
+  {
+    id: "p2",
+    name: "Flachdach Werkstatt",
+    customerId: "c2",
+    client: "",
+    address: "Industriestrasse 4, 8600 Dübendorf",
+    category: "flat",
+    status: "quoted",
+  },
+  {
+    id: "p3",
+    name: "Fassade Birmensdorf",
+    customerId: "c1",
+    client: "",
+    address: "Schürenstrasse 7, Birmensdorf",
+    category: "facade",
+    status: "lead",
+  },
+  {
+    id: "p4",
+    name: "Dachfenster Alt",
+    customerId: "c2",
+    client: "",
+    address: "Alte Gasse 1",
+    category: "pitched",
+    status: "completed",
+  },
 ];
 for (const p of projects) await setDoc(doc(db, "companies", CID, "projects", p.id), p);
 
 const customers = [
-  { id: "c1", name: "Sutter Teresa", company: "", phone: "+41 79 123 45 67", email: "teresa@example.ch",
-    address: "Lettenring 21, 8144 Dannikon", notes: "Bevorzugt Anrufe am Morgen.",
+  {
+    id: "c1",
+    name: "Sutter Teresa",
+    company: "",
+    phone: "+41 79 123 45 67",
+    email: "teresa@example.ch",
+    address: "Lettenring 21, 8144 Dannikon",
+    notes: "Bevorzugt Anrufe am Morgen.",
     contacts: [
-      { id: "k1", kind: "call", note: "Termin für Offerte vereinbart", followUp: day(-3), at: Date.now() - 86400000 * 5 },
-      { id: "k2", kind: "visit", note: "Dach besichtigt, Ziegel teilweise defekt", followUp: "", at: Date.now() - 86400000 * 4 },
-    ] },
-  { id: "c2", name: "Werkstatt Huber GmbH", company: "Huber GmbH", phone: "+41 44 987 65 43", email: "info@huber.ch",
-    address: "Industriestrasse 4, 8600 Dübendorf", notes: "", contacts: [] },
+      {
+        id: "k1",
+        kind: "call",
+        note: "Termin für Offerte vereinbart",
+        followUp: day(-3),
+        at: Date.now() - 86400000 * 5,
+      },
+      {
+        id: "k2",
+        kind: "visit",
+        note: "Dach besichtigt, Ziegel teilweise defekt",
+        followUp: "",
+        at: Date.now() - 86400000 * 4,
+      },
+    ],
+  },
+  {
+    id: "c2",
+    name: "Werkstatt Huber GmbH",
+    company: "Huber GmbH",
+    phone: "+41 44 987 65 43",
+    email: "info@huber.ch",
+    address: "Industriestrasse 4, 8600 Dübendorf",
+    notes: "",
+    contacts: [],
+  },
 ];
 for (const c of customers) await setDoc(doc(db, "companies", CID, "customers", c.id), c);
 
 const entries = [
-  { id: "e1", type: "time", projectId: "p1", date: today, qty: "7.5", unit: "h", description: "7h 30m", userId: uids.crew1, startTime: "07:00", endTime: "15:30" },
-  { id: "e2", type: "time", projectId: "p1", date: day(-1), qty: "8", unit: "h", description: "8h 0m", userId: uids.crew1, approvedBy: uids.polier, approvedAt: Date.now() },
-  { id: "e3", type: "time", projectId: "p1", date: today, qty: "6", unit: "h", description: "6h 0m", userId: uids.crew2 },
-  { id: "e4", type: "material", projectId: "p1", date: today, qty: "24", unit: "m2", description: "Ziegel Frankfurter Pfanne", unitPrice: "18.50", userId: uids.crew1 },
-  { id: "e5", type: "material", projectId: "p1", date: today, qty: "8", unit: "m", description: "Siga Risan", unitPrice: "12.50", userId: uids.crew1 },
-  { id: "e6", type: "material", projectId: "p1", date: today, qty: "3", unit: "Stk", description: "Ohne Preis erfasst", userId: uids.crew2 },
-  { id: "e7", type: "tool", projectId: "p1", date: today, qty: "1", unit: "", description: "Bauaufzug", unitPrice: "120", userId: uids.crew1 },
-  { id: "e8", type: "note", projectId: "p1", date: today, description: "Regen ab 14:00, Arbeit unterbrochen", userId: uids.crew2 },
-  { id: "e9", type: "time", projectId: "p2", date: day(-2), qty: "4", unit: "h", description: "4h 0m", userId: uids.polier },
+  {
+    id: "e1",
+    type: "time",
+    projectId: "p1",
+    date: today,
+    qty: "7.5",
+    unit: "h",
+    description: "7h 30m",
+    userId: uids.crew1,
+    startTime: "07:00",
+    endTime: "15:30",
+  },
+  {
+    id: "e2",
+    type: "time",
+    projectId: "p1",
+    date: day(-1),
+    qty: "8",
+    unit: "h",
+    description: "8h 0m",
+    userId: uids.crew1,
+    approvedBy: uids.polier,
+    approvedAt: Date.now(),
+  },
+  {
+    id: "e3",
+    type: "time",
+    projectId: "p1",
+    date: today,
+    qty: "6",
+    unit: "h",
+    description: "6h 0m",
+    userId: uids.crew2,
+  },
+  {
+    id: "e4",
+    type: "material",
+    projectId: "p1",
+    date: today,
+    qty: "24",
+    unit: "m2",
+    description: "Ziegel Frankfurter Pfanne",
+    unitPrice: "18.50",
+    userId: uids.crew1,
+  },
+  {
+    id: "e5",
+    type: "material",
+    projectId: "p1",
+    date: today,
+    qty: "8",
+    unit: "m",
+    description: "Siga Risan",
+    unitPrice: "12.50",
+    userId: uids.crew1,
+  },
+  {
+    id: "e6",
+    type: "material",
+    projectId: "p1",
+    date: today,
+    qty: "3",
+    unit: "Stk",
+    description: "Ohne Preis erfasst",
+    userId: uids.crew2,
+  },
+  {
+    id: "e7",
+    type: "tool",
+    projectId: "p1",
+    date: today,
+    qty: "1",
+    unit: "",
+    description: "Bauaufzug",
+    unitPrice: "120",
+    userId: uids.crew1,
+  },
+  {
+    id: "e8",
+    type: "note",
+    projectId: "p1",
+    date: today,
+    description: "Regen ab 14:00, Arbeit unterbrochen",
+    userId: uids.crew2,
+  },
+  {
+    id: "e9",
+    type: "time",
+    projectId: "p2",
+    date: day(-2),
+    qty: "4",
+    unit: "h",
+    description: "4h 0m",
+    userId: uids.polier,
+  },
 ];
 // Entries can only be created by the person they belong to — the rules
 // reject an entry attributed to someone else — so sign in as each author.
@@ -170,20 +339,51 @@ await signOut(auth);
 await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);
 
 const documents = [
-  { id: "d1", type: "invoice", projectId: "p1", customerId: "c1", number: "R-2026-001",
-    date: day(-40), dueDate: day(-10), status: "open", paidAmount: "", paidDate: "",
+  {
+    id: "d1",
+    type: "invoice",
+    projectId: "p1",
+    customerId: "c1",
+    number: "R-2026-001",
+    date: day(-40),
+    dueDate: day(-10),
+    status: "open",
+    paidAmount: "",
+    paidDate: "",
     lineItems: [
       { id: "li1", description: "Arbeit", qty: "60", unit: "h", unitPrice: "85" },
       { id: "li2", description: "Ziegel", qty: "120", unit: "m2", unitPrice: "18.50" },
-    ], vatRate: 8.1, notes: "" },
-  { id: "d2", type: "invoice", projectId: "p4", customerId: "c2", number: "R-2026-002",
-    date: day(-20), dueDate: day(10), status: "open", paidAmount: "500", paidDate: day(-5),
+    ],
+    vatRate: 8.1,
+    notes: "",
+  },
+  {
+    id: "d2",
+    type: "invoice",
+    projectId: "p4",
+    customerId: "c2",
+    number: "R-2026-002",
+    date: day(-20),
+    dueDate: day(10),
+    status: "open",
+    paidAmount: "500",
+    paidDate: day(-5),
     lineItems: [{ id: "li3", description: "Dachfenster Einbau", qty: "1", unit: "", unitPrice: "2400" }],
-    vatRate: 8.1, notes: "" },
-  { id: "d3", type: "quote", projectId: "p2", customerId: "c2", number: "O-2026-001",
-    date: day(-5), status: "sent",
+    vatRate: 8.1,
+    notes: "",
+  },
+  {
+    id: "d3",
+    type: "quote",
+    projectId: "p2",
+    customerId: "c2",
+    number: "O-2026-001",
+    date: day(-5),
+    status: "sent",
     lineItems: [{ id: "li4", description: "Flachdachsanierung", qty: "1", unit: "", unitPrice: "18000" }],
-    vatRate: 8.1, notes: "Gültig 30 Tage." },
+    vatRate: 8.1,
+    notes: "Gültig 30 Tage.",
+  },
 ];
 for (const d of documents) await setDoc(doc(db, "companies", CID, "documents", d.id), d);
 
@@ -191,11 +391,20 @@ for (const a of [
   { id: "a1", date: today, projectId: "p1", userId: uids.crew1 },
   { id: "a2", date: today, projectId: "p1", userId: uids.crew2 },
   { id: "a3", date: day(1), projectId: "p2", userId: uids.crew1 },
-]) await setDoc(doc(db, "companies", CID, "assignments", a.id), a);
+])
+  await setDoc(doc(db, "companies", CID, "assignments", a.id), a);
 
 // Leave, like entries, may only be filed by the person it belongs to.
 const leaveRows = [
-  { id: "l1", date: day(3), userId: uids.crew2, type: "vacation", note: "Familienfeier", status: "pending", createdAt: Date.now() },
+  {
+    id: "l1",
+    date: day(3),
+    userId: uids.crew2,
+    type: "vacation",
+    note: "Familienfeier",
+    status: "pending",
+    createdAt: Date.now(),
+  },
   { id: "l2", date: day(-1), userId: uids.crew1, type: "sick", note: "", status: "pending", createdAt: Date.now() },
 ];
 for (const l of leaveRows) {
@@ -212,8 +421,18 @@ await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);
 
 await setDoc(doc(db, "companies", CID, "kv", "site-tech-library"), {
   value: JSON.stringify([
-    { id: "t1", name: "Siga Majrex", supplier: "SIGA", articleNumber: "MJX-150", category: "Dampfbremse",
-      specs: [{ id: "s1", key: "sd-Wert", value: "veränderlich" }, { id: "s2", key: "Breite", value: "1.5 m" }], createdAt: Date.now() },
+    {
+      id: "t1",
+      name: "Siga Majrex",
+      supplier: "SIGA",
+      articleNumber: "MJX-150",
+      category: "Dampfbremse",
+      specs: [
+        { id: "s1", key: "sd-Wert", value: "veränderlich" },
+        { id: "s2", key: "Breite", value: "1.5 m" },
+      ],
+      createdAt: Date.now(),
+    },
   ]),
 });
 await setDoc(doc(db, "companies", CID, "kv", "site-material-prices"), {

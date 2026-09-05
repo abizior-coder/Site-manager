@@ -11,7 +11,9 @@
 export const QR_CURRENCIES = ["CHF", "EUR"];
 
 export function normaliseIban(iban) {
-  return String(iban || "").replace(/\s+/g, "").toUpperCase();
+  return String(iban || "")
+    .replace(/\s+/g, "")
+    .toUpperCase();
 }
 
 // IBAN check per ISO 7064 mod 97-10. Catches the typo that would otherwise
@@ -35,7 +37,10 @@ export function isSwissIban(raw) {
 // ISO 11649 creditor reference (SCOR). Gives the payment a structured
 // reference for reconciliation without needing a QR-IBAN, which QRR would.
 export function creditorReference(raw) {
-  const base = String(raw || "").toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 21);
+  const base = String(raw || "")
+    .toUpperCase()
+    .replace(/[^0-9A-Z]/g, "")
+    .slice(0, 21);
   if (!base) return "";
   const shifted = base + "RF00";
   const numeric = shifted.replace(/[A-Z]/g, (c) => String(c.charCodeAt(0) - 55));
@@ -53,7 +58,9 @@ function amountForQr(amount) {
 
 function line(v) {
   // Newlines inside a field would desynchronise the whole payload.
-  return String(v == null ? "" : v).replace(/[\r\n]+/g, " ").trim();
+  return String(v == null ? "" : v)
+    .replace(/[\r\n]+/g, " ")
+    .trim();
 }
 
 /**
@@ -64,18 +71,21 @@ export function buildQrPayload({ iban, creditor, debtor, amount, currency, refer
   // SCOR demands a valid ISO 11649 reference — feeding a bare invoice number
   // through would produce a bill the bank rejects, so format it unless the
   // caller already supplied an RF reference.
-  const rawRef = String(reference || "").trim().toUpperCase().replace(/\s+/g, "");
+  const rawRef = String(reference || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, "");
   const ref = !rawRef ? "" : /^RF\d{2}/.test(rawRef) ? rawRef : creditorReference(rawRef);
   const refType = ref ? "SCOR" : "NON";
   const hasDebtor = debtor && String(debtor.name || "").trim();
 
   const fields = [
-    "SPC",                        // QRType
-    "0200",                       // Version
-    "1",                          // Coding type (UTF-8)
-    normaliseIban(iban),          // Creditor IBAN
+    "SPC", // QRType
+    "0200", // Version
+    "1", // Coding type (UTF-8)
+    normaliseIban(iban), // Creditor IBAN
 
-    "S",                          // Creditor address: structured
+    "S", // Creditor address: structured
     line(creditor.name),
     line(creditor.street),
     line(creditor.buildingNumber),
@@ -84,7 +94,13 @@ export function buildQrPayload({ iban, creditor, debtor, amount, currency, refer
     line(creditor.country || "CH"),
 
     // Ultimate creditor — unused, but its seven blank lines must be present.
-    "", "", "", "", "", "", "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
 
     amountForQr(amount),
     (currency || "CHF").toUpperCase(),
@@ -102,7 +118,7 @@ export function buildQrPayload({ iban, creditor, debtor, amount, currency, refer
     refType,
     ref,
     line(message).slice(0, 140),
-    "EPD",                        // Trailer
+    "EPD", // Trailer
   ];
 
   return fields.join("\r\n");

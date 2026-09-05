@@ -39,8 +39,14 @@ export function fmtSize(bytes) {
 // first inside a kind. Links sit with their kind.
 export function sortFiles(files) {
   const rank = Object.fromEntries(FILE_KINDS.map((k, i) => [k, i]));
-  return (files || []).slice().sort((a, b) =>
-    (rank[a.kind] ?? 99) - (rank[b.kind] ?? 99) || (b.createdAt || 0) - (a.createdAt || 0) || String(a.name || "").localeCompare(String(b.name || "")));
+  return (files || [])
+    .slice()
+    .sort(
+      (a, b) =>
+        (rank[a.kind] ?? 99) - (rank[b.kind] ?? 99) ||
+        (b.createdAt || 0) - (a.createdAt || 0) ||
+        String(a.name || "").localeCompare(String(b.name || "")),
+    );
 }
 
 // An external link needs a scheme a browser will open and nothing that runs.
