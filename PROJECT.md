@@ -30,6 +30,31 @@ fall back to English for almost everything — **finish those before telling
 anyone the app speaks their language.** Albanian covers the crew-facing
 surface only; the office screens fall back to English by design.
 
+## 1b. Product principle: scale without the founder (owner's decision, 2026-09-06)
+
+Site Log is built as a **scalable product**, not a service. Selling it must
+never load the owner with onboarding, hand-holding or per-customer work,
+and must never lower what the owner can earn per hour. Concretely:
+
+- A new firm sets itself up, invites its crew, imports its customers and
+  connects its accounting **without anyone from Site Log** (the
+  onboarding spec of 2026-09-05 is the baseline; every new feature keeps
+  it that way).
+- Help lives in the app and in the runbooks (`docs/runbooks/`), not in
+  the owner's inbox: empty states say what to do, errors carry codes,
+  the Cockpit nags about backups and tokens.
+- Anything that needs a manual step per customer (a setting only the
+  developer can flip, a migration run by hand, a document produced on
+  request) is a **defect**, not a process. Fix it in the product.
+- Pricing is per firm or per seat, paid in-app or by yearly invoice;
+  support is best-effort by e-mail with the SLA written down, never a
+  call the owner has to take.
+- Measure: the owner's time per new firm. Target zero; anything above
+  thirty minutes is a bug to spec and fix.
+
+Every spec and every Patch Advisor answer weighs the change against this
+principle: does it add work per customer? Then it is not done yet.
+
 ## 2. Architecture
 
 | Piece | File | Role |
@@ -120,6 +145,8 @@ Two roles look at every change before it is committed:
    the industry-standard way — without committing.
 2. **Software engineer**: reviews the diff against the spec, runs the
    failsafe, verifies on the emulator, commits and deploys.
+3. Both check the change against section 1b: no new manual step per
+   customer, no dependence on the owner at run time.
 
 The technical failsafe is the git hook `.githooks/pre-commit`
 (`npm run prepare` points git at it; `npm run precommit` runs it by hand):
