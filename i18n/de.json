@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Vorheriger Monat",
   "a11yNextMonth": "Nächster Monat",
   "a11yReorder": "Verschieben",
-  "customerDeleteConfirm": "Kunde löschen? Die Aufträge bleiben, ohne Verknüpfung."
+  "customerDeleteConfirm": "Kunde löschen? Die Aufträge bleiben, ohne Verknüpfung.",
+  "languageLabel": "Sprache"
 }

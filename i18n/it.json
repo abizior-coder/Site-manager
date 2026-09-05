@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Mese precedente",
   "a11yNextMonth": "Mese successivo",
   "a11yReorder": "Sposta",
-  "customerDeleteConfirm": "Eliminare il cliente? I lavori restano, senza collegamento."
+  "customerDeleteConfirm": "Eliminare il cliente? I lavori restano, senza collegamento.",
+  "languageLabel": "Lingua"
 }

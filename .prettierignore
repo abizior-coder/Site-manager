@@ -9,3 +9,4 @@ i18n/*.json
 firebase-debug.log
 firestore-debug.log
 .github/
+.*-under-test.mjs

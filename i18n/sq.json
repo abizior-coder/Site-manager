@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Muaji i mëparshëm",
   "a11yNextMonth": "Muaji tjetër",
   "a11yReorder": "Zhvendos",
-  "customerDeleteConfirm": "Të fshihet klienti? Punishtet mbeten, pa lidhje."
+  "customerDeleteConfirm": "Të fshihet klienti? Punishtet mbeten, pa lidhje.",
+  "languageLabel": "Gjuha"
 }

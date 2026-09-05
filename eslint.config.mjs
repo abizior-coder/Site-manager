@@ -14,6 +14,7 @@ export default [
       "worker/node_modules/**",
       "functions/**",
       ".claude/**",
+      ".*-under-test.mjs",
     ],
   },
   js.configs.recommended,

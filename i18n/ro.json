@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Luna precedentă",
   "a11yNextMonth": "Luna următoare",
   "a11yReorder": "Mută",
-  "customerDeleteConfirm": "Ștergi clientul? Lucrările rămân, fără legătură."
+  "customerDeleteConfirm": "Ștergi clientul? Lucrările rămân, fără legătură.",
+  "languageLabel": "Limba"
 }

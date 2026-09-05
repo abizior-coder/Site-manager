@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Előző hónap",
   "a11yNextMonth": "Következő hónap",
   "a11yReorder": "Áthelyezés",
-  "customerDeleteConfirm": "Törlöd az ügyfelet? A munkák megmaradnak, kapcsolat nélkül."
+  "customerDeleteConfirm": "Törlöd az ügyfelet? A munkák megmaradnak, kapcsolat nélkül.",
+  "languageLabel": "Nyelv"
 }

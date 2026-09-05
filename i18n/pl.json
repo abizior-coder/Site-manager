@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Poprzedni miesiąc",
   "a11yNextMonth": "Następny miesiąc",
   "a11yReorder": "Przenieś",
-  "customerDeleteConfirm": "Usunąć klienta? Zlecenia zostają, bez powiązania."
+  "customerDeleteConfirm": "Usunąć klienta? Zlecenia zostają, bez powiązania.",
+  "languageLabel": "Język"
 }

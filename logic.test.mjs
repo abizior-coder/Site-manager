@@ -79,7 +79,15 @@ await build({
   bundle: true,
   format: "esm",
   jsx: "automatic",
-  external: ["react", "react-dom", "lucide-react", "./firebase-client.js", "./company-store.js", "./swiss-qr.js"],
+  external: [
+    "react",
+    "react-dom",
+    "lucide-react",
+    "./firebase-client.js",
+    "./company-store.js",
+    "./swiss-qr.js",
+    "./swiss-qr-bill.js",
+  ],
   logLevel: "silent",
 });
 
@@ -700,6 +708,21 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     focusable(dom.window.document.getElementById("d")).map((el) => el.id),
     ["b"],
   );
+}
+
+{
+  // The code map is the model's entry point: every source file is named in
+  // it, so a new or moved file cannot silently fall out of the map.
+  const { readdirSync, readFileSync } = await import("node:fs");
+  const map = readFileSync("docs/CODE_MAP.md", "utf8");
+  const dirs = ["", "tabs", "ui", "worker/src", "scripts", "e2e", "data", "test-stubs"];
+  const files = dirs.flatMap((d) =>
+    readdirSync(d || ".", { withFileTypes: true })
+      .filter((f) => f.isFile() && /\.(m?js|jsx|py)$/.test(f.name) && !/^\./.test(f.name))
+      .map((f) => (d ? `${d}/${f.name}` : f.name)),
+  );
+  const missing = files.filter((f) => !map.includes(f) && !map.includes(f.split("/").pop()));
+  t(`docs/CODE_MAP.md names every source file (${files.length} files)`, missing.join(", "), "");
 }
 
 {

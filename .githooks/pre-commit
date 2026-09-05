@@ -5,6 +5,14 @@
 # way; fix what it says.
 set -e
 cd "$(git rev-parse --show-toplevel)"
+# A source change lands with a dev-log entry (docs/DEVLOG.md) or not at all:
+# the log and docs/CODE_MAP.md are what the next session starts from.
+staged=$(git diff --cached --name-only | grep -vE '^(build/|sw\.js$|index\.html$|tailwind\.css$|package-lock\.json$)')
+if echo "$staged" | grep -qE '\.(js|jsx|mjs|cjs|json|html|rules|css|py)$|^\.githooks/|^\.github/'; then
+  if ! echo "$staged" | grep -q '^docs/DEVLOG.md$'; then
+    echo "pre-commit: source files are staged but docs/DEVLOG.md has no staged entry"; exit 1
+  fi
+fi
 echo "pre-commit: lint"
 npx eslint . >/dev/null
 echo "pre-commit: format"

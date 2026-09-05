@@ -88,15 +88,7 @@ import {
   weekRows,
   weekCsv,
 } from "./reports.js";
-import {
-  buildQrPayload,
-  qrDataUrl,
-  validateBillingProfile,
-  normaliseIban,
-  creditorReference,
-  isSwissIban,
-  SWISS_CROSS_SVG,
-} from "./swiss-qr.js";
+import { validateBillingProfile, normaliseIban, isSwissIban } from "./swiss-qr.js";
 import {
   loadMembership,
   createCompany,
@@ -125,6 +117,7 @@ import { MAX_FILE_BYTES, FILE_KINDS, isImage, guessKind, normaliseLink } from ".
 import { breakMeta, breakHours, netHours } from "./breaks.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { COLORS } from "./ui/theme.js";
+import { AuthLangPicker } from "./ui/lang-picker.jsx";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
 import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
@@ -693,7 +686,14 @@ export default function SiteManager() {
   const [team, setTeam] = useState({ members: [], invites: [], busy: false });
   const [clocks, setClocks] = useState([]); // each crew member's own clock
   const customersRef = useRef([]);
-  const [lang, setLang] = useState("de");
+  const [lang, setLang] = useState(() => {
+    try {
+      const saved = localStorage.getItem("site-log-lang");
+      return saved && isLang(saved) ? saved : "de";
+    } catch {
+      return "de";
+    }
+  });
   // Screen readers, hyphenation and the crash report read the language here.
   useEffect(() => {
     try {
@@ -2129,6 +2129,7 @@ export default function SiteManager() {
     if (isInvoice) {
       const problems = validateBillingProfile(billing);
       if (problems.length === 0) {
+        const { buildQrPayload, qrDataUrl, creditorReference, SWISS_CROSS_SVG } = await import("./swiss-qr-bill.js");
         const payload = buildQrPayload({
           iban: billing.iban,
           creditor: {
@@ -2602,6 +2603,9 @@ export default function SiteManager() {
     }
     setLang(code);
     setLangPickerOpen(false);
+    try {
+      localStorage.setItem("site-log-lang", code);
+    } catch {}
     try {
       await window.storage.set(personalKey("site-lang"), code);
     } catch (e) {}
@@ -4762,7 +4766,8 @@ export default function SiteManager() {
         setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, barcode } : s));
       })
       .catch(() => {});
-    qrDataUrl(ref)
+    import("./swiss-qr-bill.js")
+      .then((m) => m.qrDataUrl(ref))
       .then((url) => setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, qr: url } : s)))
       .catch(() => {});
   }
@@ -5401,7 +5406,8 @@ export default function SiteManager() {
             </button>
           </div>
 
-          <div style={{ color: COLORS.muted }} className="text-xs mt-8 leading-relaxed">
+          <AuthLangPicker lang={lang} onChange={changeLang} label={t.languageLabel} />
+          <div style={{ color: COLORS.muted }} className="text-xs mt-6 leading-relaxed">
             {t.authPrivacyNote}{" "}
             <a
               data-privacy-link
@@ -5500,7 +5506,8 @@ export default function SiteManager() {
             {onboarding.mode === "join" ? t.onbSwitchCreate : t.onbSwitchJoin}
           </button>
 
-          <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-6 text-xs">
+          <AuthLangPicker lang={lang} onChange={changeLang} label={t.languageLabel} />
+          <button onClick={doSignOut} style={{ color: COLORS.muted }} className="w-full mt-4 text-xs tap">
             {t.signOut}
           </button>
           <a

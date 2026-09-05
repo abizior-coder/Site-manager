@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Predchádzajúci mesiac",
   "a11yNextMonth": "Nasledujúci mesiac",
   "a11yReorder": "Presunúť",
-  "customerDeleteConfirm": "Vymazať zákazníka? Zákazky zostanú, bez prepojenia."
+  "customerDeleteConfirm": "Vymazať zákazníka? Zákazky zostanú, bez prepojenia.",
+  "languageLabel": "Jazyk"
 }

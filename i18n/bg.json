@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Предишен месец",
   "a11yNextMonth": "Следващ месец",
   "a11yReorder": "Премести",
-  "customerDeleteConfirm": "Изтриване на клиента? Обектите остават, без връзка."
+  "customerDeleteConfirm": "Изтриване на клиента? Обектите остават, без връзка.",
+  "languageLabel": "Език"
 }

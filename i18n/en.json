@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Previous month",
   "a11yNextMonth": "Next month",
   "a11yReorder": "Reorder",
-  "customerDeleteConfirm": "Delete this customer? The jobs stay, unlinked."
+  "customerDeleteConfirm": "Delete this customer? The jobs stay, unlinked.",
+  "languageLabel": "Language"
 }

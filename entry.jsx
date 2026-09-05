@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import SiteManager from "./roofing-site-manager.jsx";
 import { storage } from "./firebase-client.js";
-import { loadLang } from "./i18n/index.js";
+import { loadLang, isLang } from "./i18n/index.js";
 import { installCrashCapture } from "./errors-client.js";
 
 // Uncaught errors: shown once, handed to the app as an event (the app knows
@@ -46,7 +46,14 @@ window.storage = storage;
 // German is the UI's first language and English the fallback for any key a
 // translation lacks; both are in hand before the first paint. Other
 // languages load when chosen.
-await Promise.all([loadLang("en"), loadLang("de")]);
+// A language chosen before signing in (the crew's own) is remembered on the
+// device and loaded with the first paint, so the sign-in screen is already
+// in it.
+let savedLang = "";
+try {
+  savedLang = localStorage.getItem("site-log-lang") || "";
+} catch {}
+await Promise.all([loadLang("en"), loadLang("de"), savedLang && isLang(savedLang) ? loadLang(savedLang) : null]);
 createRoot(document.getElementById("root")).render(<SiteManager />);
 
 // The offline shell. Registered after the first paint so it never delays

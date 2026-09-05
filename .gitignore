@@ -17,8 +17,9 @@ docs/value-plan-*.md
 # The journal holds business decisions; local like the plans
 docs/JOURNAL.md
 
-# throwaway patch scripts
+# throwaway patch scripts and the suites' temporary bundles
 .*.py
+.*-under-test.mjs
 
 # Engineering audits stay local like the security audits
 docs/engineering-audit-*.md

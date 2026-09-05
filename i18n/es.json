@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Mes anterior",
   "a11yNextMonth": "Mes siguiente",
   "a11yReorder": "Mover",
-  "customerDeleteConfirm": "¿Eliminar el cliente? Los trabajos se conservan, sin el vínculo."
+  "customerDeleteConfirm": "¿Eliminar el cliente? Los trabajos se conservan, sin el vínculo.",
+  "languageLabel": "Idioma"
 }

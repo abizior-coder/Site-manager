@@ -935,5 +935,6 @@
   "a11yPrevMonth": "Mois précédent",
   "a11yNextMonth": "Mois suivant",
   "a11yReorder": "Déplacer",
-  "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien."
+  "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien.",
+  "languageLabel": "Langue"
 }

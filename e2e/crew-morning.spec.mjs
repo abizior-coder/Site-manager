@@ -1,7 +1,23 @@
 // A crew member's morning in a real browser: sign in, the phone bar, the «+»
 // sheet, a job's hub, sign out.
 import { test, expect } from "@playwright/test";
-import { signIn, signOut } from "./helpers.mjs";
+import { APP, signIn, signOut } from "./helpers.mjs";
+
+// The language is a crew member's own choice, before any account exists, and
+// the device remembers it across a reload.
+test("sign-in screen: the language picker works before signing in and is remembered", async ({ page }) => {
+  await page.goto(APP);
+  const picker = page.locator("[data-auth-lang]");
+  await expect(picker).toBeVisible();
+  await expect(page.getByRole("button", { name: "Anmelden" })).toBeVisible();
+  await picker.selectOption("sq");
+  await expect(page.getByRole("button", { name: "Hyr" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "sq");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Hyr" })).toBeVisible();
+  await page.locator("[data-auth-lang]").selectOption("de");
+  await expect(page.getByRole("button", { name: "Anmelden" })).toBeVisible();
+});
 
 test("crew: sign in, the «+» sheet, a job's hub, sign out", async ({ page }) => {
   await signIn(page, "crew");

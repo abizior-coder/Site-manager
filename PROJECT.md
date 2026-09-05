@@ -147,6 +147,10 @@ Two roles look at every change before it is committed:
    failsafe, verifies on the emulator, commits and deploys.
 3. Both check the change against section 1b: no new manual step per
    customer, no dependence on the owner at run time.
+4. Every commit carries an entry in `docs/DEVLOG.md` (the hook refuses a
+   source change without one) and keeps `docs/CODE_MAP.md` true (a logic
+   test names every source file). Both are the model's source of truth at
+   the start of a session — read them instead of searching.
 
 The technical failsafe is the git hook `.githooks/pre-commit`
 (`npm run prepare` points git at it; `npm run precommit` runs it by hand):
@@ -480,21 +484,11 @@ removing them shifts every later field so banks reject the bill.
 
 ## Module map (since 2026-09-03)
 
-The monolith is being taken apart one tab at a time. What has moved so far:
-
-| Module | Holds |
-|---|---|
-| `ui/theme.js` | `COLORS` |
-| `ui/format.js` | `todayKey`, `monthKey`, `uid`, `fmtHM` |
-| `ui/entries.jsx` | `typeMeta`, `ENTRY_TYPE_ORDER`, `EntryRow`, `EntryGroups`, `Stat`, `StoredImage`, `loadPhoto` |
-| `ui/break-chips.jsx` | `BreakChips` |
-| `tabs/TodayTab.jsx` | the Today tab; state stays in the app and comes in as props |
-| `metrics-client.js` | the usage tracker (batched counts, flushed on hide) |
-| `tabs/MaterialsTab.jsx`, `tabs/BoardTab.jsx`, `tabs/CockpitTab.jsx` | tabs as lazy chunks, props from the app (cut with `scripts/extract-tab.py <tab> <Component>`) |
-| `tabs/ProjectDetail.jsx` | the job view, the photo viewer and editor: one chunk, loaded when a job opens |
-| `data/catalog.js`, `data/logo.js` | the shop catalogues (loaded with the Materials tab) and the printed logo (a few seconds after start) |
-| `sw-routes.js`, `scripts/sw.template.js` → `sw.js` | the offline shell: routing (tested), worker body, generated worker with the precache list |
-| `worker/src/metrics.js` | `/metrics/<cid>`: POST counts (members), GET 30 days (owner/supervisor); KV keys `m:<cid>:<day>`, 400-day TTL |
+The full map lives in **`docs/CODE_MAP.md`** (every file, what it holds,
+the handlers inside the app component, test hooks, commands) and is kept
+current with every commit; a logic test fails when a source file is not
+named there. `docs/DEVLOG.md` holds one entry per commit. Read both
+before searching the code.
 
 Rules for the next cut: a tab component renders only; handlers and state
 stay in `roofing-site-manager.jsx` until a real store exists. Shared

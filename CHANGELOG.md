@@ -7,6 +7,12 @@ by the deploy workflow once it is live.
 
 ## [Unreleased]
 
+### Added
+- Language picker on the sign-in and onboarding screens; the choice is kept on the device.
+
+### Changed
+- QR-bill generation loads only when a bill is printed (first paint stays under budget).
+
 ## [0.9.0] - 2026-09-05
 
 The September 2026 foundation: the app went from one firm's tool to a
