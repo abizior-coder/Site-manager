@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "backupNever": "Brak zapisanego eksportu.",
   "backupOverdue": "Zaleg\u0142a \u2014 wyeksportuj kopi\u0119",
   "backupOk": "Aktualna",
-  "backupNowBtn": "Zapisz kopi\u0119 teraz"
+  "backupNowBtn": "Zapisz kopi\u0119 teraz",
+  "filesQueued": "brak sieci \u2014 plik czeka i wy\u015Ble si\u0119, gdy sie\u0107 wr\xF3ci",
+  "filesQueuedShort": "czeka na sie\u0107"
 }
 `;export{o as default};

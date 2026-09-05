@@ -47,6 +47,7 @@ import { coveredEntryIds, changedFields, reconcileEntries } from "./entries-hist
 import { backupDue, backupMeta } from "./backup.js";
 import { toRappen, fromRappen, documentState as docStatePure } from "./documents.js";
 import { COLORS } from "./ui/theme.js";
+import { drainQueue, memoryQueue, isNetworkFailure, isRefusal, MAX_ATTEMPTS } from "./upload-queue.js";
 import {
   reportId,
   reportRows,
@@ -812,6 +813,80 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     ],
     [12, true, true, true],
   );
+}
+
+{
+  // The offline upload queue: uploaded items leave, a dead network keeps the
+  // rest, a refusal drops with a message, retries are capped.
+  const item = (id, addedAt, attempts = 0) => ({ id, addedAt, attempts, name: `${id}.pdf`, projectId: "p1" });
+  t(
+    "a fetch that never reached the server is a network failure; a 4xx is not",
+    [isNetworkFailure(new TypeError("Failed to fetch")), isNetworkFailure(new Error("upload 413"))],
+    [true, false],
+  );
+  t("413 and 415 are refusals; 401, 429 and 503 may pass next time", [413, 415, 401, 429, 503].map(isRefusal), [
+    true,
+    true,
+    false,
+    false,
+    false,
+  ]);
+  {
+    const q = memoryQueue([item("b", 2), item("a", 1)]);
+    const order = [],
+      recorded = [];
+    const r = await drainQueue({
+      queue: q,
+      upload: async (it) => {
+        order.push(it.id);
+        return { ok: true, meta: { id: it.id } };
+      },
+      onUploaded: (it, meta) => recorded.push(meta.id),
+    });
+    t(
+      "everything goes up oldest first and leaves the queue",
+      [order, recorded, r, (await q.list()).length],
+      [["a", "b"], ["a", "b"], { uploaded: 2, kept: 0, dropped: 0, stopped: null }, 0],
+    );
+  }
+  {
+    const q = memoryQueue([item("a", 1), item("b", 2)]);
+    let calls = 0;
+    const r = await drainQueue({
+      queue: q,
+      upload: async () => {
+        calls++;
+        throw new TypeError("Failed to fetch");
+      },
+    });
+    t(
+      "a dead network stops the drain and keeps every item",
+      [calls, r.stopped, r.kept, (await q.list()).length],
+      [1, "network", 2, 2],
+    );
+  }
+  {
+    const q = memoryQueue([item("a", 1)]);
+    const failed = [];
+    const r = await drainQueue({
+      queue: q,
+      upload: async () => ({ ok: false, status: 413 }),
+      onFailed: (it, res) => failed.push(res.status),
+    });
+    t("a refusal drops the item and says why", [r.dropped, failed, (await q.list()).length], [1, [413], 0]);
+  }
+  {
+    const q = memoryQueue([item("a", 1, MAX_ATTEMPTS - 2)]);
+    await drainQueue({ queue: q, upload: async () => ({ ok: false, status: 503 }) });
+    t("a 503 counts an attempt and keeps the item", (await q.list())[0].attempts, MAX_ATTEMPTS - 1);
+    const r = await drainQueue({ queue: q, upload: async () => ({ ok: false, status: 503 }) });
+    t("the attempt cap drops it", [r.dropped, (await q.list()).length], [1, 0]);
+  }
+  {
+    const q = memoryQueue([item("a", 1)]);
+    const r = await drainQueue({ queue: q, isOnline: () => false, upload: async () => ({ ok: true, meta: {} }) });
+    t("offline, nothing is tried", r, { uploaded: 0, kept: 1, dropped: 0, stopped: "offline" });
+  }
 }
 
 {

@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "backupNever": "Zat\xEDm \u017E\xE1dn\xFD export.",
   "backupOverdue": "Po term\xEDnu \u2014 exportujte z\xE1lohu",
   "backupOk": "Aktu\xE1ln\xED",
-  "backupNowBtn": "Z\xE1lohovat te\u010F"
+  "backupNowBtn": "Z\xE1lohovat te\u010F",
+  "filesQueued": "bez s\xEDt\u011B \u2014 soubor \u010Dek\xE1 a ode\u0161le se, a\u017E se s\xED\u0165 vr\xE1t\xED",
+  "filesQueuedShort": "\u010Dek\xE1 na s\xED\u0165"
 }
 `;export{t as default};

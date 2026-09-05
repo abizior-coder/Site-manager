@@ -907,5 +907,7 @@
   "backupNever": "Asnjë eksport i regjistruar.",
   "backupOverdue": "Vonuar — eksporto një kopje",
   "backupOk": "Në rregull",
-  "backupNowBtn": "Ruaj tani"
+  "backupNowBtn": "Ruaj tani",
+  "filesQueued": "pa rrjet — skedari pret dhe ngarkohet kur rrjeti kthehet",
+  "filesQueuedShort": "në pritje të rrjetit"
 }

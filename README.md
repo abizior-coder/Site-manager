@@ -61,6 +61,7 @@ works on localhost; a deployed page can never point at it.
 npm test               # logic, worker, render, order, dock, rules (needs the emulator)
 npm run lint
 npm run format:check
+npm run test:e2e        # Chromium against the emulators (starts and seeds them)
 ```
 
 Run a single suite with `node logic.test.mjs` and read the exit code; on

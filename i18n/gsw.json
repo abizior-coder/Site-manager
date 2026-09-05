@@ -907,5 +907,7 @@
   "backupNever": "No kei Export feschtghalte.",
   "backupOverdue": "Überfällig — Sicherig exportiere",
   "backupOk": "Aktuell",
-  "backupNowBtn": "Jetzt sichere"
+  "backupNowBtn": "Jetzt sichere",
+  "filesQueued": "kei Netz — d Datei wartet und gaht ufe, sobald s zrugg isch",
+  "filesQueuedShort": "warted uf s Netz"
 }

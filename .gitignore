@@ -22,3 +22,7 @@ docs/JOURNAL.md
 
 # Engineering audits stay local like the security audits
 docs/engineering-audit-*.md
+
+# Playwright output
+playwright-report/
+test-results/

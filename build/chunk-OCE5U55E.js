@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "backupNever": "Niciun export \xEEnregistrat.",
   "backupOverdue": "\xCEnt\xE2rziat \u2014 export\u0103 un backup",
   "backupOk": "La zi",
-  "backupNowBtn": "Salveaz\u0103 acum"
+  "backupNowBtn": "Salveaz\u0103 acum",
+  "filesQueued": "f\u0103r\u0103 re\u021Bea \u2014 fi\u0219ierul a\u0219teapt\u0103 \u0219i pleac\u0103 la revenirea ei",
+  "filesQueuedShort": "a\u0219teapt\u0103 re\u021Beaua"
 }
 `;export{i as default};

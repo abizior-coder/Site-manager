@@ -907,5 +907,7 @@
   "backupNever": "Aucun export enregistré.",
   "backupOverdue": "En retard — exporter une sauvegarde",
   "backupOk": "À jour",
-  "backupNowBtn": "Sauvegarder maintenant"
+  "backupNowBtn": "Sauvegarder maintenant",
+  "filesQueued": "pas de réseau — le fichier attend et partira dès son retour",
+  "filesQueuedShort": "en attente du réseau"
 }

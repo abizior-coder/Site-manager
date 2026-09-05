@@ -907,5 +907,7 @@
   "backupNever": "Zatím žádný export.",
   "backupOverdue": "Po termínu — exportujte zálohu",
   "backupOk": "Aktuální",
-  "backupNowBtn": "Zálohovat teď"
+  "backupNowBtn": "Zálohovat teď",
+  "filesQueued": "bez sítě — soubor čeká a odešle se, až se síť vrátí",
+  "filesQueuedShort": "čeká na síť"
 }

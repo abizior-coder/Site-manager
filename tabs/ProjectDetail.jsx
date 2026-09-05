@@ -104,6 +104,7 @@ export function ProjectDetail({
   canDeleteFile,
   onAddLink,
   fileBusy,
+  pendingUploads = 0,
   activeClock,
   onStartDay,
   onStopDay,
@@ -586,6 +587,11 @@ export function ProjectDetail({
                       {t.filesTitle} ({(files || []).length})
                     </span>
                     {fileBusy > 0 && <Loader2 size={11} className="animate-spin" />}
+                    {pendingUploads > 0 && (
+                      <span data-upload-pending style={{ color: COLORS.amber }} className="text-xs font-bold">
+                        {pendingUploads} {t.filesQueuedShort}
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button

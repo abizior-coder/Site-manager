@@ -907,5 +907,7 @@
   "backupNever": "Няма записан експорт.",
   "backupOverdue": "Просрочено — експортирайте копие",
   "backupOk": "Актуално",
-  "backupNowBtn": "Запази сега"
+  "backupNowBtn": "Запази сега",
+  "filesQueued": "няма мрежа — файлът чака и ще се изпрати, щом се върне",
+  "filesQueuedShort": "чака мрежа"
 }

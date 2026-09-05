@@ -132,6 +132,7 @@ import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "
 import { useDialog } from "./ui/dialog.js";
 import { coveredEntryIds, reconcileEntries } from "./entries-history.js";
 import { BACKUP_KEY, backupMeta } from "./backup.js";
+import { openUploadQueue, drainQueue, isNetworkFailure } from "./upload-queue.js";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
@@ -2997,61 +2998,126 @@ export default function SiteManager() {
   // caller; the app only keeps the metadata. Several files in one drop are
   // uploaded one after another, each with its own outcome, so one bad file
   // never takes the others down with it.
+  // The file record every upload ends in, live or from the queue.
+  async function recordUploaded(meta, projectId) {
+    const record = {
+      id: meta.id,
+      name: meta.name,
+      size: meta.size,
+      type: meta.type,
+      kind: meta.kind,
+      projectId,
+      uploadedBy: user?.uid || null,
+      createdAt: Date.now(),
+    };
+    const current = [record, ...projectFilesRef.current];
+    projectFilesRef.current = current;
+    await persist({ projectFiles: current });
+    showToast(`${meta.name} ${t.filesUploaded}`);
+  }
+
+  // One POST to the Worker; the shape drainQueue expects.
+  async function postFile(cid, projectId, file, kind, name) {
+    const token = await getIdToken();
+    const fd = new FormData();
+    fd.append("file", file, name || file.name);
+    fd.append("kind", kind);
+    const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${projectId}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    if (!res.ok) return { ok: false, status: res.status };
+    return { ok: true, meta: await res.json() };
+  }
+
+  function uploadRefusedToast(name, status) {
+    if (status === 413) showToast(`${name}: ${t.filesTooLarge}`);
+    else if (status === 415) showToast(`${name}: ${t.filesTypeRefused}`);
+    else if (status === 503) showToast(t.filesNotConfigured);
+    else showError({ status, message: `upload ${status}` }, "file");
+  }
+
+  const uploadQueueRef = useRef(null);
+  function getUploadQueue() {
+    if (!uploadQueueRef.current)
+      uploadQueueRef.current = openUploadQueue(typeof indexedDB !== "undefined" ? indexedDB : null);
+    return uploadQueueRef.current;
+  }
+  const [pendingUploads, setPendingUploads] = useState([]);
+  async function refreshPending() {
+    try {
+      const q = await getUploadQueue();
+      const items = await q.list();
+      setPendingUploads(items.map(({ blob, ...rest }) => rest));
+    } catch {}
+  }
+
+  // Whatever waited goes up now: on the network coming back, and once the
+  // company is loaded after a start.
+  async function drainUploads() {
+    const cid = getCompanyId();
+    if (!cid) return;
+    try {
+      const q = await getUploadQueue();
+      await drainQueue({
+        queue: q,
+        isOnline: () => typeof navigator === "undefined" || navigator.onLine !== false,
+        upload: (item) => postFile(item.cid, item.projectId, item.blob, item.kind, item.name),
+        onUploaded: (item, meta) => recordUploaded(meta, item.projectId),
+        onFailed: (item, res) => uploadRefusedToast(item.name, res && res.status),
+      });
+    } catch {}
+    refreshPending();
+  }
+  useEffect(() => {
+    if (!membership) return;
+    drainUploads();
+    const onOnline = () => drainUploads();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [membership]);
+
   async function uploadFiles(projectId, fileList, kind) {
     tracker.track("file.upload");
     const files = Array.from(fileList || []);
     const cid = getCompanyId();
     if (!files.length || !cid || !projectId) return;
-    let current = projectFilesRef.current;
     for (const file of files) {
       if (file.size > MAX_FILE_BYTES) {
         showToast(`${file.name}: ${t.filesTooLarge}`);
         continue;
       }
+      const fileKind = kind || guessKind(file.name, file.type);
+      const enqueue = async () => {
+        const q = await getUploadQueue();
+        await q.add({
+          id: uid(),
+          cid,
+          projectId,
+          kind: fileKind,
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          blob: file,
+          addedAt: Date.now(),
+          attempts: 0,
+        });
+        await refreshPending();
+        showToast(`${file.name}: ${t.filesQueued}`);
+      };
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        await enqueue();
+        continue;
+      }
       setFileBusy((n) => n + 1);
       try {
-        const token = await getIdToken();
-        const fd = new FormData();
-        fd.append("file", file, file.name);
-        fd.append("kind", kind || guessKind(file.name, file.type));
-        const res = await fetch(`${CLAUDE_PROXY_URL}/files/${cid}/${projectId}`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: fd,
-        });
-        if (res.status === 413) {
-          showToast(`${file.name}: ${t.filesTooLarge}`);
-          continue;
-        }
-        if (res.status === 415) {
-          showToast(`${file.name}: ${t.filesTypeRefused}`);
-          continue;
-        }
-        if (res.status === 503) {
-          showToast(t.filesNotConfigured);
-          continue;
-        }
-        if (!res.ok) {
-          showError({ status: res.status, message: `upload ${res.status}` }, "file");
-          continue;
-        }
-        const meta = await res.json();
-        const record = {
-          id: meta.id,
-          name: meta.name,
-          size: meta.size,
-          type: meta.type,
-          kind: meta.kind,
-          projectId,
-          uploadedBy: user?.uid || null,
-          createdAt: Date.now(),
-        };
-        current = [record, ...current];
-        projectFilesRef.current = current;
-        await persist({ projectFiles: current });
-        showToast(`${meta.name} ${t.filesUploaded}`);
+        const res = await postFile(cid, projectId, file, fileKind);
+        if (res.ok) await recordUploaded(res.meta, projectId);
+        else uploadRefusedToast(file.name, res.status);
       } catch (e) {
-        showError(new Error("upload"), "file");
+        if (isNetworkFailure(e)) await enqueue();
+        else showError(new Error("upload"), "file");
       } finally {
         setFileBusy((n) => Math.max(0, n - 1));
       }
@@ -9370,6 +9436,7 @@ export default function SiteManager() {
             canDeleteFile={canDeleteFile}
             onAddLink={() => setLinkForm({ projectId: selectedProject, url: "", name: "", kind: "plan" })}
             fileBusy={fileBusy}
+            pendingUploads={pendingUploads.filter((p) => p.projectId === selectedProject).length}
             activeClock={activeClock}
             onStartDay={startDayOn}
             onStopDay={clockOut}

@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "backupNever": "Nessuna esportazione registrata.",
   "backupOverdue": "In ritardo \u2014 esporta un backup",
   "backupOk": "Aggiornato",
-  "backupNowBtn": "Salva ora"
+  "backupNowBtn": "Salva ora",
+  "filesQueued": "nessuna rete \u2014 il file attende e sar\xE0 inviato al ritorno della rete",
+  "filesQueuedShort": "in attesa della rete"
 }
 `;export{o as default};

@@ -907,5 +907,7 @@
   "backupNever": "Noch kein Export festgehalten.",
   "backupOverdue": "Überfällig — Sicherung exportieren",
   "backupOk": "Aktuell",
-  "backupNowBtn": "Jetzt sichern"
+  "backupNowBtn": "Jetzt sichern",
+  "filesQueued": "kein Netz — die Datei wartet und wird gesendet, sobald es zurück ist",
+  "filesQueuedShort": "warten auf Netz"
 }

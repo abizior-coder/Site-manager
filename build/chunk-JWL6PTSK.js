@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "backupNever": "M\xE9g nincs r\xF6gz\xEDtett export.",
   "backupOverdue": "Esed\xE9kes \u2014 export\xE1lj ment\xE9st",
   "backupOk": "Naprak\xE9sz",
-  "backupNowBtn": "Ment\xE9s most"
+  "backupNowBtn": "Ment\xE9s most",
+  "filesQueued": "nincs h\xE1l\xF3zat \u2014 a f\xE1jl v\xE1r, \xE9s felt\xF6lt\u0151dik, amint visszat\xE9r",
+  "filesQueuedShort": "h\xE1l\xF3zatra v\xE1r"
 }
 `;export{a as default};

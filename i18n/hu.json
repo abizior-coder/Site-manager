@@ -907,5 +907,7 @@
   "backupNever": "Még nincs rögzített export.",
   "backupOverdue": "Esedékes — exportálj mentést",
   "backupOk": "Naprakész",
-  "backupNowBtn": "Mentés most"
+  "backupNowBtn": "Mentés most",
+  "filesQueued": "nincs hálózat — a fájl vár, és feltöltődik, amint visszatér",
+  "filesQueuedShort": "hálózatra vár"
 }

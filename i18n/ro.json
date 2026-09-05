@@ -907,5 +907,7 @@
   "backupNever": "Niciun export înregistrat.",
   "backupOverdue": "Întârziat — exportă un backup",
   "backupOk": "La zi",
-  "backupNowBtn": "Salvează acum"
+  "backupNowBtn": "Salvează acum",
+  "filesQueued": "fără rețea — fișierul așteaptă și pleacă la revenirea ei",
+  "filesQueuedShort": "așteaptă rețeaua"
 }

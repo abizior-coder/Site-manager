@@ -907,5 +907,7 @@
   "backupNever": "Brak zapisanego eksportu.",
   "backupOverdue": "Zaległa — wyeksportuj kopię",
   "backupOk": "Aktualna",
-  "backupNowBtn": "Zapisz kopię teraz"
+  "backupNowBtn": "Zapisz kopię teraz",
+  "filesQueued": "brak sieci — plik czeka i wyśle się, gdy sieć wróci",
+  "filesQueuedShort": "czeka na sieć"
 }

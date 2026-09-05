@@ -907,6 +907,8 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "backupNever": "Asnj\xEB eksport i regjistruar.",
   "backupOverdue": "Vonuar \u2014 eksporto nj\xEB kopje",
   "backupOk": "N\xEB rregull",
-  "backupNowBtn": "Ruaj tani"
+  "backupNowBtn": "Ruaj tani",
+  "filesQueued": "pa rrjet \u2014 skedari pret dhe ngarkohet kur rrjeti kthehet",
+  "filesQueuedShort": "n\xEB pritje t\xEB rrjetit"
 }
 `;export{r as default};
