@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "teamTitle": "Equipo",
   "teamMembers": "Miembros",
   "teamInvites": "C\xF3digos de invitaci\xF3n",
-  "teamInviteHint": "Env\xEDa un c\xF3digo a un operario. Crea una cuenta, introduce el c\xF3digo y se une a la empresa. Caducan a los 14 d\xEDas.",
+  "teamInviteHint": "Env\xEDa el enlace o el c\xF3digo a un trabajador. Crea una cuenta y se une a la empresa. Los c\xF3digos valen tres d\xEDas, una persona cada uno.",
   "teamNewInvite": "Nuevo c\xF3digo",
   "teamNoInvites": "Sin c\xF3digos activos.",
   "teamExpires": "Caduca",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "exportPayrollDays": "Horas por d\xEDa",
   "exportContacts": "Clientes como contactos bexio",
   "exportEmpty": "nada",
-  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, \xE1brelo en Excel y gu\xE1rdalo como .xlsx. N\xF3mina: el e-mail debe coincidir con el empleado en bexio N\xF3mina. Las facturas son el diario para la gestor\xEDa; bexio solo acepta facturas por su API."
+  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, \xE1brelo en Excel y gu\xE1rdalo como .xlsx. N\xF3mina: el e-mail debe coincidir con el empleado en bexio N\xF3mina. Las facturas son el diario para la gestor\xEDa; bexio solo acepta facturas por su API.",
+  "onbLinkNotice": "Invitaci\xF3n reconocida. Crea tu cuenta y entrar\xE1s directamente en la empresa.",
+  "inviteLinkCopy": "Copiar enlace",
+  "inviteShare": "Compartir",
+  "inviteShareText": "{company} te invita a Site Log. Crea una cuenta y \xFAnete a la empresa: {link}",
+  "firstStepsTitle": "Primeros pasos",
+  "firstStepsHours": "Horas semanales y tarifa por hora (datos de facturaci\xF3n)",
+  "firstStepsSite": "Primera obra",
+  "firstStepsCrew": "Invitar al equipo",
+  "firstStepsCustomers": "A\xF1adir o importar clientes",
+  "importCustomers": "Importar clientes",
+  "importCustomersPreview": "{n} filas le\xEDdas: {added} nuevas, {skipped} ya existentes.",
+  "importCustomersNothing": "No se reconoci\xF3 ning\xFAn cliente. Necesario: una columna Nombre o Empresa; opcional Nombre de pila, Tel\xE9fono, E-mail, Direcci\xF3n, CP, Localidad. La exportaci\xF3n de contactos de bexio funciona tal cual.",
+  "importCustomersDone": "{n} clientes importados"
 }
 `;export{o as default};

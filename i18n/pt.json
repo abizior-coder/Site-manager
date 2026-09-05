@@ -278,7 +278,7 @@
   "teamTitle": "Equipa",
   "teamMembers": "Membros",
   "teamInvites": "Códigos de convite",
-  "teamInviteHint": "Envie um código a um colaborador. Cria uma conta, introduz o código e junta-se à empresa. Expiram em 14 dias.",
+  "teamInviteHint": "Envia a ligação ou o código a um trabalhador. Ele cria uma conta e entra na empresa. Os códigos valem três dias, uma pessoa cada.",
   "teamNewInvite": "Novo código",
   "teamNoInvites": "Sem códigos ativos.",
   "teamExpires": "Expira",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Horas por dia",
   "exportContacts": "Clientes como contactos bexio",
   "exportEmpty": "nada",
-  "exportHint": "CSV com ponto e vírgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Salários: o e-mail tem de corresponder ao colaborador no bexio Salários. As faturas são o diário para o contabilista; o bexio só aceita faturas pela API."
+  "exportHint": "CSV com ponto e vírgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Salários: o e-mail tem de corresponder ao colaborador no bexio Salários. As faturas são o diário para o contabilista; o bexio só aceita faturas pela API.",
+  "onbLinkNotice": "Convite reconhecido. Cria a conta e entras diretamente na empresa.",
+  "inviteLinkCopy": "Copiar ligação",
+  "inviteShare": "Partilhar",
+  "inviteShareText": "{company} convida-te para o Site Log. Cria uma conta e entra na empresa: {link}",
+  "firstStepsTitle": "Primeiros passos",
+  "firstStepsHours": "Horas semanais e taxa horária (dados de faturação)",
+  "firstStepsSite": "Primeira obra",
+  "firstStepsCrew": "Convidar a equipa",
+  "firstStepsCustomers": "Registar ou importar clientes",
+  "importCustomers": "Importar clientes",
+  "importCustomersPreview": "{n} linhas lidas: {added} novas, {skipped} já existentes.",
+  "importCustomersNothing": "Nenhum cliente reconhecido. Necessário: uma coluna Nome ou Empresa; opcional Nome próprio, Telefone, E-mail, Morada, Código postal, Localidade. A exportação de contactos do bexio funciona tal como está.",
+  "importCustomersDone": "{n} clientes importados"
 }

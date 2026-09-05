@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "teamTitle": "Csapat",
   "teamMembers": "Tagok",
   "teamInvites": "Megh\xEDv\xF3k\xF3dok",
-  "teamInviteHint": "K\xFCldj k\xF3dot egy munkat\xE1rsnak. Fi\xF3kot hoz l\xE9tre, be\xEDrja a k\xF3dot, \xE9s csatlakozik a c\xE9ghez. A k\xF3dok 14 nap ut\xE1n lej\xE1rnak.",
+  "teamInviteHint": "K\xFCldd el a linket vagy a k\xF3dot egy dolgoz\xF3nak. Fi\xF3kot hoz l\xE9tre \xE9s csatlakozik a c\xE9ghez. A k\xF3dok h\xE1rom napig \xE9rv\xE9nyesek, egy szem\xE9lyre.",
   "teamNewInvite": "\xDAj megh\xEDv\xF3k\xF3d",
   "teamNoInvites": "Nincs akt\xEDv k\xF3d.",
   "teamExpires": "Lej\xE1r",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "exportPayrollDays": "\xD3r\xE1k naponta",
   "exportContacts": "\xDCgyfelek bexio-kontaktk\xE9nt",
   "exportEmpty": "semmi",
-  "exportHint": "Pontosvessz\u0151s CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben \xE9s mentsd .xlsx-k\xE9nt. B\xE9r: az e-mailnek egyeznie kell a bexio Lohn dolgoz\xF3j\xE1val. A sz\xE1ml\xE1k a k\xF6nyvel\u0151 napl\xF3ja; a bexio sz\xE1ml\xE1t csak API-n fogad."
+  "exportHint": "Pontosvessz\u0151s CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben \xE9s mentsd .xlsx-k\xE9nt. B\xE9r: az e-mailnek egyeznie kell a bexio Lohn dolgoz\xF3j\xE1val. A sz\xE1ml\xE1k a k\xF6nyvel\u0151 napl\xF3ja; a bexio sz\xE1ml\xE1t csak API-n fogad.",
+  "onbLinkNotice": "Megh\xEDv\xF3 felismerve. Hozz l\xE9tre fi\xF3kot, \xE9s r\xF6gt\xF6n a c\xE9ghez ker\xFClsz.",
+  "inviteLinkCopy": "Link m\xE1sol\xE1sa",
+  "inviteShare": "Megoszt\xE1s",
+  "inviteShareText": "{company} megh\xEDv a Site Logba. Hozz l\xE9tre fi\xF3kot \xE9s csatlakozz a c\xE9ghez: {link}",
+  "firstStepsTitle": "Els\u0151 l\xE9p\xE9sek",
+  "firstStepsHours": "Heti \xF3r\xE1k \xE9s \xF3rad\xEDj (sz\xE1ml\xE1z\xE1si adatok)",
+  "firstStepsSite": "Els\u0151 munkater\xFClet",
+  "firstStepsCrew": "Csapat megh\xEDv\xE1sa",
+  "firstStepsCustomers": "\xDCgyfelek felv\xE9tele vagy import\xE1l\xE1sa",
+  "importCustomers": "\xDCgyfelek import\xE1l\xE1sa",
+  "importCustomersPreview": "{n} sor beolvasva: {added} \xFAj, {skipped} m\xE1r l\xE9tezik.",
+  "importCustomersNothing": "Nem ismert\xFCnk fel \xFCgyfelet. Kell egy N\xE9v vagy C\xE9g oszlop; opcion\xE1lis Keresztn\xE9v, Telefon, E-mail, C\xEDm, Ir\xE1ny\xEDt\xF3sz\xE1m, Telep\xFCl\xE9s. A bexio kontaktexport \xEDgy is m\u0171k\xF6dik.",
+  "importCustomersDone": "{n} \xFCgyf\xE9l import\xE1lva"
 }
 `;export{a as default};

@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "teamTitle": "Team",
   "teamMembers": "Members",
   "teamInvites": "Invite codes",
-  "teamInviteHint": "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.",
+  "teamInviteHint": "D\xEBrgoji punonj\xEBsit lidhjen ose kodin. Ai krijon nj\xEB llogari dhe bashkohet me firm\xEBn. Kodet vlejn\xEB tre dit\xEB, nj\xEB person secili.",
   "teamNewInvite": "New invite code",
   "teamNoInvites": "No active codes.",
   "teamExpires": "Expires",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "exportPayrollDays": "Or\xEBt p\xEBr dit\xEB",
   "exportContacts": "Klient\xEBt si kontakte bexio",
   "exportEmpty": "asgj\xEB",
-  "exportHint": "CSV me pik\xEBpresje, UTF-8. P\xEBr importin e kontakteve n\xEB bexio hapeni n\xEB Excel dhe ruajeni si .xlsx. Paga: e-maili duhet t\xEB p\xEBrputhet me punonj\xEBsin n\xEB bexio Lohn. Faturat jan\xEB ditari p\xEBr kontabilistin; bexio i pranon faturat vet\xEBm p\xEBrmes API."
+  "exportHint": "CSV me pik\xEBpresje, UTF-8. P\xEBr importin e kontakteve n\xEB bexio hapeni n\xEB Excel dhe ruajeni si .xlsx. Paga: e-maili duhet t\xEB p\xEBrputhet me punonj\xEBsin n\xEB bexio Lohn. Faturat jan\xEB ditari p\xEBr kontabilistin; bexio i pranon faturat vet\xEBm p\xEBrmes API.",
+  "onbLinkNotice": "Ftesa u njoh. Krijo llogarin\xEB, pastaj hyn direkt n\xEB firm\xEB.",
+  "inviteLinkCopy": "Kopjo lidhjen",
+  "inviteShare": "Ndaj",
+  "inviteShareText": "{company} t\xEB fton n\xEB Site Log. Krijo nj\xEB llogari dhe bashkohu me firm\xEBn: {link}",
+  "firstStepsTitle": "Hapat e par\xEB",
+  "firstStepsHours": "Or\xEBt javore dhe tarifa p\xEBr or\xEB (t\xEB dh\xEBnat e faturimit)",
+  "firstStepsSite": "Kantieri i par\xEB",
+  "firstStepsCrew": "Fto ekipin",
+  "firstStepsCustomers": "Shto ose importo klient\xEB",
+  "importCustomers": "Importo klient\xEB",
+  "importCustomersPreview": "{n} rreshta u lexuan: {added} t\xEB rinj, {skipped} ekzistojn\xEB.",
+  "importCustomersNothing": "Nuk u njoh asnj\xEB klient. Duhet nj\xEB kolon\xEB Emri ose Firma; opsionale Emri i par\xEB, Telefoni, E-mail, Adresa, Kodi postar, Vendi. Eksporti i kontakteve nga bexio funksionon si\xE7 \xEBsht\xEB.",
+  "importCustomersDone": "{n} klient\xEB u importuan"
 }
 `;export{r as default};

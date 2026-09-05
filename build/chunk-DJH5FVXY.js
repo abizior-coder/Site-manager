@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "teamTitle": "Equipa",
   "teamMembers": "Membros",
   "teamInvites": "C\xF3digos de convite",
-  "teamInviteHint": "Envie um c\xF3digo a um colaborador. Cria uma conta, introduz o c\xF3digo e junta-se \xE0 empresa. Expiram em 14 dias.",
+  "teamInviteHint": "Envia a liga\xE7\xE3o ou o c\xF3digo a um trabalhador. Ele cria uma conta e entra na empresa. Os c\xF3digos valem tr\xEAs dias, uma pessoa cada.",
   "teamNewInvite": "Novo c\xF3digo",
   "teamNoInvites": "Sem c\xF3digos ativos.",
   "teamExpires": "Expira",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "exportPayrollDays": "Horas por dia",
   "exportContacts": "Clientes como contactos bexio",
   "exportEmpty": "nada",
-  "exportHint": "CSV com ponto e v\xEDrgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Sal\xE1rios: o e-mail tem de corresponder ao colaborador no bexio Sal\xE1rios. As faturas s\xE3o o di\xE1rio para o contabilista; o bexio s\xF3 aceita faturas pela API."
+  "exportHint": "CSV com ponto e v\xEDrgula, UTF-8. Para importar contactos no bexio, abra no Excel e guarde como .xlsx. Sal\xE1rios: o e-mail tem de corresponder ao colaborador no bexio Sal\xE1rios. As faturas s\xE3o o di\xE1rio para o contabilista; o bexio s\xF3 aceita faturas pela API.",
+  "onbLinkNotice": "Convite reconhecido. Cria a conta e entras diretamente na empresa.",
+  "inviteLinkCopy": "Copiar liga\xE7\xE3o",
+  "inviteShare": "Partilhar",
+  "inviteShareText": "{company} convida-te para o Site Log. Cria uma conta e entra na empresa: {link}",
+  "firstStepsTitle": "Primeiros passos",
+  "firstStepsHours": "Horas semanais e taxa hor\xE1ria (dados de fatura\xE7\xE3o)",
+  "firstStepsSite": "Primeira obra",
+  "firstStepsCrew": "Convidar a equipa",
+  "firstStepsCustomers": "Registar ou importar clientes",
+  "importCustomers": "Importar clientes",
+  "importCustomersPreview": "{n} linhas lidas: {added} novas, {skipped} j\xE1 existentes.",
+  "importCustomersNothing": "Nenhum cliente reconhecido. Necess\xE1rio: uma coluna Nome ou Empresa; opcional Nome pr\xF3prio, Telefone, E-mail, Morada, C\xF3digo postal, Localidade. A exporta\xE7\xE3o de contactos do bexio funciona tal como est\xE1.",
+  "importCustomersDone": "{n} clientes importados"
 }
 `;export{o as default};

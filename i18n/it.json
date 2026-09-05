@@ -278,7 +278,7 @@
   "teamTitle": "Squadra",
   "teamMembers": "Membri",
   "teamInvites": "Codici invito",
-  "teamInviteHint": "Invia un codice a un collaboratore. Crea un account, inserisce il codice ed entra in azienda. I codici scadono dopo 14 giorni.",
+  "teamInviteHint": "Invia il link o il codice a un collaboratore. Crea un account ed entra nella ditta. I codici valgono tre giorni, una persona ciascuno.",
   "teamNewInvite": "Nuovo codice",
   "teamNoInvites": "Nessun codice attivo.",
   "teamExpires": "Scade",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Ore per giorno",
   "exportContacts": "Clienti come contatti bexio",
   "exportEmpty": "niente",
-  "exportHint": "CSV con punto e virgola, UTF-8. Per l'import contatti bexio aprire in Excel e salvare come .xlsx. Salari: l'e-mail deve corrispondere al collaboratore in bexio Salari. Le fatture sono il giornale per il fiduciario; bexio accetta fatture solo via API."
+  "exportHint": "CSV con punto e virgola, UTF-8. Per l'import contatti bexio aprire in Excel e salvare come .xlsx. Salari: l'e-mail deve corrispondere al collaboratore in bexio Salari. Le fatture sono il giornale per il fiduciario; bexio accetta fatture solo via API.",
+  "onbLinkNotice": "Invito riconosciuto. Crea l'account, poi entri direttamente nella ditta.",
+  "inviteLinkCopy": "Copia link",
+  "inviteShare": "Condividi",
+  "inviteShareText": "{company} ti invita su Site Log. Crea un account ed entra nella ditta: {link}",
+  "firstStepsTitle": "Primi passi",
+  "firstStepsHours": "Ore settimanali e tariffa oraria (dati di fatturazione)",
+  "firstStepsSite": "Primo cantiere",
+  "firstStepsCrew": "Invita la squadra",
+  "firstStepsCustomers": "Inserisci o importa i clienti",
+  "importCustomers": "Importa clienti",
+  "importCustomersPreview": "{n} righe lette: {added} nuove, {skipped} già presenti.",
+  "importCustomersNothing": "Nessun cliente riconosciuto. Serve una colonna Nome o Ditta; opzionali Nome, Telefono, E-mail, Indirizzo, CAP, Località. L'export contatti di bexio va bene così com'è.",
+  "importCustomersDone": "{n} clienti importati"
 }

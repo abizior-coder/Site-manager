@@ -494,6 +494,20 @@ async function renderAs(role) {
     check("owner: «+» puts the article in the basket", /Zum Warenkorb hinzugefügt|Added to basket/.test(text()), "no basket toast");
   }
 
+  // The owner's first steps sit on Heute until everything is set up.
+  {
+    window.document.querySelector('[data-tab-bar] [data-tab="today"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const card = window.document.querySelector("[data-first-steps]");
+    const steps = card ? [...card.querySelectorAll("[data-first-step]")].map((b) => `${b.getAttribute("data-first-step")}:${b.getAttribute("data-done")}`) : [];
+    check("owner: Heute shows the first steps with four items", steps.length === 4, steps.join(",") || "no card");
+    check("owner: hours are still open, the sample site is done", steps.includes("hours:0") && steps.includes("site:1"), steps.join(","));
+    const kunden = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === "KUNDEN");
+    kunden?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check("owner: the customers tab offers a file import", !!window.document.querySelector("[data-customers-import]"), "no import button");
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === "Übersicht");
@@ -594,6 +608,7 @@ async function renderAs(role) {
     check("crew: team tab lists the roster", text().includes("Mitarbeiter") && text().includes("Chef"), "roster empty for crew");
     check("crew: cannot attach people to jobs", !/Zu Baustelle hinzuf|Add to a job/.test(text()), "crew offered the add-to-job picker");
     check("crew: cannot remove anyone", !window.document.querySelector("[data-remove-member]"), "crew offered a remove button");
+    check("crew: no first-steps card", !window.document.querySelector("[data-first-steps]"), "crew saw the owner's first steps");
   }
   if (errors.length) problems.push(...errors);
 }

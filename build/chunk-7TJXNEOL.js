@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "teamTitle": "T\xEDm",
   "teamMembers": "\u010Clenovia",
   "teamInvites": "K\xF3dy pozv\xE1nok",
-  "teamInviteHint": "Po\u0161lite k\xF3d zamestnancovi. Vytvor\xED si \xFA\u010Det, zad\xE1 k\xF3d a pripoj\xED sa k firme. K\xF3dy vypr\u0161ia po 14 d\u0148och.",
+  "teamInviteHint": "Po\u0161lite pracovn\xEDkovi odkaz alebo k\xF3d. Vytvor\xED si \xFA\u010Det a prid\xE1 sa k firme. K\xF3dy platia tri dni, jeden na osobu.",
   "teamNewInvite": "Nov\xFD k\xF3d",
   "teamNoInvites": "\u017Diadne akt\xEDvne k\xF3dy.",
   "teamExpires": "Vypr\u0161\xED",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "exportPayrollDays": "Hodiny na de\u0148",
   "exportContacts": "Z\xE1kazn\xEDci ako kontakty bexio",
   "exportEmpty": "ni\u010D",
-  "exportHint": "CSV s bodko\u010Diarkou, UTF-8. Pre import kontaktov do bexio otvorte v Exceli a ulo\u017Ete ako .xlsx. Mzdy: e-mail sa mus\xED zhodova\u0165 so zamestnancom v bexio Lohn. Fakt\xFAry s\xFA denn\xEDk pre \xFA\u010Dtovn\xEDka; samotn\xE9 bexio prij\xEDma fakt\xFAry len cez API."
+  "exportHint": "CSV s bodko\u010Diarkou, UTF-8. Pre import kontaktov do bexio otvorte v Exceli a ulo\u017Ete ako .xlsx. Mzdy: e-mail sa mus\xED zhodova\u0165 so zamestnancom v bexio Lohn. Fakt\xFAry s\xFA denn\xEDk pre \xFA\u010Dtovn\xEDka; samotn\xE9 bexio prij\xEDma fakt\xFAry len cez API.",
+  "onbLinkNotice": "Pozv\xE1nka rozpoznan\xE1. Vytvorte si \xFA\u010Det a hne\u010F vst\xFApite do firmy.",
+  "inviteLinkCopy": "Kop\xEDrova\u0165 odkaz",
+  "inviteShare": "Zdie\u013Ea\u0165",
+  "inviteShareText": "{company} v\xE1s poz\xFDva do Site Log. Vytvorte si \xFA\u010Det a pridajte sa k firme: {link}",
+  "firstStepsTitle": "Prv\xE9 kroky",
+  "firstStepsHours": "T\xFD\u017Edenn\xE9 hodiny a hodinov\xE1 sadzba (faktura\u010Dn\xE9 \xFAdaje)",
+  "firstStepsSite": "Prv\xE1 stavba",
+  "firstStepsCrew": "Pozva\u0165 partiu",
+  "firstStepsCustomers": "Prida\u0165 alebo importova\u0165 z\xE1kazn\xEDkov",
+  "importCustomers": "Importova\u0165 z\xE1kazn\xEDkov",
+  "importCustomersPreview": "Na\u010D\xEDtan\xFDch {n} riadkov: {added} nov\xFDch, {skipped} u\u017E existuje.",
+  "importCustomersNothing": "Nerozpoznan\xED z\xE1kazn\xEDci. Potrebn\xFD st\u013Apec Meno alebo Firma; volite\u013Ene Krstn\xE9 meno, Telef\xF3n, E-mail, Adresa, PS\u010C, Mesto. Export kontaktov z bexio funguje tak, ako je.",
+  "importCustomersDone": "Importovan\xFDch z\xE1kazn\xEDkov: {n}"
 }
 `;export{o as default};

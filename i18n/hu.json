@@ -278,7 +278,7 @@
   "teamTitle": "Csapat",
   "teamMembers": "Tagok",
   "teamInvites": "Meghívókódok",
-  "teamInviteHint": "Küldj kódot egy munkatársnak. Fiókot hoz létre, beírja a kódot, és csatlakozik a céghez. A kódok 14 nap után lejárnak.",
+  "teamInviteHint": "Küldd el a linket vagy a kódot egy dolgozónak. Fiókot hoz létre és csatlakozik a céghez. A kódok három napig érvényesek, egy személyre.",
   "teamNewInvite": "Új meghívókód",
   "teamNoInvites": "Nincs aktív kód.",
   "teamExpires": "Lejár",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Órák naponta",
   "exportContacts": "Ügyfelek bexio-kontaktként",
   "exportEmpty": "semmi",
-  "exportHint": "Pontosvesszős CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben és mentsd .xlsx-ként. Bér: az e-mailnek egyeznie kell a bexio Lohn dolgozójával. A számlák a könyvelő naplója; a bexio számlát csak API-n fogad."
+  "exportHint": "Pontosvesszős CSV, UTF-8. A bexio kontaktimporthoz nyisd meg Excelben és mentsd .xlsx-ként. Bér: az e-mailnek egyeznie kell a bexio Lohn dolgozójával. A számlák a könyvelő naplója; a bexio számlát csak API-n fogad.",
+  "onbLinkNotice": "Meghívó felismerve. Hozz létre fiókot, és rögtön a céghez kerülsz.",
+  "inviteLinkCopy": "Link másolása",
+  "inviteShare": "Megosztás",
+  "inviteShareText": "{company} meghív a Site Logba. Hozz létre fiókot és csatlakozz a céghez: {link}",
+  "firstStepsTitle": "Első lépések",
+  "firstStepsHours": "Heti órák és óradíj (számlázási adatok)",
+  "firstStepsSite": "Első munkaterület",
+  "firstStepsCrew": "Csapat meghívása",
+  "firstStepsCustomers": "Ügyfelek felvétele vagy importálása",
+  "importCustomers": "Ügyfelek importálása",
+  "importCustomersPreview": "{n} sor beolvasva: {added} új, {skipped} már létezik.",
+  "importCustomersNothing": "Nem ismertünk fel ügyfelet. Kell egy Név vagy Cég oszlop; opcionális Keresztnév, Telefon, E-mail, Cím, Irányítószám, Település. A bexio kontaktexport így is működik.",
+  "importCustomersDone": "{n} ügyfél importálva"
 }

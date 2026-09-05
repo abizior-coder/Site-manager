@@ -8,6 +8,8 @@ import { build } from "esbuild";
 import { parsePriceList, parsePrice, mergeIntoCatalog, supplierMatches, articlesFor, filterArticles, sortArticles } from "./price-list.js";
 import { toCsv, workingDays, invoiceJournal, invoicePositions, payrollRows, payrollDays, contactRows, splitAddress, previousMonth } from "./accounting-export.js";
 import { documentTotals as docTotalsPure } from "./documents.js";
+import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./onboarding.js";
+import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -429,6 +431,25 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("the week has seven rows and sums the one worked day", [week.rows.length, week.total.net, week.total.overtime, week.target, week.diff], [7, 9.2, 0.7, 42.5, -33.3]);
   const csv = weekCsv(week, "Polier Meier");
   t("the CSV is Excel-friendly: semicolons, decimal commas, a totals line", [csv.split("\r\n").length - 1, csv.includes("2026-09-02;8,5;0,7;1,5;0,5;9,2"), csv.includes("Summe;8,5;0,7;1,5;0,5;9,2"), csv.includes("Soll;;;;;42,5")], [12, true, true, true]);
+}
+
+{
+  // Self-service onboarding: invite links, first steps, customers from a file.
+  t("an invite becomes a link on the app's own address", inviteUrl("abcd2345", "https://abizior-coder.github.io/Site-manager/index.html?emulator=1#x"), "https://abizior-coder.github.io/Site-manager/index.html?join=ABCD2345");
+  t("a bare folder address still gets index.html", inviteUrl("ABCD2345", "https://abizior-coder.github.io/Site-manager/"), "https://abizior-coder.github.io/Site-manager/index.html?join=ABCD2345");
+  t("the code comes back out of the address, cleaned", [joinCodeFromSearch("?join=abcd-2345&emulator=1"), joinCodeFromSearch("?join=xy"), joinCodeFromSearch("")], ["ABCD2345", "", ""]);
+  t("the parameter leaves the address bar, the rest stays", withoutJoinParam("http://localhost:5566/index.html?emulator=1&join=ABCD2345"), "http://localhost:5566/index.html?emulator=1");
+  const steps = firstSteps({ projects: [{}], customers: [], members: [{ uid: "o" }], invites: [], billing: { weeklyHours: "42", labourRate: "" } });
+  t("first steps: hours need both numbers, a site is done, crew needs a second member or an invite, customers open", steps.map((s) => `${s.key}:${s.done ? 1 : 0}`), ["hours:0", "site:1", "crew:0", "customers:0"]);
+  t("an open invite counts as the crew step done", firstSteps({ projects: [], customers: [], members: [{}], invites: [{ code: "X" }], billing: {} })[2].done, true);
+  const bexio = "Kontaktart;Name;Vorname;Adresse;PLZ;Ort;Land;Telefon;E-Mail;Kontaktperson 1 Nachname;Kontaktperson 1 Vorname\r\nFirma;Muster AG;;Dorfstrasse 5;8903;Birmensdorf;CH;044 000 00 00;info@muster.ch;Muster;Hans\r\nPrivat;Meier;Anna;Seeweg 3;8001;Zürich;CH;;anna@meier.ch;;\r\nFirma;Leer GmbH;;;;;CH;;;;\r\n";
+  const parsed = parseCustomersCsv("\ufeff" + bexio);
+  t("bexio's contact export: Firma with contact person, Privat with first and last name, Firma without a person", parsed.rows.map((r) => [r.name, r.company, r.address, r.email]), [["Hans Muster", "Muster AG", "Dorfstrasse 5\n8903 Birmensdorf", "info@muster.ch"], ["Anna Meier", "", "Seeweg 3\n8001 Zürich", "anna@meier.ch"], ["Leer GmbH", "Leer GmbH", "", ""]]);
+  const plain = parseCustomersCsv("Name,Telefon,Email,Bemerkung\nRuedi Keller,079 1,ruedi@k.ch,Dach 2019\n,,,\nSabine Ott,,,");
+  t("a plain list with commas: name, phone, e-mail, notes; an empty line is dropped and counted", [plain.rows.map((r) => r.name), plain.rows[0].notes, plain.warnings], [["Ruedi Keller", "Sabine Ott"], "Dach 2019", ["1 ohne Name"]]);
+  t("a file without a name column is refused", parseCustomersCsv("Datum;Betrag\n1;2").warnings, ["no-name-column"]);
+  const merged = mergeCustomers([{ id: "c1", name: "Anna Meier", company: "", email: "ANNA@meier.ch" }], parsed.rows);
+  t("known e-mail or known name+company is skipped, the rest appended with ids", [merged.added.map((r) => r.name), merged.skipped.map((r) => r.name), merged.customers.length, !!merged.added[0].id], [["Hans Muster", "Leer GmbH"], ["Anna Meier"], 3, true]);
 }
 
 {

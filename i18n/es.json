@@ -278,7 +278,7 @@
   "teamTitle": "Equipo",
   "teamMembers": "Miembros",
   "teamInvites": "Códigos de invitación",
-  "teamInviteHint": "Envía un código a un operario. Crea una cuenta, introduce el código y se une a la empresa. Caducan a los 14 días.",
+  "teamInviteHint": "Envía el enlace o el código a un trabajador. Crea una cuenta y se une a la empresa. Los códigos valen tres días, una persona cada uno.",
   "teamNewInvite": "Nuevo código",
   "teamNoInvites": "Sin códigos activos.",
   "teamExpires": "Caduca",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Horas por día",
   "exportContacts": "Clientes como contactos bexio",
   "exportEmpty": "nada",
-  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, ábrelo en Excel y guárdalo como .xlsx. Nómina: el e-mail debe coincidir con el empleado en bexio Nómina. Las facturas son el diario para la gestoría; bexio solo acepta facturas por su API."
+  "exportHint": "CSV con punto y coma, UTF-8. Para importar contactos en bexio, ábrelo en Excel y guárdalo como .xlsx. Nómina: el e-mail debe coincidir con el empleado en bexio Nómina. Las facturas son el diario para la gestoría; bexio solo acepta facturas por su API.",
+  "onbLinkNotice": "Invitación reconocida. Crea tu cuenta y entrarás directamente en la empresa.",
+  "inviteLinkCopy": "Copiar enlace",
+  "inviteShare": "Compartir",
+  "inviteShareText": "{company} te invita a Site Log. Crea una cuenta y únete a la empresa: {link}",
+  "firstStepsTitle": "Primeros pasos",
+  "firstStepsHours": "Horas semanales y tarifa por hora (datos de facturación)",
+  "firstStepsSite": "Primera obra",
+  "firstStepsCrew": "Invitar al equipo",
+  "firstStepsCustomers": "Añadir o importar clientes",
+  "importCustomers": "Importar clientes",
+  "importCustomersPreview": "{n} filas leídas: {added} nuevas, {skipped} ya existentes.",
+  "importCustomersNothing": "No se reconoció ningún cliente. Necesario: una columna Nombre o Empresa; opcional Nombre de pila, Teléfono, E-mail, Dirección, CP, Localidad. La exportación de contactos de bexio funciona tal cual.",
+  "importCustomersDone": "{n} clientes importados"
 }

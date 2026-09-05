@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "teamTitle": "Zesp\xF3\u0142",
   "teamMembers": "Cz\u0142onkowie",
   "teamInvites": "Kody zaprosze\u0144",
-  "teamInviteHint": "Wy\u015Blij kod pracownikowi. Zak\u0142ada konto, wpisuje kod i do\u0142\u0105cza do firmy. Kody wygasaj\u0105 po 14 dniach.",
+  "teamInviteHint": "Wy\u015Blij pracownikowi link lub kod. Zak\u0142ada konto i do\u0142\u0105cza do firmy. Kody wa\u017Cne trzy dni, jeden na osob\u0119.",
   "teamNewInvite": "Nowy kod",
   "teamNoInvites": "Brak aktywnych kod\xF3w.",
   "teamExpires": "Wygasa",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "exportPayrollDays": "Godziny na dzie\u0144",
   "exportContacts": "Klienci jako kontakty bexio",
   "exportEmpty": "nic",
-  "exportHint": "CSV ze \u015Brednikiem, UTF-8. Do importu kontakt\xF3w w bexio otw\xF3rz w Excelu i zapisz jako .xlsx. P\u0142ace: e-mail musi zgadza\u0107 si\u0119 z pracownikiem w bexio Lohn. Faktury to dziennik dla ksi\u0119gowego; samo bexio przyjmuje faktury tylko przez API."
+  "exportHint": "CSV ze \u015Brednikiem, UTF-8. Do importu kontakt\xF3w w bexio otw\xF3rz w Excelu i zapisz jako .xlsx. P\u0142ace: e-mail musi zgadza\u0107 si\u0119 z pracownikiem w bexio Lohn. Faktury to dziennik dla ksi\u0119gowego; samo bexio przyjmuje faktury tylko przez API.",
+  "onbLinkNotice": "Zaproszenie rozpoznane. Za\u0142\xF3\u017C konto, a od razu trafisz do firmy.",
+  "inviteLinkCopy": "Kopiuj link",
+  "inviteShare": "Udost\u0119pnij",
+  "inviteShareText": "{company} zaprasza Ci\u0119 do Site Log. Za\u0142\xF3\u017C konto i do\u0142\u0105cz do firmy: {link}",
+  "firstStepsTitle": "Pierwsze kroki",
+  "firstStepsHours": "Godziny tygodniowe i stawka (dane do faktur)",
+  "firstStepsSite": "Pierwsza budowa",
+  "firstStepsCrew": "Zapro\u015B ekip\u0119",
+  "firstStepsCustomers": "Dodaj lub zaimportuj klient\xF3w",
+  "importCustomers": "Importuj klient\xF3w",
+  "importCustomersPreview": "Odczytano {n} wierszy: {added} nowych, {skipped} ju\u017C istnieje.",
+  "importCustomersNothing": "Nie rozpoznano klient\xF3w. Potrzebna kolumna Nazwisko/Name lub Firma; opcjonalnie Imi\u0119, Telefon, E-mail, Adres, Kod pocztowy, Miejscowo\u015B\u0107. Eksport kontakt\xF3w z bexio dzia\u0142a bez zmian.",
+  "importCustomersDone": "Zaimportowano klient\xF3w: {n}"
 }
 `;export{o as default};

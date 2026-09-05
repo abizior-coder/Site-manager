@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "teamTitle": "\xC9quipe",
   "teamMembers": "Membres",
   "teamInvites": "Codes d'invitation",
-  "teamInviteHint": "Envoyez un code \xE0 un collaborateur. Il cr\xE9e un compte, saisit le code et rejoint l'entreprise. Les codes expirent apr\xE8s 14 jours.",
+  "teamInviteHint": "Envoyez le lien ou le code \xE0 un collaborateur. Il cr\xE9e un compte et rejoint l'entreprise. Les codes valent trois jours, une personne chacun.",
   "teamNewInvite": "Nouveau code",
   "teamNoInvites": "Aucun code actif.",
   "teamExpires": "Expire le",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "exportPayrollDays": "Heures par jour",
   "exportContacts": "Clients en contacts bexio",
   "exportEmpty": "rien",
-  "exportHint": "CSV point-virgule, UTF-8. Pour l'import de contacts bexio, ouvrir dans Excel et enregistrer en .xlsx. Salaires : l'e-mail doit correspondre au collaborateur dans bexio Salaires. Les factures sont le journal pour la fiduciaire ; bexio n'accepte les factures que par son API."
+  "exportHint": "CSV point-virgule, UTF-8. Pour l'import de contacts bexio, ouvrir dans Excel et enregistrer en .xlsx. Salaires : l'e-mail doit correspondre au collaborateur dans bexio Salaires. Les factures sont le journal pour la fiduciaire ; bexio n'accepte les factures que par son API.",
+  "onbLinkNotice": "Invitation reconnue. Cr\xE9ez votre compte, puis vous rejoignez l'entreprise directement.",
+  "inviteLinkCopy": "Copier le lien",
+  "inviteShare": "Partager",
+  "inviteShareText": "{company} vous invite sur Site Log. Cr\xE9ez un compte et rejoignez l'entreprise : {link}",
+  "firstStepsTitle": "Premiers pas",
+  "firstStepsHours": "Heures hebdomadaires et taux horaire (donn\xE9es de facturation)",
+  "firstStepsSite": "Premier chantier",
+  "firstStepsCrew": "Inviter l'\xE9quipe",
+  "firstStepsCustomers": "Saisir ou importer des clients",
+  "importCustomers": "Importer des clients",
+  "importCustomersPreview": "{n} lignes lues : {added} nouvelles, {skipped} d\xE9j\xE0 pr\xE9sentes.",
+  "importCustomersNothing": "Aucun client reconnu. N\xE9cessaire : une colonne Nom ou Soci\xE9t\xE9 ; optionnel Pr\xE9nom, T\xE9l\xE9phone, E-mail, Adresse, NPA, Lieu. L'export de contacts bexio fonctionne tel quel.",
+  "importCustomersDone": "{n} clients import\xE9s"
 }
 `;export{r as default};

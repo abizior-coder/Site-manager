@@ -278,7 +278,7 @@
   "teamTitle": "Équipe",
   "teamMembers": "Membres",
   "teamInvites": "Codes d'invitation",
-  "teamInviteHint": "Envoyez un code à un collaborateur. Il crée un compte, saisit le code et rejoint l'entreprise. Les codes expirent après 14 jours.",
+  "teamInviteHint": "Envoyez le lien ou le code à un collaborateur. Il crée un compte et rejoint l'entreprise. Les codes valent trois jours, une personne chacun.",
   "teamNewInvite": "Nouveau code",
   "teamNoInvites": "Aucun code actif.",
   "teamExpires": "Expire le",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Heures par jour",
   "exportContacts": "Clients en contacts bexio",
   "exportEmpty": "rien",
-  "exportHint": "CSV point-virgule, UTF-8. Pour l'import de contacts bexio, ouvrir dans Excel et enregistrer en .xlsx. Salaires : l'e-mail doit correspondre au collaborateur dans bexio Salaires. Les factures sont le journal pour la fiduciaire ; bexio n'accepte les factures que par son API."
+  "exportHint": "CSV point-virgule, UTF-8. Pour l'import de contacts bexio, ouvrir dans Excel et enregistrer en .xlsx. Salaires : l'e-mail doit correspondre au collaborateur dans bexio Salaires. Les factures sont le journal pour la fiduciaire ; bexio n'accepte les factures que par son API.",
+  "onbLinkNotice": "Invitation reconnue. Créez votre compte, puis vous rejoignez l'entreprise directement.",
+  "inviteLinkCopy": "Copier le lien",
+  "inviteShare": "Partager",
+  "inviteShareText": "{company} vous invite sur Site Log. Créez un compte et rejoignez l'entreprise : {link}",
+  "firstStepsTitle": "Premiers pas",
+  "firstStepsHours": "Heures hebdomadaires et taux horaire (données de facturation)",
+  "firstStepsSite": "Premier chantier",
+  "firstStepsCrew": "Inviter l'équipe",
+  "firstStepsCustomers": "Saisir ou importer des clients",
+  "importCustomers": "Importer des clients",
+  "importCustomersPreview": "{n} lignes lues : {added} nouvelles, {skipped} déjà présentes.",
+  "importCustomersNothing": "Aucun client reconnu. Nécessaire : une colonne Nom ou Société ; optionnel Prénom, Téléphone, E-mail, Adresse, NPA, Lieu. L'export de contacts bexio fonctionne tel quel.",
+  "importCustomersDone": "{n} clients importés"
 }

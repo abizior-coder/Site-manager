@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "teamTitle": "T\xFDm",
   "teamMembers": "\u010Clenov\xE9",
   "teamInvites": "K\xF3dy pozv\xE1nek",
-  "teamInviteHint": "Po\u0161lete k\xF3d zam\u011Bstnanci. Vytvo\u0159\xED si \xFA\u010Det, zad\xE1 k\xF3d a p\u0159ipoj\xED se k firm\u011B. K\xF3dy vypr\u0161\xED po 14 dnech.",
+  "teamInviteHint": "Po\u0161lete pracovn\xEDkovi odkaz nebo k\xF3d. Vytvo\u0159\xED si \xFA\u010Det a p\u0159id\xE1 se k firm\u011B. K\xF3dy plat\xED t\u0159i dny, jeden na osobu.",
   "teamNewInvite": "Nov\xFD k\xF3d",
   "teamNoInvites": "\u017D\xE1dn\xE9 aktivn\xED k\xF3dy.",
   "teamExpires": "Vypr\u0161\xED",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "exportPayrollDays": "Hodiny na den",
   "exportContacts": "Z\xE1kazn\xEDci jako kontakty bexio",
   "exportEmpty": "nic",
-  "exportHint": "CSV se st\u0159edn\xEDkem, UTF-8. Pro import kontakt\u016F do bexio otev\u0159ete v Excelu a ulo\u017Ete jako .xlsx. Mzdy: e-mail se mus\xED shodovat se zam\u011Bstnancem v bexio Lohn. Faktury jsou den\xEDk pro \xFA\u010Detn\xEDho; samotn\xE9 bexio p\u0159ij\xEDm\xE1 faktury jen p\u0159es API."
+  "exportHint": "CSV se st\u0159edn\xEDkem, UTF-8. Pro import kontakt\u016F do bexio otev\u0159ete v Excelu a ulo\u017Ete jako .xlsx. Mzdy: e-mail se mus\xED shodovat se zam\u011Bstnancem v bexio Lohn. Faktury jsou den\xEDk pro \xFA\u010Detn\xEDho; samotn\xE9 bexio p\u0159ij\xEDm\xE1 faktury jen p\u0159es API.",
+  "onbLinkNotice": "Pozv\xE1nka rozpozn\xE1na. Vytvo\u0159te si \xFA\u010Det a hned vstoup\xEDte do firmy.",
+  "inviteLinkCopy": "Kop\xEDrovat odkaz",
+  "inviteShare": "Sd\xEDlet",
+  "inviteShareText": "{company} v\xE1s zve do Site Log. Vytvo\u0159te si \xFA\u010Det a p\u0159idejte se k firm\u011B: {link}",
+  "firstStepsTitle": "Prvn\xED kroky",
+  "firstStepsHours": "T\xFDdenn\xED hodiny a hodinov\xE1 sazba (faktura\u010Dn\xED \xFAdaje)",
+  "firstStepsSite": "Prvn\xED stavba",
+  "firstStepsCrew": "Pozvat partu",
+  "firstStepsCustomers": "P\u0159idat nebo importovat z\xE1kazn\xEDky",
+  "importCustomers": "Importovat z\xE1kazn\xEDky",
+  "importCustomersPreview": "Na\u010Dteno {n} \u0159\xE1dk\u016F: {added} nov\xFDch, {skipped} u\u017E existuje.",
+  "importCustomersNothing": "Nerozpozn\xE1ni \u017E\xE1dn\xED z\xE1kazn\xEDci. Pot\u0159ebn\xFD sloupec Jm\xE9no nebo Firma; voliteln\u011B K\u0159estn\xED jm\xE9no, Telefon, E-mail, Adresa, PS\u010C, M\u011Bsto. Export kontakt\u016F z bexio funguje tak, jak je.",
+  "importCustomersDone": "Importov\xE1no z\xE1kazn\xEDk\u016F: {n}"
 }
 `;export{t as default};

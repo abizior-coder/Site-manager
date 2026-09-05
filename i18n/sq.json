@@ -278,7 +278,7 @@
   "teamTitle": "Team",
   "teamMembers": "Members",
   "teamInvites": "Invite codes",
-  "teamInviteHint": "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.",
+  "teamInviteHint": "Dërgoji punonjësit lidhjen ose kodin. Ai krijon një llogari dhe bashkohet me firmën. Kodet vlejnë tre ditë, një person secili.",
   "teamNewInvite": "New invite code",
   "teamNoInvites": "No active codes.",
   "teamExpires": "Expires",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Orët për ditë",
   "exportContacts": "Klientët si kontakte bexio",
   "exportEmpty": "asgjë",
-  "exportHint": "CSV me pikëpresje, UTF-8. Për importin e kontakteve në bexio hapeni në Excel dhe ruajeni si .xlsx. Paga: e-maili duhet të përputhet me punonjësin në bexio Lohn. Faturat janë ditari për kontabilistin; bexio i pranon faturat vetëm përmes API."
+  "exportHint": "CSV me pikëpresje, UTF-8. Për importin e kontakteve në bexio hapeni në Excel dhe ruajeni si .xlsx. Paga: e-maili duhet të përputhet me punonjësin në bexio Lohn. Faturat janë ditari për kontabilistin; bexio i pranon faturat vetëm përmes API.",
+  "onbLinkNotice": "Ftesa u njoh. Krijo llogarinë, pastaj hyn direkt në firmë.",
+  "inviteLinkCopy": "Kopjo lidhjen",
+  "inviteShare": "Ndaj",
+  "inviteShareText": "{company} të fton në Site Log. Krijo një llogari dhe bashkohu me firmën: {link}",
+  "firstStepsTitle": "Hapat e parë",
+  "firstStepsHours": "Orët javore dhe tarifa për orë (të dhënat e faturimit)",
+  "firstStepsSite": "Kantieri i parë",
+  "firstStepsCrew": "Fto ekipin",
+  "firstStepsCustomers": "Shto ose importo klientë",
+  "importCustomers": "Importo klientë",
+  "importCustomersPreview": "{n} rreshta u lexuan: {added} të rinj, {skipped} ekzistojnë.",
+  "importCustomersNothing": "Nuk u njoh asnjë klient. Duhet një kolonë Emri ose Firma; opsionale Emri i parë, Telefoni, E-mail, Adresa, Kodi postar, Vendi. Eksporti i kontakteve nga bexio funksionon siç është.",
+  "importCustomersDone": "{n} klientë u importuan"
 }

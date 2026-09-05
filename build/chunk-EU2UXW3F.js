@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "teamTitle": "Echip\u0103",
   "teamMembers": "Membri",
   "teamInvites": "Coduri de invita\u021Bie",
-  "teamInviteHint": "Trimite un cod unui coleg. \xCE\u0219i creeaz\u0103 cont, introduce codul \u0219i se al\u0103tur\u0103 firmei. Codurile expir\u0103 dup\u0103 14 zile.",
+  "teamInviteHint": "Trimite linkul sau codul unui angajat. \xCE\u0219i creeaz\u0103 un cont \u0219i intr\u0103 \xEEn firm\u0103. Codurile sunt valabile trei zile, o persoan\u0103 fiecare.",
   "teamNewInvite": "Cod de invita\u021Bie nou",
   "teamNoInvites": "Niciun cod activ.",
   "teamExpires": "Expir\u0103",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "exportPayrollDays": "Ore pe zi",
   "exportContacts": "Clien\u021Bi ca contacte bexio",
   "exportEmpty": "nimic",
-  "exportHint": "CSV cu punct \u0219i virgul\u0103, UTF-8. Pentru importul de contacte \xEEn bexio deschide\u021Bi \xEEn Excel \u0219i salva\u021Bi ca .xlsx. Salarii: e-mailul trebuie s\u0103 corespund\u0103 angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio accept\u0103 facturi doar prin API."
+  "exportHint": "CSV cu punct \u0219i virgul\u0103, UTF-8. Pentru importul de contacte \xEEn bexio deschide\u021Bi \xEEn Excel \u0219i salva\u021Bi ca .xlsx. Salarii: e-mailul trebuie s\u0103 corespund\u0103 angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio accept\u0103 facturi doar prin API.",
+  "onbLinkNotice": "Invita\u021Bie recunoscut\u0103. Creeaz\u0103 contul \u0219i intri direct \xEEn firm\u0103.",
+  "inviteLinkCopy": "Copiaz\u0103 linkul",
+  "inviteShare": "Trimite",
+  "inviteShareText": "{company} te invit\u0103 \xEEn Site Log. Creeaz\u0103 un cont \u0219i intr\u0103 \xEEn firm\u0103: {link}",
+  "firstStepsTitle": "Primii pa\u0219i",
+  "firstStepsHours": "Ore s\u0103pt\u0103m\xE2nale \u0219i tarif orar (date de facturare)",
+  "firstStepsSite": "Primul \u0219antier",
+  "firstStepsCrew": "Invit\u0103 echipa",
+  "firstStepsCustomers": "Adaug\u0103 sau import\u0103 clien\u021Bi",
+  "importCustomers": "Import\u0103 clien\u021Bi",
+  "importCustomersPreview": "{n} r\xE2nduri citite: {added} noi, {skipped} deja existente.",
+  "importCustomersNothing": "Niciun client recunoscut. Necesar: o coloan\u0103 Nume sau Firm\u0103; op\u021Bional Prenume, Telefon, E-mail, Adres\u0103, Cod po\u0219tal, Localitate. Exportul de contacte bexio merge a\u0219a cum este.",
+  "importCustomersDone": "{n} clien\u021Bi importa\u021Bi"
 }
 `;export{i as default};

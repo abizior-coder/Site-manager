@@ -278,7 +278,7 @@
   "teamTitle": "Team",
   "teamMembers": "Mitglieder",
   "teamInvites": "Einladungscodes",
-  "teamInviteHint": "Code an einen Mitarbeiter senden. Er erstellt ein Konto, gibt den Code ein und tritt der Firma bei. Codes laufen nach 14 Tagen ab.",
+  "teamInviteHint": "Link oder Code an einen Mitarbeiter senden. Er erstellt ein Konto und tritt der Firma bei. Codes gelten drei Tage, je eine Person.",
   "teamNewInvite": "Neuer Einladungscode",
   "teamNoInvites": "Keine aktiven Codes.",
   "teamExpires": "Läuft ab",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Stunden pro Tag",
   "exportContacts": "Kunden als bexio-Kontakte",
   "exportEmpty": "nichts",
-  "exportHint": "CSV mit Semikolon, UTF-8. Für den bexio-Kontaktimport in Excel öffnen und als .xlsx speichern. Lohn: die E-Mail muss mit dem Mitarbeiter in bexio Lohn übereinstimmen. Rechnungen sind das Journal für den Treuhänder; bexio selbst nimmt Rechnungen nur über die API."
+  "exportHint": "CSV mit Semikolon, UTF-8. Für den bexio-Kontaktimport in Excel öffnen und als .xlsx speichern. Lohn: die E-Mail muss mit dem Mitarbeiter in bexio Lohn übereinstimmen. Rechnungen sind das Journal für den Treuhänder; bexio selbst nimmt Rechnungen nur über die API.",
+  "onbLinkNotice": "Einladung erkannt. Konto erstellen, dann geht es direkt in die Firma.",
+  "inviteLinkCopy": "Link kopieren",
+  "inviteShare": "Teilen",
+  "inviteShareText": "{company} lädt dich zu Site Log ein. Konto erstellen und der Firma beitreten: {link}",
+  "firstStepsTitle": "Erste Schritte",
+  "firstStepsHours": "Wochenstunden und Stundensatz (Rechnungsangaben)",
+  "firstStepsSite": "Erste Baustelle",
+  "firstStepsCrew": "Ekipa einladen",
+  "firstStepsCustomers": "Kunden erfassen oder importieren",
+  "importCustomers": "Kunden importieren",
+  "importCustomersPreview": "{n} Zeilen gelesen: {added} neu, {skipped} schon vorhanden.",
+  "importCustomersNothing": "Keine Kunden erkannt. Nötig: eine Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adresse, PLZ, Ort. Der bexio-Kontaktexport geht so, wie er ist.",
+  "importCustomersDone": "{n} Kunden importiert"
 }

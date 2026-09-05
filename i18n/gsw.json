@@ -278,7 +278,7 @@
   "teamTitle": "Team",
   "teamMembers": "Mitglieder",
   "teamInvites": "Einladungscodes",
-  "teamInviteHint": "Code an einen Mitarbeiter senden. Er erstellt ein Konto, gibt den Code ein und tritt der Firma bei. Codes laufen nach 14 Tagen ab.",
+  "teamInviteHint": "Link oder Code eme Mitarbeiter schicke. Er erstellt es Konto und tritt de Firma bii. Codes gälted drü Tag, je ei Person.",
   "teamNewInvite": "Neuer Einladungscode",
   "teamNoInvites": "Keine aktiven Codes.",
   "teamExpires": "Läuft ab",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Stunde pro Tag",
   "exportContacts": "Kunde als bexio-Kontäkt",
   "exportEmpty": "nüt",
-  "exportHint": "CSV mit Semikolon, UTF-8. Für de bexio-Kontaktimport im Excel öffne und als .xlsx speichere. Lohn: d E-Mail muess mit em Mitarbeiter im bexio Lohn übereinstimme. Rächnige sind s Journal für de Treuhänder; bexio sälber nimmt Rächnige nur über d API."
+  "exportHint": "CSV mit Semikolon, UTF-8. Für de bexio-Kontaktimport im Excel öffne und als .xlsx speichere. Lohn: d E-Mail muess mit em Mitarbeiter im bexio Lohn übereinstimme. Rächnige sind s Journal für de Treuhänder; bexio sälber nimmt Rächnige nur über d API.",
+  "onbLinkNotice": "Iiladig erkännt. Konto erstelle, dänn gaht s diräkt i d Firma.",
+  "inviteLinkCopy": "Link kopiere",
+  "inviteShare": "Teile",
+  "inviteShareText": "{company} ladt di zu Site Log ii. Konto erstelle und de Firma biiträtte: {link}",
+  "firstStepsTitle": "Erschti Schritt",
+  "firstStepsHours": "Wuchestunde und Stundesatz (Rächnigsaagabe)",
+  "firstStepsSite": "Erschti Baustell",
+  "firstStepsCrew": "Equipe iilade",
+  "firstStepsCustomers": "Kunde erfasse oder importiere",
+  "importCustomers": "Kunde importiere",
+  "importCustomersPreview": "{n} Zile gläse: {added} neu, {skipped} scho da.",
+  "importCustomersNothing": "Kei Kunde erkännt. Nötig: e Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adrässe, PLZ, Ort. De bexio-Kontaktexport gaht so, wie er isch.",
+  "importCustomersDone": "{n} Kunde importiert"
 }

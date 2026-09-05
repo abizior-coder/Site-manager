@@ -53,11 +53,14 @@ surface only; the office screens fall back to English by design.
 
 ```text
 npm run build      # esbuild -> bundle.js, then stamps the hash
-git push origin main   # GitHub Pages deploys from main
+git push origin main   # CI, then (green only) the Pages deploy
 ```
 
-There is no CI. Pushing `main` publishes. Always run `npm run build` before
-committing, or the deployed app will not contain your change.
+Pushing `main` runs CI (`.github/workflows/ci.yml`, every suite incl. the
+rules emulator); **the Pages deploy runs only after CI is green for that
+commit** (`pages.yml` on `workflow_run`, checkout of the tested sha; a
+manual `workflow_dispatch` stays possible). Always run `npm run build`
+before committing — both workflows refuse a stale `build/`.
 
 > **A successful push does not mean the site deployed.** GitHub Pages builds
 > separately and can fail while the repository looks perfectly healthy — it

@@ -278,7 +278,7 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "teamTitle": "Team",
   "teamMembers": "Members",
   "teamInvites": "Invite codes",
-  "teamInviteHint": "Send a code to a crew member. They create an account, enter the code, and join your company. Codes expire after 14 days.",
+  "teamInviteHint": "Send the link or the code to a worker. They create an account and join the firm. Codes last three days, one person each.",
   "teamNewInvite": "New invite code",
   "teamNoInvites": "No active codes.",
   "teamExpires": "Expires",
@@ -826,6 +826,19 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "exportPayrollDays": "Hours per day",
   "exportContacts": "Customers as bexio contacts",
   "exportEmpty": "nothing",
-  "exportHint": "Semicolon CSV, UTF-8. For the bexio contact import open it in Excel and save as .xlsx. Payroll: the e-mail must match the employee in bexio Payroll. Invoices are what the accountant books from; bexio itself takes invoices only through its API."
+  "exportHint": "Semicolon CSV, UTF-8. For the bexio contact import open it in Excel and save as .xlsx. Payroll: the e-mail must match the employee in bexio Payroll. Invoices are what the accountant books from; bexio itself takes invoices only through its API.",
+  "onbLinkNotice": "Invite recognised. Create your account, then you join the firm straight away.",
+  "inviteLinkCopy": "Copy link",
+  "inviteShare": "Share",
+  "inviteShareText": "{company} invites you to Site Log. Create an account and join the firm: {link}",
+  "firstStepsTitle": "First steps",
+  "firstStepsHours": "Weekly hours and hourly rate (invoice details)",
+  "firstStepsSite": "First site",
+  "firstStepsCrew": "Invite the crew",
+  "firstStepsCustomers": "Add or import customers",
+  "importCustomers": "Import customers",
+  "importCustomersPreview": "{n} rows read: {added} new, {skipped} already there.",
+  "importCustomersNothing": "No customers recognised. Needed: a Name or Firma column; optional Vorname, Telefon, E-Mail, Adresse, PLZ, Ort. bexio's contact export works as it is.",
+  "importCustomersDone": "{n} customers imported"
 }
 `;export{o as default};

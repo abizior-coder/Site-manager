@@ -278,7 +278,7 @@
   "teamTitle": "Tým",
   "teamMembers": "Členové",
   "teamInvites": "Kódy pozvánek",
-  "teamInviteHint": "Pošlete kód zaměstnanci. Vytvoří si účet, zadá kód a připojí se k firmě. Kódy vyprší po 14 dnech.",
+  "teamInviteHint": "Pošlete pracovníkovi odkaz nebo kód. Vytvoří si účet a přidá se k firmě. Kódy platí tři dny, jeden na osobu.",
   "teamNewInvite": "Nový kód",
   "teamNoInvites": "Žádné aktivní kódy.",
   "teamExpires": "Vyprší",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Hodiny na den",
   "exportContacts": "Zákazníci jako kontakty bexio",
   "exportEmpty": "nic",
-  "exportHint": "CSV se středníkem, UTF-8. Pro import kontaktů do bexio otevřete v Excelu a uložte jako .xlsx. Mzdy: e-mail se musí shodovat se zaměstnancem v bexio Lohn. Faktury jsou deník pro účetního; samotné bexio přijímá faktury jen přes API."
+  "exportHint": "CSV se středníkem, UTF-8. Pro import kontaktů do bexio otevřete v Excelu a uložte jako .xlsx. Mzdy: e-mail se musí shodovat se zaměstnancem v bexio Lohn. Faktury jsou deník pro účetního; samotné bexio přijímá faktury jen přes API.",
+  "onbLinkNotice": "Pozvánka rozpoznána. Vytvořte si účet a hned vstoupíte do firmy.",
+  "inviteLinkCopy": "Kopírovat odkaz",
+  "inviteShare": "Sdílet",
+  "inviteShareText": "{company} vás zve do Site Log. Vytvořte si účet a přidejte se k firmě: {link}",
+  "firstStepsTitle": "První kroky",
+  "firstStepsHours": "Týdenní hodiny a hodinová sazba (fakturační údaje)",
+  "firstStepsSite": "První stavba",
+  "firstStepsCrew": "Pozvat partu",
+  "firstStepsCustomers": "Přidat nebo importovat zákazníky",
+  "importCustomers": "Importovat zákazníky",
+  "importCustomersPreview": "Načteno {n} řádků: {added} nových, {skipped} už existuje.",
+  "importCustomersNothing": "Nerozpoznáni žádní zákazníci. Potřebný sloupec Jméno nebo Firma; volitelně Křestní jméno, Telefon, E-mail, Adresa, PSČ, Město. Export kontaktů z bexio funguje tak, jak je.",
+  "importCustomersDone": "Importováno zákazníků: {n}"
 }

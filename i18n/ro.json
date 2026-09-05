@@ -278,7 +278,7 @@
   "teamTitle": "Echipă",
   "teamMembers": "Membri",
   "teamInvites": "Coduri de invitație",
-  "teamInviteHint": "Trimite un cod unui coleg. Își creează cont, introduce codul și se alătură firmei. Codurile expiră după 14 zile.",
+  "teamInviteHint": "Trimite linkul sau codul unui angajat. Își creează un cont și intră în firmă. Codurile sunt valabile trei zile, o persoană fiecare.",
   "teamNewInvite": "Cod de invitație nou",
   "teamNoInvites": "Niciun cod activ.",
   "teamExpires": "Expiră",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Ore pe zi",
   "exportContacts": "Clienți ca contacte bexio",
   "exportEmpty": "nimic",
-  "exportHint": "CSV cu punct și virgulă, UTF-8. Pentru importul de contacte în bexio deschideți în Excel și salvați ca .xlsx. Salarii: e-mailul trebuie să corespundă angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio acceptă facturi doar prin API."
+  "exportHint": "CSV cu punct și virgulă, UTF-8. Pentru importul de contacte în bexio deschideți în Excel și salvați ca .xlsx. Salarii: e-mailul trebuie să corespundă angajatului din bexio Lohn. Facturile sunt jurnalul pentru contabil; bexio acceptă facturi doar prin API.",
+  "onbLinkNotice": "Invitație recunoscută. Creează contul și intri direct în firmă.",
+  "inviteLinkCopy": "Copiază linkul",
+  "inviteShare": "Trimite",
+  "inviteShareText": "{company} te invită în Site Log. Creează un cont și intră în firmă: {link}",
+  "firstStepsTitle": "Primii pași",
+  "firstStepsHours": "Ore săptămânale și tarif orar (date de facturare)",
+  "firstStepsSite": "Primul șantier",
+  "firstStepsCrew": "Invită echipa",
+  "firstStepsCustomers": "Adaugă sau importă clienți",
+  "importCustomers": "Importă clienți",
+  "importCustomersPreview": "{n} rânduri citite: {added} noi, {skipped} deja existente.",
+  "importCustomersNothing": "Niciun client recunoscut. Necesar: o coloană Nume sau Firmă; opțional Prenume, Telefon, E-mail, Adresă, Cod poștal, Localitate. Exportul de contacte bexio merge așa cum este.",
+  "importCustomersDone": "{n} clienți importați"
 }

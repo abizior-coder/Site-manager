@@ -278,7 +278,7 @@
   "teamTitle": "Zespół",
   "teamMembers": "Członkowie",
   "teamInvites": "Kody zaproszeń",
-  "teamInviteHint": "Wyślij kod pracownikowi. Zakłada konto, wpisuje kod i dołącza do firmy. Kody wygasają po 14 dniach.",
+  "teamInviteHint": "Wyślij pracownikowi link lub kod. Zakłada konto i dołącza do firmy. Kody ważne trzy dni, jeden na osobę.",
   "teamNewInvite": "Nowy kod",
   "teamNoInvites": "Brak aktywnych kodów.",
   "teamExpires": "Wygasa",
@@ -826,5 +826,18 @@
   "exportPayrollDays": "Godziny na dzień",
   "exportContacts": "Klienci jako kontakty bexio",
   "exportEmpty": "nic",
-  "exportHint": "CSV ze średnikiem, UTF-8. Do importu kontaktów w bexio otwórz w Excelu i zapisz jako .xlsx. Płace: e-mail musi zgadzać się z pracownikiem w bexio Lohn. Faktury to dziennik dla księgowego; samo bexio przyjmuje faktury tylko przez API."
+  "exportHint": "CSV ze średnikiem, UTF-8. Do importu kontaktów w bexio otwórz w Excelu i zapisz jako .xlsx. Płace: e-mail musi zgadzać się z pracownikiem w bexio Lohn. Faktury to dziennik dla księgowego; samo bexio przyjmuje faktury tylko przez API.",
+  "onbLinkNotice": "Zaproszenie rozpoznane. Załóż konto, a od razu trafisz do firmy.",
+  "inviteLinkCopy": "Kopiuj link",
+  "inviteShare": "Udostępnij",
+  "inviteShareText": "{company} zaprasza Cię do Site Log. Załóż konto i dołącz do firmy: {link}",
+  "firstStepsTitle": "Pierwsze kroki",
+  "firstStepsHours": "Godziny tygodniowe i stawka (dane do faktur)",
+  "firstStepsSite": "Pierwsza budowa",
+  "firstStepsCrew": "Zaproś ekipę",
+  "firstStepsCustomers": "Dodaj lub zaimportuj klientów",
+  "importCustomers": "Importuj klientów",
+  "importCustomersPreview": "Odczytano {n} wierszy: {added} nowych, {skipped} już istnieje.",
+  "importCustomersNothing": "Nie rozpoznano klientów. Potrzebna kolumna Nazwisko/Name lub Firma; opcjonalnie Imię, Telefon, E-mail, Adres, Kod pocztowy, Miejscowość. Eksport kontaktów z bexio działa bez zmian.",
+  "importCustomersDone": "Zaimportowano klientów: {n}"
 }

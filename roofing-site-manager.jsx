@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment, lazy, Suspense } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages, ZoomIn, ZoomOut, Undo2, MoveUpRight, Circle, Type, Paintbrush, RotateCcw, Download } from "lucide-react";
+import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages, ZoomIn, ZoomOut, Undo2, MoveUpRight, Circle, Type, Paintbrush, RotateCcw, Download, Link2, FileUp } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
 import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
@@ -24,6 +24,7 @@ import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
 import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
+import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./onboarding.js";
 
 // Which build this page is: the shell names it, and a phone that shows an
 // old number is a phone that has not restarted since the last deploy.
@@ -418,6 +419,20 @@ export default function SiteManager() {
   const [membership, setMembership] = useState(null);
   const [membershipChecked, setMembershipChecked] = useState(false);
   const [onboarding, setOnboarding] = useState({ mode: "choose", companyName: "", displayName: "", code: "", busy: false, error: null });
+  const [customerImport, setCustomerImport] = useState(null);
+  const customerFileRef = useRef(null);
+  const [firstStepsDismissed, setFirstStepsDismissed] = useState(() => { try { return localStorage.getItem("site-log-first-steps") === "1"; } catch { return false; } });
+
+  // An invite link lands here: the code comes from the address, the sign-in
+  // screen switches to "create account" with a notice, and the onboarding
+  // screen is already in join mode. The parameter leaves the address bar.
+  useEffect(() => {
+    const code = joinCodeFromSearch(window.location.search);
+    if (!code) return;
+    setOnboarding((s) => ({ ...s, mode: "join", code }));
+    setAuthForm((s) => ({ ...s, mode: "signup", notice: "onbLinkNotice" }));
+    try { window.history.replaceState(null, "", withoutJoinParam(window.location.href)); } catch {}
+  }, []);
   const [companyMigration, setCompanyMigration] = useState(null);
   const [teamModalOpen, setTeamModalOpen] = useState(false);
   const [team, setTeam] = useState({ members: [], invites: [], busy: false });
@@ -979,6 +994,33 @@ export default function SiteManager() {
       const invites = await listInvites();
       setTeam((s) => ({ ...s, invites }));
     } catch (e) { saveFailed(e, "makeInvite"); }
+  }
+
+  // The phone's share sheet when there is one, the clipboard otherwise.
+  async function shareInvite(code) {
+    const url = inviteUrl(code, window.location.href);
+    const text = (t.inviteShareText || "").replace("{company}", billing.companyName || t.appLabel).replace("{link}", url);
+    if (navigator.share) {
+      try { await navigator.share({ title: t.appLabel, text }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    try { await navigator.clipboard.writeText(text); showToast(t.inviteLinkCopy); } catch { showToast(url); }
+  }
+
+  async function stageCustomersFile(file) {
+    if (!file) return;
+    try {
+      const [{ parseCustomersCsv, mergeCustomers }, text] = await Promise.all([import("./customers-import.js"), file.text()]);
+      const parsed = parseCustomersCsv(text);
+      const preview = mergeCustomers(customers, parsed.rows);
+      setCustomerImport({ fileName: file.name, rows: parsed.rows, warnings: parsed.warnings, added: preview.added.length, skipped: preview.skipped.length, merged: preview.customers });
+    } catch (e) { showError(e, "customersImport"); }
+  }
+
+  function applyCustomersImport() {
+    if (!customerImport || !customerImport.added) { setCustomerImport(null); return; }
+    persist({ customers: customerImport.merged });
+    showToast((t.importCustomersDone || "").replace("{n}", String(customerImport.added)));
+    setCustomerImport(null);
   }
 
   async function dropInvite(code) {
@@ -3726,6 +3768,26 @@ export default function SiteManager() {
 
   // A newer build is live: offer a restart, on the sign-in screen as much as
   // inside the app, and never reload on our own.
+  // The owner's first steps: shown on Heute until all four are done or the
+  // card is dismissed on this device.
+  const firstStepsList = isOwner() ? firstSteps({ projects, customers, members: team.members, invites: team.invites, billing }) : null;
+  const firstStepsCard = firstStepsList && !firstStepsDismissed && firstStepsList.some((s) => !s.done) ? (
+    <div data-first-steps style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}66` }} className="rounded-xl p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div style={{ color: COLORS.accent }} className="text-[10px] uppercase tracking-wide font-bold">{t.firstStepsTitle}</div>
+        <button data-first-steps-dismiss onClick={() => { setFirstStepsDismissed(true); try { localStorage.setItem("site-log-first-steps", "1"); } catch {} }} style={{ color: COLORS.muted }}><X size={14} /></button>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {firstStepsList.map((s) => (
+          <button key={s.key} data-first-step={s.key} data-done={s.done ? "1" : "0"} onClick={() => { if (s.key === "hours") setBillingModalOpen(true); else if (s.key === "site") setNewProjectOpen(true); else if (s.key === "crew") openTeam(); else setTab("customers"); }} style={{ background: COLORS.cardAlt, opacity: s.done ? 0.6 : 1 }} className="w-full text-left rounded-lg px-3 py-2 flex items-center gap-2 text-sm">
+            <span style={{ background: s.done ? COLORS.success : COLORS.shell, border: `1px solid ${COLORS.border}` }} className="w-5 h-5 rounded-full flex items-center justify-center shrink-0">{s.done ? <Check size={12} color="#12210A" /> : null}</span>
+            <span className={s.done ? "line-through" : ""}>{t[`firstSteps${s.key.charAt(0).toUpperCase()}${s.key.slice(1)}`]}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   const updateBar = updateReady ? (
     <div data-update-bar style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }} className="fixed left-3 right-3 bottom-3 lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3">
       <span className="text-sm font-semibold flex-1">{t.updateReady}</span>
@@ -4035,7 +4097,7 @@ export default function SiteManager() {
       )}
 
       <div className="relative flex-1 overflow-y-auto px-5 pb-6 pt-4 lg:px-8 lg:pb-8 lg:pt-6" style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
-        {tab === "today" && <TodayTab t={t} projects={projects} entries={entries} user={user} activeClock={activeClock} todayEntries={todayEntries} myAssignments={myAssignments} projectName={projectName} setTab={setTab} setSelectedProject={setSelectedProject} weather={weather} weatherLoc={weatherLoc} wCond={wCond} weatherEditOpen={weatherEditOpen} setWeatherEditOpen={setWeatherEditOpen} weatherCityInput={weatherCityInput} setWeatherCityInput={setWeatherCityInput} submitWeatherCity={submitWeatherCity} fetchWeather={fetchWeather} toggleBreak={toggleBreak} clockOut={clockOut} noteText={noteText} setNoteText={setNoteText} submitNote={submitNote} toggleVoiceInput={toggleVoiceInput} voiceListening={voiceListening} voiceTarget={voiceTarget} openEditTime={openEditTime} openEditEntry={openEditEntry} deleteEntryFn={deleteEntryFn} />}
+        {tab === "today" && <TodayTab topCard={firstStepsCard} t={t} projects={projects} entries={entries} user={user} activeClock={activeClock} todayEntries={todayEntries} myAssignments={myAssignments} projectName={projectName} setTab={setTab} setSelectedProject={setSelectedProject} weather={weather} weatherLoc={weatherLoc} wCond={wCond} weatherEditOpen={weatherEditOpen} setWeatherEditOpen={setWeatherEditOpen} weatherCityInput={weatherCityInput} setWeatherCityInput={setWeatherCityInput} submitWeatherCity={submitWeatherCity} fetchWeather={fetchWeather} toggleBreak={toggleBreak} clockOut={clockOut} noteText={noteText} setNoteText={setNoteText} submitNote={submitNote} toggleVoiceInput={toggleVoiceInput} voiceListening={voiceListening} voiceTarget={voiceTarget} openEditTime={openEditTime} openEditEntry={openEditEntry} deleteEntryFn={deleteEntryFn} />}
         {tab === "materials" && <Suspense fallback={null}><MaterialsTab materialDragProps={materialDragProps} addToBasket={addToBasket} articleMaster={articleMaster} basket={basket} catalogs={catalogs} deleteEntryFn={deleteEntryFn} deleteLibraryItem={deleteLibraryItem} entries={entries} lang={lang} librarySearch={librarySearch} materialSearch={materialSearch} materialsCatalogFor={materialsCatalogFor} materialsSubTab={materialsSubTab} openLibraryEdit={openLibraryEdit} openLibraryScan={openLibraryScan} openPickup={openPickup} openScan={openScan} priceFileRef={priceFileRef} projectName={projectName} projects={projects} removeBasketItem={removeBasketItem} setBasket={setBasket} setBasketMode={setBasketMode} setBasketProjectModalOpen={setBasketProjectModalOpen} setLibrarySearch={setLibrarySearch} setMaterialSearch={setMaterialSearch} setMaterialsSubTab={setMaterialsSubTab} setOrderStatus={setOrderStatus} setShopCat={setShopCat} setSortMode={setSortMode} shopCat={shopCat} sortMode={sortMode} stagePriceList={stagePriceList} t={t} techLibrary={techLibrary} toolsCatalogFor={toolsCatalogFor} updateBasketItem={updateBasketItem} user={user} /></Suspense>}
         {tab === "calendar" && (() => {
           const localeMap = { en: "en-US", de: "de-CH", fr: "fr-CH", it: "it-CH", es: "es-ES", pt: "pt-PT", pl: "pl-PL", sk: "sk-SK", cs: "cs-CZ" };
@@ -4123,9 +4185,15 @@ export default function SiteManager() {
             : customers;
           return (
             <div className="flex flex-col gap-3">
-              <button onClick={() => openCustomerForm(null)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
-                <Plus size={16} /> {t.newCustomer}
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => openCustomerForm(null)} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                  <Plus size={16} /> {t.newCustomer}
+                </button>
+                <button data-customers-import onClick={() => customerFileRef.current?.click()} style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }} className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                  <FileUp size={16} /> {t.importCustomers}
+                </button>
+                <input ref={customerFileRef} type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; stageCustomersFile(f); }} />
+              </div>
 
               {due.length > 0 && (
                 <div style={{ background: `${COLORS.amber}18`, border: `1px solid ${COLORS.amber}66` }} className="rounded-xl p-3">
@@ -5195,7 +5263,9 @@ export default function SiteManager() {
                   <div style={{ color: COLORS.muted }} className="text-[10px]">{t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}</div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} style={{ color: COLORS.muted }}><Copy size={14} /></button>
+                  <button data-invite-share onClick={() => shareInvite(i.code)} title={t.inviteShare} style={{ color: COLORS.accent }}><Share2 size={14} /></button>
+                  <button data-invite-link onClick={() => { navigator.clipboard?.writeText(inviteUrl(i.code, window.location.href)); showToast(t.inviteLinkCopy); }} title={t.inviteLinkCopy} style={{ color: COLORS.muted }}><Link2 size={14} /></button>
+                  <button onClick={() => { navigator.clipboard?.writeText(i.code); showToast(t.copyBtn); }} title={t.copyBtn} style={{ color: COLORS.muted }}><Copy size={14} /></button>
                   <button onClick={() => dropInvite(i.code)} style={{ color: COLORS.danger }}><Trash2 size={14} /></button>
                 </div>
               </div>
@@ -6197,6 +6267,21 @@ export default function SiteManager() {
           <div className="grid grid-cols-1 gap-2">
             <button onClick={() => { const r = rapportExists.existing; setRapportExists(null); printRapport(r); }} style={{ background: COLORS.accent }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.rapportOpenExisting}</button>
             <button onClick={() => { const { projectId, date } = rapportExists; setRapportExists(null); openRapport(projectId, date, true); }} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.muted }} className="w-full py-3 rounded-lg font-bold uppercase text-xs">{t.rapportCreateNew}</button>
+          </div>
+        </Modal>
+      )}
+
+      {customerImport && (
+        <Modal onClose={() => setCustomerImport(null)} title={t.importCustomers}>
+          <div data-customers-import-preview>
+            <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">{customerImport.fileName}</div>
+            {customerImport.rows.length === 0 ? (
+              <div style={{ color: COLORS.danger }} className="text-sm mb-3">{t.importCustomersNothing}</div>
+            ) : (
+              <div className="text-sm mb-3">{(t.importCustomersPreview || "").replace("{n}", String(customerImport.rows.length)).replace("{added}", String(customerImport.added)).replace("{skipped}", String(customerImport.skipped))}</div>
+            )}
+            {customerImport.warnings.length > 0 && <div style={{ color: COLORS.amber }} className="text-[11px] mb-3">{customerImport.warnings.join(" \u00b7 ")}</div>}
+            <button data-customers-import-apply disabled={!customerImport.added} onClick={applyCustomersImport} style={{ background: COLORS.accent, opacity: customerImport.added ? 1 : 0.5 }} className="w-full py-3 rounded-lg font-bold uppercase text-sm">{t.importApply}</button>
           </div>
         </Modal>
       )}

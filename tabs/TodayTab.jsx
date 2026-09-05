@@ -6,9 +6,10 @@ import { fmtHM, todayKey } from "../ui/format.js";
 import { EntryGroups } from "../ui/entries.jsx";
 import { BreakChips } from "../ui/break-chips.jsx";
 
-export function TodayTab({ t, projects, entries, user, activeClock, todayEntries, myAssignments, projectName, setTab, setSelectedProject, weather, weatherLoc, wCond, weatherEditOpen, setWeatherEditOpen, weatherCityInput, setWeatherCityInput, submitWeatherCity, fetchWeather, toggleBreak, clockOut, noteText, setNoteText, submitNote, toggleVoiceInput, voiceListening, voiceTarget, openEditTime, openEditEntry, deleteEntryFn }) {
+export function TodayTab({ topCard, t, projects, entries, user, activeClock, todayEntries, myAssignments, projectName, setTab, setSelectedProject, weather, weatherLoc, wCond, weatherEditOpen, setWeatherEditOpen, weatherCityInput, setWeatherCityInput, submitWeatherCity, fetchWeather, toggleBreak, clockOut, noteText, setNoteText, submitNote, toggleVoiceInput, voiceListening, voiceTarget, openEditTime, openEditEntry, deleteEntryFn }) {
   return (
       <div className="flex flex-col gap-4">
+        {topCard}
         {(() => {
           // What am I meant to be doing today? The first thing a crew
           // member opens the app to find out.

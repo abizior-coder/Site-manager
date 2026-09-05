@@ -1,14 +1,20 @@
-# Deploys the site with GitHub Actions instead of the legacy Pages builder.
+# Deploys the site with GitHub Actions instead of the legacy Pages builder,
+# and only after the CI workflow has passed for the same commit on main.
 #
 # The legacy builder failed repeatedly with nothing but "Page build failed." —
 # once for a commit that touched only a markdown file — and left the live site
 # serving a 404 while the repository looked healthy. This publishes the files
 # as they are and, when something does go wrong, says what.
+#
+# Gated on CI since 2026-09-05: a commit once shipped with a test suite that
+# did not even parse, because the deploy ran on push regardless of CI.
 
 name: Deploy to Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -24,12 +30,16 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The tree CI tested, not whatever main points at by now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Check the committed bundle matches the source
         run: |
