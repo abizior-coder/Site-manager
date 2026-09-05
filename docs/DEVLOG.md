@@ -5,6 +5,20 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-06 — Build reproducible across platforms (.gitattributes, LF)
+
+- **Why:** CI's "Bundle matches source" failed on d08d677: a `git stash
+  pop` on Windows had rewritten the working copies with CRLF (autocrlf),
+  Prettier restored LF only where it runs, the language JSON files (in
+  `.prettierignore`) kept CRLF, esbuild's text loader embedded `` into
+  the language chunks, and the committed chunk hashes differed from the
+  Linux build. The deploy was skipped, production stayed on b05d5bff84.
+- **What:** every tracked text file normalised to LF; `.gitattributes`
+  pins `* text=auto eol=lf` so every checkout on every platform is LF;
+  the build is committed again with the hashes CI produces.
+- **Lesson:** never trust the working copy's line endings after a git
+  checkout/stash on Windows; the attributes file now makes that moot.
+
 ## 2026-09-06 — Plan: Site Log on a private server (spec, proposed)
 
 - **Why:** the owner asked for a plan to move the whole suite to a private

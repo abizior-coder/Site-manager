@@ -1,0 +1,10 @@
+# Every text file is LF in the repo and in every working copy, on every
+# platform: the build embeds the language files as text, so a CRLF checkout
+# would produce different chunk hashes than CI's Linux build.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
