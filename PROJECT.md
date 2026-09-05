@@ -39,12 +39,13 @@ surface only; the office screens fall back to English by design.
 | Price lists | `price-list.js` | Parses supplier CSV / DATANORM into the article master |
 | Import guard | `import-guard.js` | Cuts a pasted share code or a restored backup to shape: known fields, capped sizes, fresh ids, photos re-keyed and image-only |
 | Mount | `entry.jsx` | Build entry; mounts `SiteManager` into `#root` |
-| Shell | `index.html` | Tailwind CDN only — deliberately no app logic |
-| Firebase | `firebase-client.js` | SDK boot, auth, offline cache |
+| Shell | `index.html` | Static Tailwind (`tailwind.src.css` → `tailwind.css`), stamped hashes, no app logic |
+| Firebase | `firebase-client.js` | SDK boot (bundled from npm, pinned by the lockfile, a lazy chunk), auth, offline cache |
 | Company store | `company-store.js` | Company-scoped storage, diff writes, invites, migration |
 | QR-bill | `swiss-qr.js` | Swiss QR-Rechnung payload |
 | Rules | `firestore.rules` | The real access control |
-| Tests | `logic.test.mjs`, `render.test.mjs`, `order-flow.test.mjs`, `rules.test.mjs` | `npm test` runs all four |
+| Tests | `logic.test.mjs`, `render.test.mjs`, `order-flow.test.mjs`, `dock.test.mjs`, `rules.test.mjs`, `worker/*.test.mjs` | `npm test` runs them all; `npm run lint` and `npm run format:check` run first in CI |
+| Tooling | `eslint.config.js`, `.prettierrc`, `.editorconfig`, `.nvmrc` | ESLint recommended + JSX, Prettier at 120 columns, Node 24 |
 | Bundle | `bundle.js` | **Generated — never edit by hand** |
 | Cache-bust | `scripts/stamp.mjs` | Stamps `bundle.js?v=<hash>` into `index.html` |
 | AI proxy + files | `worker/src/index.js`, `worker/src/files.js`, `worker/src/limits.js` | Cloudflare Worker holding the Anthropic key; `/files/*` serves plans from R2. Every proxy call names the company it is charged to; membership is checked as the caller and three KV caps apply (20/min/account, 200/day/account, **600/day/company** — the one that protects the bill, since a company takes an invite to enter). `npm run test:worker` |

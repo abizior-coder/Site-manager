@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { Camera, ChevronRight, ClipboardCheck, Clock, Coffee, MessageSquare, Package, Pencil, QrCode, Trash2, Truck, Wrench } from "lucide-react";
 import { COLORS } from "./theme.js";
+import { uid } from "./format.js";
 
 export const photoCache = new Map();
 
-async function savePhoto(dataUrl, meta) {
+export async function savePhoto(dataUrl, meta) {
   const id = uid();
   await window.storage.set(`photo-${id}`, dataUrl, meta);
   photoCache.set(id, dataUrl);
@@ -26,7 +27,7 @@ export async function loadPhoto(id) {
   }
 }
 
-async function deletePhoto(id) {
+export async function deletePhoto(id) {
   if (!id) return;
   photoCache.delete(id);
   try { await window.storage.delete(`photo-${id}`); } catch {}

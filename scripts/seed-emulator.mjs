@@ -12,7 +12,7 @@ import {
   signInWithEmailAndPassword, signOut,
 } from "firebase/auth";
 import {
-  getFirestore, connectFirestoreEmulator, doc, setDoc, collection,
+  getFirestore, connectFirestoreEmulator, doc, setDoc, 
   writeBatch,
 } from "firebase/firestore";
 
@@ -96,7 +96,6 @@ await setDoc(doc(db, "companies", CID, "members", uids.chef), {
 });
 await setDoc(doc(db, "users", uids.chef), { companyId: CID, displayName: "Chef Muster" });
 
-const { updateDoc } = await import("firebase/firestore");
 for (const p of PEOPLE.filter((x) => x.key !== "chef")) {
   const code = `SEED${p.key.toUpperCase()}`;
   await signInWithEmailAndPassword(auth, "chef@test.local", PASSWORD);

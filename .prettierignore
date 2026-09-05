@@ -1,0 +1,10 @@
+build/
+node_modules/
+sw.js
+tailwind.css
+package-lock.json
+docs/
+*.md
+i18n/*.json
+firebase-debug.log
+firestore-debug.log

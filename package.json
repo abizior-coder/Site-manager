@@ -1,6 +1,12 @@
 {
   "name": "site-manager",
+  "version": "0.9.0",
   "private": true,
+  "license": "UNLICENSED",
+  "description": "Site Log / Baustellenprotokoll: a phone-first site log for Swiss roofing crews.",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('build',{recursive:true,force:true})\" && esbuild entry.jsx --bundle --splitting --format=esm --minify --jsx=automatic --alias:react=preact/compat --alias:react-dom/client=preact/compat/client --alias:react-dom=preact/compat --alias:react/jsx-runtime=preact/jsx-runtime --loader:.json=text --outdir=build --entry-names=bundle --chunk-names=chunk-[hash] && tailwindcss -i tailwind.src.css -o tailwind.css --minify && node scripts/stamp.mjs",
     "test:rules": "firebase emulators:exec --config firebase.test.json --only firestore \"node rules.test.mjs\"",
@@ -12,20 +18,28 @@
     "test:order": "node order-flow.test.mjs",
     "test:dock": "node dock.test.mjs",
     "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs && node worker/errors.test.mjs",
-    "build:css": "tailwindcss -i tailwind.src.css -o tailwind.css --minify"
+    "build:css": "tailwindcss -i tailwind.src.css -o tailwind.css --minify",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@firebase/rules-unit-testing": "^5.0.2",
-    "esbuild": "^0.23.0",
-    "firebase": "^12.18.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.12.0",
     "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.17"
   },
   "dependencies": {
-    "lucide-react": "^0.436.0",
+    "firebase": "^12.18.0",
+    "lucide-react": "^1.41.0",
     "preact": "^10.29.8",
-    "qrcode": "^1.5.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "qrcode": "^1.5.4"
   }
 }

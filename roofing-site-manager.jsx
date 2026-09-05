@@ -1,23 +1,22 @@
 import { useState, useEffect, useRef, useMemo, Fragment, lazy, Suspense } from "react";
-import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages, ZoomIn, ZoomOut, Undo2, MoveUpRight, Circle, Type, Paintbrush, RotateCcw, Download, Link2, FileUp } from "lucide-react";
-import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
+import { Clock, Package, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Truck, Ruler, GripVertical, LogOut, Lock, Users, Pin, Building2, Layers, ArrowUpDown, Menu, Download, Link2, FileUp } from "lucide-react";
+import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
-import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
+import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
   loadMembership, createCompany, joinCompanyWithCode, listMembers, createInvite, listInvites, revokeInvite,
   syncCollection, loadCollection, subscribeCollection, companyStorage, isOwner, getRole,
-  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, isSupervisor, getCompanyId, setMemberActive,
+  loadFinance, saveFinance, migrateFromPersonal, personalDataSummary, resetCompanyState, canManage, getCompanyId, setMemberActive,
 } from "./company-store.js";
-import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
-import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
+import { MAX_FILE_BYTES, FILE_KINDS, isImage, guessKind, normaliseLink } from "./files.js";
+import { breakMeta, breakHours, netHours } from "./breaks.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { COLORS } from "./ui/theme.js";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
 import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
-import { photoCache, loadPhoto, StoredImage, typeMeta, Stat, EntryRow, ENTRY_TYPE_ORDER, EntryGroups } from "./ui/entries.jsx";
-import { BreakChips } from "./ui/break-chips.jsx";
+import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "./ui/entries.jsx";
 import { useDialog } from "./ui/dialog.js";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
@@ -166,9 +165,6 @@ export const ORDER_STATES = [
 // most deliveries; the field stays free text for everyone else.
 const KNOWN_SUPPLIERS = ["HGC", "GABS", "Soprema", "Velux", "Glaromat", "Gyso", "SFS", "Hasler"];
 
-function tradeMeta(key) {
-  return TRADES.find((x) => x.key === key) || TRADES[TRADES.length - 1];
-}
 
 // Each category carries an icon so a job is recognisable at tile size, where
 // there is no room for the word.
@@ -227,9 +223,6 @@ function ProjectIcon({ category, size = 40, color = "currentColor" }) {
   }
 }
 
-function categoryIcon(key) {
-  return (PROJECT_CATEGORIES.find((c) => c.key === key) || PROJECT_CATEGORIES[PROJECT_CATEGORIES.length - 1]).icon;
-}
 const DOCK_SORTS = ["pinned", "name", "status", "recent"];
 
 // Pipeline, in funnel order: an enquiry becomes a quote, a quote becomes work,
@@ -573,7 +566,7 @@ export default function SiteManager() {
   const [reportView, setReportView] = useState("daily");
   const [rapportWeekAnchor, setRapportWeekAnchor] = useState(() => todayKey());
   const [rapportPerson, setRapportPerson] = useState(null);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
   const [cprStep, setCprStep] = useState(0);
   const [scanModal, setScanModal] = useState(null);
@@ -1070,7 +1063,6 @@ export default function SiteManager() {
 
   useEffect(() => {
     if (ready) fetchWeather(weatherLoc);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, weatherLoc.lat, weatherLoc.lon]);
 
   function openProfile() {
@@ -1962,11 +1954,6 @@ export default function SiteManager() {
     });
   }
 
-  function unapproveEntry(entry) {
-    persist({
-      entries: entries.map((e) => (e.id === entry.id ? { ...e, approvedBy: null, approvedAt: null } : e)),
-    });
-  }
 
   function pendingApproval() {
     return entries.filter((e) => e.type === "time" && !e.approvedBy);
@@ -2770,11 +2757,6 @@ export default function SiteManager() {
     showToast(t.projectAdded);
   }
 
-  function clockIn(projectId) {
-    if (activeClock) return;
-    persist({ activeClock: { projectId, startedAt: Date.now() } });
-    showToast(t.clockedIn);
-  }
 
   function sendWebhook(eventType, payload) {
     if (!profile.webhookUrl) return;
@@ -3957,7 +3939,6 @@ export default function SiteManager() {
   }
 
   const daily = dailySummary(todayEntries);
-  const monthly = dailySummary(monthEntries);
   // Owner's decision: the monthly report carries only what no daily report
   // of this person has sent yet, so the supervisor gets nothing twice.
   const monthUnsent = unsentMonthEntries(monthEntries, sentReports, user?.uid, monthKey());
@@ -3978,7 +3959,6 @@ export default function SiteManager() {
       if (dockSort === "recent") return (lastTouched[b.id] || 0) - (lastTouched[a.id] || 0) || byName;
       return (pinnedIds.includes(b.id) ? 1 : 0) - (pinnedIds.includes(a.id) ? 1 : 0) || byName;
     });
-  const dockShown = !!membership && dockProjects.length > 0 && dockOpen;
 
   return (
     <div style={{ background: COLORS.shell, color: COLORS.text, fontFamily: "system-ui, -apple-system, sans-serif", height: "100dvh" }} className="w-full h-screen max-w-md md:max-w-2xl lg:max-w-none mx-auto flex flex-col lg:flex-row relative overflow-hidden">

@@ -1,10 +1,12 @@
 // Firebase lives here, in the app bundle, rather than in index.html.
 // index.html and bundle.js are cached independently, and depending on a global
-// defined in the shell has already caused an outage (PROJECT.md §6). esbuild
-// leaves a dynamic import of a URL expression untouched, so the SDK is fetched
-// at runtime without being bundled.
-
-const CDN = "https://www.gstatic.com/firebasejs/10.7.1/";
+// defined in the shell has already caused an outage (PROJECT.md §6).
+//
+// The SDK comes from the npm package, pinned by the lockfile, and is bundled
+// by esbuild as a content-addressed chunk under build/ (the dynamic imports
+// below keep it out of the first paint). Until 2026-09-05 it was fetched from
+// gstatic.com at run time: an unpinned version, no integrity check, and the
+// largest part of a cold start invisible to the size budget.
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw",
@@ -20,9 +22,9 @@ let ready = null;
 
 async function boot() {
   const [appMod, fsMod, authMod] = await Promise.all([
-    import(CDN + "firebase-app.js"),
-    import(CDN + "firebase-firestore.js"),
-    import(CDN + "firebase-auth.js"),
+    import("firebase/app"),
+    import("firebase/firestore"),
+    import("firebase/auth"),
   ]);
   const app = appMod.initializeApp(firebaseConfig);
 

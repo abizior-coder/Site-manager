@@ -106,7 +106,6 @@ function UsageCard({ t }) {
   const days = (usage && usage.days) || [];
   const totals = (usage && usage.totals) || {};
   const last7 = days.slice(-7);
-  const people7 = new Set();
   const sum = (list, pick) => list.reduce((s, d) => s + Object.entries(d.events || {}).filter(([k]) => pick(k)).reduce((x, [, v]) => x + v, 0), 0);
   const entries7 = sum(last7, (k) => k.startsWith("entry."));
   const active7 = Math.max(...last7.map((d) => d.active), 0);

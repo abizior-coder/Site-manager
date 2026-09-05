@@ -38,7 +38,7 @@ function matchColumn(header) {
 export function parsePrice(raw) {
   let v = String(raw == null ? "" : raw).trim();
   if (!v) return "";
-  v = v.replace(/[^\d.,'\-]/g, "").replace(/'/g, "");
+  v = v.replace(/[^\d.,'-]/g, "").replace(/'/g, "");
   if (!v || v === "-") return "";
   const lastComma = v.lastIndexOf(",");
   const lastDot = v.lastIndexOf(".");

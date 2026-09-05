@@ -1,5 +1,6 @@
 // --- service worker body; scripts/stamp.mjs prepends VERSION, PRECACHE and
 // --- the routing function from sw-routes.js and writes the result to sw.js.
+/* global VERSION, PRECACHE, routeFor */
 
 const CACHE = "site-log-" + VERSION;
 const PREFIX = "site-log-";

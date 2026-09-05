@@ -22,7 +22,7 @@ import { sanitiseBackup, sanitiseProjectCode, isPhotoDataUrl } from "./import-gu
 import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { routeFor, precacheAllowed } from "./sw-routes.js";
 import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
-import { writeFileSync, unlinkSync } from "node:fs";
+import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
 const tmp = "./.logic-under-test.mjs";
@@ -379,6 +379,11 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     const chunks = [...new Set([...entry.matchAll(/(?:from|import)\s*["']\.\/(chunk-[A-Z0-9]+\.js)["']/g)].map((m) => m[1]))];
     const bytes = statSync("build/bundle.js").size + chunks.reduce((sum, c) => sum + statSync(`build/${c}`).size, 0);
     t(`first-paint JS stays under 350 KB (${Math.round(bytes / 1024)} KB: bundle.js + ${chunks.length} static chunk${chunks.length === 1 ? "" : "s"})`, bytes < 350 * 1024, true);
+    // The Firebase SDK is a lazy chunk loaded at boot: not in the first paint,
+    // but the largest download of a cold start, so it has a budget of its own.
+    const { readdirSync } = fsMod;
+    const sdk = readdirSync("build").filter((f) => f.startsWith("chunk-")).map((f) => ({ f, size: statSync(`build/${f}`).size, firestore: /firestore/i.test(readFileSync(`build/${f}`, "utf8").slice(0, 200000)) })).filter((c) => c.firestore).sort((a, b) => b.size - a.size)[0];
+    t(`the bundled Firebase SDK chunk stays under 600 KB (${sdk ? Math.round(sdk.size / 1024) : "?"} KB)`, !!sdk && sdk.size < 600 * 1024, true);
     t("tailwind.css is built and small", existsSync("tailwind.css") && statSync("tailwind.css").size < 60 * 1024, true);
     t("index.html no longer loads Tailwind from a CDN", !readFileSync("index.html", "utf8").includes("cdn.tailwindcss.com"), true);
     // The privacy notice on the site says who is responsible and matches the source document's date.
@@ -575,7 +580,8 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("another page under the scope is not the shell", r(scope + "datenschutz.html", "navigate"), "network");
   t("a hashed chunk is immutable", r(scope + "build/chunk-ABC123.js"), "immutable");
   t("the stamped entry and stylesheet are immutable", [r(scope + "build/bundle.js?v=abc"), r(scope + "tailwind.css?v=abc")], ["immutable", "immutable"]);
-  t("the Firebase SDK is cached from Google's CDN", r("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"), "sdk");
+  t("the Firebase SDK, bundled under build/, is immutable like every chunk", r("https://abizior-coder.github.io/Site-manager/build/chunk-ASVWXV3D.js"), "immutable");
+  t("nothing from Google's CDN is special-cased any more", r("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"), "network");
   t("Firestore itself is never cached", r("https://firestore.googleapis.com/google.firestore.v1.Firestore/Listen/channel"), "network");
   t("the Worker is never cached", r("https://site-log-claude-proxy.abizior.workers.dev/metrics/c1"), "network");
   t("the weather is never cached", r("https://api.open-meteo.com/v1/forecast?latitude=1"), "network");

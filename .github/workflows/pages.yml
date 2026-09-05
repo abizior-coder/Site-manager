@@ -58,3 +58,42 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # One tag and one GitHub Release per version: bumping package.json and
+  # CHANGELOG.md is the release act; every other deploy is a build under
+  # the same version and creates nothing here.
+  release:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+      - name: Tag and release the version when it is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          if git ls-remote --tags origin "refs/tags/$tag" | grep -q "$tag"; then
+            echo "$tag exists; nothing to do"
+            exit 0
+          fi
+          notes=$(awk -v v="$version" '
+            index($0, "## [" v "]") == 1 { on = 1; next }
+            on && index($0, "## [") == 1 { exit }
+            on { print }
+          ' CHANGELOG.md)
+          build=$(grep -oE 'site-log-build" content="[a-f0-9]+"' index.html | grep -oE '[a-f0-9]+"$' | tr -d '"')
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Site Log $version (build $build)"
+          git push origin "$tag"
+          printf '%s
+
+Build `%s`, deployed from %s.
+' "$notes" "$build" "$(git rev-parse --short HEAD)" > /tmp/notes.md
+          gh release create "$tag" --title "Site Log $version" --notes-file /tmp/notes.md

@@ -4,20 +4,16 @@
 //   "shell"     the page itself: cached index.html first, refreshed in the
 //               background (chunks are content-addressed, so a shell one
 //               build old never mixes with new code: it names its own)
-//   "immutable" our own static files under the scope: cache-first
-//   "sdk"       the Firebase SDK from Google's CDN: cache-first
+//   "immutable" our own static files under the scope, the bundled Firebase
+//               SDK chunk included: cache-first
 //   "network"   everything else -- Firestore, Auth, the Worker, the weather:
 //               untouched, so the app's own offline handling sees the failure
-
-export const SDK_ORIGIN = "https://www.gstatic.com";
-export const SDK_PATH = "/firebasejs/";
 
 export function routeFor({ url, mode, method }, scope) {
   if (method && method !== "GET") return "network";
   let u;
   try { u = new URL(url); } catch { return "network"; }
   const s = new URL(scope);
-  if (u.origin === SDK_ORIGIN && u.pathname.startsWith(SDK_PATH)) return "sdk";
   if (u.origin !== s.origin || !u.pathname.startsWith(s.pathname)) return "network";
   const rel = u.pathname.slice(s.pathname.length);
   // Only the app's own page is the shell. Another page under the scope --

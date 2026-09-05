@@ -3,9 +3,9 @@
 import { fmtSize, sortFiles } from "../files.js";
 import { rapportChanged } from "../reports.js";
 import { StoredImage } from "../ui/entries.jsx";
-import { todayKey, uid } from "../ui/format.js";
+import { todayKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
-import { Camera, Clock, LayoutGrid, MessageSquare, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
+import { Camera, Circle, ClipboardCheck, CreditCard, Download, ExternalLink, FileText, ImagePlus, Languages, Layers, Loader2, Mail, MapPin, Mic, MoveUpRight, Package, Paintbrush, Pencil, Phone, Pin, Play, Plus, Printer, RotateCcw, Send, Share2, Square, Trash2, Truck, Type, Undo2, Wrench, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDialog } from "../ui/dialog.js";
 import { LANGS } from "../i18n/index.js";
@@ -23,7 +23,7 @@ export function ProjectDetail({ project, entries, onClose, onAdd, onEdit, onEdit
   // Unread chat: messages by others newer than this reader's last look at
   // this job's chat, remembered on the device.
   const seenKey = project ? `site-log-chat-seen-${project.id}` : null;
-  const [seenTick, setSeenTick] = useState(0);
+  const [, setSeenTick] = useState(0);
   const chatSeen = (() => { try { return seenKey ? parseInt(localStorage.getItem(seenKey) || "0", 10) || 0 : 0; } catch { return 0; } })();
   useEffect(() => {
     if (hubTab !== "chat" || !seenKey) return;
