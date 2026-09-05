@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "importCustomers": "Importa clienti",
   "importCustomersPreview": "{n} righe lette: {added} nuove, {skipped} gi\xE0 presenti.",
   "importCustomersNothing": "Nessun cliente riconosciuto. Serve una colonna Nome o Ditta; opzionali Nome, Telefono, E-mail, Indirizzo, CAP, Localit\xE0. L'export contatti di bexio va bene cos\xEC com'\xE8.",
-  "importCustomersDone": "{n} clienti importati"
+  "importCustomersDone": "{n} clienti importati",
+  "ccErrors": "Errori (7 giorni)",
+  "ccErrorsNone": "Nessun arresto segnalato.",
+  "pickupCodeUnavailable": "Questo riferimento non pu\xF2 essere disegnato come codice a barre (solo lettere e cifre)."
 }
 `;export{o as default};

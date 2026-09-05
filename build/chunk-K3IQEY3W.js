@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var i=`{
   "importCustomers": "Import\u0103 clien\u021Bi",
   "importCustomersPreview": "{n} r\xE2nduri citite: {added} noi, {skipped} deja existente.",
   "importCustomersNothing": "Niciun client recunoscut. Necesar: o coloan\u0103 Nume sau Firm\u0103; op\u021Bional Prenume, Telefon, E-mail, Adres\u0103, Cod po\u0219tal, Localitate. Exportul de contacte bexio merge a\u0219a cum este.",
-  "importCustomersDone": "{n} clien\u021Bi importa\u021Bi"
+  "importCustomersDone": "{n} clien\u021Bi importa\u021Bi",
+  "ccErrors": "Erori (7 zile)",
+  "ccErrorsNone": "Nicio c\u0103dere raportat\u0103.",
+  "pickupCodeUnavailable": "Aceast\u0103 referin\u021B\u0103 nu poate fi desenat\u0103 ca cod de bare (doar litere \u0219i cifre)."
 }
 `;export{i as default};

@@ -1,10 +1,10 @@
 // The cockpit tab, loaded when first opened. State and handlers stay in the
 // app and arrive as props; this module only renders.
-import { isOwner } from "../company-store.js";
+import { isOwner, getCompanyId } from "../company-store.js";
+import { getIdToken } from "../firebase-client.js";
 import { fmtHM, monthKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
-import { UsageCard } from "../roofing-site-manager.jsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import { downloadText } from "../ui/download.js";
 import { CONTACT_HEADERS, JOURNAL_HEADERS, PAYROLL_DAY_HEADERS, POSITION_HEADERS, contactRows, invoiceJournal, invoicePositions, payrollCsv, payrollDays, payrollRows, previousMonth, toCsv } from "../accounting-export.js";
@@ -48,7 +48,105 @@ function ExportCard({ t, documents, customers, projects, entries, team, billing,
   );
 }
 
-export function CockpitTab({ approveEntry, billing, commandCentre, customers, documents, entries, hoursBalance, leaveRequests, loadUsage, money, projects, setDocEditor, setHoursModalOpen, setLeaveStatus, setSelectedCustomer, setTab, t, team, usage }) {
+// The same Worker the app talks to (roofing-site-manager.jsx keeps the
+// other copy; a logic test holds the two equal).
+const WORKER_URL = "https://site-log-claude-proxy.abizior.workers.dev";
+
+// One GET under the company, as the signed-in person; `empty` when the
+// Worker has nothing or the network is gone.
+function useWorkerData(path, empty) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const cid = getCompanyId();
+        const token = await getIdToken();
+        const res = await fetch(`${WORKER_URL}${path.replace("{cid}", cid)}`, { headers: { Authorization: `Bearer ${token}` } });
+        const d = res.ok ? await res.json() : null;
+        if (alive) setData(d && typeof d === "object" ? d : empty);
+      } catch {
+        if (alive) setData(empty);
+      }
+    })();
+    return () => { alive = false; };
+  }, [path]);
+  return data;
+}
+
+// What crashed on the crew's phones this week: count and the last ten, so
+// the owner (and the developer on the phone with them) sees it before a
+// complaint arrives.
+function ErrorsCard({ t }) {
+  const errorsLog = useWorkerData("/errors/{cid}?days=7", { days: [], recent: [] });
+  const total = errorsLog ? (errorsLog.days || []).reduce((s, d) => s + (d.count || 0), 0) : 0;
+  return (
+    <div data-errors-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
+      <div className="flex items-center justify-between mb-2">
+        <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{t.ccErrors}</div>
+        {errorsLog && <span style={{ color: total ? COLORS.amber : COLORS.success }} className="text-sm font-black">{total}</span>}
+      </div>
+      {!errorsLog && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
+      {errorsLog && total === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccErrorsNone}</div>}
+      {errorsLog && total > 0 && (
+        <div className="flex flex-col gap-1">
+          {(errorsLog.recent || []).map((e, i) => (
+            <div key={i} className="text-[11px] font-mono truncate" title={e.stack || ""}>
+              <span style={{ color: COLORS.amber }}>{e.code}</span> {e.tag} · {new Date(e.at).toLocaleString()} · {e.build} · {e.ua} · {e.message}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UsageCard({ t }) {
+  const usage = useWorkerData("/metrics/{cid}?days=30", { days: [], totals: {}, activePeople: 0 });
+  const days = (usage && usage.days) || [];
+  const totals = (usage && usage.totals) || {};
+  const last7 = days.slice(-7);
+  const people7 = new Set();
+  const sum = (list, pick) => list.reduce((s, d) => s + Object.entries(d.events || {}).filter(([k]) => pick(k)).reduce((x, [, v]) => x + v, 0), 0);
+  const entries7 = sum(last7, (k) => k.startsWith("entry."));
+  const active7 = Math.max(...last7.map((d) => d.active), 0);
+  const entries30 = Object.entries(totals).filter(([k]) => k.startsWith("entry.")).reduce((s, [, v]) => s + v, 0);
+  const reports30 = (totals["report.sent"] || 0) + (totals["rapport.sign"] || 0);
+  const trips30 = (totals["entry.transport"] || 0) + (totals["entry.inspection"] || 0);
+  const maxActive = Math.max(...days.map((d) => d.active), 1);
+  const tile = (label, value) => (
+    <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2.5">
+      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{label}</div>
+      <div className="text-lg font-black leading-tight">{value}</div>
+    </div>
+  );
+  return (
+    <div data-usage-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
+      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccUsage}</div>
+      {!usage && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
+      {usage && days.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageEmpty}</div>}
+      {usage && days.length > 0 && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+            {tile(t.ccUsageActive30, String(usage.activePeople || 0))}
+            {tile(t.ccUsageActive7, String(active7))}
+            {tile(t.ccUsageEntries30, `${entries30} · ${entries7}`)}
+            {tile(t.ccUsageReports30, String(reports30))}
+            {tile(t.ccUsageTrips30, String(trips30))}
+          </div>
+          <div className="flex items-end gap-[3px] h-10 mt-3">
+            {days.map((d) => (
+              <div key={d.date} title={`${d.date}: ${d.active}`} style={{ height: `${Math.max(6, Math.round((d.active / maxActive) * 100))}%`, background: d.active ? COLORS.accent : COLORS.border }} className="flex-1 rounded-sm" />
+            ))}
+          </div>
+          <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.ccUsageFootnote}</div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function CockpitTab({ approveEntry, billing, commandCentre, customers, documents, entries, hoursBalance, leaveRequests, money, projects, setDocEditor, setHoursModalOpen, setLeaveStatus, setSelectedCustomer, setTab, t, team }) {
   const c = commandCentre();
   // On a desk the point is seeing it all at once; on a phone it stays a
   // single column.
@@ -72,7 +170,8 @@ export function CockpitTab({ approveEntry, billing, commandCentre, customers, do
         </div>
       ) : null}
 
-      {isOwner() && <UsageCard t={t} usage={usage} onLoad={loadUsage} />}
+      {isOwner() && <UsageCard t={t} />}
+      {isOwner() && <ErrorsCard t={t} />}
       {isOwner() && <ExportCard t={t} documents={documents} customers={customers} projects={projects} entries={entries} team={team} billing={billing} leaveRequests={leaveRequests} />}
 
       <div className="grid grid-cols-2 gap-2 lg:col-span-3">

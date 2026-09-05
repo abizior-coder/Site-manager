@@ -839,5 +839,8 @@
   "importCustomers": "Kunden importieren",
   "importCustomersPreview": "{n} Zeilen gelesen: {added} neu, {skipped} schon vorhanden.",
   "importCustomersNothing": "Keine Kunden erkannt. Nötig: eine Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adresse, PLZ, Ort. Der bexio-Kontaktexport geht so, wie er ist.",
-  "importCustomersDone": "{n} Kunden importiert"
+  "importCustomersDone": "{n} Kunden importiert",
+  "ccErrors": "Fehler (7 Tage)",
+  "ccErrorsNone": "Keine Abstürze gemeldet.",
+  "pickupCodeUnavailable": "Diese Referenz lässt sich nicht als Strichcode zeichnen (nur Buchstaben und Ziffern)."
 }

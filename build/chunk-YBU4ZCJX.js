@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "importCustomers": "Importar clientes",
   "importCustomersPreview": "{n} linhas lidas: {added} novas, {skipped} j\xE1 existentes.",
   "importCustomersNothing": "Nenhum cliente reconhecido. Necess\xE1rio: uma coluna Nome ou Empresa; opcional Nome pr\xF3prio, Telefone, E-mail, Morada, C\xF3digo postal, Localidade. A exporta\xE7\xE3o de contactos do bexio funciona tal como est\xE1.",
-  "importCustomersDone": "{n} clientes importados"
+  "importCustomersDone": "{n} clientes importados",
+  "ccErrors": "Erros (7 dias)",
+  "ccErrorsNone": "Nenhuma falha reportada.",
+  "pickupCodeUnavailable": "Esta refer\xEAncia n\xE3o pode ser desenhada como c\xF3digo de barras (apenas letras e d\xEDgitos)."
 }
 `;export{o as default};

@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var a=`{
   "importCustomers": "\xDCgyfelek import\xE1l\xE1sa",
   "importCustomersPreview": "{n} sor beolvasva: {added} \xFAj, {skipped} m\xE1r l\xE9tezik.",
   "importCustomersNothing": "Nem ismert\xFCnk fel \xFCgyfelet. Kell egy N\xE9v vagy C\xE9g oszlop; opcion\xE1lis Keresztn\xE9v, Telefon, E-mail, C\xEDm, Ir\xE1ny\xEDt\xF3sz\xE1m, Telep\xFCl\xE9s. A bexio kontaktexport \xEDgy is m\u0171k\xF6dik.",
-  "importCustomersDone": "{n} \xFCgyf\xE9l import\xE1lva"
+  "importCustomersDone": "{n} \xFCgyf\xE9l import\xE1lva",
+  "ccErrors": "Hib\xE1k (7 nap)",
+  "ccErrorsNone": "Nincs jelentett \xF6sszeoml\xE1s.",
+  "pickupCodeUnavailable": "Ez a hivatkoz\xE1s nem rajzolhat\xF3 vonalk\xF3dk\xE9nt (csak bet\u0171k \xE9s sz\xE1mjegyek)."
 }
 `;export{a as default};

@@ -839,5 +839,8 @@
   "importCustomers": "Importă clienți",
   "importCustomersPreview": "{n} rânduri citite: {added} noi, {skipped} deja existente.",
   "importCustomersNothing": "Niciun client recunoscut. Necesar: o coloană Nume sau Firmă; opțional Prenume, Telefon, E-mail, Adresă, Cod poștal, Localitate. Exportul de contacte bexio merge așa cum este.",
-  "importCustomersDone": "{n} clienți importați"
+  "importCustomersDone": "{n} clienți importați",
+  "ccErrors": "Erori (7 zile)",
+  "ccErrorsNone": "Nicio cădere raportată.",
+  "pickupCodeUnavailable": "Această referință nu poate fi desenată ca cod de bare (doar litere și cifre)."
 }

@@ -10,6 +10,10 @@ import { toCsv, workingDays, invoiceJournal, invoicePositions, payrollRows, payr
 import { documentTotals as docTotalsPure } from "./documents.js";
 import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./onboarding.js";
 import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
+import { readFileSync } from "node:fs";
+import { todayKey, monthKey, dateKeyOffset, uid } from "./ui/format.js";
+import { code128Values, code128Bars, patternFor, patternCount, START_B, START_C, CODE_B, CODE_C, STOP } from "./barcode.js";
+import { createCrashGate, crashPayload, installCrashCapture, uaFamily } from "./errors-client.js";
 import { reportId, reportRows, reportTotals, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -431,6 +435,53 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("the week has seven rows and sums the one worked day", [week.rows.length, week.total.net, week.total.overtime, week.target, week.diff], [7, 9.2, 0.7, 42.5, -33.3]);
   const csv = weekCsv(week, "Polier Meier");
   t("the CSV is Excel-friendly: semicolons, decimal commas, a totals line", [csv.split("\r\n").length - 1, csv.includes("2026-09-02;8,5;0,7;1,5;0,5;9,2"), csv.includes("Summe;8,5;0,7;1,5;0,5;9,2"), csv.includes("Soll;;;;;42,5")], [12, true, true, true]);
+}
+
+{
+  // Local calendar dates: 00:30 on the 5th is the 5th, whatever UTC says.
+  t("todayKey is the local day", todayKey(new Date(2026, 8, 5, 0, 30)), "2026-09-05");
+  t("monthKey is the local month at the month turn", monthKey(new Date(2026, 9, 1, 0, 10)), "2026-10");
+  t("a due date counts local days and crosses months", dateKeyOffset(30, new Date(2026, 0, 31, 23, 0)), "2026-03-02");
+  t("ids are UUIDs, unique", (() => { const a = uid(), b = uid(); return [a.length, a !== b, /^[0-9a-f-]{36}$/.test(a)]; })(), [36, true, true]);
+}
+
+{
+  // Code 128: the standard table, subset B for text, C for digit runs, the checksum.
+  t("the symbol table is complete and every pattern is eleven modules (stop thirteen)", (() => {
+    let ok = patternCount() === 107;
+    for (let v = 0; v < 107; v++) { const p = patternFor(v); const sum = [...p].reduce((s, c) => s + Number(c), 0); ok = ok && (v === 106 ? (sum === 13 && p.length === 7) : (sum === 11 && p.length === 6)); }
+    return ok;
+  })(), true);
+  t("ABC in subset B with the modulo-103 checksum", code128Values("ABC"), [START_B, 33, 34, 35, 1, STOP]);
+  t("digit runs switch to subset C and back", code128Values("HGC-2026-001234").slice(0, -2), [START_B, 40, 39, 35, 13, CODE_C, 20, 26, CODE_B, 13, CODE_C, 0, 12, 34]);
+  t("an odd run keeps one digit in B before switching", code128Values("A12345").slice(0, -2), [START_B, 33, 17, CODE_C, 23, 45]);
+  t("an all-digit even reference starts in C", code128Values("20260912").slice(0, -2), [START_C, 20, 26, 9, 12]);
+  t("the checksum is the weighted sum modulo 103", (() => { const v = code128Values("HGC-2026-001234"); const data = v.slice(0, -2); let s = data[0]; for (let k = 1; k < data.length; k++) s += data[k] * k; return v[v.length - 2] === s % 103 && v[v.length - 1] === STOP; })(), true);
+  t("bars start after the quiet zone and the first bar is two modules wide", (() => { const b = code128Bars("ABC"); return [b.bars[0].x, b.bars[0].w, b.width > 60]; })(), [10, 2, true]);
+  t("non-printable text is refused", (() => { try { code128Values("é"); return "no"; } catch (e) { return "refused"; } })(), "refused");
+  t("the Cockpit chunk talks to the same Worker as the app", (() => { const w = (f) => (readFileSync(new URL(f, import.meta.url), "utf8").match(/https:\/\/site-log-claude-proxy[^"]*/) || [])[0]; return w("./tabs/CockpitTab.jsx") === w("./roofing-site-manager.jsx"); })(), true);
+  t("no order reference goes to a third-party image service", /qrserver|bwipjs/.test(readFileSync(new URL("./roofing-site-manager.jsx", import.meta.url), "utf8")), false);
+}
+
+{
+  // Crash capture: one panel per message per minute, a nameless payload, a report.
+  let clock = 1000;
+  const gate = createCrashGate({ now: () => clock, windowMs: 60000 });
+  t("the gate lets a message through once a minute", [gate("x"), gate("x"), (clock += 61000, gate("x")), gate("y")], [true, false, true, true]);
+  const p = crashPayload(new TypeError("Cannot read properties of undefined (reading 'id')"), { build: "8f1ef53cc8", path: "/index.html", lang: "de", ua: "Mozilla/5.0 (Linux; Android 14) Chrome" });
+  t("the payload is coded E91, cut to size, device family only", [p.code, p.tag, p.build, p.ua, p.lang, p.message.length <= 200, p.stack.length <= 400], ["E91", "CRASH", "8f1ef53cc8", "android", "de", true, true]);
+  t("E91 in the client matches the code table", [ERROR_CODES.E91.tag, ERROR_CODES.E91.group], ["CRASH", "other"]);
+  t("device families", ["iPhone OS", "Windows NT", "Macintosh", "X11; Linux", "curl"].map(uaFamily), ["ios", "windows", "mac", "linux", "other"]);
+  const shown = [], reported = [];
+  const listeners = {};
+  const target = { addEventListener: (k, fn) => { listeners[k] = fn; } };
+  installCrashCapture({ target, build: "b1", show: (x) => shown.push(x.code), report: async (x) => { reported.push(x.message); return true; }, gate: createCrashGate({ now: () => 5 }) });
+  listeners.error({ error: new Error("boom") });
+  listeners.error({ error: new Error("boom") });
+  listeners.unhandledrejection({ reason: new Error("later") });
+  listeners.error({ message: "ResizeObserver loop limit exceeded" });
+  await new Promise((r) => setTimeout(r, 10));
+  t("errors and rejections are shown once and reported; browser noise is dropped", [shown, reported], [["E91", "E91"], ["boom", "later"]]);
 }
 
 {

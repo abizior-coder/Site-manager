@@ -522,6 +522,7 @@ async function renderAs(role) {
     // The accounting card: a month, five files, each a real download.
     const exportCard = window.document.querySelector("[data-export-card]");
     check("owner: the cockpit shows the accounting export card", !!exportCard && !!exportCard.querySelector("[data-export-month]"), "no export card");
+    check("owner: the cockpit shows the errors card", !!window.document.querySelector("[data-errors-card]"), "no errors card");
     const got = [];
     window.addEventListener("site-log:download", (e) => got.push(e.detail));
     exportCard?.querySelector('[data-export="payroll"]')?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));

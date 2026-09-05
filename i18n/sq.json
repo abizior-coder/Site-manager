@@ -839,5 +839,8 @@
   "importCustomers": "Importo klientë",
   "importCustomersPreview": "{n} rreshta u lexuan: {added} të rinj, {skipped} ekzistojnë.",
   "importCustomersNothing": "Nuk u njoh asnjë klient. Duhet një kolonë Emri ose Firma; opsionale Emri i parë, Telefoni, E-mail, Adresa, Kodi postar, Vendi. Eksporti i kontakteve nga bexio funksionon siç është.",
-  "importCustomersDone": "{n} klientë u importuan"
+  "importCustomersDone": "{n} klientë u importuan",
+  "ccErrors": "Gabime (7 ditë)",
+  "ccErrorsNone": "Asnjë rrëzim i raportuar.",
+  "pickupCodeUnavailable": "Kjo referencë nuk mund të vizatohet si barkod (vetëm shkronja dhe shifra)."
 }

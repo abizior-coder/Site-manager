@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo, Fragment, lazy, Suspense } from "
 import { Clock, Package, Wrench, Camera, MessageSquare, MapPin, FileText, Plus, X, Check, ChevronRight, ChevronLeft, Play, Square, Send, Siren, Phone, ShieldAlert, ScanLine, Loader2, ExternalLink, ImagePlus, QrCode, Barcode, ClipboardCheck, Globe, Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning, RefreshCw, Mountain, User, Flame, HardHat, Shovel, Copy, Pencil, CalendarDays, Mail, CreditCard, Award, Trash2, Share2, ClipboardPaste, Printer, Mic, ShoppingCart, Truck, BookOpen, Minus, Hammer, Ruler, GripVertical, LogOut, Lock, Users, Pin, Search, Building2, Layers, ArrowUpDown, Menu, Coffee, Utensils, Languages, ZoomIn, ZoomOut, Undo2, MoveUpRight, Circle, Type, Paintbrush, RotateCcw, Download, Link2, FileUp } from "lucide-react";
 import { onAuthChange, signIn, signUp, signOutUser, sendReset, authErrorKey, legacyScan, importLegacy, getIdToken } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
-import { parsePriceList, mergeIntoCatalog } from "./price-list.js";
 import { reportId, reportRows, reportTotals, entryLabels, unsentMonthEntries, withSend, rapportChanged, splitDayHours, weekOf, weekRows, weekCsv } from "./reports.js";
 import { buildQrPayload, qrDataUrl, validateBillingProfile, normaliseIban, creditorReference, isSwissIban, SWISS_CROSS_SVG } from "./swiss-qr.js";
 import {
@@ -12,7 +11,6 @@ import {
 } from "./company-store.js";
 import { MAX_FILE_BYTES, FILE_KINDS, isImage, isPdf, guessKind, fmtSize, sortFiles, normaliseLink } from "./files.js";
 import { BREAKS, breakMeta, breakHours, netHours, breakTaken } from "./breaks.js";
-import { sanitiseBackup, sanitiseProjectCode } from "./import-guard.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { COLORS } from "./ui/theme.js";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
@@ -439,6 +437,8 @@ export default function SiteManager() {
   const [clocks, setClocks] = useState([]); // each crew member's own clock
   const customersRef = useRef([]);
   const [lang, setLang] = useState("de");
+  // Screen readers, hyphenation and the crash report read the language here.
+  useEffect(() => { try { document.documentElement.lang = lang; } catch {} }, [lang]);
   const [langPickerOpen, setLangPickerOpen] = useState(false);
   // A language whose file has not arrived yet reads as German, then English,
   // until its chunk lands and the tick re-renders.
@@ -596,6 +596,27 @@ export default function SiteManager() {
     window.addEventListener("site-log:error", onErr);
     return () => window.removeEventListener("site-log:error", onErr);
   }, []);
+
+  // Crash reports from the entry chunk: posted to the Worker under the
+  // company, once the sign-in is there. Whatever crashed before this
+  // listener existed waits in the queue and goes now.
+  useEffect(() => {
+    const send = async (p) => {
+      try {
+        const cid = getCompanyId();
+        if (!cid) return;
+        const token = await getIdToken();
+        if (!token) return;
+        await fetch(`${CLAUDE_PROXY_URL}/errors/${cid}`, { method: "POST", keepalive: true, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(p) });
+      } catch {}
+    };
+    const onCrash = (ev) => { if (ev.detail) send(ev.detail); };
+    window.addEventListener("site-log:crash", onCrash);
+    const queued = window.__siteLogCrashes || [];
+    window.__siteLogCrashes = [];
+    queued.forEach(send);
+    return () => window.removeEventListener("site-log:crash", onCrash);
+  }, [membership]);
 
   // A new build has taken over the page (service worker); offer a restart.
   const [updateReady, setUpdateReady] = useState(() => typeof window !== "undefined" && !!window.__siteLogUpdateReady);
@@ -870,18 +891,7 @@ export default function SiteManager() {
     if (membership) tracker.track("open");
   }, [membership?.companyId]);
 
-  const [usage, setUsage] = useState(null);
-  async function loadUsage() {
-    try {
-      const cid = getCompanyId();
-      const token = await getIdToken();
-      const res = await fetch(`${CLAUDE_PROXY_URL}/metrics/${cid}?days=30`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = res.ok ? await res.json() : null;
-      setUsage(data && Array.isArray(data.days) ? data : { days: [], totals: {}, activePeople: 0 });
-    } catch {
-      setUsage({ days: [], totals: {}, activePeople: 0 });
-    }
-  }
+
 
   useEffect(() => {
     if (!selectedProject || !membership) return;
@@ -1732,6 +1742,7 @@ export default function SiteManager() {
       // Checked and cut to shape before anything lands: known fields, capped
       // sizes, fresh ids, photos re-keyed and only if they are images. A file
       // from a stranger cannot plant a record or overwrite a signature.
+      const { sanitiseBackup } = await import("./import-guard.js");
       const data = sanitiseBackup(JSON.parse(text), { makeId: uid, userId: user?.uid || null });
       if (!data) { showToast(t.invalidBackupCode); return; }
 
@@ -1794,6 +1805,7 @@ export default function SiteManager() {
   async function submitBackupImport() {
     // Same rule as the file restore: checked, cut to shape, fresh ids. A
     // pasted photo id can never land on a signature's key.
+    const { sanitiseBackup } = await import("./import-guard.js");
     const data = sanitiseBackup(decodeBackup(backupCodeInput), { makeId: uid, userId: user?.uid || null });
     if (!data) {
       setBackupError(t.invalidBackupCode);
@@ -2072,7 +2084,7 @@ export default function SiteManager() {
       customerId: project.customerId || null,
       number: nextDocNumber(documents, type, new Date().getFullYear()),
       date: todayKey(),
-      dueDate: due.toISOString().slice(0, 10),
+      dueDate: todayKey(due),
       lineItems,
       vatRate: (VAT_RATES.find((v) => v.key === vatKey) || VAT_RATES[0]).rate,
       notes: t.regieDocNote,
@@ -2576,7 +2588,7 @@ export default function SiteManager() {
       customerId: project.customerId || null,
       number: nextDocNumber(documents, type, new Date().getFullYear()),
       date: today,
-      dueDate: due.toISOString().slice(0, 10),
+      dueDate: todayKey(due),
       lineItems,
       vatRate,
       notes: "",
@@ -2617,7 +2629,7 @@ export default function SiteManager() {
       type: "invoice",
       number: nextDocNumber(documents, "invoice", new Date().getFullYear()),
       date: todayKey(),
-      dueDate: due.toISOString().slice(0, 10),
+      dueDate: todayKey(due),
       status: "open",
       fromQuote: quote.number,
       createdAt: Date.now(),
@@ -2738,10 +2750,11 @@ export default function SiteManager() {
     }
   }
 
-  function submitImportProject() {
+  async function submitImportProject() {
     // A code is JSON somebody else made. It is checked and cut to shape
     // before anything of it lands: known fields only, fresh ids, entries
     // attributed to the importer.
+    const { sanitiseProjectCode } = await import("./import-guard.js");
     const clean = sanitiseProjectCode(decodeProjectCode(importCodeInput), { makeId: uid, userId: user?.uid || null });
     if (!clean) {
       setImportError(t.invalidCode);
@@ -3007,7 +3020,9 @@ export default function SiteManager() {
     if (!file) return;
     try {
       const text = await file.text();
+      const { parsePriceList } = await import("./price-list.js");
       const parsed = parsePriceList(text);
+      const { mergeIntoCatalog } = await import("./price-list.js");
       const preview = mergeIntoCatalog(articleMaster, parsed.rows, supplier || "");
       setPriceImport({
         fileName: file.name,
@@ -3024,8 +3039,9 @@ export default function SiteManager() {
     }
   }
 
-  function applyPriceList() {
+  async function applyPriceList() {
     if (!priceImport || !priceImport.rows.length) return;
+    const { mergeIntoCatalog } = await import("./price-list.js");
     const merged = mergeIntoCatalog(articleMaster, priceImport.rows, priceImport.supplier);
     setArticleMaster(merged.catalog);
     window.storage.set("site-material-catalog", JSON.stringify(merged.catalog)).catch(() => {});
@@ -3481,7 +3497,12 @@ export default function SiteManager() {
   function generatePickupCode() {
     if (!pickupModal || !pickupModal.orderRef.trim()) return;
     addEntry({ type: "pickup", projectId: pickupModal.projectId, description: `${pickupModal.orderRef.trim()}${pickupModal.supplier ? " — " + pickupModal.supplier.trim() : ""}` });
-    setPickupModal((s) => ({ ...s, step: "code" }));
+    // Both codes are drawn here, on the phone: the reference never leaves the app.
+    const ref = pickupModal.orderRef.trim();
+    setPickupModal((s) => ({ ...s, step: "code", barcode: null, qr: null }));
+    // Both drawn on the phone; the modules load when a code is first needed.
+    import("./barcode.js").then(({ code128Bars }) => { let barcode = null; try { barcode = code128Bars(ref); } catch { barcode = null; } setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, barcode } : s)); }).catch(() => {});
+    qrDataUrl(ref).then((url) => setPickupModal((s) => (s && s.orderRef.trim() === ref ? { ...s, qr: url } : s))).catch(() => {});
   }
 
   function openInspection(projectId, entry) {
@@ -3744,7 +3765,7 @@ export default function SiteManager() {
     const expiringCerts = certificates.filter((c) => {
       if (!c.expiryDate) return false;
       const soon = new Date(); soon.setMonth(soon.getMonth() + 2);
-      return c.expiryDate <= soon.toISOString().slice(0, 10);
+      return c.expiryDate <= todayKey(soon);
     });
 
     return {
@@ -4176,7 +4197,7 @@ export default function SiteManager() {
         })()}
 
         {tab === "board" && canManage() && <Suspense fallback={null}><BoardTab assignments={assignments} boardView={boardView} calMonth={calMonth} customers={customers} dragProject={dragProject} entries={entries} lang={lang} leaveRequests={leaveRequests} openBranch={openBranch} printRapport={printRapport} projects={projects} setAssignModal={setAssignModal} setBoardView={setBoardView} setCalMonth={setCalMonth} setDragProject={setDragProject} setOpenBranch={setOpenBranch} setSelectedProject={setSelectedProject} setShowFinishedJobs={setShowFinishedJobs} setTab={setTab} setWeekAnchor={setWeekAnchor} showFinishedJobs={showFinishedJobs} siteReports={siteReports} t={t} team={team} toggleAssignment={toggleAssignment} weekAnchor={weekAnchor} weekDays={weekDays} /></Suspense>}
-        {tab === "cockpit" && canManage() && <Suspense fallback={null}><CockpitTab approveEntry={approveEntry} billing={billing} commandCentre={commandCentre} customers={customers} documents={documents} entries={entries} leaveRequests={leaveRequests} hoursBalance={hoursBalance} loadUsage={loadUsage} money={money} projects={projects} setDocEditor={setDocEditor} setHoursModalOpen={setHoursModalOpen} setLeaveStatus={setLeaveStatus} setSelectedCustomer={setSelectedCustomer} setTab={setTab} t={t} team={team} usage={usage} /></Suspense>}
+        {tab === "cockpit" && canManage() && <Suspense fallback={null}><CockpitTab approveEntry={approveEntry} billing={billing} commandCentre={commandCentre} customers={customers} documents={documents} entries={entries} leaveRequests={leaveRequests} hoursBalance={hoursBalance} money={money} projects={projects} setDocEditor={setDocEditor} setHoursModalOpen={setHoursModalOpen} setLeaveStatus={setLeaveStatus} setSelectedCustomer={setSelectedCustomer} setTab={setTab} t={t} team={team} /></Suspense>}
         {tab === "customers" && (() => {
           const due = dueFollowUps();
           const q = customerSearch.trim().toLowerCase();
@@ -6772,9 +6793,13 @@ export default function SiteManager() {
             <div className="flex flex-col items-center gap-3">
               <div style={{ background: "#fff" }} className="rounded-xl p-4 w-full flex items-center justify-center">
                 {pickupModal.codeType === "qr" ? (
-                  <img alt="QR" className="w-56 h-56" src={`https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(pickupModal.orderRef)}`} />
+                  pickupModal.qr ? <img data-pickup-qr alt={`QR ${pickupModal.orderRef}`} className="w-56 h-56" src={pickupModal.qr} /> : <Loader2 size={24} className="animate-spin" color="#333" />
+                ) : pickupModal.barcode ? (
+                  <svg data-pickup-barcode role="img" aria-label={`Code 128 ${pickupModal.orderRef}`} viewBox={`0 0 ${pickupModal.barcode.width} 60`} preserveAspectRatio="none" className="w-full h-28" shapeRendering="crispEdges">
+                    {pickupModal.barcode.bars.map((b, i) => <rect key={i} x={b.x} y={0} width={b.w} height={60} fill="#000" />)}
+                  </svg>
                 ) : (
-                  <img alt="Barcode" className="w-full h-28 object-contain" src={`https://bwipjs-api.metafloor.com/?bcid=code128&text=${encodeURIComponent(pickupModal.orderRef)}&scale=3&includetext=true`} />
+                  <div style={{ color: "#333" }} className="text-xs">{t.pickupCodeUnavailable}</div>
                 )}
               </div>
               <div className="text-center">
@@ -6985,50 +7010,6 @@ function SwissCross({ size = 14 }) {
 
 // Usage, for the owner: how many people used the app, how often, for what.
 // Counts per company and day from the Worker; no names, no text.
-export function UsageCard({ t, usage, onLoad }) {
-  useEffect(() => { if (!usage) onLoad(); }, []);
-  const days = (usage && usage.days) || [];
-  const totals = (usage && usage.totals) || {};
-  const last7 = days.slice(-7);
-  const people7 = new Set();
-  const sum = (list, pick) => list.reduce((s, d) => s + Object.entries(d.events || {}).filter(([k]) => pick(k)).reduce((x, [, v]) => x + v, 0), 0);
-  const entries7 = sum(last7, (k) => k.startsWith("entry."));
-  const active7 = Math.max(...last7.map((d) => d.active), 0);
-  const entries30 = Object.entries(totals).filter(([k]) => k.startsWith("entry.")).reduce((s, [, v]) => s + v, 0);
-  const reports30 = (totals["report.sent"] || 0) + (totals["rapport.sign"] || 0);
-  const trips30 = (totals["entry.transport"] || 0) + (totals["entry.inspection"] || 0);
-  const maxActive = Math.max(...days.map((d) => d.active), 1);
-  const tile = (label, value) => (
-    <div key={label} style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }} className="rounded-lg p-2.5">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide">{label}</div>
-      <div className="text-lg font-black leading-tight">{value}</div>
-    </div>
-  );
-  return (
-    <div data-usage-card style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-3 lg:col-span-3">
-      <div style={{ color: COLORS.muted }} className="text-[10px] uppercase tracking-wide mb-2">{t.ccUsage}</div>
-      {!usage && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageLoading}</div>}
-      {usage && days.length === 0 && <div style={{ color: COLORS.muted }} className="text-xs">{t.ccUsageEmpty}</div>}
-      {usage && days.length > 0 && (
-        <>
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2">
-            {tile(t.ccUsageActive30, String(usage.activePeople || 0))}
-            {tile(t.ccUsageActive7, String(active7))}
-            {tile(t.ccUsageEntries30, `${entries30} · ${entries7}`)}
-            {tile(t.ccUsageReports30, String(reports30))}
-            {tile(t.ccUsageTrips30, String(trips30))}
-          </div>
-          <div className="flex items-end gap-[3px] h-10 mt-3">
-            {days.map((d) => (
-              <div key={d.date} title={`${d.date}: ${d.active}`} style={{ height: `${Math.max(6, Math.round((d.active / maxActive) * 100))}%`, background: d.active ? COLORS.accent : COLORS.border }} className="flex-1 rounded-sm" />
-            ))}
-          </div>
-          <div style={{ color: COLORS.muted }} className="text-[10px] mt-2">{t.ccUsageFootnote}</div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, onReorder, t }) {
   const [sort, setSort] = useState("name");

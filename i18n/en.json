@@ -839,5 +839,8 @@
   "importCustomers": "Import customers",
   "importCustomersPreview": "{n} rows read: {added} new, {skipped} already there.",
   "importCustomersNothing": "No customers recognised. Needed: a Name or Firma column; optional Vorname, Telefon, E-Mail, Adresse, PLZ, Ort. bexio's contact export works as it is.",
-  "importCustomersDone": "{n} customers imported"
+  "importCustomersDone": "{n} customers imported",
+  "ccErrors": "Errors (7 days)",
+  "ccErrorsNone": "No crashes reported.",
+  "pickupCodeUnavailable": "This reference cannot be drawn as a barcode (letters and digits only)."
 }

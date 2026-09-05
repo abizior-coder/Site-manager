@@ -72,6 +72,9 @@ export const ERROR_CODES = {
     de: "Upload fehlgeschlagen. Verbindung prüfen und nochmals versuchen.",
     en: "Upload failed. Check the connection and try again." },
   // --- anything else --------------------------------------------------------
+  E91: { tag: "CRASH", group: "other",
+    de: "Die App ist auf einen unerwarteten Fehler gelaufen. Der Fehler wurde gemeldet; die Seite neu laden.",
+    en: "The app hit an unexpected error. It has been reported; reload the page." },
   E90: { tag: "UNKNOWN", group: "other",
     de: "Unerwarteter Fehler. Code und Text melden.",
     en: "Unexpected error. Report the code and text." },
@@ -127,7 +130,7 @@ export function classifyError(e, context = "save") {
     else if (/no company/i.test(msg)) id = "E14";
     else if (/Failed to fetch|NetworkError|offline|Load failed/i.test(msg)) id = "E11";
     else if (/exceeds|too large|maximum size|1048487/i.test(msg)) id = "E12";
-    else id = context === "save" ? "E19" : "E90";
+    else id = context === "save" ? "E19" : context === "crash" ? "E91" : "E90";
   }
   const meta = ERROR_CODES[id];
   return { code: id, tag: meta.tag, group: meta.group, detail: (code ? `${code}: ` : "") + msg.slice(0, 160) };

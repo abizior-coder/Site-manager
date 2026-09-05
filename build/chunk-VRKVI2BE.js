@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "importCustomers": "Kunden importieren",
   "importCustomersPreview": "{n} Zeilen gelesen: {added} neu, {skipped} schon vorhanden.",
   "importCustomersNothing": "Keine Kunden erkannt. N\xF6tig: eine Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adresse, PLZ, Ort. Der bexio-Kontaktexport geht so, wie er ist.",
-  "importCustomersDone": "{n} Kunden importiert"
+  "importCustomersDone": "{n} Kunden importiert",
+  "ccErrors": "Fehler (7 Tage)",
+  "ccErrorsNone": "Keine Abst\xFCrze gemeldet.",
+  "pickupCodeUnavailable": "Diese Referenz l\xE4sst sich nicht als Strichcode zeichnen (nur Buchstaben und Ziffern)."
 }
 `;export{t as default};

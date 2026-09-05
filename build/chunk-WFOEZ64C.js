@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var t=`{
   "importCustomers": "Importovat z\xE1kazn\xEDky",
   "importCustomersPreview": "Na\u010Dteno {n} \u0159\xE1dk\u016F: {added} nov\xFDch, {skipped} u\u017E existuje.",
   "importCustomersNothing": "Nerozpozn\xE1ni \u017E\xE1dn\xED z\xE1kazn\xEDci. Pot\u0159ebn\xFD sloupec Jm\xE9no nebo Firma; voliteln\u011B K\u0159estn\xED jm\xE9no, Telefon, E-mail, Adresa, PS\u010C, M\u011Bsto. Export kontakt\u016F z bexio funguje tak, jak je.",
-  "importCustomersDone": "Importov\xE1no z\xE1kazn\xEDk\u016F: {n}"
+  "importCustomersDone": "Importov\xE1no z\xE1kazn\xEDk\u016F: {n}",
+  "ccErrors": "Chyby (7 dn\xED)",
+  "ccErrorsNone": "\u017D\xE1dn\xE9 nahl\xE1\u0161en\xE9 p\xE1dy.",
+  "pickupCodeUnavailable": "Tuto referenci nelze nakreslit jako \u010D\xE1rov\xFD k\xF3d (jen p\xEDsmena a \u010D\xEDslice)."
 }
 `;export{t as default};

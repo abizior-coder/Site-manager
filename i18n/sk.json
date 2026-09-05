@@ -839,5 +839,8 @@
   "importCustomers": "Importovať zákazníkov",
   "importCustomersPreview": "Načítaných {n} riadkov: {added} nových, {skipped} už existuje.",
   "importCustomersNothing": "Nerozpoznaní zákazníci. Potrebný stĺpec Meno alebo Firma; voliteľne Krstné meno, Telefón, E-mail, Adresa, PSČ, Mesto. Export kontaktov z bexio funguje tak, ako je.",
-  "importCustomersDone": "Importovaných zákazníkov: {n}"
+  "importCustomersDone": "Importovaných zákazníkov: {n}",
+  "ccErrors": "Chyby (7 dní)",
+  "ccErrorsNone": "Žiadne nahlásené pády.",
+  "pickupCodeUnavailable": "Túto referenciu nemožno nakresliť ako čiarový kód (len písmená a číslice)."
 }

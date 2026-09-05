@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "importCustomers": "Importova\u0165 z\xE1kazn\xEDkov",
   "importCustomersPreview": "Na\u010D\xEDtan\xFDch {n} riadkov: {added} nov\xFDch, {skipped} u\u017E existuje.",
   "importCustomersNothing": "Nerozpoznan\xED z\xE1kazn\xEDci. Potrebn\xFD st\u013Apec Meno alebo Firma; volite\u013Ene Krstn\xE9 meno, Telef\xF3n, E-mail, Adresa, PS\u010C, Mesto. Export kontaktov z bexio funguje tak, ako je.",
-  "importCustomersDone": "Importovan\xFDch z\xE1kazn\xEDkov: {n}"
+  "importCustomersDone": "Importovan\xFDch z\xE1kazn\xEDkov: {n}",
+  "ccErrors": "Chyby (7 dn\xED)",
+  "ccErrorsNone": "\u017Diadne nahl\xE1sen\xE9 p\xE1dy.",
+  "pickupCodeUnavailable": "T\xFAto referenciu nemo\u017Eno nakresli\u0165 ako \u010Diarov\xFD k\xF3d (len p\xEDsmen\xE1 a \u010D\xEDslice)."
 }
 `;export{o as default};

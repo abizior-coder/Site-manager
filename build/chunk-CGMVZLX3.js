@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "importCustomers": "Importo klient\xEB",
   "importCustomersPreview": "{n} rreshta u lexuan: {added} t\xEB rinj, {skipped} ekzistojn\xEB.",
   "importCustomersNothing": "Nuk u njoh asnj\xEB klient. Duhet nj\xEB kolon\xEB Emri ose Firma; opsionale Emri i par\xEB, Telefoni, E-mail, Adresa, Kodi postar, Vendi. Eksporti i kontakteve nga bexio funksionon si\xE7 \xEBsht\xEB.",
-  "importCustomersDone": "{n} klient\xEB u importuan"
+  "importCustomersDone": "{n} klient\xEB u importuan",
+  "ccErrors": "Gabime (7 dit\xEB)",
+  "ccErrorsNone": "Asnj\xEB rr\xEBzim i raportuar.",
+  "pickupCodeUnavailable": "Kjo referenc\xEB nuk mund t\xEB vizatohet si barkod (vet\xEBm shkronja dhe shifra)."
 }
 `;export{r as default};

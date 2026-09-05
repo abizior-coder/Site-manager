@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var o=`{
   "importCustomers": "Importuj klient\xF3w",
   "importCustomersPreview": "Odczytano {n} wierszy: {added} nowych, {skipped} ju\u017C istnieje.",
   "importCustomersNothing": "Nie rozpoznano klient\xF3w. Potrzebna kolumna Nazwisko/Name lub Firma; opcjonalnie Imi\u0119, Telefon, E-mail, Adres, Kod pocztowy, Miejscowo\u015B\u0107. Eksport kontakt\xF3w z bexio dzia\u0142a bez zmian.",
-  "importCustomersDone": "Zaimportowano klient\xF3w: {n}"
+  "importCustomersDone": "Zaimportowano klient\xF3w: {n}",
+  "ccErrors": "B\u0142\u0119dy (7 dni)",
+  "ccErrorsNone": "Brak zg\u0142oszonych awarii.",
+  "pickupCodeUnavailable": "Tej referencji nie da si\u0119 narysowa\u0107 jako kodu kreskowego (tylko litery i cyfry)."
 }
 `;export{o as default};

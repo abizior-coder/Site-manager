@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "importCustomers": "Importer des clients",
   "importCustomersPreview": "{n} lignes lues : {added} nouvelles, {skipped} d\xE9j\xE0 pr\xE9sentes.",
   "importCustomersNothing": "Aucun client reconnu. N\xE9cessaire : une colonne Nom ou Soci\xE9t\xE9 ; optionnel Pr\xE9nom, T\xE9l\xE9phone, E-mail, Adresse, NPA, Lieu. L'export de contacts bexio fonctionne tel quel.",
-  "importCustomersDone": "{n} clients import\xE9s"
+  "importCustomersDone": "{n} clients import\xE9s",
+  "ccErrors": "Erreurs (7 jours)",
+  "ccErrorsNone": "Aucun plantage signal\xE9.",
+  "pickupCodeUnavailable": "Cette r\xE9f\xE9rence ne peut pas \xEAtre dessin\xE9e en code-barres (lettres et chiffres seulement)."
 }
 `;export{r as default};

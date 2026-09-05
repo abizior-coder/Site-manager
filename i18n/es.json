@@ -839,5 +839,8 @@
   "importCustomers": "Importar clientes",
   "importCustomersPreview": "{n} filas leídas: {added} nuevas, {skipped} ya existentes.",
   "importCustomersNothing": "No se reconoció ningún cliente. Necesario: una columna Nombre o Empresa; opcional Nombre de pila, Teléfono, E-mail, Dirección, CP, Localidad. La exportación de contactos de bexio funciona tal cual.",
-  "importCustomersDone": "{n} clientes importados"
+  "importCustomersDone": "{n} clientes importados",
+  "ccErrors": "Errores (7 días)",
+  "ccErrorsNone": "Sin fallos reportados.",
+  "pickupCodeUnavailable": "Esta referencia no se puede dibujar como código de barras (solo letras y cifras)."
 }

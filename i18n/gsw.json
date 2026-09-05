@@ -839,5 +839,8 @@
   "importCustomers": "Kunde importiere",
   "importCustomersPreview": "{n} Zile gläse: {added} neu, {skipped} scho da.",
   "importCustomersNothing": "Kei Kunde erkännt. Nötig: e Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adrässe, PLZ, Ort. De bexio-Kontaktexport gaht so, wie er isch.",
-  "importCustomersDone": "{n} Kunde importiert"
+  "importCustomersDone": "{n} Kunde importiert",
+  "ccErrors": "Fähler (7 Täg)",
+  "ccErrorsNone": "Kei Abstürz gmäldet.",
+  "pickupCodeUnavailable": "Die Referänz lat sich nöd als Strichcode zeichne (nur Buechstabe und Zahle)."
 }

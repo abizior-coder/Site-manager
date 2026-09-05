@@ -839,6 +839,9 @@ import"./chunk-UJVVLSSD.js";var r=`{
   "importCustomers": "Kunde importiere",
   "importCustomersPreview": "{n} Zile gl\xE4se: {added} neu, {skipped} scho da.",
   "importCustomersNothing": "Kei Kunde erk\xE4nnt. N\xF6tig: e Spalte Name oder Firma; optional Vorname, Telefon, E-Mail, Adr\xE4sse, PLZ, Ort. De bexio-Kontaktexport gaht so, wie er isch.",
-  "importCustomersDone": "{n} Kunde importiert"
+  "importCustomersDone": "{n} Kunde importiert",
+  "ccErrors": "F\xE4hler (7 T\xE4g)",
+  "ccErrorsNone": "Kei Abst\xFCrz gm\xE4ldet.",
+  "pickupCodeUnavailable": "Die Refer\xE4nz lat sich n\xF6d als Strichcode zeichne (nur Buechstabe und Zahle)."
 }
 `;export{r as default};

@@ -839,5 +839,8 @@
   "importCustomers": "Importovat zákazníky",
   "importCustomersPreview": "Načteno {n} řádků: {added} nových, {skipped} už existuje.",
   "importCustomersNothing": "Nerozpoznáni žádní zákazníci. Potřebný sloupec Jméno nebo Firma; volitelně Křestní jméno, Telefon, E-mail, Adresa, PSČ, Město. Export kontaktů z bexio funguje tak, jak je.",
-  "importCustomersDone": "Importováno zákazníků: {n}"
+  "importCustomersDone": "Importováno zákazníků: {n}",
+  "ccErrors": "Chyby (7 dní)",
+  "ccErrorsNone": "Žádné nahlášené pády.",
+  "pickupCodeUnavailable": "Tuto referenci nelze nakreslit jako čárový kód (jen písmena a číslice)."
 }

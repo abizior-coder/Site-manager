@@ -839,5 +839,8 @@
   "importCustomers": "Importuj klientów",
   "importCustomersPreview": "Odczytano {n} wierszy: {added} nowych, {skipped} już istnieje.",
   "importCustomersNothing": "Nie rozpoznano klientów. Potrzebna kolumna Nazwisko/Name lub Firma; opcjonalnie Imię, Telefon, E-mail, Adres, Kod pocztowy, Miejscowość. Eksport kontaktów z bexio działa bez zmian.",
-  "importCustomersDone": "Zaimportowano klientów: {n}"
+  "importCustomersDone": "Zaimportowano klientów: {n}",
+  "ccErrors": "Błędy (7 dni)",
+  "ccErrorsNone": "Brak zgłoszonych awarii.",
+  "pickupCodeUnavailable": "Tej referencji nie da się narysować jako kodu kreskowego (tylko litery i cyfry)."
 }

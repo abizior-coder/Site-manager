@@ -32,6 +32,7 @@ KI‑Dienst (Scans, Übersetzungen, Inspektionsberater), **E4x** Sprachen,
 | E52 | FILE-DENIED | Kein Zugriff auf die Dateiablage der Firma. | Inhaber fragen, ob das Konto aktiv ist. |
 | E53 | FILE-UPLOAD | Upload fehlgeschlagen. | Verbindung prüfen, nochmals versuchen. |
 | E90 | UNKNOWN | Unerwarteter Fehler. | Code, Text und Build melden. |
+| E91 | CRASH | Ein nicht abgefangener Fehler in der App (Absturz). Wird automatisch mit Build und Fehlertext an den Server gemeldet; der Inhaber sieht ihn im Cockpit unter «Fehler». | Seite neu laden; wenn es wiederkommt, Code und Build melden. |
 
 ## Was eine Meldung enthalten soll
 
