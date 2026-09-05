@@ -82,6 +82,31 @@ before committing — both workflows refuse a stale `build/`.
 | Cloudflare Worker | `site-log-claude-proxy.abizior.workers.dev` | Secret: `ANTHROPIC_API_KEY` |
 | Weather | Open-Meteo | `meteoswiss_icon_ch1` model, falls back to default |
 
+## 2b. Engineering standard (owner's decision, 2026-09-05)
+
+Every change from here on is made **as a software engineer holding industry
+standards**, not as a quick fix. A change is done only when:
+
+- it has a spec in `docs/specs/` with goal, constraints, definition of done;
+- pure logic lives in a tested module, not in the app component; money,
+  hours and dates have unit tests;
+- every suite is green locally (`node <suite>.test.mjs`, exit codes checked)
+  and in CI; the Pages deploy runs only after green CI;
+- it is verified on the emulator and, after deploy, on production;
+- it meets the accessibility bar: accessible names on controls, dialog
+  semantics on modals, at least 24 px (target 44 px) touch targets, at least
+  12 px type, `lang` correct, focus visible;
+- dates are local calendar dates, instants are UTC; ids come from
+  `crypto.randomUUID()`; personal data never leaves the app to an undeclared
+  third party;
+- the first paint stays under the 350 KB budget (own code) and the SDK is
+  pinned;
+- the change is recorded: spec status, `docs/JOURNAL.md`, CHANGELOG entry
+  once it exists, a semver tag per deploy once tagging exists.
+
+The engineering audit of 2026-09-05 (`docs/engineering-audit-*.md`, local)
+lists what is still below this bar and the order to close it.
+
 ## 3. Hard constraints
 
 - **No Firebase Blaze plan.** Cloud Functions are therefore unavailable

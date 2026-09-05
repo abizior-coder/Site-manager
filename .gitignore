@@ -19,3 +19,6 @@ docs/JOURNAL.md
 
 # throwaway patch scripts
 .*.py
+
+# Engineering audits stay local like the security audits
+docs/engineering-audit-*.md
