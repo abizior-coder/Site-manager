@@ -92,8 +92,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$tag" -m "Site Log $version (build $build)"
           git push origin "$tag"
-          printf '%s
-
-Build `%s`, deployed from %s.
-' "$notes" "$build" "$(git rev-parse --short HEAD)" > /tmp/notes.md
+          { printf '%s\n\n' "$notes"; printf 'Build %s, deployed from %s.\n' "$build" "$(git rev-parse --short HEAD)"; } > /tmp/notes.md
           gh release create "$tag" --title "Site Log $version" --notes-file /tmp/notes.md
