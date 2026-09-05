@@ -75,7 +75,7 @@ export function StoredImage({ photoId, photo, className, alt = "" }) {
 
 export function typeMeta(type, t) {
   const map = {
-    time: { label: t.typeTime, icon: Clock, color: COLORS.accent },
+    time: { label: t.typeTime, icon: Clock, color: COLORS.accentText },
     material: { label: t.typeMaterial, icon: Package, color: COLORS.success },
     tool: { label: t.typeTool, icon: Wrench, color: COLORS.amber },
     note: { label: t.typeNote, icon: MessageSquare, color: COLORS.muted },
@@ -155,7 +155,7 @@ export function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDel
             aria-label={t.a11yDelete}
             title={t.a11yDelete}
             onClick={() => onDelete(entry)}
-            style={{ color: COLORS.danger }}
+            style={{ color: COLORS.dangerText }}
           >
             <Trash2 size={14} />
           </button>

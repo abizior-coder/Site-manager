@@ -214,7 +214,7 @@ export function ProjectDetail({
                 href={mapsUrl(project.address)}
                 target="_blank"
                 rel="noreferrer"
-                style={{ color: COLORS.accent }}
+                style={{ color: COLORS.accentText }}
                 className="text-xs flex items-center gap-1 mt-0.5 min-w-0"
               >
                 <MapPin size={11} className="shrink-0" /> <span className="break-words min-w-0">{project.address}</span>
@@ -235,7 +235,7 @@ export function ProjectDetail({
               aria-label={t.a11yPin}
               onClick={onTogglePin}
               title={pinned ? t.dockUnpin : t.dockPin}
-              style={{ color: pinned ? COLORS.accent : COLORS.muted }}
+              style={{ color: pinned ? COLORS.accentText : COLORS.muted }}
             >
               <Pin size={16} fill={pinned ? COLORS.accent : "none"} />
             </button>
@@ -337,7 +337,7 @@ export function ProjectDetail({
                             <button
                               data-purge-entry
                               onClick={() => onPurgeEntry(e)}
-                              style={{ color: COLORS.danger, border: `1px solid ${COLORS.danger}` }}
+                              style={{ color: COLORS.dangerText, border: `1px solid ${COLORS.danger}` }}
                               className="tap px-2 py-1 rounded-lg font-bold"
                             >
                               {t.purgeBtn}
@@ -429,7 +429,7 @@ export function ProjectDetail({
                       </div>
                       <button
                         onClick={() => onEditCustomer(customer)}
-                        style={{ color: COLORS.accent }}
+                        style={{ color: COLORS.accentText }}
                         className="text-xs font-bold uppercase"
                       >
                         {t.editLabel}
@@ -501,7 +501,7 @@ export function ProjectDetail({
                           style={{
                             background: `${COLORS.accent}1F`,
                             border: `1px solid ${COLORS.accent}66`,
-                            color: COLORS.accent,
+                            color: COLORS.accentText,
                           }}
                           className="pl-2.5 pr-1.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5"
                         >
@@ -597,7 +597,7 @@ export function ProjectDetail({
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      style={{ color: COLORS.accent }}
+                      style={{ color: COLORS.accentText }}
                       className="text-xs font-bold uppercase flex items-center gap-1 whitespace-nowrap"
                     >
                       <Plus size={11} /> {t.filesAdd}
@@ -656,7 +656,7 @@ export function ProjectDetail({
                               aria-label={t.a11yDelete}
                               onClick={() => onDeleteFile(f)}
                               title={t.deleteLabel}
-                              style={{ color: COLORS.danger }}
+                              style={{ color: COLORS.dangerText }}
                               className="tap shrink-0"
                             >
                               <Trash2 size={13} />
@@ -750,7 +750,7 @@ export function ProjectDetail({
                         <span
                           style={{
                             background: `${st.overdue ? COLORS.danger : st.meta.color}22`,
-                            color: st.overdue ? COLORS.danger : st.meta.color,
+                            color: st.overdue ? COLORS.dangerText : st.meta.color,
                             border: `1px solid ${st.overdue ? COLORS.danger : st.meta.color}66`,
                           }}
                           className="shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
@@ -856,7 +856,7 @@ export function ProjectDetail({
                         </div>
                         <div className="flex justify-between font-bold">
                           <span>{t.marginLabel}</span>
-                          <span style={{ color: costing.margin >= 0 ? COLORS.success : COLORS.danger }}>
+                          <span style={{ color: costing.margin >= 0 ? COLORS.success : COLORS.dangerText }}>
                             {money(costing.margin)} ({costing.marginPct.toFixed(0)}%)
                           </span>
                         </div>
@@ -1009,7 +1009,7 @@ export function ProjectDetail({
                             <button
                               data-purge-entry
                               onClick={() => onPurgeEntry(e)}
-                              style={{ color: COLORS.danger, border: `1px solid ${COLORS.danger}` }}
+                              style={{ color: COLORS.dangerText, border: `1px solid ${COLORS.danger}` }}
                               className="tap px-2 py-1 rounded-lg font-bold"
                             >
                               {t.purgeBtn}
@@ -1063,7 +1063,7 @@ export function ProjectDetail({
                                 key={k}
                                 style={{
                                   background: v === "ok" ? `${COLORS.success}22` : `${COLORS.danger}22`,
-                                  color: v === "ok" ? COLORS.success : COLORS.danger,
+                                  color: v === "ok" ? COLORS.success : COLORS.dangerText,
                                 }}
                                 className="px-1.5 py-0.5 rounded text-xs font-bold"
                               >
@@ -1167,7 +1167,7 @@ export function ProjectDetail({
                     <button
                       data-translate-all
                       onClick={onTranslateAll}
-                      style={{ color: COLORS.accent }}
+                      style={{ color: COLORS.accentText }}
                       className="text-xs font-bold uppercase flex items-center gap-1 shrink-0"
                     >
                       <Languages size={12} /> {t.translateAll}
@@ -1198,7 +1198,7 @@ export function ProjectDetail({
                             >
                               <span
                                 className="font-bold"
-                                style={{ color: n.userId === currentUid ? COLORS.accent : COLORS.text }}
+                                style={{ color: n.userId === currentUid ? COLORS.accentText : COLORS.text }}
                               >
                                 {memberName(n.userId) || "—"}
                               </span>
@@ -1215,7 +1215,7 @@ export function ProjectDetail({
                                 key={c}
                                 data-translation
                                 data-translation-lang={c}
-                                style={{ color: COLORS.accent, borderLeft: `2px solid ${COLORS.accent}55` }}
+                                style={{ color: COLORS.accentText, borderLeft: `2px solid ${COLORS.accent}55` }}
                                 className="text-sm break-words mt-1.5 pl-2"
                               >
                                 <span style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mr-1">
@@ -1256,7 +1256,7 @@ export function ProjectDetail({
                                     : setPickFor(pickFor === n.id ? null : n.id)
                                 }
                                 title={t.translateBtn}
-                                style={{ color: busy ? COLORS.accent : COLORS.muted }}
+                                style={{ color: busy ? COLORS.accentText : COLORS.muted }}
                                 disabled={busy}
                               >
                                 {busy ? <Loader2 size={13} className="animate-spin" /> : <Languages size={13} />}
@@ -1276,7 +1276,7 @@ export function ProjectDetail({
                               aria-label={t.a11yDelete}
                               title={t.a11yDelete}
                               onClick={() => onDeleteEntry(n)}
-                              style={{ color: COLORS.danger }}
+                              style={{ color: COLORS.dangerText }}
                             >
                               <Trash2 size={13} />
                             </button>
@@ -1411,7 +1411,7 @@ export function ProjectDetail({
                     <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
                       {t.hubTime}
                     </div>
-                    <div style={{ color: COLORS.accent }} className="font-black">
+                    <div style={{ color: COLORS.accentText }} className="font-black">
                       {hoursOf(rows).toFixed(1)} h
                     </div>
                   </div>
@@ -1921,7 +1921,7 @@ export function PhotoEditor({ src, onCancel, onSave, t }) {
               title={t[`photoTool_${key}`]}
               style={{
                 background: tool === key ? `${COLORS.accent}33` : "transparent",
-                color: tool === key ? COLORS.accent : COLORS.muted,
+                color: tool === key ? COLORS.accentText : COLORS.muted,
                 border: `1px solid ${tool === key ? COLORS.accent : "transparent"}`,
               }}
               className="tap w-9 h-9 rounded-lg flex items-center justify-center"
@@ -1945,7 +1945,7 @@ export function PhotoEditor({ src, onCancel, onSave, t }) {
             <button
               key={n}
               onClick={() => setThick(n)}
-              style={{ color: thick === n ? COLORS.accent : COLORS.muted }}
+              style={{ color: thick === n ? COLORS.accentText : COLORS.muted }}
               className="w-8 h-8 flex items-center justify-center"
             >
               <span

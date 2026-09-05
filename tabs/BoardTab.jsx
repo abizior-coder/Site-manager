@@ -230,7 +230,7 @@ export function BoardTab({
                     {days.map((d) => (
                       <div
                         key={d.date}
-                        style={{ color: d.date === todayKey() ? COLORS.accent : COLORS.muted }}
+                        style={{ color: d.date === todayKey() ? COLORS.accentText : COLORS.muted }}
                         className="text-center text-xs font-bold uppercase pb-1"
                       >
                         {dayName(d.js)} {d.dayOfMonth}
@@ -367,7 +367,7 @@ export function BoardTab({
                     }}
                     className="min-h-[92px] rounded-lg p-1.5 text-left flex flex-col gap-1 overflow-hidden hover:brightness-125 transition"
                   >
-                    <div style={{ color: isToday ? COLORS.accent : COLORS.muted }} className="text-xs font-bold">
+                    <div style={{ color: isToday ? COLORS.accentText : COLORS.muted }} className="text-xs font-bold">
                       {d}
                     </div>
                     {dayPlan.slice(0, 3).map((a) => {
@@ -423,7 +423,7 @@ export function BoardTab({
           {finished.length > 0 && (
             <button
               onClick={() => setShowFinishedJobs((v) => !v)}
-              style={{ color: COLORS.accent }}
+              style={{ color: COLORS.accentText }}
               className="text-xs font-bold uppercase"
             >
               {showFinishedJobs ? t.boardHideFinished : `${t.boardShowFinished} (${finished.length})`}

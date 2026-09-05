@@ -5117,7 +5117,7 @@ export default function SiteManager() {
         className="rounded-xl p-3"
       >
         <div className="flex items-center justify-between mb-2">
-          <div style={{ color: COLORS.accent }} className="text-xs uppercase tracking-wide font-bold">
+          <div style={{ color: COLORS.accentText }} className="text-xs uppercase tracking-wide font-bold">
             {t.firstStepsTitle}
           </div>
           <button
@@ -5239,7 +5239,7 @@ export default function SiteManager() {
           />
 
           {authForm.error && (
-            <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+            <div style={{ color: COLORS.dangerText }} className="text-xs mb-3">
               {t[authForm.error] || t.authErrGeneric}
             </div>
           )}
@@ -5269,7 +5269,7 @@ export default function SiteManager() {
                   notice: null,
                 }))
               }
-              style={{ color: COLORS.accent }}
+              style={{ color: COLORS.accentText }}
               className="text-xs font-bold"
             >
               {authForm.mode === "signup" ? t.authHaveAccount : t.authNeedAccount}
@@ -5350,7 +5350,7 @@ export default function SiteManager() {
           )}
 
           {onboarding.error && (
-            <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+            <div style={{ color: COLORS.dangerText }} className="text-xs mb-3">
               {t[onboarding.error] || t.onbErrGeneric}
             </div>
           )}
@@ -5372,7 +5372,7 @@ export default function SiteManager() {
 
           <button
             onClick={() => setOnboarding((s) => ({ ...s, mode: s.mode === "join" ? "choose" : "join", error: null }))}
-            style={{ color: COLORS.accent }}
+            style={{ color: COLORS.accentText }}
             className="w-full mt-4 text-xs font-bold"
           >
             {onboarding.mode === "join" ? t.onbSwitchCreate : t.onbSwitchJoin}
@@ -5459,7 +5459,7 @@ export default function SiteManager() {
         <div className="px-5 pt-6 pb-5">
           <div className="flex items-center gap-1.5">
             <SwissCross size={13} />
-            <div style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">
+            <div style={{ color: COLORS.accentText, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">
               {t.appLabel}
             </div>
           </div>
@@ -5538,7 +5538,7 @@ export default function SiteManager() {
             <div className="flex items-center gap-1.5 min-w-0">
               <SwissCross size={13} />
               <div
-                style={{ color: COLORS.accent, letterSpacing: "0.15em" }}
+                style={{ color: COLORS.accentText, letterSpacing: "0.15em" }}
                 className="text-xs font-bold uppercase truncate"
               >
                 {t.appLabel}
@@ -5622,7 +5622,7 @@ export default function SiteManager() {
             style={{
               background: syncState.error ? `${COLORS.danger}18` : `${COLORS.amber}18`,
               borderBottom: `1px solid ${syncState.error ? COLORS.danger : COLORS.amber}55`,
-              color: syncState.error ? COLORS.danger : COLORS.amber,
+              color: syncState.error ? COLORS.dangerText : COLORS.amber,
             }}
             className="px-4 py-1.5 text-xs font-bold text-center break-all"
           >
@@ -5662,7 +5662,7 @@ export default function SiteManager() {
                   <div className="flex items-baseline gap-3">
                     <div
                       data-error-code
-                      style={{ color: COLORS.danger }}
+                      style={{ color: COLORS.dangerText }}
                       className="text-4xl font-black tracking-tight"
                     >
                       {errorBox.code}
@@ -5895,7 +5895,7 @@ export default function SiteManager() {
                             className="aspect-square rounded-lg flex flex-col items-center justify-center relative"
                           >
                             <span
-                              style={{ color: isToday ? COLORS.accent : COLORS.text }}
+                              style={{ color: isToday ? COLORS.accentText : COLORS.text }}
                               className="text-xs font-semibold"
                             >
                               {d}
@@ -5938,7 +5938,7 @@ export default function SiteManager() {
                   )}
                   <button
                     onClick={() => setRangeLeaveModalOpen(true)}
-                    style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                    style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accentText }}
                     className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                   >
                     <CalendarDays size={16} /> {t.rangeLeaveBtn}
@@ -6019,7 +6019,11 @@ export default function SiteManager() {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => openCustomerForm(null)}
-                      style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                      style={{
+                        background: COLORS.card,
+                        border: `1px dashed ${COLORS.border}`,
+                        color: COLORS.accentText,
+                      }}
                       className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                     >
                       <Plus size={16} /> {t.newCustomer}
@@ -6027,7 +6031,11 @@ export default function SiteManager() {
                     <button
                       data-customers-import
                       onClick={() => customerFileRef.current?.click()}
-                      style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                      style={{
+                        background: COLORS.card,
+                        border: `1px dashed ${COLORS.border}`,
+                        color: COLORS.accentText,
+                      }}
                       className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                     >
                       <FileUp size={16} /> {t.importCustomers}
@@ -6142,7 +6150,7 @@ export default function SiteManager() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setNewProjectOpen(true)}
-                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accentText }}
                   className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                 >
                   <Plus size={16} /> {t.newProjectSite}
@@ -6153,7 +6161,7 @@ export default function SiteManager() {
                     setImportCodeInput("");
                     setImportError(null);
                   }}
-                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                  style={{ background: COLORS.card, border: `1px dashed ${COLORS.border}`, color: COLORS.accentText }}
                   className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
                 >
                   <ClipboardPaste size={16} /> {t.importProject}
@@ -6270,7 +6278,7 @@ export default function SiteManager() {
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              style={{ color: COLORS.accent }}
+                              style={{ color: COLORS.accentText }}
                               className="text-xs flex items-center gap-1 mt-0.5"
                             >
                               <MapPin size={11} /> {p.address}
@@ -6343,7 +6351,7 @@ export default function SiteManager() {
                     {label}
                   </span>
                   <span
-                    style={{ color: strong ? COLORS.accent : COLORS.text }}
+                    style={{ color: strong ? COLORS.accentText : COLORS.text }}
                     className={strong ? "font-black text-lg" : "font-bold"}
                   >
                     {value}
@@ -6538,7 +6546,7 @@ export default function SiteManager() {
                               <td className="text-right tabular-nums">{fmt(week.total.overtime)}</td>
                               <td className="text-right tabular-nums">{fmt(week.total.travel)}</td>
                               <td className="text-right tabular-nums">{fmt(week.total.breaks)}</td>
-                              <td className="text-right tabular-nums" style={{ color: COLORS.accent }}>
+                              <td className="text-right tabular-nums" style={{ color: COLORS.accentText }}>
                                 {fmt(week.total.net)}
                               </td>
                             </tr>
@@ -6777,7 +6785,7 @@ export default function SiteManager() {
                             m.uid !== user?.uid &&
                             (removeConfirm === m.uid ? (
                               <div className="flex items-center gap-2 mt-2">
-                                <span style={{ color: COLORS.danger }} className="text-xs font-bold">
+                                <span style={{ color: COLORS.dangerText }} className="text-xs font-bold">
                                   {t.teamRemoveConfirm}
                                 </span>
                                 <button
@@ -6800,7 +6808,7 @@ export default function SiteManager() {
                               <button
                                 data-remove-member
                                 onClick={() => setRemoveConfirm(m.uid)}
-                                style={{ color: COLORS.danger }}
+                                style={{ color: COLORS.dangerText }}
                                 className="mt-2 text-xs font-bold uppercase flex items-center gap-1"
                               >
                                 <LogOut size={11} /> {t.teamRemove}
@@ -7015,7 +7023,7 @@ export default function SiteManager() {
                       style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
                       className="rounded-lg py-3 text-center"
                     >
-                      <div style={{ color: COLORS.danger }} className="text-2xl font-black">
+                      <div style={{ color: COLORS.dangerText }} className="text-2xl font-black">
                         {SWISS_EMERGENCY_NUMS[i]}
                       </div>
                       <div style={{ color: COLORS.muted }} className="text-xs">
@@ -7075,7 +7083,7 @@ export default function SiteManager() {
                       href={cat.url}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: COLORS.accent, borderTop: `1px solid ${COLORS.border}` }}
+                      style={{ color: COLORS.accentText, borderTop: `1px solid ${COLORS.border}` }}
                       className="mt-3 pt-3 text-xs font-bold flex items-center gap-1"
                     >
                       {t.fullRulesLink} <ExternalLink size={12} />
@@ -7316,7 +7324,7 @@ export default function SiteManager() {
                   data-tab={it.id}
                   {...(it.id === "more" ? { "data-menu-button": true } : {})}
                   onClick={onClick}
-                  style={{ color: active ? COLORS.accent : COLORS.muted }}
+                  style={{ color: active ? COLORS.accentText : COLORS.muted }}
                   className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase tracking-wide"
                 >
                   <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
@@ -7397,7 +7405,7 @@ export default function SiteManager() {
                         onClick={() =>
                           setDocEditor((s) => ({ ...s, lineItems: s.lineItems.filter((x) => x.id !== li.id) }))
                         }
-                        style={{ color: COLORS.danger }}
+                        style={{ color: COLORS.dangerText }}
                         className="tap shrink-0 px-1"
                       >
                         <Trash2 size={13} />
@@ -7577,7 +7585,8 @@ export default function SiteManager() {
                           </span>
                           <span
                             style={{
-                              color: st.outstanding === 0 ? COLORS.success : st.overdue ? COLORS.danger : COLORS.text,
+                              color:
+                                st.outstanding === 0 ? COLORS.success : st.overdue ? COLORS.dangerText : COLORS.text,
                             }}
                             className="font-bold"
                           >
@@ -7647,7 +7656,7 @@ export default function SiteManager() {
               {docEditor.id && (
                 <button
                   onClick={() => deleteDocument(docEditor.id)}
-                  style={{ color: COLORS.danger }}
+                  style={{ color: COLORS.dangerText }}
                   className="w-full py-3 text-xs font-bold uppercase"
                 >
                   {t.deleteLabel}
@@ -7693,7 +7702,7 @@ export default function SiteManager() {
             className="w-full rounded-lg px-3 py-2 text-sm mb-1 outline-none"
           />
           {billingDraft.iban && !isSwissIban(billingDraft.iban) && (
-            <div style={{ color: COLORS.danger }} className="text-xs mb-2">
+            <div style={{ color: COLORS.dangerText }} className="text-xs mb-2">
               {t.qrErrIban}
             </div>
           )}
@@ -8028,7 +8037,7 @@ export default function SiteManager() {
                     <span
                       className="text-right font-bold"
                       style={{
-                        color: year.overtime > 0 ? COLORS.amber : year.overtime < 0 ? COLORS.danger : COLORS.text,
+                        color: year.overtime > 0 ? COLORS.amber : year.overtime < 0 ? COLORS.dangerText : COLORS.text,
                       }}
                     >
                       {year.configured ? `${year.overtime > 0 ? "+" : ""}${year.overtime.toFixed(1)} h` : "—"}
@@ -8040,7 +8049,9 @@ export default function SiteManager() {
                     <span style={{ color: COLORS.muted }}>{t.holidayLeft}</span>
                     <span
                       className="text-right font-bold"
-                      style={{ color: year.holidayLeft !== null && year.holidayLeft < 0 ? COLORS.danger : COLORS.text }}
+                      style={{
+                        color: year.holidayLeft !== null && year.holidayLeft < 0 ? COLORS.dangerText : COLORS.text,
+                      }}
                     >
                       {year.holidayLeft !== null ? `${year.holidayLeft} ${t.daysShort}` : "—"}
                     </span>
@@ -8078,7 +8089,7 @@ export default function SiteManager() {
                 <span
                   style={{
                     background: m.role === "owner" ? `${COLORS.accent}22` : COLORS.cardAlt,
-                    color: m.role === "owner" ? COLORS.accent : COLORS.muted,
+                    color: m.role === "owner" ? COLORS.accentText : COLORS.muted,
                     border: `1px solid ${COLORS.border}`,
                   }}
                   className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full uppercase"
@@ -8115,7 +8126,7 @@ export default function SiteManager() {
                     data-invite-share
                     onClick={() => shareInvite(i.code)}
                     title={t.inviteShare}
-                    style={{ color: COLORS.accent }}
+                    style={{ color: COLORS.accentText }}
                   >
                     <Share2 size={14} />
                   </button>
@@ -8149,7 +8160,7 @@ export default function SiteManager() {
                     aria-label={t.a11yDelete}
                     title={t.a11yDelete}
                     onClick={() => dropInvite(i.code)}
-                    style={{ color: COLORS.danger }}
+                    style={{ color: COLORS.dangerText }}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -8175,7 +8186,7 @@ export default function SiteManager() {
             </button>
             <button
               onClick={() => makeInvite("supervisor")}
-              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.accent}`, color: COLORS.accent }}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.accent}`, color: COLORS.accentText }}
               className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1.5"
             >
               <Plus size={14} /> {t.roleSupervisor}
@@ -8385,7 +8396,7 @@ export default function SiteManager() {
                           aria-label={t.a11yDelete}
                           title={t.a11yDelete}
                           onClick={() => deleteContact(c.id, k.id)}
-                          style={{ color: COLORS.danger }}
+                          style={{ color: COLORS.dangerText }}
                           className="tap shrink-0"
                         >
                           <Trash2 size={12} />
@@ -8438,7 +8449,7 @@ export default function SiteManager() {
           {customerForm.id && (
             <button
               onClick={() => deleteCustomer(customerForm.id)}
-              style={{ color: COLORS.danger }}
+              style={{ color: COLORS.dangerText }}
               className="w-full py-3 text-xs font-bold uppercase"
             >
               {t.deleteLabel}
@@ -8652,7 +8663,7 @@ export default function SiteManager() {
               </div>
               <button
                 onClick={doSignOut}
-                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.danger }}
+                style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.dangerText }}
                 className="w-full py-2.5 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
               >
                 <LogOut size={14} /> {t.signOut}
@@ -8719,7 +8730,7 @@ export default function SiteManager() {
               ))}
               <button
                 onClick={() => openInsuranceForm(null)}
-                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accentText }}
                 className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
               >
                 <Plus size={13} /> {t.addInsuranceCard}
@@ -8752,7 +8763,7 @@ export default function SiteManager() {
                   >
                     <div>
                       <div className="text-sm font-semibold">{c.title}</div>
-                      <div style={{ color: expired ? COLORS.danger : COLORS.muted }} className="text-xs">
+                      <div style={{ color: expired ? COLORS.dangerText : COLORS.muted }} className="text-xs">
                         {c.issuer}
                         {c.expiryDate ? ` · ${expired ? t.expiredLabel + " " : ""}${c.expiryDate}` : ""}
                       </div>
@@ -8763,7 +8774,7 @@ export default function SiteManager() {
               })}
               <button
                 onClick={() => openCertForm(null)}
-                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accent }}
+                style={{ background: COLORS.cardAlt, border: `1px dashed ${COLORS.border}`, color: COLORS.accentText }}
                 className="w-full py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
               >
                 <Plus size={13} /> {t.addCertificate}
@@ -8871,7 +8882,7 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-xs outline-none resize-none font-mono"
             />
             {backupError && (
-              <div style={{ color: COLORS.danger }} className="text-xs">
+              <div style={{ color: COLORS.dangerText }} className="text-xs">
                 {backupError}
               </div>
             )}
@@ -8935,7 +8946,7 @@ export default function SiteManager() {
               className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
             >
               <Camera size={16} color={COLORS.accent} />
-              <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+              <span style={{ color: COLORS.accentText }} className="text-sm font-bold">
                 {t.attachPhotoTitle}
               </span>
             </button>
@@ -8952,7 +8963,7 @@ export default function SiteManager() {
             {insuranceForm.id && (
               <button
                 onClick={() => deleteInsurance(insuranceForm.id)}
-                style={{ color: COLORS.danger }}
+                style={{ color: COLORS.dangerText }}
                 className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
               >
                 <Trash2 size={13} /> {t.deleteLabel}
@@ -9014,7 +9025,7 @@ export default function SiteManager() {
               className="w-full py-3 rounded-lg flex items-center justify-center gap-2"
             >
               <Camera size={16} color={COLORS.accent} />
-              <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+              <span style={{ color: COLORS.accentText }} className="text-sm font-bold">
                 {t.attachPhotoTitle}
               </span>
             </button>
@@ -9029,7 +9040,7 @@ export default function SiteManager() {
             {certForm.id && (
               <button
                 onClick={() => deleteCert(certForm.id)}
-                style={{ color: COLORS.danger }}
+                style={{ color: COLORS.dangerText }}
                 className="w-full py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
               >
                 <Trash2 size={13} /> {t.deleteLabel}
@@ -9278,7 +9289,7 @@ export default function SiteManager() {
                         </span>
                         <button
                           onClick={() => sendLeaveToSupervisor(leave)}
-                          style={{ color: COLORS.accent }}
+                          style={{ color: COLORS.accentText }}
                           className="text-xs font-bold uppercase flex items-center gap-1"
                         >
                           <Mail size={12} /> {t.sendRequestBtn}
@@ -9664,7 +9675,7 @@ export default function SiteManager() {
               className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none font-mono"
             />
             {importError && (
-              <div style={{ color: COLORS.danger }} className="text-xs">
+              <div style={{ color: COLORS.dangerText }} className="text-xs">
                 {importError}
               </div>
             )}
@@ -9743,7 +9754,7 @@ export default function SiteManager() {
                 deleteEntryFn(editTimeModal);
                 setEditTimeModal(null);
               }}
-              style={{ color: COLORS.danger }}
+              style={{ color: COLORS.dangerText }}
               className="w-full mt-2 py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
             >
               <Trash2 size={13} /> {t.deleteLabel}
@@ -9865,7 +9876,7 @@ export default function SiteManager() {
                           <span className="min-w-0 truncate line-through">{e.description}</span>
                           <button
                             onClick={() => toggleReportEntry(e.id)}
-                            style={{ color: COLORS.accent }}
+                            style={{ color: COLORS.accentText }}
                             className="text-xs font-bold uppercase shrink-0"
                           >
                             {t.reportRestore}
@@ -9926,7 +9937,7 @@ export default function SiteManager() {
                   key: "stop",
                   label: t.clockOut,
                   icon: Square,
-                  color: COLORS.danger,
+                  color: COLORS.dangerText,
                   run: () => {
                     clockOut();
                   },
@@ -10054,7 +10065,10 @@ export default function SiteManager() {
             <div className="flex items-center justify-between px-2 mb-3">
               <div className="flex items-center gap-1.5">
                 <SwissCross size={12} />
-                <span style={{ color: COLORS.accent, letterSpacing: "0.15em" }} className="text-xs font-bold uppercase">
+                <span
+                  style={{ color: COLORS.accentText, letterSpacing: "0.15em" }}
+                  className="text-xs font-bold uppercase"
+                >
                   {t.appLabel}
                 </span>
               </div>
@@ -10227,7 +10241,7 @@ export default function SiteManager() {
                   style={{
                     background: on ? `${COLORS.accent}22` : COLORS.cardAlt,
                     border: `1px solid ${on ? COLORS.accent : COLORS.border}`,
-                    color: on ? COLORS.accent : COLORS.muted,
+                    color: on ? COLORS.accentText : COLORS.muted,
                   }}
                   className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
                 >
@@ -10289,7 +10303,7 @@ export default function SiteManager() {
               {customerImport.fileName}
             </div>
             {customerImport.rows.length === 0 ? (
-              <div style={{ color: COLORS.danger }} className="text-sm mb-3">
+              <div style={{ color: COLORS.dangerText }} className="text-sm mb-3">
                 {t.importCustomersNothing}
               </div>
             ) : (
@@ -10324,7 +10338,7 @@ export default function SiteManager() {
             {isOwner() ? (
               <div data-delete-account-blocked style={{ color: COLORS.muted }} className="text-sm leading-relaxed">
                 {t.accountOwnerBlocked}{" "}
-                <a href="mailto:a.bizior@pm.me" style={{ color: COLORS.accent }} className="underline">
+                <a href="mailto:a.bizior@pm.me" style={{ color: COLORS.accentText }} className="underline">
                   a.bizior@pm.me
                 </a>
               </div>
@@ -10348,7 +10362,7 @@ export default function SiteManager() {
                   className="w-full rounded-lg px-3 py-3 text-sm outline-none mb-3"
                 />
                 {deleteAccount.error && (
-                  <div style={{ color: COLORS.danger }} className="text-xs mb-3">
+                  <div style={{ color: COLORS.dangerText }} className="text-xs mb-3">
                     {t[deleteAccount.error] || t.authErrGeneric}
                   </div>
                 )}
@@ -10402,7 +10416,7 @@ export default function SiteManager() {
           </div>
           {priceImport.rows.length === 0 ? (
             <div>
-              <div style={{ color: COLORS.danger }} className="text-sm font-semibold mb-2">
+              <div style={{ color: COLORS.dangerText }} className="text-sm font-semibold mb-2">
                 {t.importNothingFound}
               </div>
               <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">
@@ -10590,7 +10604,7 @@ export default function SiteManager() {
                 className="w-full py-6 rounded-xl flex flex-col items-center gap-2"
               >
                 <Camera size={22} color={COLORS.accent} />
-                <span style={{ color: COLORS.accent }} className="text-sm font-bold">
+                <span style={{ color: COLORS.accentText }} className="text-sm font-bold">
                   {photoPreview && !addModal.editingId ? t.addMorePhotos : t.attachPhotoTitle}
                 </span>
               </button>
@@ -10933,7 +10947,7 @@ export default function SiteManager() {
                 deleteEntryFn({ id: addModal.editingId });
                 setAddModal(null);
               }}
-              style={{ color: COLORS.danger }}
+              style={{ color: COLORS.dangerText }}
               className="w-full mt-2 py-2 text-xs font-bold uppercase flex items-center justify-center gap-1"
             >
               <Trash2 size={13} /> {t.deleteLabel}
@@ -10953,7 +10967,7 @@ export default function SiteManager() {
           style={{ background: "#150000" }}
         >
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
-            <div style={{ color: COLORS.danger }} className="text-lg font-black uppercase flex items-center gap-2">
+            <div style={{ color: COLORS.dangerText }} className="text-lg font-black uppercase flex items-center gap-2">
               <Siren size={20} /> {t.emergencyTitle}
             </div>
             <button
@@ -11096,7 +11110,7 @@ export default function SiteManager() {
             </div>
             <input ref={scanFileRef} type="file" accept="image/*" onChange={addScanImage} className="hidden" />
             {scanModal.error && (
-              <div style={{ color: COLORS.danger }} className="text-xs">
+              <div style={{ color: COLORS.dangerText }} className="text-xs">
                 {scanModal.error}
               </div>
             )}
@@ -11189,7 +11203,7 @@ export default function SiteManager() {
               className="hidden"
             />
             {libraryScanModal.error && (
-              <div style={{ color: COLORS.danger }} className="text-xs">
+              <div style={{ color: COLORS.dangerText }} className="text-xs">
                 {libraryScanModal.error}
               </div>
             )}
@@ -11307,7 +11321,7 @@ export default function SiteManager() {
                           result: { ...st.result, specs: st.result.specs.filter((x) => x.id !== s.id) },
                         }))
                       }
-                      style={{ color: COLORS.danger }}
+                      style={{ color: COLORS.dangerText }}
                     >
                       <X size={16} />
                     </button>
@@ -11418,7 +11432,7 @@ export default function SiteManager() {
                   aria-label={t.a11yClose}
                   title={t.a11yClose}
                   onClick={() => removeLibrarySpecRow(s.id)}
-                  style={{ color: COLORS.danger }}
+                  style={{ color: COLORS.dangerText }}
                 >
                   <X size={16} />
                 </button>
@@ -11829,7 +11843,7 @@ export default function SiteManager() {
                 className="hidden"
               />
               {inspectionModal.error && (
-                <div style={{ color: COLORS.danger }} className="text-xs">
+                <div style={{ color: COLORS.dangerText }} className="text-xs">
                   {inspectionModal.error}
                 </div>
               )}
@@ -11949,7 +11963,7 @@ export default function SiteManager() {
                   onClick={() =>
                     setInspectionModal((s) => ({ ...s, tiles: [...(s.tiles || []), { model: "", count: "" }] }))
                   }
-                  style={{ color: COLORS.accent }}
+                  style={{ color: COLORS.accentText }}
                   className="text-xs font-bold uppercase flex items-center gap-1"
                 >
                   <Plus size={11} /> {t.inspectAddTile}
@@ -12180,7 +12194,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
           aria-label={t.a11yDelete}
           onClick={() => onDeleteItem(i)}
           title={t.deleteLabel}
-          style={{ color: COLORS.danger }}
+          style={{ color: COLORS.dangerText }}
         >
           <Trash2 size={13} />
         </button>

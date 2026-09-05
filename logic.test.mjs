@@ -45,6 +45,8 @@ import {
 import { createCrashGate, crashPayload, installCrashCapture, uaFamily } from "./errors-client.js";
 import { coveredEntryIds, changedFields, reconcileEntries } from "./entries-history.js";
 import { backupDue, backupMeta } from "./backup.js";
+import { toRappen, fromRappen, documentState as docStatePure } from "./documents.js";
+import { COLORS } from "./ui/theme.js";
 import {
   reportId,
   reportRows,
@@ -810,6 +812,90 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     ],
     [12, true, true, true],
   );
+}
+
+{
+  // Money in Rappen: no floating-point crumbs, Swiss cash rounding, states.
+  const tot = (items, rate = 8.1) => docTotalsPure({ lineItems: items, vatRate: rate });
+  t(
+    "3 × 33.33 is 99.99 net, 8.10 VAT, 108.10 gross",
+    (() => {
+      const x = tot([{ qty: "3", unitPrice: "33.33" }]);
+      return [x.net, x.vat, x.gross, x.netRp, x.vatRp, x.grossRp];
+    })(),
+    [99.99, 8.1, 108.1, 9999, 810, 10810],
+  );
+  t(
+    "a hundred lines of 0.10 come to exactly 10.00",
+    tot(
+      Array.from({ length: 100 }, () => ({ qty: "1", unitPrice: "0.10" })),
+      0,
+    ).net,
+    10,
+  );
+  t(
+    "7.5 h × 85.50 rounds the total to 0.05",
+    (() => {
+      const x = tot([{ qty: "7.5", unitPrice: "85.50" }]);
+      return [x.net, x.vat, x.gross];
+    })(),
+    [641.25, 51.94, 693.2],
+  );
+  t("Rappen round-trip", [toRappen("12.345"), toRappen(""), fromRappen(1234)], [1235, 0, 12.34]);
+  const paidState = docStatePure(
+    {
+      type: "invoice",
+      status: "open",
+      lineItems: [{ qty: "7.5", unitPrice: "85.50" }],
+      vatRate: 8.1,
+      paidAmount: "693.20",
+    },
+    "2026-09-05",
+  );
+  t(
+    "paid to the Rappen is paid, nothing outstanding",
+    [paidState.key, paidState.outstanding, paidState.outstandingRp],
+    ["paid", 0, 0],
+  );
+  const partState = docStatePure(
+    { type: "invoice", status: "open", lineItems: [{ qty: "1", unitPrice: "100" }], vatRate: 0, paidAmount: "33.33" },
+    "2026-09-05",
+  );
+  t("a part payment leaves the exact rest", [partState.key, partState.outstanding], ["partial", 66.67]);
+}
+
+{
+  // Text colours pass AA on every surface; the brand red stays for surfaces.
+  const lum = (h) => {
+    const [r, g, b] = [1, 3, 5]
+      .map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a, b) => {
+    const x = lum(a),
+      y = lum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  };
+  const surfaces = [COLORS.shell, COLORS.card, COLORS.cardAlt];
+  const textTokens = ["text", "muted", "accentText", "dangerText", "success", "amber"];
+  const failing = textTokens.flatMap((k) =>
+    surfaces.filter((s) => contrast(COLORS[k], s) < 4.5).map((s) => `${k} on ${s}`),
+  );
+  t("every text colour reaches 4.5:1 on shell, card and cardAlt", failing, []);
+  const textUsesBrandRed = [
+    "./roofing-site-manager.jsx",
+    "./tabs/ProjectDetail.jsx",
+    "./tabs/MaterialsTab.jsx",
+    "./tabs/TodayTab.jsx",
+    "./tabs/BoardTab.jsx",
+    "./tabs/CockpitTab.jsx",
+    "./ui/entries.jsx",
+    "./ui/break-chips.jsx",
+  ].filter((f) =>
+    /color:\s*[^,}\n]*COLORS\.(accent|danger)\b(?!Text|Dim)/.test(readFileSync(new URL(f, import.meta.url), "utf8")),
+  );
+  t("no text is set in the brand red any more", textUsesBrandRed, []);
 }
 
 {

@@ -94,7 +94,7 @@ export function TodayTab({
                 setWeatherCityInput("");
               }}
               className="text-xs font-bold uppercase"
-              style={{ color: COLORS.accent }}
+              style={{ color: COLORS.accentText }}
             >
               {t.changeLocation}
             </button>
@@ -136,7 +136,7 @@ export function TodayTab({
           </div>
         )}
         {weather.error && (
-          <div style={{ color: COLORS.danger }} className="text-xs">
+          <div style={{ color: COLORS.dangerText }} className="text-xs">
             {weather.error}
           </div>
         )}
@@ -167,7 +167,7 @@ export function TodayTab({
             </div>
             <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
             <div className="font-bold text-lg mb-3">{projectName(activeClock.projectId)}</div>
-            <div style={{ color: COLORS.accent }} className="text-3xl font-black mb-4 tabular-nums">
+            <div style={{ color: COLORS.accentText }} className="text-3xl font-black mb-4 tabular-nums">
               {fmtHM(Date.now() - activeClock.startedAt)}
             </div>
             <button

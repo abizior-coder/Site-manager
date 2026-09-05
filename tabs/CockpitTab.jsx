@@ -457,7 +457,11 @@ export function CockpitTab({
                     </button>
                     <button
                       onClick={() => setLeaveStatus(r.id, "declined")}
-                      style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.danger}`, color: COLORS.danger }}
+                      style={{
+                        background: COLORS.cardAlt,
+                        border: `1px solid ${COLORS.danger}`,
+                        color: COLORS.dangerText,
+                      }}
                       className="px-2.5 py-1.5 rounded-full text-xs font-bold uppercase"
                     >
                       {t.markDeclined}
@@ -556,7 +560,7 @@ export function CockpitTab({
           {!isOwner() ? null : (
             <button
               onClick={() => setHoursModalOpen(true)}
-              style={{ color: COLORS.accent }}
+              style={{ color: COLORS.accentText }}
               className="mt-2 text-xs font-bold uppercase"
             >
               {t.hoursDetailBtn}
@@ -597,7 +601,7 @@ export function CockpitTab({
                   <div className="text-sm">
                     {t.invoiceLabel} {doc.number} · {money(st.outstanding)}
                   </div>
-                  <div style={{ color: COLORS.danger }} className="text-xs">
+                  <div style={{ color: COLORS.dangerText }} className="text-xs">
                     {t.overdueLabel} — {doc.dueDate}
                   </div>
                 </button>

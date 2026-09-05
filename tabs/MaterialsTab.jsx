@@ -46,7 +46,7 @@ function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
           setDir("asc");
         }
       }}
-      style={{ color: sortKey === key ? COLORS.accent : COLORS.muted }}
+      style={{ color: sortKey === key ? COLORS.accentText : COLORS.muted }}
       className={`text-xs uppercase tracking-wide font-bold truncate ${align === "right" ? "text-right" : "text-left"}`}
     >
       {label}
@@ -82,7 +82,7 @@ function ArticleSheet({ rows, t, onAdd, dragProps, onImport }) {
         <div style={{ color: COLORS.amber }} className="text-xs mb-2 flex flex-wrap items-center gap-x-2">
           <span>{t.sheetDemo}</span>
           {onImport && (
-            <button onClick={onImport} style={{ color: COLORS.accent }} className="underline font-bold">
+            <button onClick={onImport} style={{ color: COLORS.accentText }} className="underline font-bold">
               {t.importPriceList}
             </button>
           )}
@@ -243,7 +243,7 @@ export function MaterialsTab({
             </div>
             <button
               onClick={() => priceFileRef.current?.click()}
-              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.accent }}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.accentText }}
               className="shrink-0 px-3 py-2 rounded-lg text-xs font-bold uppercase"
             >
               {t.importPriceList}
@@ -346,7 +346,7 @@ export function MaterialsTab({
                                 aria-label={t.a11yDelete}
                                 title={t.a11yDelete}
                                 onClick={() => deleteEntryFn(e)}
-                                style={{ color: COLORS.danger }}
+                                style={{ color: COLORS.dangerText }}
                                 className="tap px-2"
                               >
                                 <Trash2 size={13} />
@@ -554,7 +554,7 @@ export function MaterialsTab({
                   href={catalog.links[shopCat]}
                   target="_blank"
                   rel="noreferrer"
-                  style={{ color: COLORS.accent }}
+                  style={{ color: COLORS.accentText }}
                   className="text-xs flex items-center gap-1 underline"
                 >
                   <ExternalLink size={13} /> {t.openShopBtn}
@@ -629,7 +629,7 @@ export function MaterialsTab({
                     href={toolsCatalog.links[shopCat]}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ color: COLORS.accent }}
+                    style={{ color: COLORS.accentText }}
                     className="text-xs flex items-center gap-1 underline"
                   >
                     <ExternalLink size={13} /> {t.openShopBtn}
@@ -823,7 +823,7 @@ export function MaterialsTab({
                           aria-label={t.a11yDelete}
                           title={t.a11yDelete}
                           onClick={() => deleteLibraryItem(it.id)}
-                          style={{ color: COLORS.danger }}
+                          style={{ color: COLORS.dangerText }}
                         >
                           <Trash2 size={15} />
                         </button>
@@ -857,7 +857,7 @@ export function MaterialsTab({
             </div>
             <button
               onClick={() => setBasket([])}
-              style={{ color: COLORS.danger }}
+              style={{ color: COLORS.dangerText }}
               className="text-xs font-bold uppercase"
             >
               {t.clearBasketBtn}
