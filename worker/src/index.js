@@ -10,7 +10,7 @@ const MAX_IMAGE_BLOCKS = 4;
 const FIREBASE_PROJECT_ID = "site-log-ab6a9";
 const FIREBASE_API_KEY = "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw";
 
-function corsHeaders(origin, allowedOrigins) {
+export function corsHeaders(origin, allowedOrigins) {
   const allowed = (allowedOrigins || "")
     .split(",")
     .map((o) => o.trim())
@@ -18,7 +18,9 @@ function corsHeaders(origin, allowedOrigins) {
   const allowOrigin = allowed.includes(origin) ? origin : allowed[0] || "*";
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    // PUT is the bexio token; a method missing here fails in the browser as a
+    // bare "Failed to fetch" with nothing in the Worker log.
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
 }
