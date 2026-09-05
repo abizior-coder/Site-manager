@@ -700,6 +700,15 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       true,
     );
     t(
+      "sw.js precaches every chunk of the build, so an older build can serve itself after a deploy",
+      (() => {
+        const pre = readFileSync(new URL("./sw.js", import.meta.url), "utf8").match(/const PRECACHE = (\[[^\]]*\])/);
+        const list = pre ? JSON.parse(pre[1]) : [];
+        return fsMod.readdirSync("build").filter((f) => f.startsWith("chunk-") && !list.includes(`build/${f}`));
+      })(),
+      [],
+    );
+    t(
       "sw.js precaches the stylesheet and the two first-paint languages",
       pre.some((p) => p.startsWith("tailwind.css?v=")) &&
         pre.filter((p) => /build\/chunk-/.test(p)).length >= chunks.length + 2,
@@ -1256,6 +1265,26 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       ["E91", "E91"],
       ["boom", "later"],
     ],
+  );
+  const stale = [];
+  const ls2 = {};
+  installCrashCapture({
+    target: {
+      addEventListener: (k, fn) => {
+        ls2[k] = fn;
+      },
+    },
+    build: "b1",
+    show: () => shown.push("shown"),
+    report: async () => true,
+    onStale: (p) => stale.push(p.code),
+    gate: createCrashGate({ now: () => 9 }),
+  });
+  ls2.error({ error: new TypeError("Failed to fetch dynamically imported module: https://x/build/chunk-ABC.js") });
+  t(
+    "a missing chunk after a deploy is stale, not a crash: onStale, no panel",
+    [stale, shown.filter((s) => s === "shown")],
+    [["E92"], []],
   );
 }
 

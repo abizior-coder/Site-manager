@@ -138,6 +138,12 @@ export const ERROR_CODES = {
     de: "Die App ist auf einen unerwarteten Fehler gelaufen. Der Fehler wurde gemeldet; die Seite neu laden.",
     en: "The app hit an unexpected error. It has been reported; reload the page.",
   },
+  E92: {
+    tag: "STALE",
+    group: "other",
+    de: "Die geöffnete App ist eine Version hinter dem Server. Seite neu laden — dann passt es wieder.",
+    en: "The open app is one version behind the server. Reload the page and it matches again.",
+  },
   E90: {
     tag: "UNKNOWN",
     group: "other",

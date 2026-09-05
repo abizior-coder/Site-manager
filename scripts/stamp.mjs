@@ -54,6 +54,13 @@ const PRECACHE = [
   `build/bundle.js?v=${bundleHash}`,
   ...staticChunks.map((c) => `build/${c}`),
   ...langChunks.map((c) => `build/${c}`),
+  // Every other chunk too: a deploy replaces build/ on the server, and a
+  // phone still on this build must be able to open the Cockpit or the
+  // Material tab from its own cache, however many deploys came after.
+  ...readdirSync("build")
+    .filter((f) => f.startsWith("chunk-") && !staticChunks.includes(f) && !langChunks.includes(f))
+    .sort()
+    .map((c) => `build/${c}`),
   "manifest.webmanifest",
   "icon.svg",
   "icon-maskable.svg",

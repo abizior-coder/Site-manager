@@ -14,6 +14,21 @@ installCrashCapture({
   path: () => location.pathname,
   ua: navigator.userAgent,
   show: (p) => window.dispatchEvent(new CustomEvent("site-log:error", { detail: { code: p.code, detail: p.message } })),
+  // A build behind a deploy: reload once; if it happens again, say so (E92).
+  onStale: (p) => {
+    const mark = `site-log-reloaded-${p.build || "x"}`;
+    let done = false;
+    try {
+      done = sessionStorage.getItem(mark) === "1";
+      if (!done) sessionStorage.setItem(mark, "1");
+    } catch {}
+    if (!done) {
+      location.reload();
+      return;
+    }
+    window.dispatchEvent(new CustomEvent("site-log:error", { detail: { code: "E92", detail: p.message } }));
+    window.dispatchEvent(new Event("site-log:update"));
+  },
   report: (p) => {
     const q = (window.__siteLogCrashes = window.__siteLogCrashes || []);
     q.push(p);

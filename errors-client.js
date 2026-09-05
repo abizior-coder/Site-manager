@@ -51,10 +51,19 @@ export function crashPayload(err, { build, path, lang, ua } = {}) {
 // Browser noise that is not a crash of ours.
 export const IGNORED = [/ResizeObserver loop/i, /^Script error\.?$/];
 
+// A lazy chunk that is no longer on the server: the app is a build behind
+// a deploy. Not a crash of ours -- a reload cures it.
+export const STALE_CHUNK =
+  /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i;
+export function isStaleChunkError(message) {
+  return STALE_CHUNK.test(String(message || ""));
+}
+
 export function installCrashCapture({
   target,
   report,
   show,
+  onStale,
   build = "",
   lang = () => "",
   path = () => "",
@@ -65,6 +74,15 @@ export function installCrashCapture({
     try {
       const payload = crashPayload(err, { build, path: path(), lang: lang(), ua });
       if (!payload.message || IGNORED.some((re) => re.test(payload.message))) return null;
+      if (isStaleChunkError(payload.message)) {
+        const stale = { ...payload, code: "E92", tag: "STALE" };
+        if (onStale) onStale(stale);
+        else
+          try {
+            show(stale);
+          } catch {}
+        return stale;
+      }
       if (!gate(payload.message)) return null;
       try {
         show(payload);
