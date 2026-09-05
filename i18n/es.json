@@ -886,5 +886,13 @@
   "a11yPrint": "Imprimir",
   "a11yZoomIn": "Ampliar",
   "a11yZoomOut": "Reducir",
-  "exportMonth": "Mes"
+  "exportMonth": "Mes",
+  "deletedTitle": "Eliminados",
+  "restoreBtn": "Restaurar",
+  "purgeBtn": "Eliminar definitivamente",
+  "deleteReasonTitle": "Motivo de la eliminación",
+  "deleteReasonHint": "Esta entrada está en un informe enviado. El cambio se registra con el motivo.",
+  "changeReasonLabel": "Motivo del cambio",
+  "histTitle": "Historial",
+  "entryRestored": "Entrada restaurada"
 }

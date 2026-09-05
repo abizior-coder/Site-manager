@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "a11yPrint": "Tisk",
   "a11yZoomIn": "P\u0159ibl\xED\u017Eit",
   "a11yZoomOut": "Odd\xE1lit",
-  "exportMonth": "M\u011Bs\xEDc"
+  "exportMonth": "M\u011Bs\xEDc",
+  "deletedTitle": "Smazan\xE9",
+  "restoreBtn": "Obnovit",
+  "purgeBtn": "Smazat natrvalo",
+  "deleteReasonTitle": "D\u016Fvod smaz\xE1n\xED",
+  "deleteReasonHint": "Tento z\xE1znam je v odeslan\xE9m raportu. Zm\u011Bna se zaznamen\xE1 s d\u016Fvodem.",
+  "changeReasonLabel": "D\u016Fvod zm\u011Bny",
+  "histTitle": "Historie",
+  "entryRestored": "Z\xE1znam obnoven"
 }
 `;export{t as default};

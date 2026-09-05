@@ -886,5 +886,13 @@
   "a11yPrint": "Tipărește",
   "a11yZoomIn": "Mărește",
   "a11yZoomOut": "Micșorează",
-  "exportMonth": "Luna"
+  "exportMonth": "Luna",
+  "deletedTitle": "Șterse",
+  "restoreBtn": "Restaurează",
+  "purgeBtn": "Șterge definitiv",
+  "deleteReasonTitle": "Motivul ștergerii",
+  "deleteReasonHint": "Această intrare e într-un raport trimis. Modificarea se înregistrează cu motivul.",
+  "changeReasonLabel": "Motivul modificării",
+  "histTitle": "Istoric",
+  "entryRestored": "Intrare restaurată"
 }

@@ -886,5 +886,13 @@
   "a11yPrint": "Tisk",
   "a11yZoomIn": "Přiblížit",
   "a11yZoomOut": "Oddálit",
-  "exportMonth": "Měsíc"
+  "exportMonth": "Měsíc",
+  "deletedTitle": "Smazané",
+  "restoreBtn": "Obnovit",
+  "purgeBtn": "Smazat natrvalo",
+  "deleteReasonTitle": "Důvod smazání",
+  "deleteReasonHint": "Tento záznam je v odeslaném raportu. Změna se zaznamená s důvodem.",
+  "changeReasonLabel": "Důvod změny",
+  "histTitle": "Historie",
+  "entryRestored": "Záznam obnoven"
 }

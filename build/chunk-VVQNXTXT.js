@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "a11yPrint": "Drucken",
   "a11yZoomIn": "Vergr\xF6ssern",
   "a11yZoomOut": "Verkleinern",
-  "exportMonth": "Monat"
+  "exportMonth": "Monat",
+  "deletedTitle": "Gel\xF6scht",
+  "restoreBtn": "Wiederherstellen",
+  "purgeBtn": "Endg\xFCltig l\xF6schen",
+  "deleteReasonTitle": "Grund f\xFCr das L\xF6schen",
+  "deleteReasonHint": "Dieser Eintrag steht auf einem gesendeten Rapport. Die \xC4nderung wird mit Grund festgehalten.",
+  "changeReasonLabel": "Grund der \xC4nderung",
+  "histTitle": "Verlauf",
+  "entryRestored": "Eintrag wiederhergestellt"
 }
 `;export{t as default};

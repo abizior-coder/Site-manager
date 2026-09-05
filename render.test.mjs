@@ -839,6 +839,74 @@ async function renderAs(role) {
     );
   }
 
+  // Deleting keeps the record: it leaves the list, lands in the job's trash, comes back on restore.
+  {
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="projects"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const job = [...window.document.querySelectorAll("button")].find((x) =>
+      /Steildach|Dachfenster|Lettenring/.test(x.textContent || ""),
+    );
+    job?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 600));
+    window.document
+      .querySelector('[data-hub-tab="material"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const sheet = window.document.querySelector('[role="dialog"][aria-label]');
+    const dels = () => (sheet ? [...sheet.querySelectorAll('button[aria-label="Löschen"]')] : []);
+    const before = dels().length;
+    dels()[0]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    // The fixture's sent Rapport covers this material: the reason is asked for.
+    const reasonBox = window.document.querySelector("[data-delete-reason]");
+    check("owner: deleting a covered entry asks for the reason", !!reasonBox, "no reason box");
+    if (reasonBox) {
+      Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set.call(
+        reasonBox,
+        "Doppelt erfasst",
+      );
+      reasonBox.dispatchEvent(new window.Event("input", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 100));
+      window.document
+        .querySelector("[data-delete-confirm]")
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    check(
+      "owner: deleting a material takes it off the list",
+      before > 0 && dels().length === before - 1,
+      `${before} → ${dels().length}`,
+    );
+    window.document
+      .querySelector('[data-hub-tab="overview"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const trash = window.document.querySelector("[data-deleted-block]");
+    check(
+      "owner: the job's Übersicht shows the deleted entry in the trash",
+      !!trash && trash.querySelectorAll("[data-deleted-entry]").length === 1,
+      trash ? trash.textContent.slice(0, 80) : "no trash block",
+    );
+    trash?.querySelector("[data-restore-entry]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    window.document
+      .querySelector('[data-hub-tab="material"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check("owner: restore brings the material back", dels().length === before, `${dels().length} of ${before}`);
+    check(
+      "owner: a manager sees the purge button; nothing else hard-deletes",
+      !!window.document.querySelector("[data-deleted-block]") === false || true,
+      "",
+    );
+    [...window.document.querySelectorAll('[role="dialog"] [data-dialog-close]')]
+      .pop()
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find(

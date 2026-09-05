@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "a11yPrint": "Drucke",
   "a11yZoomIn": "Vergr\xF6ssere",
   "a11yZoomOut": "Verchliinere",
-  "exportMonth": "Monet"
+  "exportMonth": "Monet",
+  "deletedTitle": "Gl\xF6scht",
+  "restoreBtn": "Zrugghole",
+  "purgeBtn": "Endg\xFCltig l\xF6sche",
+  "deleteReasonTitle": "Grund f\xFCrs L\xF6sche",
+  "deleteReasonHint": "D\xE4 Iitrag staht uf eme gschickte Rapport. D \xC4nderig wird mit Grund feschtghalte.",
+  "changeReasonLabel": "Grund vo de \xC4nderig",
+  "histTitle": "Verlauf",
+  "entryRestored": "Iitrag zrugggholt"
 }
 `;export{r as default};

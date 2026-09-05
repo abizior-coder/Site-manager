@@ -127,6 +127,7 @@ import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
 import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "./ui/entries.jsx";
 import { useDialog } from "./ui/dialog.js";
+import { coveredEntryIds, reconcileEntries } from "./entries-history.js";
 import { TodayTab } from "./tabs/TodayTab.jsx";
 export { fmtHM };
 import { createTracker } from "./metrics-client.js";
@@ -745,7 +746,12 @@ export default function SiteManager() {
   const [customerSearch, setCustomerSearch] = useState("");
   const [contactForm, setContactForm] = useState(null);
   const [pipelineFilter, setPipelineFilter] = useState("all");
-  const [entries, setEntries] = useState([]);
+  // Every entry the company has, deleted ones included; the app works on the
+  // visible slice and persist() reconciles the two (entries-history.js).
+  const [allEntries, setAllEntries] = useState([]);
+  const entries = useMemo(() => allEntries.filter((e) => !e.deleted), [allEntries]);
+  const changeReasonRef = useRef("");
+  const [deleteAsk, setDeleteAsk] = useState(null);
   const [activeClock, setActiveClock] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [noteText, setNoteText] = useState("");
@@ -777,6 +783,7 @@ export default function SiteManager() {
   const [importCodeInput, setImportCodeInput] = useState("");
   const [importError, setImportError] = useState(null);
   const [sentReports, setSentReports] = useState([]);
+  const coveredIds = useMemo(() => coveredEntryIds(sentReports), [sentReports]);
   // Plans and documents: metadata here, bytes in R2 behind the Worker.
   const [projectFiles, setProjectFiles] = useState([]);
   const projectFilesRef = useRef([]);
@@ -996,7 +1003,7 @@ export default function SiteManager() {
         // person's invoices, labour rate and IBAN in memory, and they appeared
         // on screen for a role that must never see them.
         setProjects([]);
-        setEntries([]);
+        setAllEntries([]);
         setCustomers([]);
         setLeaveRequests([]);
         setSentReports([]);
@@ -1109,7 +1116,7 @@ export default function SiteManager() {
         "entries",
         (rows, meta) => {
           track(meta);
-          setEntries(rows);
+          setAllEntries(rows);
         },
         onErr,
       ),
@@ -1748,7 +1755,7 @@ export default function SiteManager() {
   // against the live log, so a corrected quantity reaches the supervisor on
   // the next send. Old reports still carry copies and read from those.
   function reportFigures(report) {
-    const rows = reportRows(report, entries);
+    const rows = reportRows(report, allEntries);
     const totals = reportTotals(rows);
     const live = Array.isArray(report.entryIds);
     return {
@@ -1980,7 +1987,7 @@ export default function SiteManager() {
   function buildReportHtml(report) {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const bySite = {};
-    reportRows(report, entries).forEach((e) => {
+    reportRows(report, allEntries).forEach((e) => {
       if (e.deleted) return;
       const key = e.projectName || (e.projectId ? projectName(e.projectId) : "") || t.sitesLabel;
       (bySite[key] = bySite[key] || []).push(e);
@@ -2541,7 +2548,18 @@ export default function SiteManager() {
       projectFilesRef.current = next.projectFiles;
     }
     if (next.projects) setProjects(next.projects);
-    if (next.entries) setEntries(next.entries);
+    if (next.entries) {
+      const merged = reconcileEntries(allEntries, next.entries, {
+        by: user?.uid || null,
+        now: Date.now(),
+        covered: coveredIds,
+        reason: next.changeReason ?? changeReasonRef.current,
+        purge: next.purgeIds,
+      });
+      changeReasonRef.current = "";
+      next = { ...next, entries: merged };
+      setAllEntries(merged);
+    }
     if (next.activeClock !== undefined) setActiveClock(next.activeClock);
     if (next.leaveRequests) setLeaveRequests(next.leaveRequests);
     if (next.sentReports) setSentReports(next.sentReports);
@@ -3910,9 +3928,30 @@ export default function SiteManager() {
     showToast(t.projectAdded);
   }
 
+  // Deleting marks; the record stays (entries-history.js). An entry a sent
+  // Rapport covers asks for the reason first.
   function deleteEntryFn(entry) {
+    if (coveredIds.has(entry.id)) {
+      setDeleteAsk({ entry, reason: "" });
+      return;
+    }
     persist({ entries: entries.filter((e) => e.id !== entry.id) });
-    if (entry.photoId) deletePhoto(entry.photoId); // don't leave orphan photo docs
+  }
+  function confirmDelete() {
+    if (!deleteAsk) return;
+    const { entry, reason } = deleteAsk;
+    setDeleteAsk(null);
+    persist({ entries: entries.filter((e) => e.id !== entry.id), changeReason: reason });
+  }
+  function restoreEntry(entry) {
+    persist({ entries: [...entries, { ...entry, deleted: false }] });
+    showToast(t.entryRestored);
+  }
+  // The only hard delete left: a manager empties the trash; the photo goes with it.
+  function purgeEntry(entry) {
+    if (!canManage()) return;
+    persist({ entries, purgeIds: [entry.id] });
+    if (entry.photoId) deletePhoto(entry.photoId);
   }
 
   // Only ever fills blanks. Overwriting what somebody typed on site to match
@@ -9210,6 +9249,9 @@ export default function SiteManager() {
           <ProjectDetail
             project={projects.find((p) => p.id === selectedProject)}
             entries={entries.filter((e) => e.projectId === selectedProject)}
+            deletedEntries={allEntries.filter((e) => e.deleted && e.projectId === selectedProject)}
+            onRestoreEntry={restoreEntry}
+            onPurgeEntry={canManage() ? purgeEntry : null}
             onClose={() => setSelectedProject(null)}
             onAdd={(type) => openAdd(type, selectedProject)}
             onEditEntry={openEditEntry}
@@ -10210,6 +10252,31 @@ export default function SiteManager() {
         </Modal>
       )}
 
+      {deleteAsk && (
+        <Modal t={t} onClose={() => setDeleteAsk(null)} title={t.deleteReasonTitle}>
+          <div style={{ color: COLORS.muted }} className="text-sm mb-3">
+            {t.deleteReasonHint}
+          </div>
+          <textarea
+            data-delete-reason
+            aria-label={t.deleteReasonTitle}
+            value={deleteAsk.reason}
+            onChange={(e) => setDeleteAsk((s) => ({ ...s, reason: e.target.value }))}
+            rows={3}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm outline-none mb-3"
+          />
+          <button
+            data-delete-confirm
+            onClick={confirmDelete}
+            style={{ background: COLORS.danger }}
+            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+          >
+            {t.a11yDelete}
+          </button>
+        </Modal>
+      )}
+
       {priceImport && (
         <Modal t={t} onClose={() => setPriceImport(null)} title={t.importPriceList}>
           <div style={{ color: COLORS.muted }} className="text-xs mb-3 truncate">
@@ -10341,6 +10408,53 @@ export default function SiteManager() {
                   : t.attachPhotoTitle
           }
         >
+          {addModal.editingId &&
+            coveredIds.has(addModal.editingId) &&
+            (() => {
+              const current = allEntries.find((e) => e.id === addModal.editingId) || {};
+              const hist = current.history || [];
+              return (
+                <div
+                  data-change-reason-box
+                  style={{ background: `${COLORS.amber}18`, border: `1px solid ${COLORS.amber}66` }}
+                  className="rounded-xl p-3 mb-3"
+                >
+                  <div style={{ color: COLORS.amber }} className="text-xs font-bold uppercase tracking-wide mb-1">
+                    {t.changeReasonLabel}
+                  </div>
+                  <div style={{ color: COLORS.muted }} className="text-xs mb-2">
+                    {t.deleteReasonHint}
+                  </div>
+                  <textarea
+                    data-change-reason
+                    aria-label={t.changeReasonLabel}
+                    defaultValue=""
+                    onChange={(e) => {
+                      changeReasonRef.current = e.target.value;
+                    }}
+                    rows={2}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                  />
+                  {hist.length > 0 && (
+                    <div data-entry-history className="mt-2 flex flex-col gap-1">
+                      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                        {t.histTitle} ({hist.length})
+                      </div>
+                      {hist
+                        .slice()
+                        .reverse()
+                        .map((h, i) => (
+                          <div key={i} style={{ color: COLORS.muted }} className="text-xs">
+                            {new Date(h.at).toLocaleString()} · {memberName(h.by)}
+                            {h.reason ? ` · ${h.reason}` : ""} · {Object.keys(h.before || {}).join(", ")}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           {addModal.type === "photo" ? (
             <div className="flex flex-col gap-3">
               <input

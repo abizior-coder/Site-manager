@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "a11yPrint": "Nyomtat\xE1s",
   "a11yZoomIn": "Nagy\xEDt\xE1s",
   "a11yZoomOut": "Kicsiny\xEDt\xE9s",
-  "exportMonth": "H\xF3nap"
+  "exportMonth": "H\xF3nap",
+  "deletedTitle": "T\xF6r\xF6lve",
+  "restoreBtn": "Vissza\xE1ll\xEDt\xE1s",
+  "purgeBtn": "V\xE9gleges t\xF6rl\xE9s",
+  "deleteReasonTitle": "A t\xF6rl\xE9s oka",
+  "deleteReasonHint": "Ez a bejegyz\xE9s egy elk\xFCld\xF6tt jelent\xE9sen szerepel. A v\xE1ltoz\xE1s az okkal egy\xFCtt r\xF6gz\xFCl.",
+  "changeReasonLabel": "A v\xE1ltoztat\xE1s oka",
+  "histTitle": "El\u0151zm\xE9nyek",
+  "entryRestored": "Bejegyz\xE9s vissza\xE1ll\xEDtva"
 }
 `;export{a as default};

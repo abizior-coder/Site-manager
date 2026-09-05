@@ -43,6 +43,7 @@ import {
   STOP,
 } from "./barcode.js";
 import { createCrashGate, crashPayload, installCrashCapture, uaFamily } from "./errors-client.js";
+import { coveredEntryIds, changedFields, reconcileEntries } from "./entries-history.js";
 import {
   reportId,
   reportRows,
@@ -807,6 +808,62 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       csv.includes("Soll;;;;;42,5"),
     ],
     [12, true, true, true],
+  );
+}
+
+{
+  // Entries keep their history: stamps, change records on covered entries,
+  // soft delete, restore, purge.
+  const covered = coveredEntryIds([{ entryIds: ["a", "b"] }, { entries: [{ id: "c" }] }]);
+  t("covered ids come from entryIds and from old copies", [...covered].sort(), ["a", "b", "c"]);
+  t(
+    "changed fields list content, not bookkeeping",
+    changedFields({ qty: 1, note: "x", updatedAt: 1 }, { qty: 2, note: "x", updatedAt: 2, extra: "y" }),
+    { qty: 1, extra: null },
+  );
+  const prev = [
+    { id: "a", type: "material", qty: 1, description: "Latte" },
+    { id: "b", type: "time", qty: 8 },
+    { id: "c", type: "note", description: "alt" },
+    { id: "d", type: "material", qty: 3, deleted: true, deletedAt: 5 },
+  ];
+  const next = [
+    { id: "a", type: "material", qty: 2, description: "Latte" },
+    { id: "b", type: "time", qty: 8 },
+    { id: "n", type: "material", qty: 1 },
+  ];
+  const out = reconcileEntries(prev, next, { by: "u1", now: 1000, covered, reason: "Zähler abgelesen" });
+  const byId = Object.fromEntries(out.map((e) => [e.id, e]));
+  t(
+    "a covered change is stamped and recorded with what it was",
+    [byId.a.qty, byId.a.updatedAt, byId.a.updatedBy, byId.a.history],
+    [2, 1000, "u1", [{ at: 1000, by: "u1", reason: "Zähler abgelesen", before: { qty: 1 } }]],
+  );
+  t("an unchanged entry is the same object, untouched", byId.b === prev[1] && !byId.b.updatedAt, true);
+  t(
+    "an entry that left the visible list is soft-deleted, with a record when covered",
+    [byId.c.deleted, byId.c.deletedAt, byId.c.deletedBy, byId.c.deleteReason, byId.c.history.length],
+    [true, 1000, "u1", "Zähler abgelesen", 1],
+  );
+  t("an already deleted entry stays, hidden", byId.d === prev[3], true);
+  t("a new entry is added as is", byId.n, { id: "n", type: "material", qty: 1 });
+  const restored = reconcileEntries(out, [...next, { ...byId.d, deleted: false }], { by: "u2", now: 2000, covered });
+  t(
+    "restoring marks the return and keeps the entry",
+    [restored.find((e) => e.id === "d").deleted, restored.find((e) => e.id === "d").restoredBy],
+    [false, "u2"],
+  );
+  const purged = reconcileEntries(out, next, { by: "u1", now: 3000, covered, purge: ["c"] });
+  t("purge is the only way a record leaves", purged.map((e) => e.id).sort(), ["a", "b", "d", "n"]);
+  const uncoveredEdit = reconcileEntries([{ id: "x", qty: 1 }], [{ id: "x", qty: 2 }], {
+    by: "u1",
+    now: 10,
+    covered: new Set(),
+  });
+  t(
+    "an uncovered change is stamped but not recorded",
+    [uncoveredEdit[0].updatedAt, uncoveredEdit[0].history],
+    [10, undefined],
   );
 }
 

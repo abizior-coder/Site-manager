@@ -886,5 +886,13 @@
   "a11yPrint": "Печат",
   "a11yZoomIn": "Увеличи",
   "a11yZoomOut": "Намали",
-  "exportMonth": "Месец"
+  "exportMonth": "Месец",
+  "deletedTitle": "Изтрити",
+  "restoreBtn": "Възстанови",
+  "purgeBtn": "Изтрий окончателно",
+  "deleteReasonTitle": "Причина за изтриването",
+  "deleteReasonHint": "Този запис е в изпратен рапорт. Промяната се записва с причината.",
+  "changeReasonLabel": "Причина за промяната",
+  "histTitle": "История",
+  "entryRestored": "Записът е възстановен"
 }

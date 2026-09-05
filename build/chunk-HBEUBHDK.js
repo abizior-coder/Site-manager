@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "a11yPrint": "Tip\u0103re\u0219te",
   "a11yZoomIn": "M\u0103re\u0219te",
   "a11yZoomOut": "Mic\u0219oreaz\u0103",
-  "exportMonth": "Luna"
+  "exportMonth": "Luna",
+  "deletedTitle": "\u0218terse",
+  "restoreBtn": "Restaureaz\u0103",
+  "purgeBtn": "\u0218terge definitiv",
+  "deleteReasonTitle": "Motivul \u0219tergerii",
+  "deleteReasonHint": "Aceast\u0103 intrare e \xEEntr-un raport trimis. Modificarea se \xEEnregistreaz\u0103 cu motivul.",
+  "changeReasonLabel": "Motivul modific\u0103rii",
+  "histTitle": "Istoric",
+  "entryRestored": "Intrare restaurat\u0103"
 }
 `;export{i as default};

@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "a11yPrint": "Stampa",
   "a11yZoomIn": "Ingrandisci",
   "a11yZoomOut": "Riduci",
-  "exportMonth": "Mese"
+  "exportMonth": "Mese",
+  "deletedTitle": "Eliminati",
+  "restoreBtn": "Ripristina",
+  "purgeBtn": "Elimina definitivamente",
+  "deleteReasonTitle": "Motivo dell'eliminazione",
+  "deleteReasonHint": "Questa voce \xE8 su un rapporto inviato. La modifica viene registrata con il motivo.",
+  "changeReasonLabel": "Motivo della modifica",
+  "histTitle": "Cronologia",
+  "entryRestored": "Voce ripristinata"
 }
 `;export{o as default};

@@ -886,5 +886,13 @@
   "a11yPrint": "Drucke",
   "a11yZoomIn": "Vergrössere",
   "a11yZoomOut": "Verchliinere",
-  "exportMonth": "Monet"
+  "exportMonth": "Monet",
+  "deletedTitle": "Glöscht",
+  "restoreBtn": "Zrugghole",
+  "purgeBtn": "Endgültig lösche",
+  "deleteReasonTitle": "Grund fürs Lösche",
+  "deleteReasonHint": "Dä Iitrag staht uf eme gschickte Rapport. D Änderig wird mit Grund feschtghalte.",
+  "changeReasonLabel": "Grund vo de Änderig",
+  "histTitle": "Verlauf",
+  "entryRestored": "Iitrag zrugggholt"
 }

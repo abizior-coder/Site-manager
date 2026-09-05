@@ -1,4 +1,4 @@
-import"./chunk-6ATBPRIA.js";var t=`{
+import"./chunk-6ATBPRIA.js";var r=`{
   "appLabel": "Journal de chantier",
   "onSite": "Sur site",
   "navToday": "Aujourd'hui",
@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "a11yPrint": "Imprimer",
   "a11yZoomIn": "Agrandir",
   "a11yZoomOut": "R\xE9duire",
-  "exportMonth": "Mois"
+  "exportMonth": "Mois",
+  "deletedTitle": "Supprim\xE9s",
+  "restoreBtn": "Restaurer",
+  "purgeBtn": "Supprimer d\xE9finitivement",
+  "deleteReasonTitle": "Motif de la suppression",
+  "deleteReasonHint": "Cette entr\xE9e figure sur un rapport envoy\xE9. La modification est enregistr\xE9e avec le motif.",
+  "changeReasonLabel": "Motif de la modification",
+  "histTitle": "Historique",
+  "entryRestored": "Entr\xE9e restaur\xE9e"
 }
-`;export{t as default};
+`;export{r as default};

@@ -886,5 +886,13 @@
   "a11yPrint": "Drucken",
   "a11yZoomIn": "Vergrössern",
   "a11yZoomOut": "Verkleinern",
-  "exportMonth": "Monat"
+  "exportMonth": "Monat",
+  "deletedTitle": "Gelöscht",
+  "restoreBtn": "Wiederherstellen",
+  "purgeBtn": "Endgültig löschen",
+  "deleteReasonTitle": "Grund für das Löschen",
+  "deleteReasonHint": "Dieser Eintrag steht auf einem gesendeten Rapport. Die Änderung wird mit Grund festgehalten.",
+  "changeReasonLabel": "Grund der Änderung",
+  "histTitle": "Verlauf",
+  "entryRestored": "Eintrag wiederhergestellt"
 }

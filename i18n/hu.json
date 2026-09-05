@@ -886,5 +886,13 @@
   "a11yPrint": "Nyomtatás",
   "a11yZoomIn": "Nagyítás",
   "a11yZoomOut": "Kicsinyítés",
-  "exportMonth": "Hónap"
+  "exportMonth": "Hónap",
+  "deletedTitle": "Törölve",
+  "restoreBtn": "Visszaállítás",
+  "purgeBtn": "Végleges törlés",
+  "deleteReasonTitle": "A törlés oka",
+  "deleteReasonHint": "Ez a bejegyzés egy elküldött jelentésen szerepel. A változás az okkal együtt rögzül.",
+  "changeReasonLabel": "A változtatás oka",
+  "histTitle": "Előzmények",
+  "entryRestored": "Bejegyzés visszaállítva"
 }

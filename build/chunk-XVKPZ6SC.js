@@ -886,6 +886,14 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "a11yPrint": "Printo",
   "a11yZoomIn": "Zmadho",
   "a11yZoomOut": "Zvog\xEBlo",
-  "exportMonth": "Muaji"
+  "exportMonth": "Muaji",
+  "deletedTitle": "T\xEB fshira",
+  "restoreBtn": "Rikthe",
+  "purgeBtn": "Fshi p\xEBrgjithmon\xEB",
+  "deleteReasonTitle": "Arsyeja e fshirjes",
+  "deleteReasonHint": "Ky sh\xEBnim \xEBsht\xEB n\xEB nj\xEB raport t\xEB d\xEBrguar. Ndryshimi regjistrohet me arsyen.",
+  "changeReasonLabel": "Arsyeja e ndryshimit",
+  "histTitle": "Historiku",
+  "entryRestored": "Sh\xEBnimi u rikthye"
 }
 `;export{r as default};

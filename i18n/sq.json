@@ -886,5 +886,13 @@
   "a11yPrint": "Printo",
   "a11yZoomIn": "Zmadho",
   "a11yZoomOut": "Zvogëlo",
-  "exportMonth": "Muaji"
+  "exportMonth": "Muaji",
+  "deletedTitle": "Të fshira",
+  "restoreBtn": "Rikthe",
+  "purgeBtn": "Fshi përgjithmonë",
+  "deleteReasonTitle": "Arsyeja e fshirjes",
+  "deleteReasonHint": "Ky shënim është në një raport të dërguar. Ndryshimi regjistrohet me arsyen.",
+  "changeReasonLabel": "Arsyeja e ndryshimit",
+  "histTitle": "Historiku",
+  "entryRestored": "Shënimi u rikthye"
 }

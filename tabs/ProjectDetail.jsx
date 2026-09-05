@@ -66,6 +66,9 @@ export function ProjectDetail({
   onEditEntry,
   onCopyEntry,
   onDeleteEntry,
+  deletedEntries = [],
+  onRestoreEntry,
+  onPurgeEntry,
   onShare,
   onScanCompare,
   onReorderEntries,
@@ -298,6 +301,54 @@ export function ProjectDetail({
           </div>
           {hubTab === "overview" && (
             <>
+              {deletedEntries.length > 0 && (
+                <details
+                  data-deleted-block
+                  style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                  className="rounded-xl p-4 mb-4"
+                >
+                  <summary
+                    style={{ color: COLORS.muted }}
+                    className="text-xs font-bold uppercase tracking-wide cursor-pointer"
+                  >
+                    {t.deletedTitle} ({deletedEntries.length})
+                  </summary>
+                  <div className="flex flex-col gap-2 mt-3">
+                    {deletedEntries.map((e) => (
+                      <div key={e.id} data-deleted-entry className="flex items-center justify-between gap-2 text-xs">
+                        <div className="min-w-0">
+                          <div className="truncate">{e.description || e.type}</div>
+                          <div style={{ color: COLORS.muted }} className="truncate">
+                            {e.date}
+                            {e.deletedAt ? ` · ${new Date(e.deletedAt).toLocaleDateString()}` : ""}
+                            {e.deleteReason ? ` · ${e.deleteReason}` : ""}
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 shrink-0">
+                          <button
+                            data-restore-entry
+                            onClick={() => onRestoreEntry && onRestoreEntry(e)}
+                            style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                            className="tap px-2 py-1 rounded-lg font-bold"
+                          >
+                            {t.restoreBtn}
+                          </button>
+                          {onPurgeEntry && (
+                            <button
+                              data-purge-entry
+                              onClick={() => onPurgeEntry(e)}
+                              style={{ color: COLORS.danger, border: `1px solid ${COLORS.danger}` }}
+                              className="tap px-2 py-1 rounded-lg font-bold"
+                            >
+                              {t.purgeBtn}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
               {/* Each part of a job is its own block, so the eye can find the one it
             wants instead of reading a single long strip. */}
               <div
@@ -922,6 +973,54 @@ export function ProjectDetail({
 
           {hubTab === "overview" && (
             <>
+              {deletedEntries.length > 0 && (
+                <details
+                  data-deleted-block
+                  style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                  className="rounded-xl p-4 mb-4"
+                >
+                  <summary
+                    style={{ color: COLORS.muted }}
+                    className="text-xs font-bold uppercase tracking-wide cursor-pointer"
+                  >
+                    {t.deletedTitle} ({deletedEntries.length})
+                  </summary>
+                  <div className="flex flex-col gap-2 mt-3">
+                    {deletedEntries.map((e) => (
+                      <div key={e.id} data-deleted-entry className="flex items-center justify-between gap-2 text-xs">
+                        <div className="min-w-0">
+                          <div className="truncate">{e.description || e.type}</div>
+                          <div style={{ color: COLORS.muted }} className="truncate">
+                            {e.date}
+                            {e.deletedAt ? ` · ${new Date(e.deletedAt).toLocaleDateString()}` : ""}
+                            {e.deleteReason ? ` · ${e.deleteReason}` : ""}
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 shrink-0">
+                          <button
+                            data-restore-entry
+                            onClick={() => onRestoreEntry && onRestoreEntry(e)}
+                            style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                            className="tap px-2 py-1 rounded-lg font-bold"
+                          >
+                            {t.restoreBtn}
+                          </button>
+                          {onPurgeEntry && (
+                            <button
+                              data-purge-entry
+                              onClick={() => onPurgeEntry(e)}
+                              style={{ color: COLORS.danger, border: `1px solid ${COLORS.danger}` }}
+                              className="tap px-2 py-1 rounded-lg font-bold"
+                            >
+                              {t.purgeBtn}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
               {/* What the roof inspections found and what drove to and from this
             job -- both used to live only on Today. */}
               {inspections.length > 0 && (

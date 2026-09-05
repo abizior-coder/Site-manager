@@ -886,5 +886,13 @@
   "a11yPrint": "Tlačiť",
   "a11yZoomIn": "Priblížiť",
   "a11yZoomOut": "Oddialiť",
-  "exportMonth": "Mesiac"
+  "exportMonth": "Mesiac",
+  "deletedTitle": "Vymazané",
+  "restoreBtn": "Obnoviť",
+  "purgeBtn": "Vymazať natrvalo",
+  "deleteReasonTitle": "Dôvod vymazania",
+  "deleteReasonHint": "Tento záznam je v odoslanom raporte. Zmena sa zaznamená s dôvodom.",
+  "changeReasonLabel": "Dôvod zmeny",
+  "histTitle": "História",
+  "entryRestored": "Záznam obnovený"
 }
