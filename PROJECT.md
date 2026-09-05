@@ -30,6 +30,23 @@ fall back to English for almost everything — **finish those before telling
 anyone the app speaks their language.** Albanian covers the crew-facing
 surface only; the office screens fall back to English by design.
 
+## 1a. Competitive reality (2026-09-06) — read before any product or pricing decision
+
+`docs/research/2026-09-06_swiss-competitors.md` is the reference. The
+Swiss market already has ALBAU/OF-Bau (Orbit, built for Spenglerei and
+Bedachung by name), SORBA (Dachdecker/Spengler by name, DE/EN/FR/IT app),
+Werkli (Dachdecker page, CHF 50–170/month, offline, QR from the Rapport),
+noovi (CHF 19–49/user, AI dictation, 1000+ firms), Baunex (DE/FR/IT,
+dialect voice, OCR, bexio two-way, from CHF 24/user), BRIXX (CHF 150
+flat) and Technoova. Rapport, Zeiterfassung, QR-Rechnung, offline, bexio
+and "AI" are table stakes there. The earlier line that Site Log is
+"functionally ahead of the competition" was based on German tools and is
+withdrawn; the CHF 290/firm price in the value plan is above the market.
+The only visible gap is a crew interface in the crews' own languages —
+a hypothesis to be tested with roofing firms before any further product
+work. The roofing/Spengler sector is about 850 firms with 4,000
+employees under the GAV: not a multi-million market on its own.
+
 ## 1b. Product principle: scale without the founder (owner's decision, 2026-09-06)
 
 Site Log is built as a **scalable product**, not a service. Selling it must

@@ -19,6 +19,19 @@ is added, moved or changes its job.
 - **Lesson:** never trust the working copy's line endings after a git
   checkout/stash on Windows; the attributes file now makes that moot.
 
+## 2026-09-06 — Swiss competitor research (correction of 2026-09-04)
+
+- **Why:** the owner pointed out that the 2026-09-04 research covered
+  plancraft and ToolTime (German market) and none of the Swiss vendors.
+- **What:** `docs/research/2026-09-06_swiss-competitors.md` from the
+  vendors' own pages: ALBAU/OF-Bau, SORBA, Werkli, noovi, Baunex, BRIXX,
+  Technoova (+ Jobilino for languages); feature-by-feature against Site
+  Log; prices; market size (~850 firms / 4,000 employees under the GAV).
+  PROJECT.md §1a records the reality and withdraws the "ahead of the
+  competition" line and the CHF 290 price. The private-server plan and
+  the billing/landing steps are parked until the crew-language hypothesis
+  is tested with real firms.
+
 ## 2026-09-06 — Plan: Site Log on a private server (spec, proposed)
 
 - **Why:** the owner asked for a plan to move the whole suite to a private
