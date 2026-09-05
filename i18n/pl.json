@@ -909,5 +909,17 @@
   "backupOk": "Aktualna",
   "backupNowBtn": "Zapisz kopię teraz",
   "filesQueued": "brak sieci — plik czeka i wyśle się, gdy sieć wróci",
-  "filesQueuedShort": "czeka na sieć"
+  "filesQueuedShort": "czeka na sieć",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Utwórz Personal Access Token na developer.bexio.com (Personal Access Tokens → Create new token, wybierz firmę) i wklej go tu raz. Leży zaszyfrowany tylko na serwerze, nigdy w tym telefonie. Tokeny ważne 60 dni.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Połącz bexio",
+  "bexioConnected": "Połączono",
+  "bexioRenew": "Token wkrótce wygaśnie — utwórz nowy na developer.bexio.com i wklej tutaj.",
+  "bexioDryRun": "Próba (pokaż, co zostałoby wysłane)",
+  "bexioPushContacts": "Klienci → bexio",
+  "bexioPushInvoices": "Faktury miesiąca → bexio",
+  "bexioDryRunDone": "Próba — nic nie wysłano:",
+  "bexioPushed": "Wysłano — odpowiedź bexio:",
+  "bexioDisconnect": "Rozłącz bexio"
 }

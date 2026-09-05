@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "backupOk": "Aggiornato",
   "backupNowBtn": "Salva ora",
   "filesQueued": "nessuna rete \u2014 il file attende e sar\xE0 inviato al ritorno della rete",
-  "filesQueuedShort": "in attesa della rete"
+  "filesQueuedShort": "in attesa della rete",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Crea un Personal Access Token su developer.bexio.com (Personal Access Tokens \u2192 Create new token, scegli la ditta) e incollalo qui una volta. Resta cifrato solo sul server, mai su questo telefono. I token valgono 60 giorni.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Collega bexio",
+  "bexioConnected": "Collegato",
+  "bexioRenew": "Il token scade presto \u2014 creane uno nuovo su developer.bexio.com e incollalo qui.",
+  "bexioDryRun": "Prova (mostra cosa verrebbe inviato)",
+  "bexioPushContacts": "Clienti \u2192 bexio",
+  "bexioPushInvoices": "Fatture del mese \u2192 bexio",
+  "bexioDryRunDone": "Prova \u2014 nulla inviato:",
+  "bexioPushed": "Inviato \u2014 bexio risponde:",
+  "bexioDisconnect": "Scollega bexio"
 }
 `;export{o as default};

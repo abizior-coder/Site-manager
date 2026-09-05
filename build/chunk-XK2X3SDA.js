@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "backupOk": "Aktu\xE1lne",
   "backupNowBtn": "Z\xE1lohova\u0165 teraz",
   "filesQueued": "bez siete \u2014 s\xFAbor \u010Dak\xE1 a odo\u0161le sa, ke\u010F sa sie\u0165 vr\xE1ti",
-  "filesQueuedShort": "\u010Dak\xE1 na sie\u0165"
+  "filesQueuedShort": "\u010Dak\xE1 na sie\u0165",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Vytvorte Personal Access Token na developer.bexio.com (Personal Access Tokens \u2192 Create new token, vyberte firmu) a vlo\u017Ete ho sem raz. Le\u017E\xED za\u0161ifrovan\xFD len na serveri, nikdy v tomto telef\xF3ne. Tokeny platia 60 dn\xED.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Pripoji\u0165 bexio",
+  "bexioConnected": "Pripojen\xE9",
+  "bexioRenew": "Token \u010Doskoro vypr\u0161\xED \u2014 vytvorte nov\xFD na developer.bexio.com a vlo\u017Ete ho sem.",
+  "bexioDryRun": "Sk\xFA\u0161ka (uk\xE1za\u0165, \u010Do by sa poslalo)",
+  "bexioPushContacts": "Z\xE1kazn\xEDci \u2192 bexio",
+  "bexioPushInvoices": "Fakt\xFAry mesiaca \u2192 bexio",
+  "bexioDryRunDone": "Sk\xFA\u0161ka \u2014 ni\u010D sa neposlalo:",
+  "bexioPushed": "Odoslan\xE9 \u2014 bexio odpoved\xE1:",
+  "bexioDisconnect": "Odpoji\u0165 bexio"
 }
 `;export{o as default};

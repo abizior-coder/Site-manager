@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "backupOk": "N\xEB rregull",
   "backupNowBtn": "Ruaj tani",
   "filesQueued": "pa rrjet \u2014 skedari pret dhe ngarkohet kur rrjeti kthehet",
-  "filesQueuedShort": "n\xEB pritje t\xEB rrjetit"
+  "filesQueuedShort": "n\xEB pritje t\xEB rrjetit",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Krijo nj\xEB Personal Access Token n\xEB developer.bexio.com (Personal Access Tokens \u2192 Create new token, zgjidh firm\xEBn) dhe ngjite k\xEBtu nj\xEB her\xEB. Ruhet i enkriptuar vet\xEBm n\xEB server, kurr\xEB n\xEB k\xEBt\xEB telefon. Token\xEBt vlejn\xEB 60 dit\xEB.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Lidh bexio",
+  "bexioConnected": "I lidhur",
+  "bexioRenew": "Tokeni skadon s\xEB shpejti \u2014 krijo nj\xEB t\xEB ri n\xEB developer.bexio.com dhe ngjite k\xEBtu.",
+  "bexioDryRun": "Prov\xEB (trego \xE7far\xEB do t\xEB d\xEBrgohej)",
+  "bexioPushContacts": "Klient\xEBt \u2192 bexio",
+  "bexioPushInvoices": "Faturat e muajit \u2192 bexio",
+  "bexioDryRunDone": "Prov\xEB \u2014 asgj\xEB e d\xEBrguar:",
+  "bexioPushed": "U d\xEBrgua \u2014 bexio p\xEBrgjigjet:",
+  "bexioDisconnect": "Shk\xEBput bexio"
 }
 `;export{r as default};

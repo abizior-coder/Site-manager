@@ -18,7 +18,7 @@
     "emulators": "firebase emulators:start --only auth,firestore",
     "test:order": "node order-flow.test.mjs",
     "test:dock": "node dock.test.mjs",
-    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs && node worker/errors.test.mjs",
+    "test:worker": "node worker/files.test.mjs && node worker/limits.test.mjs && node worker/metrics.test.mjs && node worker/errors.test.mjs && node worker/bexio.test.mjs",
     "build:css": "tailwindcss -i tailwind.src.css -o tailwind.css --minify",
     "lint": "eslint .",
     "format": "prettier --write .",

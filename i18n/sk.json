@@ -909,5 +909,17 @@
   "backupOk": "Aktuálne",
   "backupNowBtn": "Zálohovať teraz",
   "filesQueued": "bez siete — súbor čaká a odošle sa, keď sa sieť vráti",
-  "filesQueuedShort": "čaká na sieť"
+  "filesQueuedShort": "čaká na sieť",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Vytvorte Personal Access Token na developer.bexio.com (Personal Access Tokens → Create new token, vyberte firmu) a vložte ho sem raz. Leží zašifrovaný len na serveri, nikdy v tomto telefóne. Tokeny platia 60 dní.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Pripojiť bexio",
+  "bexioConnected": "Pripojené",
+  "bexioRenew": "Token čoskoro vyprší — vytvorte nový na developer.bexio.com a vložte ho sem.",
+  "bexioDryRun": "Skúška (ukázať, čo by sa poslalo)",
+  "bexioPushContacts": "Zákazníci → bexio",
+  "bexioPushInvoices": "Faktúry mesiaca → bexio",
+  "bexioDryRunDone": "Skúška — nič sa neposlalo:",
+  "bexioPushed": "Odoslané — bexio odpovedá:",
+  "bexioDisconnect": "Odpojiť bexio"
 }

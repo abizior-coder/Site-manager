@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "backupOk": "Naprak\xE9sz",
   "backupNowBtn": "Ment\xE9s most",
   "filesQueued": "nincs h\xE1l\xF3zat \u2014 a f\xE1jl v\xE1r, \xE9s felt\xF6lt\u0151dik, amint visszat\xE9r",
-  "filesQueuedShort": "h\xE1l\xF3zatra v\xE1r"
+  "filesQueuedShort": "h\xE1l\xF3zatra v\xE1r",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Hozz l\xE9tre Personal Access Tokent a developer.bexio.com oldalon (Personal Access Tokens \u2192 Create new token, v\xE1laszd a c\xE9get), \xE9s illeszd be ide egyszer. Titkos\xEDtva csak a szerveren van, ezen a telefonon soha. A tokenek 60 napig \xE9rv\xE9nyesek.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "bexio csatlakoztat\xE1sa",
+  "bexioConnected": "Csatlakoztatva",
+  "bexioRenew": "A token hamarosan lej\xE1r \u2014 hozz l\xE9tre \xFAjat a developer.bexio.com oldalon \xE9s illeszd be ide.",
+  "bexioDryRun": "Pr\xF3ba (mutasd, mi menne el)",
+  "bexioPushContacts": "\xDCgyfelek \u2192 bexio",
+  "bexioPushInvoices": "A h\xF3nap sz\xE1ml\xE1i \u2192 bexio",
+  "bexioDryRunDone": "Pr\xF3ba \u2014 semmi nem ment el:",
+  "bexioPushed": "Elk\xFCldve \u2014 a bexio v\xE1lasza:",
+  "bexioDisconnect": "bexio lev\xE1laszt\xE1sa"
 }
 `;export{a as default};

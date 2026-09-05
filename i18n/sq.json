@@ -909,5 +909,17 @@
   "backupOk": "Në rregull",
   "backupNowBtn": "Ruaj tani",
   "filesQueued": "pa rrjet — skedari pret dhe ngarkohet kur rrjeti kthehet",
-  "filesQueuedShort": "në pritje të rrjetit"
+  "filesQueuedShort": "në pritje të rrjetit",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Krijo një Personal Access Token në developer.bexio.com (Personal Access Tokens → Create new token, zgjidh firmën) dhe ngjite këtu një herë. Ruhet i enkriptuar vetëm në server, kurrë në këtë telefon. Tokenët vlejnë 60 ditë.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Lidh bexio",
+  "bexioConnected": "I lidhur",
+  "bexioRenew": "Tokeni skadon së shpejti — krijo një të ri në developer.bexio.com dhe ngjite këtu.",
+  "bexioDryRun": "Provë (trego çfarë do të dërgohej)",
+  "bexioPushContacts": "Klientët → bexio",
+  "bexioPushInvoices": "Faturat e muajit → bexio",
+  "bexioDryRunDone": "Provë — asgjë e dërguar:",
+  "bexioPushed": "U dërgua — bexio përgjigjet:",
+  "bexioDisconnect": "Shkëput bexio"
 }

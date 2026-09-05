@@ -946,6 +946,14 @@ async function renderAs(role) {
       !!backup && backup.getAttribute("data-due") === "1" && !!backup.querySelector("[data-backup-now]"),
       backup ? backup.textContent.slice(0, 80) : "no backup card",
     );
+    const bexio = window.document.querySelector("[data-bexio-card]");
+    check(
+      "owner: the cockpit shows the bexio card with the token form",
+      !!bexio &&
+        (!!bexio.querySelector("[data-bexio-token]") ||
+          /nicht konfiguriert|not configured|bexio/i.test(bexio.textContent || "")),
+      bexio ? bexio.textContent.slice(0, 80) : "no bexio card",
+    );
 
     // Accessibility: every rendered button has a name, every input a label.
     const nameless = [...window.document.querySelectorAll("button")].filter(

@@ -909,5 +909,17 @@
   "backupOk": "Актуално",
   "backupNowBtn": "Запази сега",
   "filesQueued": "няма мрежа — файлът чака и ще се изпрати, щом се върне",
-  "filesQueuedShort": "чака мрежа"
+  "filesQueuedShort": "чака мрежа",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Създайте Personal Access Token на developer.bexio.com (Personal Access Tokens → Create new token, изберете фирмата) и го поставете тук веднъж. Пази се шифрован само на сървъра, никога на този телефон. Токените важат 60 дни.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Свържи bexio",
+  "bexioConnected": "Свързано",
+  "bexioRenew": "Токенът скоро изтича — създайте нов на developer.bexio.com и го поставете тук.",
+  "bexioDryRun": "Проба (покажи какво би се изпратило)",
+  "bexioPushContacts": "Клиенти → bexio",
+  "bexioPushInvoices": "Фактури за месеца → bexio",
+  "bexioDryRunDone": "Проба — нищо не е изпратено:",
+  "bexioPushed": "Изпратено — bexio отговаря:",
+  "bexioDisconnect": "Прекъсни bexio"
 }

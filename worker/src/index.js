@@ -1,6 +1,7 @@
 import { handleFiles, firestoreMember } from "./files.js";
 import { checkLimits } from "./limits.js";
 import { handleErrors } from "./errors.js";
+import { handleBexio } from "./bexio.js";
 import { handleMetrics } from "./metrics.js";
 
 const MODEL = "claude-sonnet-5";
@@ -65,6 +66,15 @@ export default {
     // everything else is the AI proxy.
     if (new URL(request.url).pathname.startsWith("/metrics")) {
       return handleMetrics({
+        request,
+        env,
+        headers,
+        verify: verifyUser,
+        isMember: (cid, uid, token) => firestoreMember(FIREBASE_PROJECT_ID, cid, uid, token),
+      });
+    }
+    if (new URL(request.url).pathname.startsWith("/bexio")) {
+      return handleBexio({
         request,
         env,
         headers,

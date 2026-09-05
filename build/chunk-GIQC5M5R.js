@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "backupOk": "La zi",
   "backupNowBtn": "Salveaz\u0103 acum",
   "filesQueued": "f\u0103r\u0103 re\u021Bea \u2014 fi\u0219ierul a\u0219teapt\u0103 \u0219i pleac\u0103 la revenirea ei",
-  "filesQueuedShort": "a\u0219teapt\u0103 re\u021Beaua"
+  "filesQueuedShort": "a\u0219teapt\u0103 re\u021Beaua",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Creeaz\u0103 un Personal Access Token pe developer.bexio.com (Personal Access Tokens \u2192 Create new token, alege firma) \u0219i lipe\u0219te-l aici o dat\u0103. St\u0103 criptat doar pe server, niciodat\u0103 pe acest telefon. Tokenurile sunt valabile 60 de zile.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Conecteaz\u0103 bexio",
+  "bexioConnected": "Conectat",
+  "bexioRenew": "Tokenul expir\u0103 \xEEn cur\xE2nd \u2014 creeaz\u0103 unul nou pe developer.bexio.com \u0219i lipe\u0219te-l aici.",
+  "bexioDryRun": "Prob\u0103 (arat\u0103 ce s-ar trimite)",
+  "bexioPushContacts": "Clien\u021Bi \u2192 bexio",
+  "bexioPushInvoices": "Facturile lunii \u2192 bexio",
+  "bexioDryRunDone": "Prob\u0103 \u2014 nimic trimis:",
+  "bexioPushed": "Trimis \u2014 bexio r\u0103spunde:",
+  "bexioDisconnect": "Deconecteaz\u0103 bexio"
 }
 `;export{i as default};

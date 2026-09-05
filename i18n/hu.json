@@ -909,5 +909,17 @@
   "backupOk": "Naprakész",
   "backupNowBtn": "Mentés most",
   "filesQueued": "nincs hálózat — a fájl vár, és feltöltődik, amint visszatér",
-  "filesQueuedShort": "hálózatra vár"
+  "filesQueuedShort": "hálózatra vár",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Hozz létre Personal Access Tokent a developer.bexio.com oldalon (Personal Access Tokens → Create new token, válaszd a céget), és illeszd be ide egyszer. Titkosítva csak a szerveren van, ezen a telefonon soha. A tokenek 60 napig érvényesek.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "bexio csatlakoztatása",
+  "bexioConnected": "Csatlakoztatva",
+  "bexioRenew": "A token hamarosan lejár — hozz létre újat a developer.bexio.com oldalon és illeszd be ide.",
+  "bexioDryRun": "Próba (mutasd, mi menne el)",
+  "bexioPushContacts": "Ügyfelek → bexio",
+  "bexioPushInvoices": "A hónap számlái → bexio",
+  "bexioDryRunDone": "Próba — semmi nem ment el:",
+  "bexioPushed": "Elküldve — a bexio válasza:",
+  "bexioDisconnect": "bexio leválasztása"
 }

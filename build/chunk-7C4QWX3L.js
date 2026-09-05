@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "backupOk": "Aktualna",
   "backupNowBtn": "Zapisz kopi\u0119 teraz",
   "filesQueued": "brak sieci \u2014 plik czeka i wy\u015Ble si\u0119, gdy sie\u0107 wr\xF3ci",
-  "filesQueuedShort": "czeka na sie\u0107"
+  "filesQueuedShort": "czeka na sie\u0107",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Utw\xF3rz Personal Access Token na developer.bexio.com (Personal Access Tokens \u2192 Create new token, wybierz firm\u0119) i wklej go tu raz. Le\u017Cy zaszyfrowany tylko na serwerze, nigdy w tym telefonie. Tokeny wa\u017Cne 60 dni.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Po\u0142\u0105cz bexio",
+  "bexioConnected": "Po\u0142\u0105czono",
+  "bexioRenew": "Token wkr\xF3tce wyga\u015Bnie \u2014 utw\xF3rz nowy na developer.bexio.com i wklej tutaj.",
+  "bexioDryRun": "Pr\xF3ba (poka\u017C, co zosta\u0142oby wys\u0142ane)",
+  "bexioPushContacts": "Klienci \u2192 bexio",
+  "bexioPushInvoices": "Faktury miesi\u0105ca \u2192 bexio",
+  "bexioDryRunDone": "Pr\xF3ba \u2014 nic nie wys\u0142ano:",
+  "bexioPushed": "Wys\u0142ano \u2014 odpowied\u017A bexio:",
+  "bexioDisconnect": "Roz\u0142\u0105cz bexio"
 }
 `;export{o as default};

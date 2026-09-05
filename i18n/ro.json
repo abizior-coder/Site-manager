@@ -909,5 +909,17 @@
   "backupOk": "La zi",
   "backupNowBtn": "Salvează acum",
   "filesQueued": "fără rețea — fișierul așteaptă și pleacă la revenirea ei",
-  "filesQueuedShort": "așteaptă rețeaua"
+  "filesQueuedShort": "așteaptă rețeaua",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Creează un Personal Access Token pe developer.bexio.com (Personal Access Tokens → Create new token, alege firma) și lipește-l aici o dată. Stă criptat doar pe server, niciodată pe acest telefon. Tokenurile sunt valabile 60 de zile.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Conectează bexio",
+  "bexioConnected": "Conectat",
+  "bexioRenew": "Tokenul expiră în curând — creează unul nou pe developer.bexio.com și lipește-l aici.",
+  "bexioDryRun": "Probă (arată ce s-ar trimite)",
+  "bexioPushContacts": "Clienți → bexio",
+  "bexioPushInvoices": "Facturile lunii → bexio",
+  "bexioDryRunDone": "Probă — nimic trimis:",
+  "bexioPushed": "Trimis — bexio răspunde:",
+  "bexioDisconnect": "Deconectează bexio"
 }

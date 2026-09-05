@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "backupOk": "\xC0 jour",
   "backupNowBtn": "Sauvegarder maintenant",
   "filesQueued": "pas de r\xE9seau \u2014 le fichier attend et partira d\xE8s son retour",
-  "filesQueuedShort": "en attente du r\xE9seau"
+  "filesQueuedShort": "en attente du r\xE9seau",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Cr\xE9ez un Personal Access Token sur developer.bexio.com (Personal Access Tokens \u2192 Create new token, choisissez l'entreprise) et collez-le ici une fois. Il est conserv\xE9 chiffr\xE9 sur le serveur seulement, jamais sur ce t\xE9l\xE9phone. Les tokens valent 60 jours.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "Connecter bexio",
+  "bexioConnected": "Connect\xE9",
+  "bexioRenew": "Le token expire bient\xF4t \u2014 cr\xE9ez-en un nouveau sur developer.bexio.com et collez-le ici.",
+  "bexioDryRun": "Essai \xE0 blanc (montrer ce qui serait envoy\xE9)",
+  "bexioPushContacts": "Clients \u2192 bexio",
+  "bexioPushInvoices": "Factures du mois \u2192 bexio",
+  "bexioDryRunDone": "Essai \xE0 blanc \u2014 rien envoy\xE9 :",
+  "bexioPushed": "Envoy\xE9 \u2014 r\xE9ponse de bexio :",
+  "bexioDisconnect": "D\xE9connecter bexio"
 }
 `;export{r as default};

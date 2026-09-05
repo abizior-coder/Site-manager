@@ -909,5 +909,17 @@
   "backupOk": "Aktuell",
   "backupNowBtn": "Jetzt sichere",
   "filesQueued": "kei Netz — d Datei wartet und gaht ufe, sobald s zrugg isch",
-  "filesQueuedShort": "warted uf s Netz"
+  "filesQueuedShort": "warted uf s Netz",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Uf developer.bexio.com en Personal Access Token erstelle (Personal Access Tokens → Create new token, Firma wähle) und da eimal iisetze. Er liit verschlüsslet nur uf em Server, nie uf dem Telefon. Tokens gälted 60 Tag.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "bexio verbinde",
+  "bexioConnected": "Verbunde",
+  "bexioRenew": "De Token lauft bald ab — uf developer.bexio.com en neue erstelle und da iisetze.",
+  "bexioDryRun": "Probelauf (zeige, was gschickt wür)",
+  "bexioPushContacts": "Kunde → bexio",
+  "bexioPushInvoices": "Rächnige vom Monet → bexio",
+  "bexioDryRunDone": "Probelauf — nüt gschickt:",
+  "bexioPushed": "Gschickt — bexio antwortet:",
+  "bexioDisconnect": "bexio trenne"
 }

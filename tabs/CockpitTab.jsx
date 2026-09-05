@@ -258,6 +258,207 @@ function UsageCard({ t }) {
   );
 }
 
+// bexio: connect with a Personal Access Token (kept only in the Worker),
+// push customers and a month's invoices; every answer from bexio is shown.
+function BexioCard({ t, customers, documents, projects }) {
+  const [status, setStatus] = useState(null);
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
+  const [month, setMonth] = useState(previousMonth());
+  const [dryRun, setDryRun] = useState(true);
+  const call = async (method, action, body) => {
+    const cid = getCompanyId();
+    const tok = await getIdToken();
+    const res = await fetch(`${WORKER_URL}/bexio/${cid}/${action}`, {
+      method,
+      headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `bexio ${res.status}`);
+    return data;
+  };
+  useEffect(() => {
+    let alive = true;
+    call("GET", "status")
+      .then((s) => alive && setStatus(s))
+      .catch((e) => alive && setStatus({ connected: false, unavailable: e.message }));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const run = async (fn) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await fn();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const connect = () =>
+    run(async () => {
+      const r = await call("PUT", "token", { token: token.trim() });
+      setStatus(r.status);
+      setToken("");
+    });
+  const disconnect = () =>
+    run(async () => {
+      await call("DELETE", "token");
+      setStatus({ connected: false });
+      setResult(null);
+    });
+  const monthInvoices = (documents || []).filter(
+    (d) => d.type === "invoice" && (d.status || "draft") !== "draft" && String(d.date || "").startsWith(month),
+  );
+  const push = (what) =>
+    run(async () => {
+      const body = { dryRun, projects: (projects || []).map((p) => ({ id: p.id, name: p.name })) };
+      if (what === "contacts") body.contacts = customers || [];
+      if (what === "invoices") {
+        body.invoices = monthInvoices;
+        body.contacts = (customers || []).filter((c) => monthInvoices.some((d) => d.customerId === c.id));
+      }
+      const r = await call("POST", "push", body);
+      setResult({ what, ...r });
+    });
+  const line = (s) => `${s.user || ""} · ${new Date(s.since).toLocaleDateString()} · ${s.expiresInDays} d`;
+  return (
+    <div
+      data-bexio-card
+      style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+      className="rounded-xl p-3 lg:col-span-3"
+    >
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+        {t.bexioTitle}
+      </div>
+      {!status && (
+        <div style={{ color: COLORS.muted }} className="text-xs">
+          {t.ccUsageLoading}
+        </div>
+      )}
+      {status && status.unavailable && (
+        <div style={{ color: COLORS.amber }} className="text-xs mb-2">
+          {status.unavailable}
+        </div>
+      )}
+      {status && !status.connected && (
+        <div className="flex flex-col gap-2">
+          <div style={{ color: COLORS.muted }} className="text-xs leading-relaxed">
+            {t.bexioHowTo}
+          </div>
+          <input
+            data-bexio-token
+            type="password"
+            autoComplete="off"
+            aria-label={t.bexioTokenLabel}
+            placeholder={t.bexioTokenLabel}
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+            className="w-full rounded-lg px-3 py-2 text-sm outline-none font-mono"
+          />
+          <button
+            data-bexio-connect
+            disabled={busy || token.trim().length < 20}
+            onClick={connect}
+            style={{ background: COLORS.accent, opacity: busy || token.trim().length < 20 ? 0.5 : 1 }}
+            className="w-full py-2.5 rounded-lg text-xs font-bold uppercase"
+          >
+            {t.bexioConnect}
+          </button>
+        </div>
+      )}
+      {status && status.connected && (
+        <div className="flex flex-col gap-2">
+          <div className="text-sm">
+            <span style={{ color: COLORS.success }} className="font-bold">
+              {t.bexioConnected}
+            </span>{" "}
+            <span style={{ color: COLORS.muted }} className="text-xs">
+              {line(status)}
+            </span>
+          </div>
+          {status.renewSoon && (
+            <div style={{ color: COLORS.amber }} className="text-xs">
+              {t.bexioRenew}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <input
+              data-bexio-month
+              aria-label={t.exportMonth}
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value || month)}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="rounded-lg px-2 py-1 text-xs outline-none"
+            />
+            <label className="flex items-center gap-1.5 text-xs" style={{ color: COLORS.muted }}>
+              <input data-bexio-dry type="checkbox" checked={dryRun} onChange={(e) => setDryRun(e.target.checked)} />{" "}
+              {t.bexioDryRun}
+            </label>
+          </div>
+          <div className="grid gap-2 lg:grid-cols-2">
+            <button
+              data-bexio-push-contacts
+              disabled={busy}
+              onClick={() => push("contacts")}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+              className="py-2.5 rounded-lg text-xs font-bold"
+            >
+              {t.bexioPushContacts} ({(customers || []).length})
+            </button>
+            <button
+              data-bexio-push-invoices
+              disabled={busy}
+              onClick={() => push("invoices")}
+              style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+              className="py-2.5 rounded-lg text-xs font-bold"
+            >
+              {t.bexioPushInvoices} ({monthInvoices.length})
+            </button>
+          </div>
+          {result && (
+            <div data-bexio-result className="flex flex-col gap-1 text-xs">
+              <div style={{ color: COLORS.muted }}>{result.dryRun ? t.bexioDryRunDone : t.bexioPushed}</div>
+              {[...(result.results.contacts || []), ...(result.results.invoices || [])].slice(0, 40).map((r, i) => (
+                <div
+                  key={i}
+                  className="font-mono truncate"
+                  style={{ color: r.status === "error" ? COLORS.dangerText : COLORS.text }}
+                >
+                  {r.number || r.id} · {r.status}
+                  {r.bexioId ? ` · #${r.bexioId}` : ""}
+                  {r.error ? ` · ${r.error}` : ""}
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            data-bexio-disconnect
+            disabled={busy}
+            onClick={disconnect}
+            style={{ color: COLORS.muted }}
+            className="text-xs underline self-start"
+          >
+            {t.bexioDisconnect}
+          </button>
+        </div>
+      )}
+      {error && (
+        <div data-bexio-error style={{ color: COLORS.dangerText }} className="text-xs mt-2">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // How long since the owner last exported; a nudge once a week has passed.
 function BackupCard({ t, backupMeta, onBackup }) {
   const state = backupDue(backupMeta && backupMeta.lastAt);
@@ -362,6 +563,7 @@ export function CockpitTab({
       {isOwner() && <UsageCard t={t} />}
       {isOwner() && <ErrorsCard t={t} />}
       {isOwner() && <BackupCard t={t} backupMeta={backupMeta} onBackup={onBackup} />}
+      {isOwner() && <BexioCard t={t} customers={customers} documents={documents} projects={projects} />}
       {isOwner() && (
         <ExportCard
           t={t}

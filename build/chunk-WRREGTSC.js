@@ -909,6 +909,18 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "backupOk": "Aktu\xE1ln\xED",
   "backupNowBtn": "Z\xE1lohovat te\u010F",
   "filesQueued": "bez s\xEDt\u011B \u2014 soubor \u010Dek\xE1 a ode\u0161le se, a\u017E se s\xED\u0165 vr\xE1t\xED",
-  "filesQueuedShort": "\u010Dek\xE1 na s\xED\u0165"
+  "filesQueuedShort": "\u010Dek\xE1 na s\xED\u0165",
+  "bexioTitle": "bexio",
+  "bexioHowTo": "Vytvo\u0159te Personal Access Token na developer.bexio.com (Personal Access Tokens \u2192 Create new token, vyberte firmu) a vlo\u017Ete ho sem jednou. Le\u017E\xED za\u0161ifrovan\xFD jen na serveru, nikdy v tomto telefonu. Tokeny plat\xED 60 dn\xED.",
+  "bexioTokenLabel": "Personal Access Token",
+  "bexioConnect": "P\u0159ipojit bexio",
+  "bexioConnected": "P\u0159ipojeno",
+  "bexioRenew": "Token brzy vypr\u0161\xED \u2014 vytvo\u0159te nov\xFD na developer.bexio.com a vlo\u017Ete ho sem.",
+  "bexioDryRun": "Zkou\u0161ka (uk\xE1zat, co by se poslalo)",
+  "bexioPushContacts": "Z\xE1kazn\xEDci \u2192 bexio",
+  "bexioPushInvoices": "Faktury m\u011Bs\xEDce \u2192 bexio",
+  "bexioDryRunDone": "Zkou\u0161ka \u2014 nic se neposlalo:",
+  "bexioPushed": "Odesl\xE1no \u2014 bexio odpov\xEDd\xE1:",
+  "bexioDisconnect": "Odpojit bexio"
 }
 `;export{t as default};
