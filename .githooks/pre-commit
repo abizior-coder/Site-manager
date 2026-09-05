@@ -1,0 +1,26 @@
+#!/bin/sh
+# The failsafe before every commit: nothing lands that does not lint, is not
+# formatted, does not build, or fails the fast suites. The slow ones (rules
+# emulator, Chromium e2e) run in CI. Skipping with --no-verify is not the
+# way; fix what it says.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+echo "pre-commit: lint"
+npx eslint . >/dev/null
+echo "pre-commit: format"
+npx prettier --check . >/dev/null
+echo "pre-commit: build"
+npm run -s build >/dev/null
+for suite in logic render order-flow dock; do
+  echo "pre-commit: $suite"
+  out=$(node "$suite.test.mjs" 2>&1 | grep -E "passed, " | tail -1)
+  case "$out" in
+    *"0 failed"*) ;;
+    *) echo "pre-commit: $suite is not green ($out)"; node "$suite.test.mjs" 2>&1 | grep -E "^FAIL" | head -5; exit 1;;
+  esac
+done
+echo "pre-commit: worker"
+npm run -s test:worker >/dev/null || { echo "pre-commit: worker suites are not green"; exit 1; }
+# The build is part of the commit: stage what it produced.
+git add build index.html sw.js tailwind.css >/dev/null 2>&1 || true
+echo "pre-commit: green"

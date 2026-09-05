@@ -108,6 +108,25 @@ standards**, not as a quick fix. A change is done only when:
 The engineering audit of 2026-09-05 (`docs/engineering-audit-*.md`, local)
 lists what is still below this bar and the order to close it.
 
+### The gate before every commit (owner's decision, 2026-09-06)
+
+Two roles look at every change before it is committed:
+
+1. **Interface engineer** (a subagent with the brief in
+   `docs/ui-audit-checklist.md`): walks the built app on the emulator as
+   owner and as crew at 375 px and 1280 px, checks every tab, modal, list,
+   report view, loading, empty and error state against the checklist,
+   writes findings to `docs/ui-audit-<date>.md`, and fixes display bugs in
+   the industry-standard way — without committing.
+2. **Software engineer**: reviews the diff against the spec, runs the
+   failsafe, verifies on the emulator, commits and deploys.
+
+The technical failsafe is the git hook `.githooks/pre-commit`
+(`npm run prepare` points git at it; `npm run precommit` runs it by hand):
+lint, format check, build, the logic/render/order/dock suites and the
+Worker suites must be green, and the build output is staged with the
+commit. The rules emulator and the Chromium e2e run in CI.
+
 ## 3. Hard constraints
 
 - **No Firebase Blaze plan.** Cloud Functions are therefore unavailable

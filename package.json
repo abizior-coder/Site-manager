@@ -23,7 +23,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:e2e": "firebase emulators:exec --only auth,firestore \"npm run seed && playwright test\""
+    "test:e2e": "firebase emulators:exec --only auth,firestore \"npm run seed && playwright test\"",
+    "prepare": "git config core.hooksPath .githooks",
+    "precommit": "sh .githooks/pre-commit"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
