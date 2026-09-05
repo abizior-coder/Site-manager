@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "Fotky zo strechy sa sem dostan\xFA cez \u201E+\u201C \u203A Fotka alebo z chatu.",
   "emptyProjectsTitle": "Zatia\u013E \u017Eiadne stavby",
   "emptyProjectsHint": "Ka\u017Ed\xE1 stavba tu zbiera hodiny, materi\xE1l, fotky, pl\xE1ny a v\xFDkazy. Zalo\u017E prv\xFA alebo ju importuj.",
-  "a11yPerson": "Vybra\u0165 osobu"
+  "a11yPerson": "Vybra\u0165 osobu",
+  "a11yPrevMonth": "Predch\xE1dzaj\xFAci mesiac",
+  "a11yNextMonth": "Nasleduj\xFAci mesiac",
+  "a11yReorder": "Presun\xFA\u0165",
+  "customerDeleteConfirm": "Vymaza\u0165 z\xE1kazn\xEDka? Z\xE1kazky zostan\xFA, bez prepojenia."
 }
 `;export{o as default};

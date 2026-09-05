@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Les photos du toit arrivent ici via « + » › Photo ou depuis le chat.",
   "emptyProjectsTitle": "Pas encore de chantiers",
   "emptyProjectsHint": "Chaque chantier réunit ici heures, matériel, photos, plans et rapports. Crée le premier ou importe-le.",
-  "a11yPerson": "Choisir une personne"
+  "a11yPerson": "Choisir une personne",
+  "a11yPrevMonth": "Mois précédent",
+  "a11yNextMonth": "Mois suivant",
+  "a11yReorder": "Déplacer",
+  "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien."
 }

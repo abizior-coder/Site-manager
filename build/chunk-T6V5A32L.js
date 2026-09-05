@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "emptyPhotosHint": "Les photos du toit arrivent ici via \xAB + \xBB \u203A Photo ou depuis le chat.",
   "emptyProjectsTitle": "Pas encore de chantiers",
   "emptyProjectsHint": "Chaque chantier r\xE9unit ici heures, mat\xE9riel, photos, plans et rapports. Cr\xE9e le premier ou importe-le.",
-  "a11yPerson": "Choisir une personne"
+  "a11yPerson": "Choisir une personne",
+  "a11yPrevMonth": "Mois pr\xE9c\xE9dent",
+  "a11yNextMonth": "Mois suivant",
+  "a11yReorder": "D\xE9placer",
+  "customerDeleteConfirm": "Supprimer ce client ? Les chantiers restent, sans le lien."
 }
 `;export{r as default};

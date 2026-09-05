@@ -755,6 +755,7 @@ export default function SiteManager() {
     paymentDays: "30",
   });
   const [customerForm, setCustomerForm] = useState(null);
+  const [customerDeleteAsk, setCustomerDeleteAsk] = useState(false); // the two-step Löschen in the form
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [contactForm, setContactForm] = useState(null);
@@ -3645,6 +3646,7 @@ export default function SiteManager() {
   }
 
   function openCustomerForm(existing) {
+    setCustomerDeleteAsk(false);
     setCustomerForm(
       existing ? { ...existing } : { id: null, name: "", company: "", phone: "", email: "", address: "", notes: "" },
     );
@@ -4260,6 +4262,16 @@ export default function SiteManager() {
           });
           setTimeout(() => autoTranslateNote(edited), 0);
         }
+      } else if (addModal.type === "note") {
+        // The «+» sheet's note is the entry the job hub's comment box writes.
+        const noteEntry = newEntry({
+          type: "note",
+          projectId: addModal.projectId,
+          description: form.description.trim(),
+        });
+        persist({ entries: [noteEntry, ...entries] });
+        autoTranslateNote(noteEntry);
+        showToast(t.commentSaved);
       } else {
         addEntry({
           type: addModal.type,
@@ -5380,11 +5392,11 @@ export default function SiteManager() {
                 }))
               }
               style={{ color: COLORS.accentText }}
-              className="text-xs font-bold"
+              className="tap text-xs font-bold"
             >
               {authForm.mode === "signup" ? t.authHaveAccount : t.authNeedAccount}
             </button>
-            <button onClick={submitReset} style={{ color: COLORS.muted }} className="text-xs">
+            <button onClick={submitReset} style={{ color: COLORS.muted }} className="tap text-xs">
               {t.authForgot}
             </button>
           </div>
@@ -5954,8 +5966,8 @@ export default function SiteManager() {
                     <div className="flex items-center justify-between mb-3">
                       <button
                         className="tap"
-                        aria-label={t.a11yBack}
-                        title={t.a11yBack}
+                        aria-label={t.a11yPrevMonth}
+                        title={t.a11yPrevMonth}
                         onClick={() => setCalMonth(new Date(year, month - 1, 1))}
                       >
                         <ChevronLeft size={18} color={COLORS.muted} />
@@ -5963,8 +5975,8 @@ export default function SiteManager() {
                       <div className="font-bold text-sm capitalize">{monthLabel}</div>
                       <button
                         className="tap"
-                        aria-label={t.a11yOpen}
-                        title={t.a11yOpen}
+                        aria-label={t.a11yNextMonth}
+                        title={t.a11yNextMonth}
                         onClick={() => setCalMonth(new Date(year, month + 1, 1))}
                       >
                         <ChevronRight size={18} color={COLORS.muted} />
@@ -6097,6 +6109,7 @@ export default function SiteManager() {
           {tab === "cockpit" && canManage() && (
             <Suspense fallback={<Loading t={t} />}>
               <CockpitTab
+                lang={lang}
                 approveEntry={approveEntry}
                 backupMeta={backupMetaState}
                 billing={billing}
@@ -6138,9 +6151,9 @@ export default function SiteManager() {
                         border: `1px dashed ${COLORS.border}`,
                         color: COLORS.accentText,
                       }}
-                      className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                      className="py-3 px-2 rounded-xl text-sm font-bold leading-tight text-center flex items-center justify-center gap-2"
                     >
-                      <Plus size={16} /> {t.newCustomer}
+                      <Plus size={16} className="shrink-0" /> <span className="min-w-0">{t.newCustomer}</span>
                     </button>
                     <button
                       data-customers-import
@@ -6150,9 +6163,9 @@ export default function SiteManager() {
                         border: `1px dashed ${COLORS.border}`,
                         color: COLORS.accentText,
                       }}
-                      className="py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                      className="py-3 px-2 rounded-xl text-sm font-bold leading-tight text-center flex items-center justify-center gap-2"
                     >
-                      <FileUp size={16} /> {t.importCustomers}
+                      <FileUp size={16} className="shrink-0" /> <span className="min-w-0">{t.importCustomers}</span>
                     </button>
                     <input
                       ref={customerFileRef}
@@ -6187,8 +6200,8 @@ export default function SiteManager() {
                             className="w-full text-left rounded-lg px-3 py-2"
                           >
                             <div className="text-sm font-semibold">{customer.name}</div>
-                            <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                              {contact.followUp} · {contact.note}
+                            <div data-followup style={{ color: COLORS.muted }} className="text-xs truncate">
+                              {fmtDate(contact.followUp, lang)} · {contact.note}
                             </div>
                           </button>
                         ))}
@@ -6219,38 +6232,42 @@ export default function SiteManager() {
                           (p) => !["completed", "lost"].includes(p.status || DEFAULT_PROJECT_STATUS),
                         ).length;
                         return (
-                          <button
+                          <div
                             key={c.id}
-                            onClick={() => setSelectedCustomer(c.id)}
+                            data-customer-row
                             style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
-                            className="w-full text-left rounded-xl p-4 flex items-center justify-between gap-2"
+                            className="w-full rounded-xl pl-4 pr-2 py-2 flex items-center gap-2"
                           >
-                            <div className="min-w-0">
-                              <div className="font-bold truncate">{c.name}</div>
-                              {c.company && (
-                                <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                                  {c.company}
+                            <button
+                              onClick={() => setSelectedCustomer(c.id)}
+                              className="flex-1 min-w-0 text-left py-2 flex items-center justify-between gap-2"
+                            >
+                              <div className="min-w-0">
+                                <div className="font-bold truncate">{c.name}</div>
+                                {c.company && (
+                                  <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                                    {c.company}
+                                  </div>
+                                )}
+                                <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                                  {jobs.length} {t.jobsLabel}
+                                  {open > 0 ? ` · ${open} ${t.openLabel}` : ""}
                                 </div>
-                              )}
-                              <div style={{ color: COLORS.muted }} className="text-xs mt-1">
-                                {jobs.length} {t.jobsLabel}
-                                {open > 0 ? ` · ${open} ${t.openLabel}` : ""}
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {c.phone && (
-                                <a
-                                  href={telHref(c.phone)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  style={{ background: COLORS.cardAlt, color: COLORS.success }}
-                                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                                >
-                                  <Phone size={14} />
-                                </a>
-                              )}
-                              <ChevronRight size={18} color={COLORS.muted} />
-                            </div>
-                          </button>
+                              <ChevronRight size={18} color={COLORS.muted} className="shrink-0" />
+                            </button>
+                            {c.phone && (
+                              <a
+                                href={telHref(c.phone)}
+                                aria-label={`${t.callLabel}: ${c.name}`}
+                                title={t.callLabel}
+                                style={{ background: COLORS.cardAlt, color: COLORS.success }}
+                                className="tap w-10 h-10 shrink-0 rounded-full flex items-center justify-center"
+                              >
+                                <Phone size={16} />
+                              </a>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -6327,6 +6344,7 @@ export default function SiteManager() {
                     : projects.filter((p) => (p.status || DEFAULT_PROJECT_STATUS) === pipelineFilter)
                 }
                 gapClass="gap-2"
+                label={t.a11yReorder}
                 onReorder={reorderProjects}
                 renderItem={(p, handle) => {
                   const pEntries = entries.filter((e) => e.projectId === p.id);
@@ -6893,6 +6911,7 @@ export default function SiteManager() {
                                 {todayProjects.map((tp) => (
                                   <span
                                     key={tp.id}
+                                    title={t.schedToday}
                                     style={{
                                       background: `${projectColour(tp.id)}22`,
                                       color: projectColour(tp.id),
@@ -6961,7 +6980,7 @@ export default function SiteManager() {
                                 data-remove-member
                                 onClick={() => setRemoveConfirm(m.uid)}
                                 style={{ color: COLORS.dangerText }}
-                                className="mt-2 text-xs font-bold uppercase flex items-center gap-1"
+                                className="tap mt-2 text-xs font-bold uppercase flex items-center gap-1"
                               >
                                 <LogOut size={11} /> {t.teamRemove}
                               </button>
@@ -7039,7 +7058,7 @@ export default function SiteManager() {
                     </div>
                     <div className="grid grid-cols-4 gap-2 text-center">
                       {[
-                        [t.tripTrips, String(month.length), COLORS.accent],
+                        [t.tripTrips, String(month.length), COLORS.accentText],
                         [t.tripHours, sum(month, "hours").toFixed(1), COLORS.amber],
                         ["km", String(sum(month, "km")), COLORS.success],
                         [
@@ -7091,18 +7110,27 @@ export default function SiteManager() {
                       ))}
                     </div>
                   )}
-                  {trips.length === 0 && (
-                    <div style={{ color: COLORS.muted }} className="text-sm text-center py-6">
-                      {t.tripEmpty}
-                    </div>
-                  )}
+                  {trips.length === 0 &&
+                    (() => {
+                      const [first, ...rest] = String(t.tripEmpty || "").split(". ");
+                      return (
+                        <EmptyState
+                          name="trips"
+                          icon={Truck}
+                          title={rest.length ? `${first}.` : first}
+                          hint={rest.join(". ")}
+                          action={t.tripAdd}
+                          onAction={() => openTrip()}
+                        />
+                      );
+                    })()}
                   {Object.keys(byDay)
                     .sort()
                     .reverse()
                     .map((day) => (
                       <div key={day} className="flex flex-col gap-2">
                         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
-                          {day}
+                          {fmtDate(day, lang)}
                           {day === todayKey() ? ` · ${t.navToday}` : ""}
                         </div>
                         {byDay[day].map((e) => (
@@ -8096,7 +8124,7 @@ export default function SiteManager() {
           );
           const dayLeave = leaveRequests.filter((r) => r.date === date);
           return (
-            <Modal t={t} onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${date}`}>
+            <Modal t={t} onClose={() => setAssignModal(null)} title={`${t.schedTitle} · ${fmtDate(date, lang)}`}>
               {team.members.length === 0 ? (
                 <div style={{ color: COLORS.muted }} className="text-xs mb-3">
                   {t.schedNoTeam}
@@ -8269,22 +8297,22 @@ export default function SiteManager() {
                 <div className="min-w-0">
                   <div className="text-sm font-mono tracking-widest">{i.code}</div>
                   <div style={{ color: COLORS.muted }} className="text-xs">
-                    {t.teamExpires} {new Date(i.expiresAt).toLocaleDateString()}
+                    {t.teamExpires} {fmtDate(todayKey(new Date(i.expiresAt)), lang)}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
-                    className="tap"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center"
                     aria-label={t.a11yShare}
                     data-invite-share
                     onClick={() => shareInvite(i.code)}
                     title={t.inviteShare}
                     style={{ color: COLORS.accentText }}
                   >
-                    <Share2 size={14} />
+                    <Share2 size={16} />
                   </button>
                   <button
-                    className="tap"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center"
                     aria-label={t.a11yCopyLink}
                     data-invite-link
                     onClick={() => {
@@ -8294,10 +8322,10 @@ export default function SiteManager() {
                     title={t.inviteLinkCopy}
                     style={{ color: COLORS.muted }}
                   >
-                    <Link2 size={14} />
+                    <Link2 size={16} />
                   </button>
                   <button
-                    className="tap"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center"
                     aria-label={t.copyBtn}
                     onClick={() => {
                       navigator.clipboard?.writeText(i.code);
@@ -8306,16 +8334,16 @@ export default function SiteManager() {
                     title={t.copyBtn}
                     style={{ color: COLORS.muted }}
                   >
-                    <Copy size={14} />
+                    <Copy size={16} />
                   </button>
                   <button
-                    className="tap"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center"
                     aria-label={t.a11yDelete}
                     title={t.a11yDelete}
                     onClick={() => dropInvite(i.code)}
                     style={{ color: COLORS.dangerText }}
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
@@ -8536,11 +8564,11 @@ export default function SiteManager() {
                         <div className="flex-1 min-w-0">
                           <div className="text-sm break-words">{k.note}</div>
                           <div style={{ color: COLORS.muted }} className="text-xs mt-0.5">
-                            {new Date(k.at).toLocaleDateString()} · {t[km.labelKey]}
+                            {fmtDate(todayKey(new Date(k.at)), lang)} · {t[km.labelKey]}
                             {k.followUp && (
                               <span style={{ color: overdue ? COLORS.amber : COLORS.muted }} className="font-bold">
                                 {" "}
-                                · {t.followUpLabel} {k.followUp}
+                                · {t.followUpLabel} {fmtDate(k.followUp, lang)}
                               </span>
                             )}
                           </div>
@@ -8564,7 +8592,14 @@ export default function SiteManager() {
         })()}
 
       {customerForm && (
-        <Modal t={t} onClose={() => setCustomerForm(null)} title={customerForm.id ? t.editCustomer : t.newCustomer}>
+        <Modal
+          t={t}
+          onClose={() => {
+            setCustomerForm(null);
+            setCustomerDeleteAsk(false);
+          }}
+          title={customerForm.id ? t.editCustomer : t.newCustomer}
+        >
           {[
             ["name", t.customerNameLabel],
             ["company", t.companyLabel],
@@ -8599,15 +8634,38 @@ export default function SiteManager() {
           >
             {t.saveLabel}
           </button>
-          {customerForm.id && (
-            <button
-              onClick={() => deleteCustomer(customerForm.id)}
-              style={{ color: COLORS.dangerText }}
-              className="w-full py-3 text-xs font-bold uppercase"
-            >
-              {t.deleteLabel}
-            </button>
-          )}
+          {customerForm.id &&
+            (customerDeleteAsk ? (
+              <div data-customer-delete-confirm className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                <span style={{ color: COLORS.dangerText }} className="text-xs font-bold">
+                  {t.customerDeleteConfirm}
+                </span>
+                <button
+                  data-customer-delete-yes
+                  onClick={() => deleteCustomer(customerForm.id)}
+                  style={{ background: COLORS.danger }}
+                  className="px-2.5 py-1.5 rounded text-xs font-bold uppercase"
+                >
+                  {t.deleteLabel}
+                </button>
+                <button
+                  onClick={() => setCustomerDeleteAsk(false)}
+                  style={{ color: COLORS.muted }}
+                  className="tap px-2 py-1.5 text-xs font-bold uppercase"
+                >
+                  {t.back}
+                </button>
+              </div>
+            ) : (
+              <button
+                data-customer-delete
+                onClick={() => setCustomerDeleteAsk(true)}
+                style={{ color: COLORS.dangerText }}
+                className="w-full py-3 text-xs font-bold uppercase"
+              >
+                {t.deleteLabel}
+              </button>
+            ))}
         </Modal>
       )}
 
@@ -8646,6 +8704,7 @@ export default function SiteManager() {
             {t.followUpLabel}
           </div>
           <input
+            aria-label={t.followUpLabel}
             type="date"
             value={contactForm.followUp}
             onChange={(e) => setContactForm((s) => ({ ...s, followUp: e.target.value }))}
@@ -8846,7 +8905,7 @@ export default function SiteManager() {
                 target="_blank"
                 rel="noopener"
                 style={{ color: COLORS.muted }}
-                className="block w-full mt-3 text-center text-xs underline"
+                className="tap block w-full mt-3 text-center text-xs underline"
               >
                 {t.privacyLink}
               </a>
@@ -9295,6 +9354,7 @@ export default function SiteManager() {
                   {t.dateFromLabel}
                 </div>
                 <input
+                  aria-label={t.dateFromLabel}
                   type="date"
                   value={rangeLeaveForm.from}
                   onChange={(e) => setRangeLeaveForm((f) => ({ ...f, from: e.target.value }))}
@@ -9307,6 +9367,7 @@ export default function SiteManager() {
                   {t.dateToLabel}
                 </div>
                 <input
+                  aria-label={t.dateToLabel}
                   type="date"
                   value={rangeLeaveForm.to}
                   onChange={(e) => setRangeLeaveForm((f) => ({ ...f, to: e.target.value }))}
@@ -9355,7 +9416,7 @@ export default function SiteManager() {
           const dayEntries = entries.filter((e) => e.date === selectedDay);
           const leave = myLeaveFor(selectedDay);
           return (
-            <Modal t={t} onClose={() => setSelectedDay(null)} title={selectedDay}>
+            <Modal t={t} onClose={() => setSelectedDay(null)} title={fmtDate(selectedDay, lang)}>
               <div className="flex flex-col gap-4">
                 <div>
                   <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
@@ -10194,7 +10255,7 @@ export default function SiteManager() {
                         className="rounded-xl py-3 px-2 flex flex-col items-center gap-1.5 text-xs font-bold"
                       >
                         <Icon size={20} color={a.color} />
-                        <span className="truncate max-w-full">{a.label}</span>
+                        <span className="line-clamp-2 leading-tight text-center">{a.label}</span>
                       </button>
                     );
                   })}
@@ -10691,7 +10752,9 @@ export default function SiteManager() {
                 ? t.addMaterialTitle
                 : addModal.type === "tool"
                   ? t.addToolTitle
-                  : t.attachPhotoTitle
+                  : addModal.type === "note"
+                    ? t.typeNote
+                    : t.attachPhotoTitle
           }
         >
           {addModal.editingId &&
@@ -10797,6 +10860,17 @@ export default function SiteManager() {
                 className="w-full rounded-lg px-3 py-2 text-sm outline-none"
               />
             </div>
+          ) : addModal.type === "note" ? (
+            <textarea
+              data-note-input
+              aria-label={t.commentPlaceholder}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder={t.commentPlaceholder}
+              rows={4}
+              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+              className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+            />
           ) : (
             <div className="flex flex-col gap-2">
               <input
@@ -11017,7 +11091,7 @@ export default function SiteManager() {
               </div>
             </div>
           )}
-          {addModal.type !== "photo" && (
+          {addModal.type !== "photo" && addModal.type !== "note" && (
             <div className="mt-3">
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
                 {t.supplierLabel}
@@ -11064,30 +11138,32 @@ export default function SiteManager() {
               </div>
             </div>
           )}
-          <div className="mt-4">
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
-              {t.tradeLabel}
+          {addModal.type !== "note" && (
+            <div className="mt-4">
+              <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1.5">
+                {t.tradeLabel}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {TRADES.map((tr) => {
+                  const on = (form.trade || DEFAULT_TRADE) === tr.key;
+                  return (
+                    <button
+                      key={tr.key}
+                      onClick={() => setForm((f) => ({ ...f, trade: tr.key }))}
+                      style={{
+                        background: on ? `${tr.color}26` : COLORS.cardAlt,
+                        border: `1px solid ${on ? tr.color : COLORS.border}`,
+                        color: on ? tr.color : COLORS.muted,
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
+                    >
+                      {t[tr.labelKey]}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {TRADES.map((tr) => {
-                const on = (form.trade || DEFAULT_TRADE) === tr.key;
-                return (
-                  <button
-                    key={tr.key}
-                    onClick={() => setForm((f) => ({ ...f, trade: tr.key }))}
-                    style={{
-                      background: on ? `${tr.color}26` : COLORS.cardAlt,
-                      border: `1px solid ${on ? tr.color : COLORS.border}`,
-                      color: on ? tr.color : COLORS.muted,
-                    }}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold"
-                  >
-                    {t[tr.labelKey]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          )}
           <button
             onClick={submitAdd}
             style={{ background: COLORS.accent }}
@@ -11129,8 +11205,9 @@ export default function SiteManager() {
                 setSosOpen(false);
                 logIncident();
               }}
-              className="text-xs font-bold uppercase"
-              style={{ color: COLORS.muted }}
+              data-sos-close
+              className="py-2.5 px-3 rounded-lg text-xs font-bold uppercase"
+              style={{ color: COLORS.text, border: `1px solid ${COLORS.border}` }}
             >
               {t.closeAndLog}
             </button>
@@ -11727,6 +11804,7 @@ export default function SiteManager() {
               <div className="flex flex-col gap-2.5">
                 {lbl(t.tripProject)}
                 <select
+                  aria-label={t.tripProject}
                   data-trip-project
                   value={tripModal.projectId || ""}
                   onChange={(e) => setTripField("projectId", e.target.value)}
@@ -11744,6 +11822,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripVehicle)}
                     <select
+                      aria-label={t.tripVehicle}
                       data-trip-vehicle
                       value={tripModal.vehicle}
                       onChange={(e) => setTripField("vehicle", e.target.value)}
@@ -11760,6 +11839,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripDate)}
                     <input
+                      aria-label={t.tripDate}
                       type="date"
                       value={tripModal.date}
                       onChange={(e) => setTripField("date", e.target.value)}
@@ -11798,6 +11878,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripDepart)}
                     <input
+                      aria-label={t.tripDepart}
                       data-trip-depart
                       type="time"
                       value={tripModal.departTime}
@@ -11809,6 +11890,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripArrive)}
                     <input
+                      aria-label={t.tripArrive}
                       data-trip-arrive
                       type="time"
                       value={tripModal.arriveTime}
@@ -11820,7 +11902,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripKm)}
                     <input
-                      aria-label="0"
+                      aria-label={t.tripKm}
                       data-trip-km
                       value={tripModal.km}
                       onChange={(e) => setTripField("km", e.target.value)}
@@ -11857,7 +11939,7 @@ export default function SiteManager() {
                   <div>
                     {lbl(t.tripWeight)}
                     <input
-                      aria-label="kg"
+                      aria-label={t.tripWeight}
                       data-trip-weight
                       value={tripModal.weightKg}
                       onChange={(e) => setTripField("weightKg", e.target.value)}
@@ -11871,6 +11953,7 @@ export default function SiteManager() {
                     <div>
                       {lbl(t.tripMulde)}
                       <select
+                        aria-label={t.tripMulde}
                         data-trip-mulde
                         value={tripModal.mulde}
                         onChange={(e) => setTripField("mulde", e.target.value)}
@@ -11907,6 +11990,7 @@ export default function SiteManager() {
                 )}
                 {lbl(t.notesLabel)}
                 <textarea
+                  aria-label={t.notesLabel}
                   value={tripModal.notes}
                   onChange={(e) => setTripField("notes", e.target.value)}
                   rows={2}
@@ -11942,14 +12026,14 @@ export default function SiteManager() {
                 style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                 className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
               />
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <input
                   aria-label={t.startTimeLabel}
                   value={inspectionModal.startTime}
                   onChange={(e) => setInspectionModal((s) => ({ ...s, startTime: e.target.value }))}
                   placeholder={t.startTimeLabel}
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                  className="min-w-0 w-full rounded-lg px-2 py-2 text-sm outline-none"
                 />
                 <input
                   aria-label={t.ladderLabel}
@@ -11957,7 +12041,7 @@ export default function SiteManager() {
                   onChange={(e) => setInspectionModal((s) => ({ ...s, ladderLength: e.target.value }))}
                   placeholder={t.ladderLabel}
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                  className="min-w-0 w-full rounded-lg px-2 py-2 text-sm outline-none"
                 />
                 <input
                   aria-label={t.psaLabel}
@@ -11965,7 +12049,7 @@ export default function SiteManager() {
                   onChange={(e) => setInspectionModal((s) => ({ ...s, psaCount: e.target.value }))}
                   placeholder={t.psaLabel}
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                  className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
+                  className="min-w-0 w-full rounded-lg px-2 py-2 text-sm outline-none"
                 />
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -12010,7 +12094,7 @@ export default function SiteManager() {
               <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mt-1">
                 {t.inspectChecklist}
               </div>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {INSPECTION_ITEMS.map((k) => {
                   const st = (inspectionModal.checklist || {})[k];
                   const col = st === "ok" ? COLORS.success : st === "mangel" ? COLORS.danger : COLORS.muted;
@@ -12030,7 +12114,7 @@ export default function SiteManager() {
                         style={{ background: st ? col : COLORS.border }}
                         className="w-2 h-2 rounded-full shrink-0"
                       />
-                      <span className="truncate">{t[`inspect_${k}`]}</span>
+                      <span className="min-w-0 leading-tight">{t[`inspect_${k}`]}</span>
                       {st && (
                         <span className="ml-auto text-xs uppercase">{st === "ok" ? t.inspectOk : t.inspectMangel}</span>
                       )}
@@ -12050,6 +12134,7 @@ export default function SiteManager() {
                   <div key={i} className="flex flex-col gap-1">
                     <div className="flex gap-2">
                       <select
+                        aria-label={t.inspectTileModel}
                         data-tile-model
                         value={ROOF_TILES.some((x) => x.key === row.model) ? row.model : row.model ? "__free" : ""}
                         onChange={(e) =>
@@ -12392,7 +12477,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
         </label>
       </div>
       {sort === "manual" ? (
-        <ReorderList items={sorted} onReorder={onReorder} renderItem={row} />
+        <ReorderList items={sorted} onReorder={onReorder} renderItem={row} label={t.a11yReorder} />
       ) : (
         <div className="flex flex-col gap-1.5">
           {sorted.map((i) => (
@@ -12408,7 +12493,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
 // which doesn't fire on touch devices — this app is used on phones on site.
 // Dragging is started from the grip handle only, so the row itself stays
 // tappable and the list still scrolls normally.
-function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
+function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5", label = "Reorder" }) {
   const [dragId, setDragId] = useState(null);
   const [order, setOrder] = useState(null);
   const rowRefs = useRef({});
@@ -12485,7 +12570,8 @@ function ReorderList({ items, onReorder, renderItem, gapClass = "gap-1.5" }) {
               onPointerCancel={endDrag}
               style={{ color: COLORS.muted, touchAction: "none", cursor: "grab" }}
               className="tap shrink-0 px-1 py-1 -my-1"
-              aria-label="Reorder"
+              aria-label={label}
+              title={label}
             >
               <GripVertical size={15} />
             </button>,

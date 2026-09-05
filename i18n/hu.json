@@ -931,5 +931,9 @@
   "emptyPhotosHint": "A tetőről készült fotók a „+” › Fotó gombbal vagy a csevegésből kerülnek ide.",
   "emptyProjectsTitle": "Még nincs munkahely",
   "emptyProjectsHint": "Minden munkahely itt gyűjti az órákat, anyagot, fotókat, terveket és jelentéseket. Hozd létre az elsőt vagy importáld.",
-  "a11yPerson": "Személy kiválasztása"
+  "a11yPerson": "Személy kiválasztása",
+  "a11yPrevMonth": "Előző hónap",
+  "a11yNextMonth": "Következő hónap",
+  "a11yReorder": "Áthelyezés",
+  "customerDeleteConfirm": "Törlöd az ügyfelet? A munkák megmaradnak, kapcsolat nélkül."
 }

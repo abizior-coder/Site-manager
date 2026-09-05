@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "emptyPhotosHint": "Fotky ze st\u0159echy se sem dostanou p\u0159es \u201E+\u201C \u203A Fotka nebo z chatu.",
   "emptyProjectsTitle": "Zat\xEDm \u017E\xE1dn\xE9 stavby",
   "emptyProjectsHint": "Ka\u017Ed\xE1 stavba tu sb\xEDr\xE1 hodiny, materi\xE1l, fotky, pl\xE1ny a v\xFDkazy. Zalo\u017E prvn\xED nebo ji importuj.",
-  "a11yPerson": "Vybrat osobu"
+  "a11yPerson": "Vybrat osobu",
+  "a11yPrevMonth": "P\u0159edchoz\xED m\u011Bs\xEDc",
+  "a11yNextMonth": "N\xE1sleduj\xEDc\xED m\u011Bs\xEDc",
+  "a11yReorder": "P\u0159esunout",
+  "customerDeleteConfirm": "Smazat z\xE1kazn\xEDka? Zak\xE1zky z\u016Fstanou, bez propojen\xED."
 }
 `;export{t as default};

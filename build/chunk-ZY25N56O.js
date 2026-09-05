@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "emptyPhotosHint": "A tet\u0151r\u0151l k\xE9sz\xFClt fot\xF3k a \u201E+\u201D \u203A Fot\xF3 gombbal vagy a cseveg\xE9sb\u0151l ker\xFClnek ide.",
   "emptyProjectsTitle": "M\xE9g nincs munkahely",
   "emptyProjectsHint": "Minden munkahely itt gy\u0171jti az \xF3r\xE1kat, anyagot, fot\xF3kat, terveket \xE9s jelent\xE9seket. Hozd l\xE9tre az els\u0151t vagy import\xE1ld.",
-  "a11yPerson": "Szem\xE9ly kiv\xE1laszt\xE1sa"
+  "a11yPerson": "Szem\xE9ly kiv\xE1laszt\xE1sa",
+  "a11yPrevMonth": "El\u0151z\u0151 h\xF3nap",
+  "a11yNextMonth": "K\xF6vetkez\u0151 h\xF3nap",
+  "a11yReorder": "\xC1thelyez\xE9s",
+  "customerDeleteConfirm": "T\xF6rl\xF6d az \xFCgyfelet? A munk\xE1k megmaradnak, kapcsolat n\xE9lk\xFCl."
 }
 `;export{a as default};

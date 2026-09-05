@@ -8,8 +8,15 @@ export const FOCUSABLE =
 
 export function focusable(root) {
   if (!root) return [];
+  const view = root.ownerDocument?.defaultView;
+  const shown = (el) => {
+    if (!view || typeof view.getComputedStyle !== "function") return true;
+    const cs = view.getComputedStyle(el);
+    return cs.display !== "none" && cs.visibility !== "hidden";
+  };
   return [...root.querySelectorAll(FOCUSABLE)].filter(
-    (el) => !el.hasAttribute("hidden") && el.getAttribute("aria-hidden") !== "true" && !el.closest("[hidden]"),
+    (el) =>
+      !el.hasAttribute("hidden") && el.getAttribute("aria-hidden") !== "true" && !el.closest("[hidden]") && shown(el),
   );
 }
 

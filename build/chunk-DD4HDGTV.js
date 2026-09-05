@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "Las fotos del tejado llegan aqu\xED desde \xAB+\xBB \u203A Foto o desde el chat.",
   "emptyProjectsTitle": "A\xFAn no hay obras",
   "emptyProjectsHint": "Cada obra re\xFAne aqu\xED horas, material, fotos, planos y partes. Crea la primera o imp\xF3rtala.",
-  "a11yPerson": "Elegir una persona"
+  "a11yPerson": "Elegir una persona",
+  "a11yPrevMonth": "Mes anterior",
+  "a11yNextMonth": "Mes siguiente",
+  "a11yReorder": "Mover",
+  "customerDeleteConfirm": "\xBFEliminar el cliente? Los trabajos se conservan, sin el v\xEDnculo."
 }
 `;export{o as default};

@@ -3,7 +3,7 @@
 import { isOwner, getCompanyId } from "../company-store.js";
 import { getIdToken } from "../firebase-client.js";
 import { backupDue } from "../backup.js";
-import { fmtHM, monthKey } from "../ui/format.js";
+import { fmtDate, fmtHM, monthKey, todayKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
@@ -260,7 +260,7 @@ function UsageCard({ t }) {
 
 // bexio: connect with a Personal Access Token (kept only in the Worker),
 // push customers and a month's invoices; every answer from bexio is shown.
-function BexioCard({ t, customers, documents, projects }) {
+function BexioCard({ t, lang, customers, documents, projects }) {
   const [status, setStatus] = useState(null);
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
@@ -326,7 +326,7 @@ function BexioCard({ t, customers, documents, projects }) {
       const r = await call("POST", "push", body);
       setResult({ what, ...r });
     });
-  const line = (s) => `${s.user || ""} · ${new Date(s.since).toLocaleDateString()} · ${s.expiresInDays} d`;
+  const line = (s) => `${s.user || ""} · ${fmtDate(todayKey(new Date(s.since)), lang)} · ${s.expiresInDays} d`;
   return (
     <div
       data-bexio-card
@@ -460,11 +460,11 @@ function BexioCard({ t, customers, documents, projects }) {
 }
 
 // How long since the owner last exported; a nudge once a week has passed.
-function BackupCard({ t, backupMeta, onBackup }) {
+function BackupCard({ t, lang, backupMeta, onBackup }) {
   const state = backupDue(backupMeta && backupMeta.lastAt);
   const line = state.never
     ? t.backupNever
-    : `${t.backupLast} ${new Date(backupMeta.lastAt).toLocaleDateString()} (${state.daysAgo} d)`;
+    : `${t.backupLast} ${fmtDate(todayKey(new Date(backupMeta.lastAt)), lang)} (${state.daysAgo} d)`;
   return (
     <div
       data-backup-card
@@ -494,6 +494,7 @@ function BackupCard({ t, backupMeta, onBackup }) {
 }
 
 export function CockpitTab({
+  lang,
   approveEntry,
   backupMeta,
   billing,
@@ -562,8 +563,8 @@ export function CockpitTab({
 
       {isOwner() && <UsageCard t={t} />}
       {isOwner() && <ErrorsCard t={t} />}
-      {isOwner() && <BackupCard t={t} backupMeta={backupMeta} onBackup={onBackup} />}
-      {isOwner() && <BexioCard t={t} customers={customers} documents={documents} projects={projects} />}
+      {isOwner() && <BackupCard t={t} lang={lang} backupMeta={backupMeta} onBackup={onBackup} />}
+      {isOwner() && <BexioCard t={t} lang={lang} customers={customers} documents={documents} projects={projects} />}
       {isOwner() && (
         <ExportCard
           t={t}
@@ -609,8 +610,8 @@ export function CockpitTab({
                     <div className="text-sm truncate">
                       {m ? m.name || m.email || e.userId : t.ccUnassigned} · {e.qty} h
                     </div>
-                    <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                      {e.date} · {pr ? pr.name : "—"}
+                    <div data-cc-date style={{ color: COLORS.muted }} className="text-xs truncate">
+                      {fmtDate(e.date, lang)} · {pr ? pr.name : "—"}
                     </div>
                   </div>
                   <button
@@ -647,7 +648,7 @@ export function CockpitTab({
                   <div className="min-w-0 flex-1 basis-40">
                     <div className="text-sm truncate">{m ? m.name || m.email || r.userId : t.ccUnassigned}</div>
                     <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                      {r.date} ·{" "}
+                      {fmtDate(r.date, lang)} ·{" "}
                       {t[`leave${(r.type || "other").charAt(0).toUpperCase()}${(r.type || "other").slice(1)}`] ||
                         t.leaveOther}
                     </div>
@@ -766,7 +767,7 @@ export function CockpitTab({
             <button
               onClick={() => setHoursModalOpen(true)}
               style={{ color: COLORS.accentText }}
-              className="mt-2 text-xs font-bold uppercase"
+              className="tap mt-2 text-xs font-bold uppercase"
             >
               {t.hoursDetailBtn}
             </button>
@@ -807,7 +808,7 @@ export function CockpitTab({
                     {t.invoiceLabel} {doc.number} · {money(st.outstanding)}
                   </div>
                   <div style={{ color: COLORS.dangerText }} className="text-xs">
-                    {t.overdueLabel} — {doc.dueDate}
+                    {t.overdueLabel} — {fmtDate(doc.dueDate, lang)}
                   </div>
                 </button>
               ))}
@@ -823,7 +824,7 @@ export function CockpitTab({
               >
                 <div className="text-sm truncate">{customer.name}</div>
                 <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                  {t.followUpLabel} {contact.followUp}
+                  {t.followUpLabel} {fmtDate(contact.followUp, lang)}
                 </div>
               </button>
             ))}

@@ -365,11 +365,30 @@ export function BoardTab({
                       background: COLORS.cardAlt,
                       border: `1px solid ${isToday ? COLORS.accent : COLORS.border}`,
                     }}
-                    className="min-h-[92px] rounded-lg p-1.5 text-left flex flex-col gap-1 overflow-hidden hover:brightness-125 transition"
+                    className="min-h-[56px] sm:min-h-[92px] rounded-lg p-1.5 text-left flex flex-col gap-1 overflow-hidden hover:brightness-125 transition"
                   >
                     <div style={{ color: isToday ? COLORS.accentText : COLORS.muted }} className="text-xs font-bold">
                       {d}
                     </div>
+                    {/* A phone's cell is 24 px of text: one dot per assignment
+                        (the job's colour), amber for leave, muted for a note. */}
+                    {(dayPlan.length > 0 || dayLeave.length > 0 || dayNotes.length > 0) && (
+                      <div data-board-dots aria-hidden="true" className="flex flex-wrap gap-0.5 sm:hidden">
+                        {dayPlan.map((a) => (
+                          <span
+                            key={a.id}
+                            style={{ background: projectColour(a.projectId) }}
+                            className="w-2 h-2 rounded-full"
+                          />
+                        ))}
+                        {dayLeave.map((r) => (
+                          <span key={r.id} style={{ background: COLORS.amber }} className="w-2 h-2 rounded-full" />
+                        ))}
+                        {dayNotes.length > 0 && (
+                          <span style={{ background: COLORS.muted }} className="w-2 h-2 rounded-full" />
+                        )}
+                      </div>
+                    )}
                     {dayPlan.slice(0, 3).map((a) => {
                       const pr = projects.find((x) => x.id === a.projectId);
                       const col = projectColour(a.projectId);
@@ -377,14 +396,14 @@ export function BoardTab({
                         <div
                           key={a.id}
                           style={{ background: `${col}2A`, borderLeft: `3px solid ${col}`, color: COLORS.text }}
-                          className="text-xs leading-tight px-1 py-0.5 rounded-sm truncate"
+                          className="hidden sm:block text-xs leading-tight px-1 py-0.5 rounded-sm truncate"
                         >
                           {memberName(a.userId).split(" ")[0]} · {pr ? pr.name : "—"}
                         </div>
                       );
                     })}
                     {dayPlan.length > 3 && (
-                      <div style={{ color: COLORS.muted }} className="text-xs">
+                      <div style={{ color: COLORS.muted }} className="hidden sm:block text-xs">
                         +{dayPlan.length - 3}
                       </div>
                     )}
@@ -392,7 +411,7 @@ export function BoardTab({
                       <div
                         key={r.id}
                         style={{ background: `${COLORS.amber}22`, color: COLORS.amber }}
-                        className="text-xs px-1 py-0.5 rounded-sm truncate"
+                        className="hidden sm:block text-xs px-1 py-0.5 rounded-sm truncate"
                       >
                         {memberName(r.userId).split(" ")[0]} ·{" "}
                         {t[`leave${(r.type || "other").charAt(0).toUpperCase()}${(r.type || "other").slice(1)}`] ||
@@ -400,7 +419,11 @@ export function BoardTab({
                       </div>
                     ))}
                     {dayNotes.slice(0, 1).map((n) => (
-                      <div key={n.id} style={{ color: COLORS.muted }} className="text-xs italic truncate">
+                      <div
+                        key={n.id}
+                        style={{ color: COLORS.muted }}
+                        className="hidden sm:block text-xs italic truncate"
+                      >
                         {n.description}
                       </div>
                     ))}
@@ -424,7 +447,7 @@ export function BoardTab({
             <button
               onClick={() => setShowFinishedJobs((v) => !v)}
               style={{ color: COLORS.accentText }}
-              className="text-xs font-bold uppercase"
+              className="tap text-xs font-bold uppercase"
             >
               {showFinishedJobs ? t.boardHideFinished : `${t.boardShowFinished} (${finished.length})`}
             </button>

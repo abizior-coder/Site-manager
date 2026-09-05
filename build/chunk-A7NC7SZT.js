@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "emptyPhotosHint": "Fotografiile de pe acoperi\u0219 ajung aici prin \u201E+\u201D \u203A Foto sau din chat.",
   "emptyProjectsTitle": "\xCEnc\u0103 niciun \u0219antier",
   "emptyProjectsHint": "Fiecare \u0219antier adun\u0103 aici ore, material, fotografii, planuri \u0219i rapoarte. Creeaz\u0103-l pe primul sau import\u0103-l.",
-  "a11yPerson": "Alege o persoan\u0103"
+  "a11yPerson": "Alege o persoan\u0103",
+  "a11yPrevMonth": "Luna precedent\u0103",
+  "a11yNextMonth": "Luna urm\u0103toare",
+  "a11yReorder": "Mut\u0103",
+  "customerDeleteConfirm": "\u0218tergi clientul? Lucr\u0103rile r\u0103m\xE2n, f\u0103r\u0103 leg\u0103tur\u0103."
 }
 `;export{i as default};

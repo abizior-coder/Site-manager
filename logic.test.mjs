@@ -31,6 +31,7 @@ import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
 import { readFileSync } from "node:fs";
 import * as fsMod from "node:fs";
 import { todayKey, monthKey, dateKeyOffset, uid, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
+import { focusable } from "./ui/dialog.js";
 import { printChrome, withPrintChrome } from "./ui/print.js";
 import {
   code128Values,
@@ -678,13 +679,27 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     englishLeft[f] = same.length;
   }
   t("every language file has every key", missing, {});
-  for (const code of ["ro", "bg", "hu", "pl", "pt", "fr", "it", "es", "sk", "cs", "gsw"]) {
+  t("de.json speaks German on the first steps (no «Ekipa»)", /Ekipa/.test(readFileSync("i18n/de.json", "utf8")), false);
+  for (const code of ["sq", "ro", "bg", "hu", "pl", "pt", "fr", "it", "es", "sk", "cs", "gsw"]) {
     t(
       `${code} is translated, not English with a flag (${englishLeft[code + ".json"]} left)`,
       englishLeft[code + ".json"] < 40,
       true,
     );
   }
+}
+
+{
+  // A dialog's first focus target must be something focus() can reach: the
+  // photo modal's hidden file input is display:none, and focusing it left the
+  // dialog without focus, so Escape never closed it.
+  const { JSDOM } = await import("jsdom");
+  const dom = new JSDOM('<div id="d"><input type="file" style="display:none"><button id="b">x</button></div>');
+  t(
+    "focusable() skips a display:none control (the photo modal's hidden file input)",
+    focusable(dom.window.document.getElementById("d")).map((el) => el.id),
+    ["b"],
+  );
 }
 
 {

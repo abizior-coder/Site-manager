@@ -407,7 +407,7 @@
   "supervisorPhoneLabel": "Telefon Vorgesetzte(r)",
   "webhookLabel": "Automatisierungs-Webhook (Zapier/Make)",
   "webhookPlaceholder": "https://hooks.zapier.com/...",
-  "webhookHint": "Optional: Fügen Sie eine Zapier- oder Make.com-Webhook-URL ein, um erfasste Stunden und Berichte automatisch dorthin zu senden.",
+  "webhookHint": "Optional: eine Zapier- oder Make.com-Webhook-URL einfügen — erfasste Stunden und Berichte gehen dann automatisch dorthin.",
   "sendRequestBtn": "An Vorgesetzten senden",
   "dayJournalHeading": "An diesem Tag erfasst",
   "profileInsurance": "Versicherungskarten",
@@ -834,7 +834,7 @@
   "firstStepsTitle": "Erste Schritte",
   "firstStepsHours": "Wochenstunden und Stundensatz (Rechnungsangaben)",
   "firstStepsSite": "Erste Baustelle",
-  "firstStepsCrew": "Ekipa einladen",
+  "firstStepsCrew": "Team einladen",
   "firstStepsCustomers": "Kunden erfassen oder importieren",
   "importCustomers": "Kunden importieren",
   "importCustomersPreview": "{n} Zeilen gelesen: {added} neu, {skipped} schon vorhanden.",
@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Fotos vom Dach kommen über «+» › Foto oder aus dem Chat hierher.",
   "emptyProjectsTitle": "Noch keine Baustellen",
   "emptyProjectsHint": "Jede Baustelle sammelt hier Zeiten, Material, Fotos, Pläne und Rapporte. Lege die erste an oder importiere sie.",
-  "a11yPerson": "Person wählen"
+  "a11yPerson": "Person wählen",
+  "a11yPrevMonth": "Vorheriger Monat",
+  "a11yNextMonth": "Nächster Monat",
+  "a11yReorder": "Verschieben",
+  "customerDeleteConfirm": "Kunde löschen? Die Aufträge bleiben, ohne Verknüpfung."
 }

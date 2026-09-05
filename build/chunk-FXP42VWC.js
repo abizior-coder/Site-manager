@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "Zdj\u0119cia z dachu trafiaj\u0105 tu przez \u201E+\u201D \u203A Zdj\u0119cie lub z czatu.",
   "emptyProjectsTitle": "Brak bud\xF3w",
   "emptyProjectsHint": "Ka\u017Cda budowa zbiera tu godziny, materia\u0142, zdj\u0119cia, plany i raporty. Za\u0142\xF3\u017C pierwsz\u0105 lub j\u0105 zaimportuj.",
-  "a11yPerson": "Wybierz osob\u0119"
+  "a11yPerson": "Wybierz osob\u0119",
+  "a11yPrevMonth": "Poprzedni miesi\u0105c",
+  "a11yNextMonth": "Nast\u0119pny miesi\u0105c",
+  "a11yReorder": "Przenie\u015B",
+  "customerDeleteConfirm": "Usun\u0105\u0107 klienta? Zlecenia zostaj\u0105, bez powi\u0105zania."
 }
 `;export{o as default};

@@ -26,11 +26,14 @@ export function BreakChips({ entries, userId, onToggle, t }) {
                 border: `1px solid ${on ? "#B48EAD" : COLORS.border}`,
                 color: on ? "#B48EAD" : COLORS.muted,
               }}
-              className="py-2.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5"
+              className="py-2 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5"
             >
-              {on ? <Check size={14} /> : <Icon size={14} />}
-              <span className="truncate">
-                {t[`break_${b.key}`]} {b.start} · {b.minutes} min
+              {on ? <Check size={14} className="shrink-0" /> : <Icon size={14} className="shrink-0" />}
+              <span className="min-w-0 leading-tight text-left">
+                <span className="block">{t[`break_${b.key}`]}</span>
+                <span className="block font-semibold" style={{ color: on ? "#B48EAD" : COLORS.text }}>
+                  {b.start} · {b.minutes} min
+                </span>
               </span>
             </button>
           );

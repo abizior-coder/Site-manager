@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "Le foto dal tetto arrivano qui da \xAB+\xBB \u203A Foto o dalla chat.",
   "emptyProjectsTitle": "Ancora nessun cantiere",
   "emptyProjectsHint": "Ogni cantiere raccoglie qui ore, materiale, foto, piani e rapporti. Crea il primo o importalo.",
-  "a11yPerson": "Scegli una persona"
+  "a11yPerson": "Scegli una persona",
+  "a11yPrevMonth": "Mese precedente",
+  "a11yNextMonth": "Mese successivo",
+  "a11yReorder": "Sposta",
+  "customerDeleteConfirm": "Eliminare il cliente? I lavori restano, senza collegamento."
 }
 `;export{o as default};

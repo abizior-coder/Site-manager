@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Fötteli vom Dach chömed über «+» › Foto oder us em Chat da ane.",
   "emptyProjectsTitle": "No kei Baustelle",
   "emptyProjectsHint": "Jedi Baustell sammlet da Zyte, Material, Fötteli, Plän und Rapport. Leg die erst aa oder importier si.",
-  "a11yPerson": "Person wähle"
+  "a11yPerson": "Person wähle",
+  "a11yPrevMonth": "Vorige Monet",
+  "a11yNextMonth": "Nöchschte Monet",
+  "a11yReorder": "Verschiebe",
+  "customerDeleteConfirm": "Chund lösche? D Ufträg bliibed, ohni Verchnüpfig."
 }

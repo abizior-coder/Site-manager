@@ -858,7 +858,7 @@ export function MaterialsTab({
             <button
               onClick={() => setBasket([])}
               style={{ color: COLORS.dangerText }}
-              className="text-xs font-bold uppercase"
+              className="tap text-xs font-bold uppercase"
             >
               {t.clearBasketBtn}
             </button>
@@ -873,6 +873,7 @@ export function MaterialsTab({
                   <GripVertical size={12} color={COLORS.muted} className="shrink-0" /> {i.name}
                 </span>
                 <input
+                  aria-label={t.qtyPlaceholder}
                   value={i.qty}
                   onChange={(e) => updateBasketItem(i.id, "qty", e.target.value)}
                   inputMode="decimal"

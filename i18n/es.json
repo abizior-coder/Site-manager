@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Las fotos del tejado llegan aquí desde «+» › Foto o desde el chat.",
   "emptyProjectsTitle": "Aún no hay obras",
   "emptyProjectsHint": "Cada obra reúne aquí horas, material, fotos, planos y partes. Crea la primera o impórtala.",
-  "a11yPerson": "Elegir una persona"
+  "a11yPerson": "Elegir una persona",
+  "a11yPrevMonth": "Mes anterior",
+  "a11yNextMonth": "Mes siguiente",
+  "a11yReorder": "Mover",
+  "customerDeleteConfirm": "¿Eliminar el cliente? Los trabajos se conservan, sin el vínculo."
 }

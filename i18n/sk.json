@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Fotky zo strechy sa sem dostanú cez „+“ › Fotka alebo z chatu.",
   "emptyProjectsTitle": "Zatiaľ žiadne stavby",
   "emptyProjectsHint": "Každá stavba tu zbiera hodiny, materiál, fotky, plány a výkazy. Založ prvú alebo ju importuj.",
-  "a11yPerson": "Vybrať osobu"
+  "a11yPerson": "Vybrať osobu",
+  "a11yPrevMonth": "Predchádzajúci mesiac",
+  "a11yNextMonth": "Nasledujúci mesiac",
+  "a11yReorder": "Presunúť",
+  "customerDeleteConfirm": "Vymazať zákazníka? Zákazky zostanú, bez prepojenia."
 }

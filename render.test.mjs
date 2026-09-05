@@ -1224,6 +1224,189 @@ async function renderAs(role) {
     }
   }
 
+  // --- pass 2 of the UI audit (docs/ui-audit-2026-09-06-pass2.md) ---------
+  {
+    const click = (el) => el?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const tabByName = (name) =>
+      [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim().toUpperCase() === name);
+    const buttonByText = (label) =>
+      [...window.document.querySelectorAll("button")].find((x) => (x.textContent || "").trim() === label);
+    const topDialog = () => [...window.document.querySelectorAll('[role="dialog"]')].pop();
+    const closeTop = async () => {
+      click(topDialog()?.querySelector("[data-dialog-close]"));
+      await wait(300);
+    };
+    const openQuick = async (action) => {
+      click(window.document.querySelector("[data-quick-add-button]"));
+      await wait(300);
+      click(window.document.querySelector("[data-quick-site]")); // when more than one site is open
+      await wait(200);
+      click(window.document.querySelector(`[data-quick-action="${action}"]`));
+      await wait(400);
+    };
+    const ISO = /\d{4}-\d{2}-\d{2}/;
+
+    // The «+» sheet's labels wrap; none is cut.
+    click(window.document.querySelector("[data-quick-add-button]"));
+    await wait(300);
+    const actionLabels = [...window.document.querySelectorAll("[data-quick-action] span")];
+    check(
+      "owner: no «+» action label is truncated",
+      actionLabels.length > 0 && actionLabels.every((s) => !s.classList.contains("truncate")),
+      actionLabels.length ? "a label carries truncate" : "no «+» sheet",
+    );
+    await closeTop();
+
+    // Notiz from the «+» sheet opens a note, not the material form under a photo title.
+    await openQuick("note");
+    {
+      const dlg = topDialog();
+      const title = (dlg?.querySelector("[id^='dlg-']")?.textContent || "").trim();
+      check("owner: the «+» sheet's Notiz opens a dialog titled Notiz", title === "Notiz", title || "no dialog");
+      check(
+        "owner: the note form is a textarea without quantity fields",
+        !!dlg?.querySelector("[data-note-input]") &&
+          !dlg?.querySelector('input[aria-label="Menge"]') &&
+          !dlg?.querySelector('input[aria-label="Lieferant"]'),
+        dlg
+          ? [...dlg.querySelectorAll("input,textarea")].map((i) => i.getAttribute("aria-label")).join(",")
+          : "no dialog",
+      );
+    }
+    await closeTop();
+
+    // Neue Fahrt: every control has a name.
+    await openQuick("trip");
+    {
+      const dlg = topDialog();
+      const unnamed = dlg
+        ? [...dlg.querySelectorAll("input:not([type=hidden]), select, textarea")].filter(
+            (el) => !el.getAttribute("aria-label"),
+          )
+        : [];
+      check(
+        "owner: the trip modal has no unnamed control",
+        !!dlg && unnamed.length === 0,
+        unnamed.map((el) => `${el.tagName}:${el.placeholder || el.type}`).join(",") || "no dialog",
+      );
+    }
+    await closeTop();
+
+    // Break chips: two lines, nothing cut.
+    click(window.document.querySelector('[data-tab-bar] [data-tab="today"]'));
+    await wait(300);
+    {
+      const chip = window.document.querySelector("[data-break]");
+      check(
+        "owner: a break chip carries no truncate and reads as two lines",
+        !!chip && !chip.querySelector(".truncate") && chip.querySelectorAll(".block").length === 2,
+        chip ? chip.outerHTML.slice(0, 160) : "no chip",
+      );
+    }
+
+    // Kunden: a local follow-up date, the call link beside the row, deleting asks first.
+    click(tabByName("KUNDEN"));
+    await wait(300);
+    {
+      const due = window.document.querySelector("[data-followup]")?.textContent || "";
+      check(
+        "owner: the follow-up row shows a local date, not an ISO key",
+        due.length > 0 && !ISO.test(due),
+        due || "no [data-followup]",
+      );
+      const row = window.document.querySelector("[data-customer-row]");
+      check(
+        "owner: the customer row's call link is a named sibling, not nested in the button",
+        !!row && !row.querySelector("button a") && !!row.querySelector("a[aria-label]"),
+        row ? row.innerHTML.slice(0, 120) : "no row",
+      );
+      click(row?.querySelector("button"));
+      await wait(300);
+      click(
+        [...(topDialog()?.querySelectorAll("button") || [])].find((b) => (b.textContent || "").trim() === "Bearbeiten"),
+      );
+      await wait(300);
+      click(window.document.querySelector("[data-customer-delete]"));
+      await wait(300);
+      const confirm = window.document.querySelector("[data-customer-delete-confirm]");
+      check(
+        "owner: the first tap on a customer's Löschen asks instead of deleting",
+        !!confirm && text().includes("Sutter Terresa"),
+        confirm ? "customer gone" : "no confirm row",
+      );
+      await closeTop();
+      await closeTop();
+    }
+
+    // Kalender: the arrows say which month.
+    click(tabByName("KALENDER"));
+    await wait(300);
+    check(
+      "owner: the calendar arrows are named by month",
+      !!window.document.querySelector('button[aria-label="Vorheriger Monat"]') &&
+        !!window.document.querySelector('button[aria-label="Nächster Monat"]'),
+      [...window.document.querySelectorAll("button.tap[aria-label]")]
+        .map((b) => b.getAttribute("aria-label"))
+        .slice(0, 4)
+        .join(","),
+    );
+
+    // Team: the invite row's icons are boxes, not overlapping hit areas.
+    click(tabByName("TEAM"));
+    await wait(300);
+    click(buttonByText("Einladen"));
+    await wait(400);
+    {
+      const share = window.document.querySelector("[data-invite-share]");
+      check(
+        "owner: the invite row's buttons are 36 px boxes",
+        !!share && share.classList.contains("w-9") && !share.classList.contains("tap"),
+        share ? share.className : "no invite row",
+      );
+    }
+    await closeTop();
+
+    // Board › Monat: dots on a phone.
+    click(tabByName("BOARD"));
+    await wait(700);
+    click(buttonByText("Monat"));
+    await wait(400);
+    check(
+      "owner: a Board month cell carries the phone's dot strip",
+      !!window.document.querySelector("[data-board-dots]"),
+      "no [data-board-dots]",
+    );
+
+    // Übersicht: the hours rows show local dates.
+    click(tabByName("ÜBERSICHT"));
+    await wait(700);
+    {
+      const rows = [...window.document.querySelectorAll("[data-cc-date]")].map((d) => d.textContent || "");
+      check(
+        "owner: the Cockpit's hours rows show local dates",
+        rows.length > 0 && rows.every((s) => !ISO.test(s)),
+        rows.join(" | ") || "no [data-cc-date]",
+      );
+    }
+
+    // Sicherheit: the emergency screen's close control has a hit area.
+    click(tabByName("SICHERHEIT"));
+    await wait(300);
+    click([...window.document.querySelectorAll("button")].find((b) => /^SOS/.test((b.textContent || "").trim())));
+    await wait(300);
+    {
+      const close = window.document.querySelector("[data-sos-close]");
+      check(
+        "owner: the emergency screen's close control is padded",
+        !!close && close.classList.contains("py-2.5"),
+        close ? close.className : "no [data-sos-close]",
+      );
+      topDialog()?.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      await wait(300);
+    }
+  }
+
   if (errors.length) problems.push(...errors);
 }
 
@@ -1388,6 +1571,19 @@ async function renderAs(role) {
       "crew: the confirm button is disabled until a password is typed",
       !!delModal?.querySelector("[data-delete-account-confirm]")?.disabled,
       "enabled without password",
+    );
+  }
+  // Transport without trips says how the first one gets in (pass 2 of the audit).
+  {
+    const transport = [...window.document.querySelectorAll("button")].find(
+      (x) => (x.textContent || "").trim().toUpperCase() === "TRANSPORT",
+    );
+    transport?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check(
+      "crew: Transport without trips shows the trips empty state",
+      !!window.document.querySelector('[data-empty="trips"]'),
+      "no [data-empty=trips]",
     );
   }
   if (errors.length) problems.push(...errors);

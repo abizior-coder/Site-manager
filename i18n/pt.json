@@ -931,5 +931,9 @@
   "emptyPhotosHint": "As fotos do telhado chegam aqui por «+» › Foto ou pelo chat.",
   "emptyProjectsTitle": "Ainda sem obras",
   "emptyProjectsHint": "Cada obra reúne aqui horas, material, fotos, plantas e relatórios. Cria a primeira ou importa-a.",
-  "a11yPerson": "Escolher uma pessoa"
+  "a11yPerson": "Escolher uma pessoa",
+  "a11yPrevMonth": "Mês anterior",
+  "a11yNextMonth": "Mês seguinte",
+  "a11yReorder": "Mover",
+  "customerDeleteConfirm": "Eliminar o cliente? As obras ficam, sem a ligação."
 }

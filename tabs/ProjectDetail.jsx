@@ -256,7 +256,7 @@ export function ProjectDetail({
             >
               <Share2 size={16} />
             </button>
-            <button onClick={onEdit} style={{ color: COLORS.muted }} className="text-xs font-bold uppercase">
+            <button onClick={onEdit} style={{ color: COLORS.muted }} className="tap text-xs font-bold uppercase">
               {t.editLabel}
             </button>
             <button className="tap" aria-label={t.a11yClose} title={t.a11yClose} onClick={onClose}>

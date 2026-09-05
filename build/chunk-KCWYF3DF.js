@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "As fotos do telhado chegam aqui por \xAB+\xBB \u203A Foto ou pelo chat.",
   "emptyProjectsTitle": "Ainda sem obras",
   "emptyProjectsHint": "Cada obra re\xFAne aqui horas, material, fotos, plantas e relat\xF3rios. Cria a primeira ou importa-a.",
-  "a11yPerson": "Escolher uma pessoa"
+  "a11yPerson": "Escolher uma pessoa",
+  "a11yPrevMonth": "M\xEAs anterior",
+  "a11yNextMonth": "M\xEAs seguinte",
+  "a11yReorder": "Mover",
+  "customerDeleteConfirm": "Eliminar o cliente? As obras ficam, sem a liga\xE7\xE3o."
 }
 `;export{o as default};

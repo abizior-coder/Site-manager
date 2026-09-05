@@ -160,7 +160,7 @@ export function TodayTab({
                 setWeatherEditOpen((o) => !o);
                 setWeatherCityInput("");
               }}
-              className="text-xs font-bold uppercase"
+              className="tap text-xs font-bold uppercase"
               style={{ color: COLORS.accentText }}
             >
               {t.changeLocation}

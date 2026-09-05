@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Fotografiile de pe acoperiș ajung aici prin „+” › Foto sau din chat.",
   "emptyProjectsTitle": "Încă niciun șantier",
   "emptyProjectsHint": "Fiecare șantier adună aici ore, material, fotografii, planuri și rapoarte. Creează-l pe primul sau importă-l.",
-  "a11yPerson": "Alege o persoană"
+  "a11yPerson": "Alege o persoană",
+  "a11yPrevMonth": "Luna precedentă",
+  "a11yNextMonth": "Luna următoare",
+  "a11yReorder": "Mută",
+  "customerDeleteConfirm": "Ștergi clientul? Lucrările rămân, fără legătură."
 }

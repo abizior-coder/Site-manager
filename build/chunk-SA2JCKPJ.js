@@ -931,6 +931,10 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "emptyPhotosHint": "Photos from the roof land here via \u201C+\u201D \u203A Photo or from the chat.",
   "emptyProjectsTitle": "No sites yet",
   "emptyProjectsHint": "Every site collects hours, material, photos, plans and reports here. Create the first one or import it.",
-  "a11yPerson": "Choose a person"
+  "a11yPerson": "Choose a person",
+  "a11yPrevMonth": "Previous month",
+  "a11yNextMonth": "Next month",
+  "a11yReorder": "Reorder",
+  "customerDeleteConfirm": "Delete this customer? The jobs stay, unlinked."
 }
 `;export{o as default};

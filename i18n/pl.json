@@ -931,5 +931,9 @@
   "emptyPhotosHint": "Zdjęcia z dachu trafiają tu przez „+” › Zdjęcie lub z czatu.",
   "emptyProjectsTitle": "Brak budów",
   "emptyProjectsHint": "Każda budowa zbiera tu godziny, materiał, zdjęcia, plany i raporty. Załóż pierwszą lub ją zaimportuj.",
-  "a11yPerson": "Wybierz osobę"
+  "a11yPerson": "Wybierz osobę",
+  "a11yPrevMonth": "Poprzedni miesiąc",
+  "a11yNextMonth": "Następny miesiąc",
+  "a11yReorder": "Przenieś",
+  "customerDeleteConfirm": "Usunąć klienta? Zlecenia zostają, bez powiązania."
 }
