@@ -5,6 +5,23 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-06 — Plan: Site Log on a private server (spec, proposed)
+
+- **Why:** the owner asked for a plan to move the whole suite to a private
+  server so database and file size limits stop shaping the product.
+- **What:** `docs/specs/2026-09-06_private-server-migration.md` — the
+  limits today (1 MiB documents, 900 KB photos, 25 MB files, Spark quotas,
+  KV-only server state, rules DSL, emulator blind to uploads) and what
+  removes each; target: Caddy + Fastify API + PostgreSQL 16 + MinIO in
+  Docker Compose on a Swiss VPS; auth stays Firebase until phase 3; a
+  change-feed sync (SSE + IndexedDB mirror) replaces `onSnapshot`; four
+  phases (seams/local stack → files+photos → data → auth+Worker jobs →
+  hosting+paperwork) with read-back checks and a month-long way back.
+- **Waits on the owner:** provider, location, budget, phase order.
+- **Effect on the open batch:** the Abo (billing) moves to the API in
+  phase 3; `worker/src/plan.js` stays an uncommitted draft; ownership
+  transfer and company deletion are planned on the API, not on Firestore.
+
 ## 2026-09-06 — Language before sign-in; QR-bill code lazy; code map + dev log
 
 - **Why:** UI audit pass 2 finding 20 and PROJECT.md §1b — a crew member
