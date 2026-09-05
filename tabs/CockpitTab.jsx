@@ -638,10 +638,13 @@ export function CockpitTab({
               return (
                 <div
                   key={r.id}
+                  data-leave-row
                   style={{ background: COLORS.cardAlt }}
-                  className="rounded-lg px-3 py-2 flex items-center justify-between gap-2"
+                  className="rounded-lg px-3 py-2 flex flex-wrap items-center justify-between gap-2"
                 >
-                  <div className="min-w-0">
+                  {/* The name keeps 10 rem; the two buttons wrap under it on a
+                      phone instead of squeezing it to nothing. */}
+                  <div className="min-w-0 flex-1 basis-40">
                     <div className="text-sm truncate">{m ? m.name || m.email || r.userId : t.ccUnassigned}</div>
                     <div style={{ color: COLORS.muted }} className="text-xs truncate">
                       {r.date} ·{" "}
@@ -649,7 +652,7 @@ export function CockpitTab({
                         t.leaveOther}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       onClick={() => setLeaveStatus(r.id, "approved")}
                       style={{ background: COLORS.success, color: "#12210A" }}

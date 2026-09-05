@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "bexioPushInvoices": "Faktury m\u011Bs\xEDce \u2192 bexio",
   "bexioDryRunDone": "Zkou\u0161ka \u2014 nic se neposlalo:",
   "bexioPushed": "Odesl\xE1no \u2014 bexio odpov\xEDd\xE1:",
-  "bexioDisconnect": "Odpojit bexio"
+  "bexioDisconnect": "Odpojit bexio",
+  "loading": "Na\u010D\xEDt\xE1n\xED\u2026",
+  "dayOpenSite": "Otev\u0159\xEDt stavbu",
+  "dayChooseSite": "Vybrat stavbu",
+  "emptyTodayHint": "Dne\u0161n\xED hodiny, materi\xE1l a fotky se zobraz\xED zde \u2014 zapsan\xE9 p\u0159es \u201E+\u201C nebo v zak\xE1zce.",
+  "emptyReportsHint": "Po\u0161li denn\xED v\xFDkaz nad\u0159\xEDzen\xE9mu \u2014 ka\u017Ed\xE9 odesl\xE1n\xED se zobraz\xED zde.",
+  "emptyPhotosTitle": "Zat\xEDm \u017E\xE1dn\xE9 fotky",
+  "emptyPhotosHint": "Fotky ze st\u0159echy se sem dostanou p\u0159es \u201E+\u201C \u203A Fotka nebo z chatu.",
+  "emptyProjectsTitle": "Zat\xEDm \u017E\xE1dn\xE9 stavby",
+  "emptyProjectsHint": "Ka\u017Ed\xE1 stavba tu sb\xEDr\xE1 hodiny, materi\xE1l, fotky, pl\xE1ny a v\xFDkazy. Zalo\u017E prvn\xED nebo ji importuj.",
+  "a11yPerson": "Vybrat osobu"
 }
 `;export{t as default};

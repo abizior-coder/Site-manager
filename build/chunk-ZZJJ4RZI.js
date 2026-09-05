@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "bexioPushInvoices": "Facturile lunii \u2192 bexio",
   "bexioDryRunDone": "Prob\u0103 \u2014 nimic trimis:",
   "bexioPushed": "Trimis \u2014 bexio r\u0103spunde:",
-  "bexioDisconnect": "Deconecteaz\u0103 bexio"
+  "bexioDisconnect": "Deconecteaz\u0103 bexio",
+  "loading": "Se \xEEncarc\u0103\u2026",
+  "dayOpenSite": "Deschide \u0219antierul",
+  "dayChooseSite": "Alege un \u0219antier",
+  "emptyTodayHint": "Orele, materialul \u0219i fotografiile de azi apar aici \u2014 \xEEnregistrate cu \u201E+\u201D sau \xEEn lucrare.",
+  "emptyReportsHint": "Trimite raportul zilnic superiorului \u2014 fiecare trimitere apare aici.",
+  "emptyPhotosTitle": "\xCEnc\u0103 nicio fotografie",
+  "emptyPhotosHint": "Fotografiile de pe acoperi\u0219 ajung aici prin \u201E+\u201D \u203A Foto sau din chat.",
+  "emptyProjectsTitle": "\xCEnc\u0103 niciun \u0219antier",
+  "emptyProjectsHint": "Fiecare \u0219antier adun\u0103 aici ore, material, fotografii, planuri \u0219i rapoarte. Creeaz\u0103-l pe primul sau import\u0103-l.",
+  "a11yPerson": "Alege o persoan\u0103"
 }
 `;export{i as default};

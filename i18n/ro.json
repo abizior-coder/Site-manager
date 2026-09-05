@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Facturile lunii → bexio",
   "bexioDryRunDone": "Probă — nimic trimis:",
   "bexioPushed": "Trimis — bexio răspunde:",
-  "bexioDisconnect": "Deconectează bexio"
+  "bexioDisconnect": "Deconectează bexio",
+  "loading": "Se încarcă…",
+  "dayOpenSite": "Deschide șantierul",
+  "dayChooseSite": "Alege un șantier",
+  "emptyTodayHint": "Orele, materialul și fotografiile de azi apar aici — înregistrate cu „+” sau în lucrare.",
+  "emptyReportsHint": "Trimite raportul zilnic superiorului — fiecare trimitere apare aici.",
+  "emptyPhotosTitle": "Încă nicio fotografie",
+  "emptyPhotosHint": "Fotografiile de pe acoperiș ajung aici prin „+” › Foto sau din chat.",
+  "emptyProjectsTitle": "Încă niciun șantier",
+  "emptyProjectsHint": "Fiecare șantier adună aici ore, material, fotografii, planuri și rapoarte. Creează-l pe primul sau importă-l.",
+  "a11yPerson": "Alege o persoană"
 }

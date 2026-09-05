@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioPushInvoices": "Faturas do m\xEAs \u2192 bexio",
   "bexioDryRunDone": "Ensaio \u2014 nada enviado:",
   "bexioPushed": "Enviado \u2014 bexio responde:",
-  "bexioDisconnect": "Desligar bexio"
+  "bexioDisconnect": "Desligar bexio",
+  "loading": "A carregar\u2026",
+  "dayOpenSite": "Abrir a obra",
+  "dayChooseSite": "Escolher uma obra",
+  "emptyTodayHint": "As horas, o material e as fotos de hoje aparecem aqui \u2014 registados com \xAB+\xBB ou na obra.",
+  "emptyReportsHint": "Envia o relat\xF3rio di\xE1rio ao respons\xE1vel \u2014 cada envio aparece aqui.",
+  "emptyPhotosTitle": "Ainda sem fotos",
+  "emptyPhotosHint": "As fotos do telhado chegam aqui por \xAB+\xBB \u203A Foto ou pelo chat.",
+  "emptyProjectsTitle": "Ainda sem obras",
+  "emptyProjectsHint": "Cada obra re\xFAne aqui horas, material, fotos, plantas e relat\xF3rios. Cria a primeira ou importa-a.",
+  "a11yPerson": "Escolher uma pessoa"
 }
 `;export{o as default};

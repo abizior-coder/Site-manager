@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "bexioPushInvoices": "Faturat e muajit \u2192 bexio",
   "bexioDryRunDone": "Prov\xEB \u2014 asgj\xEB e d\xEBrguar:",
   "bexioPushed": "U d\xEBrgua \u2014 bexio p\xEBrgjigjet:",
-  "bexioDisconnect": "Shk\xEBput bexio"
+  "bexioDisconnect": "Shk\xEBput bexio",
+  "loading": "Po ngarkohet\u2026",
+  "dayOpenSite": "Hap kantierin",
+  "dayChooseSite": "Zgjidh kantierin",
+  "emptyTodayHint": "Or\xEBt, materiali dhe fotot e sotme shfaqen k\xEBtu \u2014 t\xEB regjistruara me \xAB+\xBB ose brenda pun\xEBs.",
+  "emptyReportsHint": "D\xEBrgo raportin ditor te p\xEBrgjegj\xEBsi \u2014 \xE7do d\xEBrgim shfaqet k\xEBtu.",
+  "emptyPhotosTitle": "Ende pa foto",
+  "emptyPhotosHint": "Fotot nga \xE7atia vijn\xEB k\xEBtu me \xAB+\xBB \u203A Foto ose nga biseda.",
+  "emptyProjectsTitle": "Ende pa kantiere",
+  "emptyProjectsHint": "\xC7do kantier mbledh k\xEBtu or\xEB, material, foto, plane dhe raporte. Krijo t\xEB parin ose importoje.",
+  "a11yPerson": "Zgjidh personin"
 }
 `;export{r as default};

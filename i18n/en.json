@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Invoices of the month → bexio",
   "bexioDryRunDone": "Dry run — nothing was sent:",
   "bexioPushed": "Sent — bexio answered:",
-  "bexioDisconnect": "Disconnect bexio"
+  "bexioDisconnect": "Disconnect bexio",
+  "loading": "Loading…",
+  "dayOpenSite": "Open the site",
+  "dayChooseSite": "Choose a site",
+  "emptyTodayHint": "Today's hours, material and photos appear here — logged with “+” or inside the job.",
+  "emptyReportsHint": "Send the daily report to your supervisor — every send shows up here.",
+  "emptyPhotosTitle": "No photos yet",
+  "emptyPhotosHint": "Photos from the roof land here via “+” › Photo or from the chat.",
+  "emptyProjectsTitle": "No sites yet",
+  "emptyProjectsHint": "Every site collects hours, material, photos, plans and reports here. Create the first one or import it.",
+  "a11yPerson": "Choose a person"
 }

@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "bexioPushInvoices": "A h\xF3nap sz\xE1ml\xE1i \u2192 bexio",
   "bexioDryRunDone": "Pr\xF3ba \u2014 semmi nem ment el:",
   "bexioPushed": "Elk\xFCldve \u2014 a bexio v\xE1lasza:",
-  "bexioDisconnect": "bexio lev\xE1laszt\xE1sa"
+  "bexioDisconnect": "bexio lev\xE1laszt\xE1sa",
+  "loading": "Bet\xF6lt\xE9s\u2026",
+  "dayOpenSite": "Munkahely megnyit\xE1sa",
+  "dayChooseSite": "Munkahely kiv\xE1laszt\xE1sa",
+  "emptyTodayHint": "A mai \xF3r\xE1k, anyagok \xE9s fot\xF3k itt jelennek meg \u2014 a \u201E+\u201D gombbal vagy a munk\xE1ban r\xF6gz\xEDtve.",
+  "emptyReportsHint": "K\xFCldd el a napi jelent\xE9st a vezet\u0151nek \u2014 minden k\xFCld\xE9s itt jelenik meg.",
+  "emptyPhotosTitle": "M\xE9g nincs fot\xF3",
+  "emptyPhotosHint": "A tet\u0151r\u0151l k\xE9sz\xFClt fot\xF3k a \u201E+\u201D \u203A Fot\xF3 gombbal vagy a cseveg\xE9sb\u0151l ker\xFClnek ide.",
+  "emptyProjectsTitle": "M\xE9g nincs munkahely",
+  "emptyProjectsHint": "Minden munkahely itt gy\u0171jti az \xF3r\xE1kat, anyagot, fot\xF3kat, terveket \xE9s jelent\xE9seket. Hozd l\xE9tre az els\u0151t vagy import\xE1ld.",
+  "a11yPerson": "Szem\xE9ly kiv\xE1laszt\xE1sa"
 }
 `;export{a as default};

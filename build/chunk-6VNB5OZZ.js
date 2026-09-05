@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioPushInvoices": "Faktury miesi\u0105ca \u2192 bexio",
   "bexioDryRunDone": "Pr\xF3ba \u2014 nic nie wys\u0142ano:",
   "bexioPushed": "Wys\u0142ano \u2014 odpowied\u017A bexio:",
-  "bexioDisconnect": "Roz\u0142\u0105cz bexio"
+  "bexioDisconnect": "Roz\u0142\u0105cz bexio",
+  "loading": "\u0141adowanie\u2026",
+  "dayOpenSite": "Otw\xF3rz budow\u0119",
+  "dayChooseSite": "Wybierz budow\u0119",
+  "emptyTodayHint": "Godziny, materia\u0142 i zdj\u0119cia z dzisiaj pojawi\u0105 si\u0119 tutaj \u2014 dodane przez \u201E+\u201D lub w zleceniu.",
+  "emptyReportsHint": "Wy\u015Blij raport dzienny do prze\u0142o\u017Conego \u2014 ka\u017Cda wysy\u0142ka pojawi si\u0119 tutaj.",
+  "emptyPhotosTitle": "Brak zdj\u0119\u0107",
+  "emptyPhotosHint": "Zdj\u0119cia z dachu trafiaj\u0105 tu przez \u201E+\u201D \u203A Zdj\u0119cie lub z czatu.",
+  "emptyProjectsTitle": "Brak bud\xF3w",
+  "emptyProjectsHint": "Ka\u017Cda budowa zbiera tu godziny, materia\u0142, zdj\u0119cia, plany i raporty. Za\u0142\xF3\u017C pierwsz\u0105 lub j\u0105 zaimportuj.",
+  "a11yPerson": "Wybierz osob\u0119"
 }
 `;export{o as default};

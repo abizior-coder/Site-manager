@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Faturat e muajit → bexio",
   "bexioDryRunDone": "Provë — asgjë e dërguar:",
   "bexioPushed": "U dërgua — bexio përgjigjet:",
-  "bexioDisconnect": "Shkëput bexio"
+  "bexioDisconnect": "Shkëput bexio",
+  "loading": "Po ngarkohet…",
+  "dayOpenSite": "Hap kantierin",
+  "dayChooseSite": "Zgjidh kantierin",
+  "emptyTodayHint": "Orët, materiali dhe fotot e sotme shfaqen këtu — të regjistruara me «+» ose brenda punës.",
+  "emptyReportsHint": "Dërgo raportin ditor te përgjegjësi — çdo dërgim shfaqet këtu.",
+  "emptyPhotosTitle": "Ende pa foto",
+  "emptyPhotosHint": "Fotot nga çatia vijnë këtu me «+» › Foto ose nga biseda.",
+  "emptyProjectsTitle": "Ende pa kantiere",
+  "emptyProjectsHint": "Çdo kantier mbledh këtu orë, material, foto, plane dhe raporte. Krijo të parin ose importoje.",
+  "a11yPerson": "Zgjidh personin"
 }

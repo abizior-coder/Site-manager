@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Rechnungen des Monats → bexio",
   "bexioDryRunDone": "Probelauf — nichts gesendet:",
   "bexioPushed": "Gesendet — bexio antwortet:",
-  "bexioDisconnect": "bexio trennen"
+  "bexioDisconnect": "bexio trennen",
+  "loading": "Lädt…",
+  "dayOpenSite": "Baustelle öffnen",
+  "dayChooseSite": "Baustelle wählen",
+  "emptyTodayHint": "Zeiten, Material und Fotos von heute erscheinen hier — erfasst über «+» oder im Auftrag.",
+  "emptyReportsHint": "Sende den Tagesrapport an den Vorgesetzten — jeder Versand erscheint hier.",
+  "emptyPhotosTitle": "Noch keine Fotos",
+  "emptyPhotosHint": "Fotos vom Dach kommen über «+» › Foto oder aus dem Chat hierher.",
+  "emptyProjectsTitle": "Noch keine Baustellen",
+  "emptyProjectsHint": "Jede Baustelle sammelt hier Zeiten, Material, Fotos, Pläne und Rapporte. Lege die erste an oder importiere sie.",
+  "a11yPerson": "Person wählen"
 }

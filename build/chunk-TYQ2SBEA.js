@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "bexioPushInvoices": "R\xE4chnige vom Monet \u2192 bexio",
   "bexioDryRunDone": "Probelauf \u2014 n\xFCt gschickt:",
   "bexioPushed": "Gschickt \u2014 bexio antwortet:",
-  "bexioDisconnect": "bexio trenne"
+  "bexioDisconnect": "bexio trenne",
+  "loading": "Ladt\u2026",
+  "dayOpenSite": "Baustell \xF6ffne",
+  "dayChooseSite": "Baustell w\xE4hle",
+  "emptyTodayHint": "Zyte, Material und F\xF6tteli vo h\xFCt erschiined da \u2014 erfasst \xFCber \xAB+\xBB oder im Uftrag.",
+  "emptyReportsHint": "Schick de Tagesrapport a de Vorgsetzt \u2014 jede Versand erschiint da.",
+  "emptyPhotosTitle": "No kei F\xF6tteli",
+  "emptyPhotosHint": "F\xF6tteli vom Dach ch\xF6med \xFCber \xAB+\xBB \u203A Foto oder us em Chat da ane.",
+  "emptyProjectsTitle": "No kei Baustelle",
+  "emptyProjectsHint": "Jedi Baustell sammlet da Zyte, Material, F\xF6tteli, Pl\xE4n und Rapport. Leg die erst aa oder importier si.",
+  "a11yPerson": "Person w\xE4hle"
 }
 `;export{r as default};

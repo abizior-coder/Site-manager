@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Rächnige vom Monet → bexio",
   "bexioDryRunDone": "Probelauf — nüt gschickt:",
   "bexioPushed": "Gschickt — bexio antwortet:",
-  "bexioDisconnect": "bexio trenne"
+  "bexioDisconnect": "bexio trenne",
+  "loading": "Ladt…",
+  "dayOpenSite": "Baustell öffne",
+  "dayChooseSite": "Baustell wähle",
+  "emptyTodayHint": "Zyte, Material und Fötteli vo hüt erschiined da — erfasst über «+» oder im Uftrag.",
+  "emptyReportsHint": "Schick de Tagesrapport a de Vorgsetzt — jede Versand erschiint da.",
+  "emptyPhotosTitle": "No kei Fötteli",
+  "emptyPhotosHint": "Fötteli vom Dach chömed über «+» › Foto oder us em Chat da ane.",
+  "emptyProjectsTitle": "No kei Baustelle",
+  "emptyProjectsHint": "Jedi Baustell sammlet da Zyte, Material, Fötteli, Plän und Rapport. Leg die erst aa oder importier si.",
+  "a11yPerson": "Person wähle"
 }

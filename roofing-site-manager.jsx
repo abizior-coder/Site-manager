@@ -127,9 +127,11 @@ import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripH
 import { COLORS } from "./ui/theme.js";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
 import { downloadText } from "./ui/download.js";
-import { todayKey, monthKey, uid, fmtHM } from "./ui/format.js";
+import { todayKey, monthKey, uid, fmtHM, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
 import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "./ui/entries.jsx";
 import { useDialog } from "./ui/dialog.js";
+import { Loading, LoadingOverlay } from "./ui/loading.jsx";
+import { EmptyState } from "./ui/empty-state.jsx";
 import { coveredEntryIds, reconcileEntries } from "./entries-history.js";
 import { BACKUP_KEY, backupMeta } from "./backup.js";
 import { openUploadQueue, drainQueue, isNetworkFailure } from "./upload-queue.js";
@@ -717,6 +719,12 @@ export default function SiteManager() {
   const t = T[lang] || T.de || T.en;
 
   const [tab, setTab] = useState("today");
+  // Every main tab starts at its top. The column kept its scroll position
+  // otherwise: Heute opened scrolled past the day after a long Rapport.
+  const scrollRef = useRef(null);
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }, [tab]);
   const [projects, setProjects] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -1788,6 +1796,12 @@ export default function SiteManager() {
     };
   }
 
+  // The period as a person reads it: the id-like periodLabel stays on the
+  // record and in the mail subject, the screen shows a local date.
+  function periodTitle(report) {
+    return report.period === "daily" ? fmtDate(report.periodLabel, lang) : fmtMonth(report.periodLabel, lang);
+  }
+
   function reportSendText(report) {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const f = reportFigures(report);
@@ -1931,7 +1945,7 @@ export default function SiteManager() {
     const notesHtml = (notes) =>
       notes && notes.length
         ? `<div class="tablabel">${t.notesLabel}</div>
-           <ul class="notes">${notes.map((n) => `<li><span class="when">${esc(n.date)}</span>${esc(n.description)}</li>`).join("")}</ul>`
+           <ul class="notes">${notes.map((n) => `<li><span class="when">${esc(fmtDate(n.date, lang))}</span>${esc(n.description)}</li>`).join("")}</ul>`
         : "";
 
     const tableHtml = (label, items) =>
@@ -2028,7 +2042,7 @@ export default function SiteManager() {
         notes,
       };
     });
-    const subtitle = `${periodLabel} · ${report.periodLabel}${profile.name ? " · " + profile.name : ""}`;
+    const subtitle = `${periodLabel} · ${periodTitle(report)}${profile.name ? " · " + profile.name : ""}`;
     // The author's own remark on the report goes on top, before the sites.
     return renderReportDocument(subtitle, sections, report.notes);
   }
@@ -2052,6 +2066,32 @@ export default function SiteManager() {
       .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0 || s.notes.length > 0);
     const subtitle = `${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}`;
     return renderReportDocument(subtitle, sections);
+  }
+
+  // Every document the app opens in a new tab goes through here: it gets the
+  // print toolbar and prints itself once loaded, so «Als PDF speichern» and
+  // the print icon reach the print/PDF sheet instead of a bare page. The
+  // chrome is a lazy chunk (printing is rare, the first paint is not): the
+  // tab opens on the tap's own stack, which is what popup blockers want, and
+  // gets its document once the chunk is here.
+  function openPrintable(html, where) {
+    let tab = null;
+    try {
+      tab = window.open("", "_blank");
+    } catch {}
+    import("./ui/print.js")
+      .then(({ withPrintChrome }) => {
+        const blob = new Blob([withPrintChrome(html, { printLabel: t.a11yPrint, closeLabel: t.a11yClose })], {
+          type: "text/html",
+        });
+        const url = URL.createObjectURL(blob);
+        if (tab) tab.location.href = url;
+        else window.open(url, "_blank");
+      })
+      .catch((e) => {
+        if (tab) tab.close();
+        saveFailed(e, where);
+      });
   }
 
   async function printDocument(doc) {
@@ -2191,12 +2231,7 @@ export default function SiteManager() {
       ${paymentPart}
     </body></html>`;
 
-    try {
-      const blob = new Blob([html], { type: "text/html" });
-      window.open(URL.createObjectURL(blob), "_blank");
-    } catch (e) {
-      saveFailed(e, "printDocument");
-    }
+    openPrintable(html, "printDocument");
   }
 
   // The signed Rapport as a printable document. Shows what was signed, by
@@ -2257,12 +2292,7 @@ export default function SiteManager() {
       </div>
     </body></html>`;
 
-    try {
-      const blob = new Blob([html], { type: "text/html" });
-      window.open(URL.createObjectURL(blob), "_blank");
-    } catch (e) {
-      saveFailed(e, "printRapport");
-    }
+    openPrintable(html, "printRapport");
   }
 
   function toggleReportProject(id) {
@@ -2270,25 +2300,25 @@ export default function SiteManager() {
   }
 
   function generateProjectsReport(projectIds) {
+    let html;
     try {
-      const html = buildProjectsReportHtml(projectIds);
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      html = buildProjectsReportHtml(projectIds);
     } catch (e) {
       saveFailed(e, "generateProjectsReport");
+      return;
     }
+    openPrintable(html, "generateProjectsReport");
   }
 
   function saveReportAsPdf(report) {
+    let html;
     try {
-      const html = buildReportHtml(report);
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      html = buildReportHtml(report);
     } catch (e) {
       saveFailed(e, "saveReportAsPdf");
+      return;
     }
+    openPrintable(html, "saveReportAsPdf");
   }
 
   // A full backup as a downloadable file. The pasteable code has to stay small
@@ -5238,7 +5268,7 @@ export default function SiteManager() {
     <div
       data-update-bar
       style={{ background: COLORS.card, border: `1px solid ${COLORS.accent}`, color: COLORS.text }}
-      className="fixed left-3 right-3 bottom-3 lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3"
+      className="fixed left-3 right-3 bottom-[calc(76px+env(safe-area-inset-bottom))] lg:left-auto lg:right-6 lg:bottom-6 lg:w-96 z-50 rounded-xl px-4 py-3 shadow-lg flex items-center gap-3"
     >
       <span className="text-sm font-semibold flex-1">{t.updateReady}</span>
       <button
@@ -5787,6 +5817,8 @@ export default function SiteManager() {
         )}
 
         <div
+          ref={scrollRef}
+          data-main-column
           className="relative flex-1 overflow-y-auto px-5 pb-6 pt-4 lg:px-8 lg:pb-8 lg:pt-6"
           style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
         >
@@ -5794,6 +5826,7 @@ export default function SiteManager() {
             <TodayTab
               topCard={firstStepsCard}
               t={t}
+              lang={lang}
               projects={projects}
               entries={entries}
               user={user}
@@ -5826,7 +5859,7 @@ export default function SiteManager() {
             />
           )}
           {tab === "materials" && (
-            <Suspense fallback={null}>
+            <Suspense fallback={<Loading t={t} />}>
               <MaterialsTab
                 materialDragProps={materialDragProps}
                 addToBasket={addToBasket}
@@ -6014,7 +6047,7 @@ export default function SiteManager() {
             })()}
 
           {tab === "board" && canManage() && (
-            <Suspense fallback={null}>
+            <Suspense fallback={<Loading t={t} />}>
               <BoardTab
                 assignments={assignments}
                 boardView={boardView}
@@ -6047,7 +6080,7 @@ export default function SiteManager() {
             </Suspense>
           )}
           {tab === "cockpit" && canManage() && (
-            <Suspense fallback={null}>
+            <Suspense fallback={<Loading t={t} />}>
               <CockpitTab
                 approveEntry={approveEntry}
                 backupMeta={backupMetaState}
@@ -6361,9 +6394,14 @@ export default function SiteManager() {
                 }}
               />
               {projects.length === 0 && (
-                <div style={{ color: COLORS.muted }} className="text-sm text-center mt-8">
-                  {t.noProjectsYet}
-                </div>
+                <EmptyState
+                  name="projects"
+                  icon={MapPin}
+                  title={t.emptyProjectsTitle}
+                  hint={t.emptyProjectsHint}
+                  action={t.newProjectSite}
+                  onAction={() => setNewProjectOpen(true)}
+                />
               )}
             </div>
           )}
@@ -6425,6 +6463,11 @@ export default function SiteManager() {
                 </div>
               );
               const dayNames = [t.dayMon, t.dayTue, t.dayWed, t.dayThu, t.dayFri, t.daySat, t.daySun];
+              // The week table is wider than a phone in Albanian or Hungarian:
+              // it scrolls inside its card with the day pinned left and the
+              // total pinned right, so the figure the person came for stays.
+              const pinL = { position: "sticky", left: 0, background: COLORS.card, zIndex: 1 };
+              const pinR = { position: "sticky", right: 0, background: COLORS.card, zIndex: 1 };
               return (
                 <div className="flex flex-col gap-4">
                   <div className="flex gap-2">
@@ -6456,7 +6499,7 @@ export default function SiteManager() {
                     >
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
-                          {t.rapportTitleDay} · {todayKey()}
+                          {t.rapportTitleDay} · {fmtDate(todayKey(), lang)}
                         </div>
                         <span
                           data-approval
@@ -6485,7 +6528,10 @@ export default function SiteManager() {
                       <HourLine label={t.hoursNormal} value={fmt(split.normal)} />
                       <HourLine label={t.overtimeLabel} value={fmt(split.overtime)} />
                       <HourLine label={t.hoursTravel} value={fmt(split.travel)} />
-                      <HourLine label={t.hoursBreaks} value={`−${fmt(split.breaks)}`} />
+                      <HourLine
+                        label={t.hoursBreaks}
+                        value={split.breaks > 0 ? `−${fmt(split.breaks)}` : fmt(split.breaks)}
+                      />
                       <HourLine
                         label={`${t.hoursTotal}${split.target != null ? ` · ${t.hoursTarget} ${fmt(split.target)}` : ""}`}
                         value={fmt(split.net)}
@@ -6541,7 +6587,7 @@ export default function SiteManager() {
                           style={{ color: COLORS.muted }}
                           className="text-xs uppercase tracking-wide text-center"
                         >
-                          {weekDates[0]} – {weekDates[6]}
+                          {fmtDateRange(weekDates[0], weekDates[6], lang)}
                         </div>
                         <button
                           aria-label={t.a11yOpen}
@@ -6557,6 +6603,7 @@ export default function SiteManager() {
                       {canManage() && team.members.length > 1 && (
                         <select
                           data-week-person
+                          aria-label={t.a11yPerson}
                           value={personId || ""}
                           onChange={(e) => setRapportPerson(e.target.value)}
                           style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
@@ -6569,16 +6616,20 @@ export default function SiteManager() {
                           ))}
                         </select>
                       )}
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs">
+                      <div data-week-table className="overflow-x-auto">
+                        <table className="w-full text-xs whitespace-nowrap">
                           <thead>
                             <tr style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
-                              <th className="text-left py-1">{t.docDate}</th>
-                              <th className="text-right py-1">{t.hoursNormal}</th>
-                              <th className="text-right py-1">{t.overtimeShort}</th>
-                              <th className="text-right py-1">{t.hoursTravel}</th>
-                              <th className="text-right py-1">{t.hoursBreaks}</th>
-                              <th className="text-right py-1">{t.hoursTotal}</th>
+                              <th style={pinL} className="sticky text-left py-1 pr-2">
+                                {t.docDate}
+                              </th>
+                              <th className="text-right py-1 px-1">{t.hoursNormal}</th>
+                              <th className="text-right py-1 px-1">{t.overtimeShort}</th>
+                              <th className="text-right py-1 px-1">{t.hoursTravel}</th>
+                              <th className="text-right py-1 px-1">{t.hoursBreaks}</th>
+                              <th data-week-total style={pinR} className="sticky text-right py-1 pl-2">
+                                {t.hoursTotal}
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -6591,40 +6642,47 @@ export default function SiteManager() {
                                   color: r.net > 0 ? COLORS.text : COLORS.muted,
                                 }}
                               >
-                                <td className="py-1.5">
+                                <td style={pinL} className="sticky py-1.5 pr-2">
                                   <span className="font-bold">{dayNames[i]}</span>{" "}
                                   <span style={{ color: COLORS.muted }}>
                                     {r.date.slice(8)}.{r.date.slice(5, 7)}.
                                   </span>
                                 </td>
-                                <td className="text-right tabular-nums">{fmt(r.normal)}</td>
-                                <td className="text-right tabular-nums">{fmt(r.overtime)}</td>
-                                <td className="text-right tabular-nums">{fmt(r.travel)}</td>
-                                <td className="text-right tabular-nums">{fmt(r.breaks)}</td>
-                                <td className="text-right tabular-nums font-bold">{fmt(r.net)}</td>
+                                <td className="text-right tabular-nums px-1">{fmt(r.normal)}</td>
+                                <td className="text-right tabular-nums px-1">{fmt(r.overtime)}</td>
+                                <td className="text-right tabular-nums px-1">{fmt(r.travel)}</td>
+                                <td className="text-right tabular-nums px-1">{fmt(r.breaks)}</td>
+                                <td style={pinR} className="sticky text-right tabular-nums font-bold pl-2">
+                                  {fmt(r.net)}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
                           <tfoot>
                             <tr style={{ borderTop: `2px solid ${COLORS.border}` }} className="font-bold">
-                              <td className="py-1.5">{t.hoursSum}</td>
-                              <td className="text-right tabular-nums">{fmt(week.total.normal)}</td>
-                              <td className="text-right tabular-nums">{fmt(week.total.overtime)}</td>
-                              <td className="text-right tabular-nums">{fmt(week.total.travel)}</td>
-                              <td className="text-right tabular-nums">{fmt(week.total.breaks)}</td>
-                              <td className="text-right tabular-nums" style={{ color: COLORS.accentText }}>
+                              <td style={pinL} className="sticky py-1.5 pr-2">
+                                {t.hoursSum}
+                              </td>
+                              <td className="text-right tabular-nums px-1">{fmt(week.total.normal)}</td>
+                              <td className="text-right tabular-nums px-1">{fmt(week.total.overtime)}</td>
+                              <td className="text-right tabular-nums px-1">{fmt(week.total.travel)}</td>
+                              <td className="text-right tabular-nums px-1">{fmt(week.total.breaks)}</td>
+                              <td
+                                className="sticky text-right tabular-nums pl-2"
+                                style={{ ...pinR, color: COLORS.accentText }}
+                              >
                                 {fmt(week.total.net)}
                               </td>
                             </tr>
                             {week.target != null && (
                               <tr style={{ color: COLORS.muted }}>
-                                <td className="py-1">
+                                <td style={pinL} className="sticky py-1 pr-2">
                                   {t.hoursTarget} / {t.hoursDiff}
                                 </td>
                                 <td colSpan={4}></td>
                                 <td
-                                  className="text-right tabular-nums"
-                                  style={{ color: week.diff >= 0 ? COLORS.success : COLORS.amber }}
+                                  className="sticky text-right tabular-nums pl-2"
+                                  style={{ ...pinR, color: week.diff >= 0 ? COLORS.success : COLORS.amber }}
                                 >
                                   {fmt(week.target)} / {week.diff >= 0 ? "+" : ""}
                                   {fmt(week.diff)}
@@ -6661,7 +6719,7 @@ export default function SiteManager() {
                             className="rounded-xl p-4"
                           >
                             <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-3">
-                              {monthKey()}
+                              {fmtMonth(monthKey(), lang)}
                             </div>
                             <Stat label={t.hoursWorked} value={s.hours.toFixed(1)} color={COLORS.accent} />
                             {s.breaks > 0 && (
@@ -6699,24 +6757,37 @@ export default function SiteManager() {
                         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
                           {t.entriesTitle}
                         </div>
-                        <EntryGroups
-                          entries={reportView === "daily" ? todayEntries : monthUnsent.entries}
-                          projectName={projectName}
-                          t={t}
-                          emptyLabel={t.nothingLogged}
-                          onEditTime={openEditTime}
-                          onEditEntry={openEditEntry}
-                          onDelete={deleteEntryFn}
-                        />
+                        {(reportView === "daily" ? todayEntries : monthUnsent.entries).length === 0 ? (
+                          <EmptyState
+                            name="entries"
+                            icon={Clock}
+                            title={t.nothingLogged}
+                            hint={reportView === "daily" ? t.emptyTodayHint : undefined}
+                            compact
+                          />
+                        ) : (
+                          <EntryGroups
+                            entries={reportView === "daily" ? todayEntries : monthUnsent.entries}
+                            projectName={projectName}
+                            t={t}
+                            onEditTime={openEditTime}
+                            onEditEntry={openEditEntry}
+                            onDelete={deleteEntryFn}
+                          />
+                        )}
                       </div>
                       <div>
                         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
                           {t.sentReports}
                         </div>
                         {sentReports.length === 0 ? (
-                          <div style={{ color: COLORS.muted }} className="text-sm">
-                            {t.noReportsYet}
-                          </div>
+                          <EmptyState
+                            name="reports"
+                            icon={FileText}
+                            title={t.noReportsYet}
+                            hint={t.emptyReportsHint}
+                            compact
+                          />
                         ) : (
                           <div className="flex flex-col gap-2">
                             {sentReports.map((r) => (
@@ -6728,7 +6799,7 @@ export default function SiteManager() {
                               >
                                 <div>
                                   <div className="text-sm font-semibold">
-                                    {r.period === "daily" ? t.daily : t.monthly} · {r.periodLabel}
+                                    {r.period === "daily" ? t.daily : t.monthly} · {periodTitle(r)}
                                   </div>
                                   <div style={{ color: COLORS.muted }} className="text-xs">
                                     {reportFigures(r).hours}h · {t.reportSentTimes} {(r.sends || []).length || 1}×
@@ -6882,6 +6953,7 @@ export default function SiteManager() {
                             ))}
                           {canManage() && (
                             <select
+                              aria-label={t.crewAddToJob}
                               value=""
                               onChange={(e) => {
                                 if (e.target.value) toggleProjectCrew(e.target.value, m.uid);
@@ -7391,7 +7463,7 @@ export default function SiteManager() {
                   {...(it.id === "more" ? { "data-menu-button": true } : {})}
                   onClick={onClick}
                   style={{ color: active ? COLORS.accentText : COLORS.muted }}
-                  className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase tracking-wide"
+                  className="flex flex-col items-center gap-0.5 py-1.5 text-xs font-bold uppercase"
                 >
                   <Icon size={20} color={active ? COLORS.accent : COLORS.muted} />
                   <span className="truncate max-w-full">{it.label}</span>
@@ -9388,7 +9460,7 @@ export default function SiteManager() {
         })()}
 
       {selectedProject && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<LoadingOverlay t={t} />}>
           <ProjectDetail
             project={projects.find((p) => p.id === selectedProject)}
             entries={entries.filter((e) => e.projectId === selectedProject)}
@@ -9848,7 +9920,7 @@ export default function SiteManager() {
             <Modal
               t={t}
               onClose={() => setReportViewModal(null)}
-              title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${reportViewModal.periodLabel}`}
+              title={`${reportViewModal.period === "daily" ? t.daily : t.monthly} · ${periodTitle(reportViewModal)}`}
             >
               <div className="flex flex-col gap-3">
                 <div
@@ -9897,7 +9969,7 @@ export default function SiteManager() {
                   style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
                   className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
                 />
-                <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto">
+                <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto overflow-x-hidden">
                   {f.rows.map((e) => {
                     const meta = typeMeta(e.type, t) || typeMeta("note", t);
                     return (
@@ -9960,7 +10032,7 @@ export default function SiteManager() {
                 >
                   {t.saveLabel}
                 </button>
-                <div className="grid grid-cols-2 gap-2">
+                <div data-report-actions className="grid gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => saveReportAsPdf(reportViewModal)}
                     style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
@@ -10205,7 +10277,7 @@ export default function SiteManager() {
       )}
 
       {photoView && !photoEdit && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<LoadingOverlay t={t} />}>
           <PhotoViewer
             src={photoView.src}
             entry={photoView.entry}
@@ -10222,7 +10294,7 @@ export default function SiteManager() {
         </Suspense>
       )}
       {photoEdit && (
-        <Suspense fallback={null}>
+        <Suspense fallback={<LoadingOverlay t={t} />}>
           <PhotoEditor
             src={photoEdit.src}
             onCancel={() => setPhotoEdit(null)}

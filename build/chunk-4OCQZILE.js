@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioPushInvoices": "Fakt\xFAry mesiaca \u2192 bexio",
   "bexioDryRunDone": "Sk\xFA\u0161ka \u2014 ni\u010D sa neposlalo:",
   "bexioPushed": "Odoslan\xE9 \u2014 bexio odpoved\xE1:",
-  "bexioDisconnect": "Odpoji\u0165 bexio"
+  "bexioDisconnect": "Odpoji\u0165 bexio",
+  "loading": "Na\u010D\xEDtava sa\u2026",
+  "dayOpenSite": "Otvori\u0165 stavbu",
+  "dayChooseSite": "Vybra\u0165 stavbu",
+  "emptyTodayHint": "Dne\u0161n\xE9 hodiny, materi\xE1l a fotky sa zobrazia tu \u2014 zap\xEDsan\xE9 cez \u201E+\u201C alebo v z\xE1kazke.",
+  "emptyReportsHint": "Po\u0161li denn\xFD v\xFDkaz nadriaden\xE9mu \u2014 ka\u017Ed\xE9 odoslanie sa zobraz\xED tu.",
+  "emptyPhotosTitle": "Zatia\u013E \u017Eiadne fotky",
+  "emptyPhotosHint": "Fotky zo strechy sa sem dostan\xFA cez \u201E+\u201C \u203A Fotka alebo z chatu.",
+  "emptyProjectsTitle": "Zatia\u013E \u017Eiadne stavby",
+  "emptyProjectsHint": "Ka\u017Ed\xE1 stavba tu zbiera hodiny, materi\xE1l, fotky, pl\xE1ny a v\xFDkazy. Zalo\u017E prv\xFA alebo ju importuj.",
+  "a11yPerson": "Vybra\u0165 osobu"
 }
 `;export{o as default};

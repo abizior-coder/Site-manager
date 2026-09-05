@@ -921,5 +921,15 @@
   "bexioPushInvoices": "A hónap számlái → bexio",
   "bexioDryRunDone": "Próba — semmi nem ment el:",
   "bexioPushed": "Elküldve — a bexio válasza:",
-  "bexioDisconnect": "bexio leválasztása"
+  "bexioDisconnect": "bexio leválasztása",
+  "loading": "Betöltés…",
+  "dayOpenSite": "Munkahely megnyitása",
+  "dayChooseSite": "Munkahely kiválasztása",
+  "emptyTodayHint": "A mai órák, anyagok és fotók itt jelennek meg — a „+” gombbal vagy a munkában rögzítve.",
+  "emptyReportsHint": "Küldd el a napi jelentést a vezetőnek — minden küldés itt jelenik meg.",
+  "emptyPhotosTitle": "Még nincs fotó",
+  "emptyPhotosHint": "A tetőről készült fotók a „+” › Fotó gombbal vagy a csevegésből kerülnek ide.",
+  "emptyProjectsTitle": "Még nincs munkahely",
+  "emptyProjectsHint": "Minden munkahely itt gyűjti az órákat, anyagot, fotókat, terveket és jelentéseket. Hozd létre az elsőt vagy importáld.",
+  "a11yPerson": "Személy kiválasztása"
 }

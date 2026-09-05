@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Фактури за месеца → bexio",
   "bexioDryRunDone": "Проба — нищо не е изпратено:",
   "bexioPushed": "Изпратено — bexio отговаря:",
-  "bexioDisconnect": "Прекъсни bexio"
+  "bexioDisconnect": "Прекъсни bexio",
+  "loading": "Зарежда се…",
+  "dayOpenSite": "Отвори обекта",
+  "dayChooseSite": "Избери обект",
+  "emptyTodayHint": "Часовете, материалът и снимките от днес се показват тук — въведени с „+“ или в обекта.",
+  "emptyReportsHint": "Изпрати дневния отчет на ръководителя — всяко изпращане се показва тук.",
+  "emptyPhotosTitle": "Още няма снимки",
+  "emptyPhotosHint": "Снимките от покрива идват тук през „+“ › Снимка или от чата.",
+  "emptyProjectsTitle": "Още няма обекти",
+  "emptyProjectsHint": "Всеки обект събира тук часове, материал, снимки, планове и отчети. Създай първия или го импортирай.",
+  "a11yPerson": "Избери човек"
 }

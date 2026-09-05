@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Faktúry mesiaca → bexio",
   "bexioDryRunDone": "Skúška — nič sa neposlalo:",
   "bexioPushed": "Odoslané — bexio odpovedá:",
-  "bexioDisconnect": "Odpojiť bexio"
+  "bexioDisconnect": "Odpojiť bexio",
+  "loading": "Načítava sa…",
+  "dayOpenSite": "Otvoriť stavbu",
+  "dayChooseSite": "Vybrať stavbu",
+  "emptyTodayHint": "Dnešné hodiny, materiál a fotky sa zobrazia tu — zapísané cez „+“ alebo v zákazke.",
+  "emptyReportsHint": "Pošli denný výkaz nadriadenému — každé odoslanie sa zobrazí tu.",
+  "emptyPhotosTitle": "Zatiaľ žiadne fotky",
+  "emptyPhotosHint": "Fotky zo strechy sa sem dostanú cez „+“ › Fotka alebo z chatu.",
+  "emptyProjectsTitle": "Zatiaľ žiadne stavby",
+  "emptyProjectsHint": "Každá stavba tu zbiera hodiny, materiál, fotky, plány a výkazy. Založ prvú alebo ju importuj.",
+  "a11yPerson": "Vybrať osobu"
 }

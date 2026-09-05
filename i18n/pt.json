@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Faturas do mês → bexio",
   "bexioDryRunDone": "Ensaio — nada enviado:",
   "bexioPushed": "Enviado — bexio responde:",
-  "bexioDisconnect": "Desligar bexio"
+  "bexioDisconnect": "Desligar bexio",
+  "loading": "A carregar…",
+  "dayOpenSite": "Abrir a obra",
+  "dayChooseSite": "Escolher uma obra",
+  "emptyTodayHint": "As horas, o material e as fotos de hoje aparecem aqui — registados com «+» ou na obra.",
+  "emptyReportsHint": "Envia o relatório diário ao responsável — cada envio aparece aqui.",
+  "emptyPhotosTitle": "Ainda sem fotos",
+  "emptyPhotosHint": "As fotos do telhado chegam aqui por «+» › Foto ou pelo chat.",
+  "emptyProjectsTitle": "Ainda sem obras",
+  "emptyProjectsHint": "Cada obra reúne aqui horas, material, fotos, plantas e relatórios. Cria a primeira ou importa-a.",
+  "a11yPerson": "Escolher uma pessoa"
 }

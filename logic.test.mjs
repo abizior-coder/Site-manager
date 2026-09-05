@@ -30,7 +30,8 @@ import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./o
 import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
 import { readFileSync } from "node:fs";
 import * as fsMod from "node:fs";
-import { todayKey, monthKey, dateKeyOffset, uid } from "./ui/format.js";
+import { todayKey, monthKey, dateKeyOffset, uid, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
+import { printChrome, withPrintChrome } from "./ui/print.js";
 import {
   code128Values,
   code128Bars,
@@ -562,6 +563,56 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     ]),
     { hours: 7.5, breaks: 0.5, transportHours: 1.5, materialsCount: 0, toolsCount: 0, projIds: [] },
   );
+}
+
+{
+  // Dates as people read them. The app stores ISO keys; a title shows a local
+  // date in the person's language, never "2026-09-05". Unknown languages read
+  // Swiss German rather than whatever locale the machine happens to have.
+  t("fmtDate de: weekday and Swiss date", fmtDate("2026-09-05", "de"), "Sa, 05.09.2026");
+  t("fmtDate en: British order", fmtDate("2026-09-05", "en"), "Sat, 05/09/2026");
+  t("fmtDate sq: Albanian weekday", fmtDate("2026-09-05", "sq"), "Sht, 05.09.2026");
+  t("fmtDate gsw: no trailing dot on the weekday", fmtDate("2026-09-05", "gsw"), "Sa, 05.09.2026");
+  t("fmtDate unknown language falls back to de-CH", fmtDate("2026-09-05", "xx"), "Sa, 05.09.2026");
+  t(
+    "fmtDate leaves what is not a date alone",
+    [fmtDate("", "de"), fmtDate("nope", "de"), fmtDate(undefined, "de")],
+    ["", "nope", ""],
+  );
+  t("fmtMonth de", fmtMonth("2026-09", "de"), "September 2026");
+  t("fmtMonth en", fmtMonth("2026-09", "en"), "September 2026");
+  t("fmtMonth sq starts with a capital", fmtMonth("2026-09", "sq"), "Shtator 2026");
+  t("fmtMonth accepts a full day key", fmtMonth("2026-09-05", "de"), "September 2026");
+  t("fmtDateRange de", fmtDateRange("2026-08-31", "2026-09-06", "de"), "31.08.2026 – 06.09.2026");
+  t("fmtDateRange en", fmtDateRange("2026-08-31", "2026-09-06", "en"), "31/08/2026 – 06/09/2026");
+  t("fmtDateRange sq", fmtDateRange("2026-08-31", "2026-09-06", "sq"), "31.08.2026 – 06.09.2026");
+  t(
+    "no ISO key survives the formatters",
+    [fmtDate("2026-09-05", "de"), fmtMonth("2026-09", "hu"), fmtDateRange("2026-08-31", "2026-09-06", "bg")].some((x) =>
+      /\d{4}-\d{2}/.test(x),
+    ),
+    false,
+  );
+}
+
+{
+  // The documents opened in a new tab print themselves: a toolbar that is
+  // not on paper, and window.print() once the page has loaded.
+  const chrome = printChrome({ printLabel: "Drucken", closeLabel: "Schliessen" });
+  t("printChrome calls window.print on load", chrome.includes("window.print()") && chrome.includes('"load"'), true);
+  t("printChrome hides its toolbar on paper", /@media print\{\.no-print\{display:none/.test(chrome), true);
+  t("printChrome carries the labels", chrome.includes(">Drucken<") && chrome.includes(">Schliessen<"), true);
+  t("printChrome escapes a label", printChrome({ printLabel: "<b>" }).includes("&lt;b&gt;"), true);
+  t("printChrome without autoPrint has no script", printChrome({ autoPrint: false }).includes("<script"), false);
+  const doc = "<!DOCTYPE html><html><head><title>x</title></head><body><h1>Rapport</h1></body></html>";
+  const out = withPrintChrome(doc, { printLabel: "Print" });
+  t(
+    "withPrintChrome puts the toolbar first in the body",
+    out.indexOf('<div class="no-print">') < out.indexOf("<h1>"),
+    true,
+  );
+  t("withPrintChrome keeps the head", out.startsWith("<!DOCTYPE html><html><head><title>x</title></head><body>"), true);
+  t("withPrintChrome on a fragment prepends", withPrintChrome("<p>x</p>").endsWith("<p>x</p>"), true);
 }
 
 {

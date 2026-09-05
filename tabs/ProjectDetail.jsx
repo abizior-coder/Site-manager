@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDialog } from "../ui/dialog.js";
+import { EmptyState } from "../ui/empty-state.jsx";
 import { LANGS } from "../i18n/index.js";
 import {
   DEFAULT_PROJECT_STATUS,
@@ -162,6 +163,12 @@ export function ProjectDetail({
   const [dragOver, setDragOver] = useState(false);
   const [filesOver, setFilesOver] = useState(false);
   const fileInputRef = useRef(null);
+  // The strip of hub chips scrolls sideways; the active one stays in view.
+  const hubTabsRef = useRef(null);
+  useEffect(() => {
+    const chip = hubTabsRef.current?.querySelector(`[data-hub-tab="${hubTab}"]`);
+    if (chip && typeof chip.scrollIntoView === "function") chip.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [hubTab]);
   const onCrew = (roster || []).filter((m) => (crew || []).includes(m.uid));
   const offCrew = (roster || []).filter((m) => !(crew || []).includes(m.uid));
   return (
@@ -176,7 +183,7 @@ export function ProjectDetail({
         aria-label={project.name}
         tabIndex={-1}
         style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}` }}
-        className="relative w-full max-w-md lg:max-w-none rounded-t-2xl lg:rounded-none p-5 lg:p-8 max-h-[85vh] lg:max-h-none lg:h-full overflow-y-auto"
+        className="relative w-full max-w-md lg:max-w-none rounded-t-2xl lg:rounded-none p-5 lg:p-8 h-[85vh] lg:max-h-none lg:h-full overflow-y-auto"
       >
         {/* The name block yields and wraps; the buttons keep their width. On a
             phone the name plus two chips plus 'Bearbeiten' and the close
@@ -260,7 +267,7 @@ export function ProjectDetail({
         <div className="lg:max-w-4xl lg:mx-auto">
           {/* The hub: the job's content behind a row of tabs, the way the market
             lays a site out, instead of one long strip. */}
-          <div data-hub-tabs className="flex gap-1.5 overflow-x-auto mb-4 -mx-1 px-1 pb-1">
+          <div ref={hubTabsRef} data-hub-tabs className="flex gap-1.5 overflow-x-auto mb-4 -mx-1 px-1 pb-1">
             {[
               ["overview", t.hubOverview, 0],
               ["time", t.hubTime, timeCount],
@@ -1342,9 +1349,7 @@ export function ProjectDetail({
               className="rounded-xl p-4 mb-4"
             >
               {photos.length === 0 && (
-                <div style={{ color: COLORS.muted }} className="text-sm">
-                  {t.nothingLogged}
-                </div>
+                <EmptyState name="photos" icon={Camera} title={t.emptyPhotosTitle} hint={t.emptyPhotosHint} compact />
               )}
               {photos.length > 0 && (
                 <div>

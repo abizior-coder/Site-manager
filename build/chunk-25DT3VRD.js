@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "bexioPushInvoices": "Rechnungen des Monats \u2192 bexio",
   "bexioDryRunDone": "Probelauf \u2014 nichts gesendet:",
   "bexioPushed": "Gesendet \u2014 bexio antwortet:",
-  "bexioDisconnect": "bexio trennen"
+  "bexioDisconnect": "bexio trennen",
+  "loading": "L\xE4dt\u2026",
+  "dayOpenSite": "Baustelle \xF6ffnen",
+  "dayChooseSite": "Baustelle w\xE4hlen",
+  "emptyTodayHint": "Zeiten, Material und Fotos von heute erscheinen hier \u2014 erfasst \xFCber \xAB+\xBB oder im Auftrag.",
+  "emptyReportsHint": "Sende den Tagesrapport an den Vorgesetzten \u2014 jeder Versand erscheint hier.",
+  "emptyPhotosTitle": "Noch keine Fotos",
+  "emptyPhotosHint": "Fotos vom Dach kommen \xFCber \xAB+\xBB \u203A Foto oder aus dem Chat hierher.",
+  "emptyProjectsTitle": "Noch keine Baustellen",
+  "emptyProjectsHint": "Jede Baustelle sammelt hier Zeiten, Material, Fotos, Pl\xE4ne und Rapporte. Lege die erste an oder importiere sie.",
+  "a11yPerson": "Person w\xE4hlen"
 }
 `;export{t as default};

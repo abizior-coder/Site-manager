@@ -921,6 +921,16 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioPushInvoices": "Invoices of the month \u2192 bexio",
   "bexioDryRunDone": "Dry run \u2014 nothing was sent:",
   "bexioPushed": "Sent \u2014 bexio answered:",
-  "bexioDisconnect": "Disconnect bexio"
+  "bexioDisconnect": "Disconnect bexio",
+  "loading": "Loading\u2026",
+  "dayOpenSite": "Open the site",
+  "dayChooseSite": "Choose a site",
+  "emptyTodayHint": "Today's hours, material and photos appear here \u2014 logged with \u201C+\u201D or inside the job.",
+  "emptyReportsHint": "Send the daily report to your supervisor \u2014 every send shows up here.",
+  "emptyPhotosTitle": "No photos yet",
+  "emptyPhotosHint": "Photos from the roof land here via \u201C+\u201D \u203A Photo or from the chat.",
+  "emptyProjectsTitle": "No sites yet",
+  "emptyProjectsHint": "Every site collects hours, material, photos, plans and reports here. Create the first one or import it.",
+  "a11yPerson": "Choose a person"
 }
 `;export{o as default};

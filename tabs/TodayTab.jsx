@@ -1,14 +1,17 @@
-// The Today tab: what am I doing today, the weather, the clock, the note
-// box and the day's entries. State lives in the app; this only renders.
-import { CalendarDays, Check, MessageSquare, Mic, RefreshCw, Send, Square } from "lucide-react";
+// The Today tab: the day first (date, site, clock, breaks and the one action
+// that matters now), then the weather, the note box and the day's entries.
+// State lives in the app; this only renders.
+import { CalendarDays, Check, Clock, MapPin, MessageSquare, Mic, RefreshCw, Send, Square } from "lucide-react";
 import { COLORS } from "../ui/theme.js";
-import { fmtHM, todayKey } from "../ui/format.js";
+import { fmtDate, fmtHM, todayKey } from "../ui/format.js";
 import { EntryGroups } from "../ui/entries.jsx";
 import { BreakChips } from "../ui/break-chips.jsx";
+import { EmptyState } from "../ui/empty-state.jsx";
 
 export function TodayTab({
   topCard,
   t,
+  lang,
   projects,
   entries,
   user,
@@ -39,49 +42,113 @@ export function TodayTab({
   openEditEntry,
   deleteEntryFn,
 }) {
+  const today = todayKey();
+  // What am I meant to be doing today? The first thing a crew member opens
+  // the app to find out. The day starts inside the job the Polier assigned.
+  const mine = myAssignments(today);
+  const firstJob = mine.map((a) => projects.find((x) => x.id === a.projectId)).find(Boolean);
+  const openJob = (id) => {
+    setTab("projects");
+    setSelectedProject(id);
+  };
+  // The first action is the biggest control on the screen: a glove hits it.
+  const bigAction = "w-full py-4 rounded-xl font-bold uppercase text-base flex items-center justify-center gap-2";
   return (
     <div className="flex flex-col gap-4">
-      {topCard}
-      {(() => {
-        // What am I meant to be doing today? The first thing a crew
-        // member opens the app to find out.
-        const mine = myAssignments(todayKey());
-        if (mine.length === 0) return null;
-        return (
-          <div style={{ background: "#6FB3D914", border: "1px solid #6FB3D955" }} className="rounded-xl p-4">
-            <div
-              style={{ color: "#6FB3D9" }}
-              className="text-xs uppercase tracking-wide mb-2 font-bold flex items-center gap-1.5"
-            >
-              <CalendarDays size={13} /> {t.schedToday}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              {mine.map((a) => {
-                const pr = projects.find((x) => x.id === a.projectId);
-                if (!pr) return null;
-                return (
-                  <button
-                    key={a.id}
-                    onClick={() => {
-                      setTab("projects");
-                      setSelectedProject(pr.id);
-                    }}
-                    style={{ background: COLORS.card }}
-                    className="w-full text-left rounded-lg px-3 py-2"
-                  >
-                    <div className="text-sm font-semibold">{pr.name}</div>
-                    {pr.address && (
-                      <div style={{ color: COLORS.muted }} className="text-xs truncate">
-                        {pr.address}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+      {/* The day card: one glance for the date, the site, the clock and the
+          breaks, with the first action under it. */}
+      <div
+        data-day-card
+        style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+        className="rounded-xl p-4"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+            {t.navToday}
           </div>
-        );
-      })()}
+          <div data-today-count style={{ color: COLORS.muted }} className="text-xs tabular-nums">
+            {todayEntries.length} {t.entriesLabelFmt}
+          </div>
+        </div>
+        <div data-today-date className="text-2xl font-black mt-0.5 mb-3">
+          {fmtDate(today, lang)}
+        </div>
+        {activeClock ? (
+          <>
+            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+              {t.workingAt}
+            </div>
+            <div data-today-site className="font-bold text-lg">
+              {projectName(activeClock.projectId)}
+            </div>
+            <div style={{ color: COLORS.accentText }} className="text-3xl font-black tabular-nums">
+              {fmtHM(Date.now() - activeClock.startedAt)}
+            </div>
+            <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
+            <button
+              data-day-action
+              onClick={clockOut}
+              style={{ background: COLORS.accent }}
+              className={`${bigAction} mt-4`}
+            >
+              <Square size={18} /> {t.clockOut}
+            </button>
+          </>
+        ) : (
+          <>
+            {mine.length > 0 ? (
+              <>
+                <div
+                  style={{ color: "#6FB3D9" }}
+                  className="text-xs uppercase tracking-wide mb-1.5 font-bold flex items-center gap-1.5"
+                >
+                  <CalendarDays size={13} /> {t.schedToday}
+                </div>
+                <div data-today-site className="flex flex-col gap-1.5 mb-3">
+                  {mine.map((a) => {
+                    const pr = projects.find((x) => x.id === a.projectId);
+                    if (!pr) return null;
+                    return (
+                      <button
+                        key={a.id}
+                        onClick={() => openJob(pr.id)}
+                        style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
+                        className="w-full text-left rounded-lg px-3 py-2"
+                      >
+                        <div className="text-sm font-semibold">{pr.name}</div>
+                        {pr.address && (
+                          <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                            {pr.address}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                  {t.startYourDay}
+                </div>
+                <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed mb-3">
+                  {t.startDayHint}
+                </div>
+              </>
+            )}
+            <button
+              data-day-action
+              onClick={() => (firstJob ? openJob(firstJob.id) : setTab("projects"))}
+              style={{ background: COLORS.accent }}
+              className={bigAction}
+            >
+              <MapPin size={18} /> {firstJob ? t.dayOpenSite : t.dayChooseSite}
+            </button>
+            <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
+          </>
+        )}
+      </div>
+      {topCard}
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
         <div className="flex items-center justify-between mb-1">
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
@@ -160,41 +227,6 @@ export function TodayTab({
       </div>
 
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
-        {activeClock ? (
-          <>
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
-              {t.workingAt}
-            </div>
-            <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
-            <div className="font-bold text-lg mb-3">{projectName(activeClock.projectId)}</div>
-            <div style={{ color: COLORS.accentText }} className="text-3xl font-black mb-4 tabular-nums">
-              {fmtHM(Date.now() - activeClock.startedAt)}
-            </div>
-            <button
-              onClick={clockOut}
-              style={{ background: COLORS.accent }}
-              className="w-full py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
-            >
-              <Square size={16} /> {t.clockOut}
-            </button>
-          </>
-        ) : (
-          <>
-            {/* The list of every job to clock into is gone. The day
-                  starts inside the job the Polier assigned -- tap it under
-                  "Heutiger Einsatz" above, or open it under Projekte. */}
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
-              {t.startYourDay}
-            </div>
-            <div style={{ color: COLORS.muted }} className="text-sm leading-relaxed">
-              {t.startDayHint}
-            </div>
-            <BreakChips entries={entries} userId={user?.uid} onToggle={toggleBreak} t={t} />
-          </>
-        )}
-      </div>
-
-      <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 flex items-center gap-1">
           <MessageSquare size={13} /> {t.tellLog}
         </div>
@@ -241,15 +273,18 @@ export function TodayTab({
         <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2 mt-2">
           {t.todaysTickets}
         </div>
-        <EntryGroups
-          entries={todayEntries}
-          projectName={projectName}
-          t={t}
-          emptyLabel={t.nothingLogged}
-          onEditTime={openEditTime}
-          onEditEntry={openEditEntry}
-          onDelete={deleteEntryFn}
-        />
+        {todayEntries.length === 0 ? (
+          <EmptyState name="today" icon={Clock} title={t.nothingLogged} hint={t.emptyTodayHint} compact />
+        ) : (
+          <EntryGroups
+            entries={todayEntries}
+            projectName={projectName}
+            t={t}
+            onEditTime={openEditTime}
+            onEditEntry={openEditEntry}
+            onDelete={deleteEntryFn}
+          />
+        )}
       </div>
     </div>
   );

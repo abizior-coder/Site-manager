@@ -921,5 +921,15 @@
   "bexioPushInvoices": "Faktury miesiąca → bexio",
   "bexioDryRunDone": "Próba — nic nie wysłano:",
   "bexioPushed": "Wysłano — odpowiedź bexio:",
-  "bexioDisconnect": "Rozłącz bexio"
+  "bexioDisconnect": "Rozłącz bexio",
+  "loading": "Ładowanie…",
+  "dayOpenSite": "Otwórz budowę",
+  "dayChooseSite": "Wybierz budowę",
+  "emptyTodayHint": "Godziny, materiał i zdjęcia z dzisiaj pojawią się tutaj — dodane przez „+” lub w zleceniu.",
+  "emptyReportsHint": "Wyślij raport dzienny do przełożonego — każda wysyłka pojawi się tutaj.",
+  "emptyPhotosTitle": "Brak zdjęć",
+  "emptyPhotosHint": "Zdjęcia z dachu trafiają tu przez „+” › Zdjęcie lub z czatu.",
+  "emptyProjectsTitle": "Brak budów",
+  "emptyProjectsHint": "Każda budowa zbiera tu godziny, materiał, zdjęcia, plany i raporty. Załóż pierwszą lub ją zaimportuj.",
+  "a11yPerson": "Wybierz osobę"
 }

@@ -117,6 +117,55 @@ async function renderAs(role) {
   check("owner: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("owner: shows a project from the store", text().includes("Trockenbau"), text().slice(0, 120));
 
+  // Heute opens with the day: a local date with its weekday, and the first
+  // action as a button (it was a paragraph telling people where to look).
+  {
+    const date = window.document.querySelector("[data-today-date]")?.textContent || "";
+    check(
+      "owner: Heute shows today's date with a weekday",
+      /^[A-Za-zÀ-ž]{2,3}, \d{2}\.\d{2}\.\d{4}$/.test(date.trim()),
+      date || "no [data-today-date]",
+    );
+    const action = window.document.querySelector("[data-day-action]");
+    check(
+      "owner: the day's first action is a button in the day card",
+      action?.tagName === "BUTTON" &&
+        !!action.closest("[data-day-card]") &&
+        (action.textContent || "").trim().length > 3,
+      action ? action.outerHTML.slice(0, 80) : "no [data-day-action]",
+    );
+    const card = window.document.querySelector("[data-day-card]");
+    const column = card?.parentElement;
+    check(
+      "owner: the day card comes before the weather",
+      !!column && column.firstElementChild === card,
+      "the day card is not the first card",
+    );
+  }
+
+  // A lazy tab shows a loading element the moment it is asked for, and none
+  // once its chunk has landed. The area used to be blank in between, which on
+  // a weak connection is seconds of nothing after a tap.
+  {
+    const board = [...window.document.querySelectorAll("button")].find(
+      (b) => (b.textContent || "").trim().toUpperCase() === "BOARD",
+    );
+    check("owner: the Board tab exists", !!board, "button not found");
+    board?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    let seen = false;
+    for (let i = 0; i < 40 && !seen; i++) {
+      await Promise.resolve();
+      if (window.document.querySelector("[data-loading]")) seen = true;
+    }
+    check("owner: a lazy tab shows a loading element while its chunk resolves", seen, "no [data-loading] appeared");
+    await new Promise((r) => setTimeout(r, 300));
+    check(
+      "owner: no loading element remains once the tab has landed",
+      !window.document.querySelector("[data-loading]") && /Board|Woche|Week/i.test(text()),
+      window.document.querySelector("[data-loading]") ? "still loading" : "Board content missing",
+    );
+  }
+
   // Walk the tabs. A crash in any of these is what a blank screen looks like.
   const tabs = ["MATERIAL", "KUNDEN", "KALENDER", "PROJEKTE", "RAPPORT"];
   for (const label of tabs) {
@@ -168,6 +217,90 @@ async function renderAs(role) {
       "owner: the report shows it went out twice",
       /gesendet 2×|sent 2×/.test(rows[0]?.textContent || ""),
       (rows[0]?.textContent || "").slice(0, 120),
+    );
+  }
+
+  // Rapport on a phone: titles are local dates, not the ISO keys the app
+  // stores; the week table pins its Total column so it survives Albanian
+  // column headers on a 375 px screen; "Pausen" never reads "−0.0".
+  {
+    const tagesrapport = window.document.querySelector("[data-tagesrapport]");
+    const title = tagesrapport?.querySelector("div")?.textContent || "";
+    check(
+      "owner: the Tagesrapport title is a local date, not an ISO key",
+      /Tagesrapport|Daily report/.test(title) && !/\d{4}-\d{2}-\d{2}/.test(title) && /\d{2}\.\d{2}\.\d{4}/.test(title),
+      title,
+    );
+    check(
+      "owner: breaks never read as a negative zero",
+      !/−0\.0/.test(tagesrapport?.textContent || ""),
+      "−0.0 in the Tagesrapport",
+    );
+    const reportRow = [...window.document.querySelectorAll("button")].find((x) =>
+      /^(Täglich|Daily) · /.test((x.textContent || "").trim()),
+    );
+    check(
+      "owner: a sent report row shows a local date",
+      !!reportRow && !/\d{4}-\d{2}-\d{2}/.test(reportRow.textContent || ""),
+      (reportRow?.textContent || "no row").slice(0, 60),
+    );
+    window.document
+      .querySelector('[data-rapport-view="week"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const total = window.document.querySelector("[data-week-total]");
+    check(
+      "owner: the Woche table pins its Total column",
+      !!total && total.classList.contains("sticky") && total.style.position === "sticky",
+      total ? total.className : "no Total header",
+    );
+    const label = window.document.querySelector("[data-week-label]")?.textContent || "";
+    check(
+      "owner: the Woche label is a local date range",
+      !/\d{4}-\d{2}-\d{2}/.test(label) && label.includes(" – "),
+      label,
+    );
+    window.document
+      .querySelector('[data-rapport-view="daily"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+  }
+
+  // Overflow and names: the Cockpit's leave row wraps on a phone instead of
+  // pushing past the edge; the phone tab bar labels carry no letter-spacing
+  // («Baustellen» was cut to «Baustell…»); the team's add-to-job select has
+  // an accessible name.
+  {
+    const cockpit = [...window.document.querySelectorAll("button")].find(
+      (x) => (x.textContent || "").trim().toUpperCase() === "ÜBERSICHT",
+    );
+    cockpit?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    const leaveRow = window.document.querySelector("[data-leave-row]");
+    check(
+      "owner: the Cockpit's leave row wraps",
+      !!leaveRow && leaveRow.classList.contains("flex-wrap") && leaveRow.querySelectorAll("button").length === 2,
+      leaveRow ? leaveRow.className : "no pending leave row in the Cockpit",
+    );
+    const tabLabels = [...window.document.querySelectorAll("[data-tab-bar] [data-tab]")];
+    check(
+      "phone tab bar labels carry no letter-spacing",
+      tabLabels.length >= 4 && tabLabels.every((b) => !/tracking-/.test(b.className)),
+      tabLabels
+        .map((b) => b.className)
+        .join(" | ")
+        .slice(0, 120),
+    );
+    const teamBtn = [...window.document.querySelectorAll("button")].find(
+      (x) => (x.textContent || "").trim().toUpperCase() === "TEAM",
+    );
+    teamBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const addSelect = window.document.querySelector("select[aria-label]");
+    check(
+      "owner: the team's add-to-job select has an accessible name",
+      !!addSelect && /Zu Baustelle|Add to a job/.test(addSelect.getAttribute("aria-label") || ""),
+      addSelect ? addSelect.getAttribute("aria-label") : "no labelled select on the Team tab",
     );
   }
 
@@ -1119,6 +1252,53 @@ async function renderAs(role) {
   check("crew: app renders something", text().length > 50, `only ${text().length} chars — blank screen`);
   check("crew: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("crew: money is not shown", !text().includes("R-2026-001"), "an invoice number leaked into the crew view");
+  // Empty lists say what would be here and how the first item gets in.
+  {
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="reports"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    window.document
+      .querySelector('[data-rapport-view="daily"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const empty = window.document.querySelector('[data-empty="reports"]');
+    check(
+      "crew: the Rapport shows the sent-reports empty state",
+      !!empty &&
+        /Noch keine Berichte|No reports/.test(empty.textContent || "") &&
+        (empty.textContent || "").length > 40,
+      empty ? empty.textContent.slice(0, 80) : "no [data-empty=reports]",
+    );
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="projects"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const job = [...window.document.querySelectorAll("button")].find((x) =>
+      (x.textContent || "").includes("Dach Kontrolle"),
+    );
+    job?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    window.document
+      .querySelector('[data-hub-tab="photos"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const photos = window.document.querySelector('[data-empty="photos"]');
+    check(
+      "crew: a job without photos shows the photos empty state",
+      !!photos && /Noch keine Fotos|No photos/.test(photos.textContent || ""),
+      photos ? photos.textContent.slice(0, 80) : job ? "no [data-empty=photos]" : "job not found",
+    );
+    window.document
+      .querySelector('[role="dialog"] button[aria-label="Schliessen"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check("crew: the job sheet closes again", !window.document.querySelector("[data-hub-tabs]"), "sheet still open");
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="today"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+  }
   check(
     "crew: no overview button",
     ![...window.document.querySelectorAll("button")].some((b) =>
