@@ -26,9 +26,21 @@ export function reportRows(report, entries) {
   }
   const byId = new Map((entries || []).map((e) => [e.id, e]));
   const labels = report.entryLabels || {};
+  const regie = new Set(report.regieIds || []);
   return report.entryIds
     .filter((id) => !excluded.has(id))
-    .map((id) => byId.get(id) || { id, description: labels[id] || "", type: "note", qty: "", unit: "", deleted: true });
+    .map(
+      (id) =>
+        byId.get(id) || {
+          id,
+          description: labels[id] || "",
+          type: "note",
+          qty: "",
+          unit: "",
+          deleted: true,
+          regie: regie.has(id),
+        },
+    );
 }
 
 // Hours, counts and sites from a list of rows. Deleted rows count for
@@ -40,10 +52,16 @@ export function reportTotals(rows) {
   const projIds = [];
   let breaks = 0;
   let transportHours = 0;
+  let regieHours = 0;
   for (const r of rows || []) {
     if (r.deleted) continue;
-    if (r.type === "time") hours += parseFloat(r.qty || 0) || 0;
-    else if (r.type === "break") breaks += parseFloat(r.qty || 0) || 0;
+    if (r.type === "time") {
+      const qty = parseFloat(r.qty || 0) || 0;
+      hours += qty;
+      // Regie is a subset of the hours, never additional to them -- of the
+      // worked time, this much was outside the agreed scope.
+      if (r.regie) regieHours += qty;
+    } else if (r.type === "break") breaks += parseFloat(r.qty || 0) || 0;
     // Trips are told apart from worked time: the office decides how travel is paid.
     else if (r.type === "transport") transportHours += parseFloat(r.hours || r.qty || 0) || 0;
     else if (r.type === "material") materialsCount++;
@@ -53,6 +71,7 @@ export function reportTotals(rows) {
   // Net of breaks marked that day: what the supervisor is told is worked time.
   return {
     hours: Math.max(0, Math.round((hours - breaks) * 100) / 100),
+    regieHours: Math.round(regieHours * 100) / 100,
     breaks: Math.round(breaks * 100) / 100,
     transportHours: Math.round(transportHours * 100) / 100,
     materialsCount,
@@ -71,18 +90,81 @@ export function entryLabels(rows) {
   return out;
 }
 
+// Which rows are Regie, stored alongside entryLabels (a parallel field, not
+// baked into the label string, which is untranslated everywhere else in
+// this file) so a deleted entry still reads as Regie once it can no longer
+// be read live -- see reportRows' deleted-row fallback above.
+export function regieIds(rows) {
+  return (rows || []).filter((e) => e.regie).map((e) => e.id);
+}
+
+// Which of a day's entries a daily report may carry: the sender's own by
+// default, so a report never goes out under one name with the whole crew's
+// hours in it. A manager may choose "whole crew" instead -- wholeCrew is
+// meaningless from anyone else and callers must gate it on canManage().
+export function dayReportScope(entries, dateStr, userId, wholeCrew) {
+  return (entries || []).filter((e) => e.date === dateStr && (wholeCrew || e.userId === userId));
+}
+
+// Every entry type a printed report may carry, sorted into where it goes:
+// material and tool get their own table, notes their own list, and every
+// other type -- break, transport, photo, inspection, order, pickup -- goes
+// into "other" rather than being silently left off the page. Time itself
+// is never a row: it is the hours figure, which reportTotals computes net
+// of breaks so the same number appears in the PDF, the modal and the mail.
+export const OTHER_ENTRY_TYPES = ["break", "transport", "photo", "inspection", "order", "pickup"];
+
+// Groups a report's live rows by site (siteKeyOf names the site for a row)
+// and classifies each site's rows into the buckets above, with hours net
+// of that site's own breaks -- the same reportTotals used for the whole
+// report. Deleted rows are excluded, the same as the modal and the mail.
+export function reportSiteGroups(rows, siteKeyOf) {
+  const bySite = {};
+  for (const e of rows || []) {
+    if (e.deleted) continue;
+    const key = siteKeyOf(e);
+    (bySite[key] = bySite[key] || []).push(e);
+  }
+  return Object.entries(bySite).map(([site, ents]) => ({
+    site,
+    entries: ents,
+    hours: reportTotals(ents).hours,
+    materials: ents.filter((e) => e.type === "material"),
+    machines: ents.filter((e) => e.type === "tool"),
+    notes: ents.filter((e) => e.type === "note"),
+    other: ents.filter((e) => OTHER_ENTRY_TYPES.includes(e.type)),
+  }));
+}
+
 // The month's entries that no daily report of this person has carried yet.
 // The owner's decision (2026-09-02): the monthly report excludes what the
 // daily ones already sent, rather than flagging it, so the supervisor gets
 // what is new and nothing twice. The count of what was left out is returned
 // so the report can say so.
+//
+// A daily report counts here in two cases: it is this person's own (any
+// scope -- dayReportScope never lets a person-scoped report carry anyone
+// else's entries anyway), or it is a colleague's WHOLE-CREW report
+// (dayReportScope's manager toggle, marked wholeCrew on the record), which
+// by definition already carried this person's entries too. A colleague's
+// person-scoped report is skipped: it cannot contain this person's entries,
+// so entries only that colleague logged still need a first report of their
+// own, from someone -- excluding it here would be a no-op either way.
 export function unsentMonthEntries(monthEntries, sentReports, userId, monthLabel) {
   const sent = new Set();
   for (const r of sentReports || []) {
     if (r.period !== "daily") continue;
-    if (userId && r.userId && r.userId !== userId) continue;
+    if (userId && r.userId && r.userId !== userId && !r.wholeCrew) continue;
     if (monthLabel && String(r.periodLabel || "").slice(0, 7) !== monthLabel) continue;
-    const ids = Array.isArray(r.entryIds) ? r.entryIds : (r.entries || []).map((e) => e.id);
+    // An id taken out of the day report after it was sent (toggleReportEntry
+    // + saveReportEdits, no resend) stays in entryIds from the send that
+    // included it, but excludedIds now names it too -- it was never actually
+    // shown to the supervisor, so it must not count as sent here either, or
+    // it would never reach any report again.
+    const excluded = new Set(r.excludedIds || []);
+    const ids = (Array.isArray(r.entryIds) ? r.entryIds : (r.entries || []).map((e) => e.id)).filter(
+      (id) => !excluded.has(id),
+    );
     ids.forEach((id) => sent.add(id));
   }
   const entries = (monthEntries || []).filter((e) => !sent.has(e.id));

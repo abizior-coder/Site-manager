@@ -37,6 +37,12 @@ await testEnv.withSecurityRulesDisabled(async (ctx) => {
   await setDoc(doc(d, "companies", CID, "members", OWNER), { role: "owner" });
   await setDoc(doc(d, "companies", CID, "members", CREW), { role: "crew" });
   await setDoc(doc(d, "companies", CID, "private", "finance"), { labourRate: 85, iban: "CH93..." });
+  await setDoc(doc(d, "companies", CID, "private", "reportProfile"), {
+    weeklyHours: 42,
+    companyName: "Dach AG",
+    street: "Bahnhofstrasse",
+    town: "Zürich",
+  });
   await setDoc(doc(d, "companies", CID, "documents", "inv1"), { number: "R-2026-001", total: 5000 });
   await setDoc(doc(d, "companies", CID, "projects", "p1"), { name: "Roof" });
   await setDoc(doc(d, "companies", CID, "entries", "e-own"), { userId: CREW, qty: "8" });
@@ -72,6 +78,77 @@ await check("crew CANNOT read invoices", () => assertFails(getDoc(doc(crew, "com
 await check("crew CANNOT list invoices", () => assertFails(getDocs(collection(crew, "companies", CID, "documents"))));
 await check("owner CAN read finance", () => assertSucceeds(getDoc(doc(owner, "companies", CID, "private", "finance"))));
 await check("owner CAN read invoices", () => assertSucceeds(getDoc(doc(owner, "companies", CID, "documents", "inv1"))));
+
+// --- the report profile (weekly target, firm address) is not the money --
+await check("crew CAN read the firm's weekly target and address", () =>
+  assertSucceeds(getDoc(doc(crew, "companies", CID, "private", "reportProfile"))),
+);
+await check("crew CANNOT read the labour rate or IBAN via reportProfile", async () => {
+  const snap = await getDoc(doc(crew, "companies", CID, "private", "reportProfile"));
+  const data = snap.data();
+  if ("labourRate" in data || "iban" in data) throw new Error("money field present on reportProfile");
+});
+await check("crew CANNOT write the report profile", () =>
+  assertFails(setDoc(doc(crew, "companies", CID, "private", "reportProfile"), { weeklyHours: 99 })),
+);
+await check("owner CAN write the report profile", () =>
+  assertSucceeds(
+    setDoc(doc(owner, "companies", CID, "private", "reportProfile"), {
+      weeklyHours: 42,
+      companyName: "Dach AG",
+      street: "Bahnhofstrasse",
+      town: "Zürich",
+    }),
+  ),
+);
+
+// --- login audit: owner-only reading, self-only creating -----------------
+// docs/specs/2026-09-09_login-audit.md.
+await check("crew CAN create their own login row", () =>
+  assertSucceeds(
+    setDoc(doc(crew, "companies", CID, "loginEvents", "le-crew"), {
+      uid: CREW,
+      name: "Crew",
+      role: "crew",
+      at: Date.now(),
+    }),
+  ),
+);
+await check("crew CANNOT create a login row naming someone else", () =>
+  assertFails(
+    setDoc(doc(crew, "companies", CID, "loginEvents", "le-fake"), {
+      uid: OWNER,
+      name: "Crew",
+      role: "crew",
+      at: Date.now(),
+    }),
+  ),
+);
+await check("owner CAN read the login list", () =>
+  assertSucceeds(getDocs(collection(owner, "companies", CID, "loginEvents"))),
+);
+await check("crew CANNOT read another member's login row", () =>
+  assertFails(getDoc(doc(crew, "companies", CID, "loginEvents", "le-crew"))),
+);
+await check("crew CANNOT list the login collection", () =>
+  assertFails(getDocs(collection(crew, "companies", CID, "loginEvents"))),
+);
+await check("nobody can update a login row, not even the owner", () =>
+  assertFails(updateDoc(doc(owner, "companies", CID, "loginEvents", "le-crew"), { role: "owner" })),
+);
+await check("owner CAN delete a login row (the retention prune)", () =>
+  assertSucceeds(deleteDoc(doc(owner, "companies", CID, "loginEvents", "le-crew"))),
+);
+await check("crew CANNOT delete a login row", () =>
+  assertFails(
+    setDoc(doc(crew, "companies", CID, "loginEvents", "le-crew2"), {
+      uid: CREW,
+      name: "Crew",
+      role: "crew",
+      at: Date.now(),
+    }).then(() => deleteDoc(doc(crew, "companies", CID, "loginEvents", "le-crew2"))),
+  ),
+);
 
 // --- crew can do their job ----------------------------------------------
 await check("crew CAN read projects", () => assertSucceeds(getDoc(doc(crew, "companies", CID, "projects", "p1"))));
@@ -175,6 +252,12 @@ const sup = testEnv.authenticatedContext(SUP).firestore();
 
 await check("supervisor CANNOT read finance", () =>
   assertFails(getDoc(doc(sup, "companies", CID, "private", "finance"))),
+);
+await check("supervisor CAN read weeklyHours and the firm address", () =>
+  assertSucceeds(getDoc(doc(sup, "companies", CID, "private", "reportProfile"))),
+);
+await check("supervisor CANNOT write the report profile", () =>
+  assertFails(setDoc(doc(sup, "companies", CID, "private", "reportProfile"), { weeklyHours: 99 })),
 );
 await check("supervisor CANNOT read invoices", () =>
   assertFails(getDoc(doc(sup, "companies", CID, "documents", "inv1"))),

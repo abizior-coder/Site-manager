@@ -17,9 +17,14 @@ writeFileSync(
   `
 import { createRoot } from "react-dom/client";
 import SiteManager from "./roofing-site-manager.jsx";
-import { setStubRole } from "./test-stubs/company-store.js";
+import { setStubRole, setStubWeeklyHours } from "./test-stubs/company-store.js";
+import { setStubSignedOut } from "./test-stubs/firebase-client.js";
+import { setStubLoginEvents } from "./test-stubs/login-events.js";
 import { loadLang } from "./i18n/index.js";
 window.__setRole = setStubRole;
+window.__setWeeklyHours = setStubWeeklyHours;
+window.__setSignedOut = setStubSignedOut;
+window.__setLoginEvents = setStubLoginEvents;
 window.__mount = async () => { await Promise.all([loadLang("en"), loadLang("de")]); createRoot(document.getElementById("root")).render(<SiteManager />); };
 `,
 );
@@ -42,12 +47,20 @@ await build({
   plugins: [
     {
       // esbuild's `alias` option rejects relative specifiers, so redirect the
-      // two modules that talk to Firebase at resolve time instead.
+      // modules that talk to Firebase at resolve time instead. login-events.js
+      // (docs/specs/2026-09-09_login-audit.md) is lazy in production, but this
+      // bundle has no `--splitting`, so a dynamic import() still gets its real
+      // code inlined and evaluated — it needs the same stub treatment as
+      // firebase-client.js/company-store.js, which it itself imports.
       name: "stub-firebase",
       setup(b) {
-        b.onResolve({ filter: /(firebase-client|company-store)\.js$/ }, (args) => {
+        b.onResolve({ filter: /(firebase-client|company-store|login-events)\.js$/ }, (args) => {
           if (args.importer.includes("test-stubs")) return null;
-          const name = args.path.includes("firebase-client") ? "firebase-client.js" : "company-store.js";
+          const name = args.path.includes("firebase-client")
+            ? "firebase-client.js"
+            : args.path.includes("company-store")
+              ? "company-store.js"
+              : "login-events.js";
           return { path: new URL(`./test-stubs/${name}`, import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1") };
         });
       },
@@ -68,7 +81,7 @@ function check(name, ok, detail) {
   ok ? pass++ : fail++;
 }
 
-async function renderAs(role) {
+async function renderAs(role, weeklyHours = null, signedOut = false, install = null, loginEvents = null) {
   const dom = new JSDOM(`<!doctype html><html><body><div id="root"></div></body></html>`, {
     url: "https://example.test/",
     pretendToBeVisual: true,
@@ -79,15 +92,25 @@ async function renderAs(role) {
   const errors = [];
   window.addEventListener("error", (e) => errors.push(String(e.error || e.message)));
   window.console.error = (...a) => errors.push(a.map(String).join(" "));
-  window.matchMedia =
-    window.matchMedia ||
-    (() => ({
-      matches: false,
-      addListener() {},
-      removeListener() {},
-      addEventListener() {},
-      removeEventListener() {},
-    }));
+  // docs/specs/2026-09-09_pwa-install.md: "(display-mode: standalone)" is
+  // the only query the app itself reads; everything else stays not-matched
+  // the way jsdom's own default would leave it.
+  window.matchMedia = (query) => ({
+    matches: query.includes("display-mode: standalone") ? !!(install && install.standalone) : false,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+  });
+  if (install && install.ua) {
+    Object.defineProperty(window.navigator, "userAgent", { value: install.ua, configurable: true });
+  }
+  if (install && install.dismissed) {
+    window.localStorage.setItem("site-log-install-hint", "1");
+  }
+  if (install && install.androidPrompt) {
+    window.__siteLogInstallPrompt = { prompt: () => {} };
+  }
   // Weather reads `current`; the AI proxy (scans, translations) reads `text`.
   window.fetch = async () => ({
     ok: true,
@@ -103,11 +126,55 @@ async function renderAs(role) {
 
   dom.window.eval(code);
   dom.window.__setRole(role);
+  dom.window.__setWeeklyHours(weeklyHours);
+  dom.window.__setSignedOut(signedOut);
+  if (loginEvents !== null) {
+    // The app's own mount effect records this session's sign-in too (the
+    // real feature under test elsewhere) -- pre-claiming the slot here
+    // keeps a test that hands renderAs() an explicit row set from getting
+    // an extra synthetic row spliced in by that same mount effect.
+    window.sessionStorage.setItem("site-log-login-recorded-u1", "1");
+    dom.window.__setLoginEvents(loginEvents);
+  }
   dom.window.__mount();
 
   // let effects and the stubbed async loads settle
   await new Promise((r) => setTimeout(r, 400));
   return { window, errors, text: () => window.document.body.textContent || "" };
+}
+
+// --- signed out (the sign-in screen itself) -------------------------------
+// docs/specs/2026-09-09_public-demo.md: the Demo control's only render
+// coverage, since the app has no other route to the sign-in screen than
+// staying signed out -- role is irrelevant here, nobody is signed in yet.
+{
+  const { window, errors, text } = await renderAs("owner", null, true);
+  check("signed out: the sign-in screen renders", text().length > 50, `only ${text().length} chars`);
+  check("signed out: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
+  const demo = window.document.querySelector("[data-demo-button]");
+  check("signed out: the Demo control is offered", !!demo, "no [data-demo-button]");
+  check(
+    "signed out: the Demo control has an accessible name",
+    !!demo && !!(demo.textContent || "").trim(),
+    demo ? demo.outerHTML.slice(0, 120) : "",
+  );
+  check(
+    "signed out: the Demo control opens ?demo=1",
+    !!demo && demo.getAttribute("href") === "?demo=1",
+    demo ? demo.getAttribute("href") : "",
+  );
+  check(
+    "signed out: the Demo control carries the app's 44x44 touch-target class",
+    !!demo && demo.classList.contains("tap"),
+    demo ? demo.className : "",
+  );
+  const picker = window.document.querySelector("[data-auth-lang]");
+  check(
+    "signed out: the Demo control sits with the same-screen language picker",
+    !!picker && !!demo,
+    `picker=${!!picker} demo=${!!demo}`,
+  );
+  if (errors.length) problems.push(...errors);
 }
 
 // --- owner ---------------------------------------------------------------
@@ -116,6 +183,11 @@ async function renderAs(role) {
   check("owner: app renders something", text().length > 50, `only ${text().length} chars — blank screen`);
   check("owner: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("owner: shows a project from the store", text().includes("Trockenbau"), text().slice(0, 120));
+  check(
+    "owner: the Demo control is gone once signed in",
+    !window.document.querySelector("[data-demo-button]"),
+    "a signed-in owner can still see the Demo control",
+  );
 
   // Heute opens with the day: a local date with its weekday, and the first
   // action as a button (it was a paragraph telling people where to look).
@@ -235,6 +307,17 @@ async function renderAs(role) {
       "owner: breaks never read as a negative zero",
       !/−0\.0/.test(tagesrapport?.textContent || ""),
       "−0.0 in the Tagesrapport",
+    );
+    const wholeCrewToggle = window.document.querySelector("[data-report-whole-crew]");
+    check(
+      "owner: the whole-crew toggle is offered and off by default",
+      !!wholeCrewToggle && wholeCrewToggle.checked === false,
+      wholeCrewToggle ? `checked=${wholeCrewToggle.checked}` : "no [data-report-whole-crew]",
+    );
+    check(
+      "owner: the whole-crew toggle has an accessible name",
+      !!wholeCrewToggle?.closest("label")?.textContent?.trim(),
+      wholeCrewToggle?.closest("label")?.textContent || "not wrapped in a label",
     );
     const reportRow = [...window.document.querySelectorAll("button")].find((x) =>
       /^(Täglich|Daily) · /.test((x.textContent || "").trim()),
@@ -1088,6 +1171,29 @@ async function renderAs(role) {
       bexio ? bexio.textContent.slice(0, 80) : "no bexio card",
     );
 
+    // Login audit (docs/specs/2026-09-09_login-audit.md): owner-only,
+    // newest first, no filter or pagination.
+    await new Promise((r) => setTimeout(r, 300));
+    const logins = window.document.querySelector("[data-logins-card]");
+    check("owner: the cockpit shows the logins card", !!logins, "no [data-logins-card]");
+    check(
+      "owner: the logins card lists every stub row",
+      (logins?.textContent || "").includes("Chef") &&
+        (logins?.textContent || "").includes("Mitarbeiter") &&
+        (logins?.textContent || "").includes("Polier"),
+      logins ? logins.textContent.slice(0, 200) : "",
+    );
+    {
+      const rows = [...(logins?.querySelectorAll(".truncate") || [])].map((el) => el.textContent);
+      const chefIdx = rows.findIndex((r) => r === "Chef");
+      const polierIdx = rows.findIndex((r) => r === "Polier");
+      check(
+        "owner: the logins card orders newest first",
+        chefIdx !== -1 && polierIdx !== -1 && chefIdx < polierIdx,
+        `chef@${chefIdx} polier@${polierIdx}`,
+      );
+    }
+
     // Accessibility: every rendered button has a name, every input a label.
     const nameless = [...window.document.querySelectorAll("button")].filter(
       (b) => !(b.textContent || "").trim() && !b.getAttribute("aria-label") && !b.getAttribute("title"),
@@ -1471,12 +1577,34 @@ async function renderAs(role) {
   check("supervisor: no invoice numbers", !t.includes("R-2026-001"), "invoice number visible");
   check("supervisor: no labour rate", !t.includes("85.00") && !t.includes("CHF 85"), "labour rate visible");
   check("supervisor: no margin figures", !t.includes("Marge") && !t.includes("Margin"), "margin visible");
+  // Login audit (docs/specs/2026-09-09_login-audit.md): a supervisor can
+  // manage, so the Cockpit tab itself is reachable, but the logins card is
+  // owner-only regardless.
+  check(
+    "supervisor: the logins card is not shown even on the Cockpit",
+    !window.document.querySelector("[data-logins-card]"),
+    "unexpected [data-logins-card] for supervisor",
+  );
+  // A supervisor may manage, so the daily report's whole-crew toggle is theirs too.
+  window.document
+    .querySelector('[data-tab-bar] [data-tab="reports"]')
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 300));
+  window.document
+    .querySelector('[data-rapport-view="daily"]')
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 300));
+  check(
+    "supervisor: the whole-crew toggle is offered",
+    !!window.document.querySelector("[data-report-whole-crew]"),
+    "no [data-report-whole-crew] for a supervisor",
+  );
   if (errors.length) problems.push(...errors);
 }
 
 // --- crew ----------------------------------------------------------------
 {
-  const { window, errors, text } = await renderAs("crew");
+  const { window, errors, text } = await renderAs("crew", "42"); // the firm's weekly target, readable by every role now
   check("crew: app renders something", text().length > 50, `only ${text().length} chars — blank screen`);
   check("crew: no React or runtime errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   check("crew: money is not shown", !text().includes("R-2026-001"), "an invoice number leaked into the crew view");
@@ -1497,6 +1625,22 @@ async function renderAs(role) {
         /Noch keine Berichte|No reports/.test(empty.textContent || "") &&
         (empty.textContent || "").length > 40,
       empty ? empty.textContent.slice(0, 80) : "no [data-empty=reports]",
+    );
+    check(
+      "crew: the whole-crew toggle is not offered",
+      !window.document.querySelector("[data-report-whole-crew]"),
+      "a crew member can see the whole-crew toggle",
+    );
+    // Defect 5: the weekly target used to live only in the owner-only
+    // finance document; a crew member's own Woche view read it as unset.
+    window.document
+      .querySelector('[data-rapport-view="week"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    check(
+      "crew: the week table shows the firm's weekly target, not the owner only",
+      !text().includes("Wochenstunden in den Rechnungsangaben erfassen"),
+      text().slice(0, 200),
     );
     window.document
       .querySelector('[data-tab-bar] [data-tab="projects"]')
@@ -1631,6 +1775,115 @@ async function renderAs(role) {
       "no [data-empty=trips]",
     );
   }
+  // Login audit (docs/specs/2026-09-09_login-audit.md): crew has no Cockpit
+  // tab at all, so the owner-only logins card is never even reachable.
+  check(
+    "crew: the logins card is never shown",
+    !window.document.querySelector("[data-logins-card]"),
+    "unexpected [data-logins-card] for crew",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+// --- add-to-home-screen hint (docs/specs/2026-09-09_pwa-install.md) -------
+// Heute is the default tab every renderAs() lands on, so no navigation is
+// needed to reach the banner's slot.
+{
+  const IOS_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15";
+  const ANDROID_UA = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126.0";
+
+  {
+    const { window, errors } = await renderAs("crew", null, false, { ua: IOS_UA });
+    const hint = window.document.querySelector("[data-install-hint]");
+    check(
+      "install hint: appears on Heute for an iOS visitor, not standalone, not dismissed",
+      !!hint,
+      "no [data-install-hint]",
+    );
+    check(
+      "install hint: iOS gets the Share-sheet instruction, no install button",
+      !hint?.querySelector("[data-install-button]"),
+      "unexpected [data-install-button] on iOS",
+    );
+    if (errors.length) problems.push(...errors);
+  }
+  {
+    const { window, errors } = await renderAs("crew", null, false, { ua: ANDROID_UA, androidPrompt: true });
+    const hint = window.document.querySelector("[data-install-hint]");
+    check(
+      "install hint: appears on Heute for an Android visitor with a captured prompt",
+      !!hint,
+      "no [data-install-hint]",
+    );
+    const btn = hint?.querySelector("[data-install-button]");
+    check(
+      "install hint: Android gets an Installieren button with an accessible name",
+      !!btn && !!(btn.textContent || "").trim(),
+      "no usable [data-install-button]",
+    );
+    if (errors.length) problems.push(...errors);
+  }
+  {
+    const { window, errors } = await renderAs("crew", null, false, { ua: ANDROID_UA, standalone: true });
+    check(
+      "install hint: does not appear once already standalone",
+      !window.document.querySelector("[data-install-hint]"),
+      "hint shown while standalone",
+    );
+    if (errors.length) problems.push(...errors);
+  }
+  {
+    const { window, errors } = await renderAs("crew", null, false, { ua: IOS_UA, dismissed: true });
+    check(
+      "install hint: does not appear once already dismissed on this device",
+      !window.document.querySelector("[data-install-hint]"),
+      "hint shown while dismissed",
+    );
+    if (errors.length) problems.push(...errors);
+  }
+  {
+    const { window, errors } = await renderAs("crew", null, false, { ua: IOS_UA });
+    const dismissBtn = window.document.querySelector("[data-install-hint-dismiss]");
+    check(
+      "install hint: the dismiss control has an accessible name",
+      !!dismissBtn &&
+        !!(
+          dismissBtn.getAttribute("aria-label") ||
+          dismissBtn.getAttribute("title") ||
+          (dismissBtn.textContent || "").trim()
+        ),
+      "no accessible name on [data-install-hint-dismiss]",
+    );
+    dismissBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 200));
+    check(
+      "install hint: dismissing removes the banner immediately",
+      !window.document.querySelector("[data-install-hint]"),
+      "hint still present after dismiss",
+    );
+    check(
+      "install hint: dismissing persists to this device's storage",
+      window.localStorage.getItem("site-log-install-hint") === "1",
+      `storage says ${window.localStorage.getItem("site-log-install-hint")}`,
+    );
+    if (errors.length) problems.push(...errors);
+  }
+}
+
+// --- login audit: the empty state (docs/specs/2026-09-09_login-audit.md) --
+{
+  const { window, errors } = await renderAs("owner", null, false, null, []);
+  const cockpit = [...window.document.querySelectorAll("button")].find(
+    (x) => (x.textContent || "").trim() === "Übersicht",
+  );
+  cockpit?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 400));
+  const logins = window.document.querySelector("[data-logins-card]");
+  check(
+    "login audit: no rows renders the empty state, not a blank card",
+    !!logins?.querySelector('[data-empty="logins"]'),
+    logins ? logins.textContent.slice(0, 120) : "no [data-logins-card]",
+  );
   if (errors.length) problems.push(...errors);
 }
 

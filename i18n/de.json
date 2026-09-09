@@ -953,5 +953,13 @@
   "bexioStCreated": "angelegt",
   "bexioStExists": "bereits vorhanden",
   "bexioStError": "Fehler",
-  "bexioStDryRun": "Probelauf"
+  "bexioStDryRun": "Probelauf",
+  "reportWholeCrewLabel": "Ganzes Team senden",
+  "otherEntriesLabel": "Weitere Einträge",
+  "demoButtonLabel": "Demo ausprobieren",
+  "installHintIos": "Zum Installieren: Teilen-Symbol tippen, dann «Zum Home-Bildschirm».",
+  "installHintAndroid": "Site Log lässt sich installieren und wie eine App öffnen.",
+  "installButtonLabel": "Installieren",
+  "ccLogins": "Logins",
+  "ccLoginsEmpty": "Noch niemand hat sich angemeldet."
 }

@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioStCreated": "vytvoren\xE9",
   "bexioStExists": "u\u017E existuje",
   "bexioStError": "chyba",
-  "bexioStDryRun": "sk\xFA\u0161ka"
+  "bexioStDryRun": "sk\xFA\u0161ka",
+  "reportWholeCrewLabel": "Odosla\u0165 cel\xFD t\xEDm",
+  "otherEntriesLabel": "\u010Eal\u0161ie z\xE1znamy",
+  "demoButtonLabel": "Vysk\xFA\u0161a\u0165 demo",
+  "installHintIos": "Ak chce\u0161 nain\u0161talova\u0165: klepni na Zdie\u013Ea\u0165, potom \u201CPrida\u0165 na plochu\u201D.",
+  "installHintAndroid": "Site Log sa d\xE1 nain\u0161talova\u0165 a otv\xE1ra\u0165 ako appka.",
+  "installButtonLabel": "In\u0161talova\u0165",
+  "ccLogins": "Prihl\xE1senia",
+  "ccLoginsEmpty": "Zatia\u013E sa nikto neprihl\xE1sil."
 }
 `;export{o as default};

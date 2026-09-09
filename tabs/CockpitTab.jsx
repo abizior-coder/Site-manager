@@ -6,8 +6,9 @@ import { backupDue } from "../backup.js";
 import { fmtDate, fmtHM, monthKey, todayKey } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import { useEffect, useState } from "react";
-import { Download } from "lucide-react";
+import { Download, LogIn } from "lucide-react";
 import { downloadText } from "../ui/download.js";
+import { EmptyState } from "../ui/empty-state.jsx";
 import {
   CONTACT_HEADERS,
   JOURNAL_HEADERS,
@@ -526,6 +527,56 @@ function BackupCard({ t, lang, backupMeta, onBackup }) {
   );
 }
 
+// Who signed in, when, from which role (docs/specs/2026-09-09_login-audit.md).
+// Owner-only per firestore.rules -- the card itself is only ever mounted for
+// the owner (see CockpitTab below), the same guard every other owner-only
+// card here already uses; the rules are the real access control regardless.
+// A plain list, newest first, no filter or pagination -- "no extra product
+// chrome" per the spec.
+function LoginsCard({ t, loadLoginEvents }) {
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    loadLoginEvents()
+      .then((r) => alive && setRows(r))
+      .catch(() => alive && setRows([]));
+    return () => {
+      alive = false;
+    };
+  }, [loadLoginEvents]);
+  const roleLabel = (role) =>
+    (role === "owner" && t.roleOwner) || (role === "supervisor" && t.roleSupervisor) || t.roleCrew;
+  return (
+    <div
+      data-logins-card
+      style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+      className="rounded-xl p-3 lg:col-span-3"
+    >
+      <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
+        {t.ccLogins}
+      </div>
+      {rows === null && (
+        <div style={{ color: COLORS.muted }} className="text-xs">
+          {t.ccUsageLoading}
+        </div>
+      )}
+      {rows && rows.length === 0 && <EmptyState name="logins" icon={LogIn} title={t.ccLoginsEmpty} compact />}
+      {rows && rows.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {rows.map((r) => (
+            <div key={r.id} className="flex items-center justify-between gap-2 text-sm">
+              <span className="truncate">{r.name || r.uid}</span>
+              <span style={{ color: COLORS.muted }} className="text-xs shrink-0">
+                {roleLabel(r.role)} · {new Date(r.at).toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CockpitTab({
   lang,
   approveEntry,
@@ -537,6 +588,7 @@ export function CockpitTab({
   entries,
   hoursBalance,
   leaveRequests,
+  loadLoginEvents,
   money,
   onBackup,
   projects,
@@ -594,6 +646,7 @@ export function CockpitTab({
         </div>
       ) : null}
 
+      {isOwner() && <LoginsCard t={t} loadLoginEvents={loadLoginEvents} />}
       {isOwner() && <UsageCard t={t} />}
       {isOwner() && <ErrorsCard t={t} />}
       {isOwner() && <BackupCard t={t} lang={lang} backupMeta={backupMeta} onBackup={onBackup} />}

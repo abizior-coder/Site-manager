@@ -953,5 +953,13 @@
   "bexioStCreated": "created",
   "bexioStExists": "already there",
   "bexioStError": "error",
-  "bexioStDryRun": "dry run"
+  "bexioStDryRun": "dry run",
+  "reportWholeCrewLabel": "Send the whole team",
+  "otherEntriesLabel": "Other entries",
+  "demoButtonLabel": "Try the demo",
+  "installHintIos": "To install: tap Share, then “Add to Home Screen”.",
+  "installHintAndroid": "Site Log can be installed and opened like an app.",
+  "installButtonLabel": "Install",
+  "ccLogins": "Logins",
+  "ccLoginsEmpty": "Nobody has signed in yet."
 }

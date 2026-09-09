@@ -151,7 +151,11 @@ export function canManage() {
 }
 
 export async function loadMembership() {
-  return { companyId: "c1", role: roleValue, member: { role: roleValue } };
+  return {
+    companyId: "c1",
+    role: roleValue,
+    member: { role: roleValue, name: roleValue === "owner" ? "Chef" : "Mitarbeiter" },
+  };
 }
 export async function createCompany() {
   return "c1";
@@ -231,6 +235,26 @@ export async function loadFinance() {
   };
 }
 export async function saveFinance() {}
+// Falsy by default so the existing "billing not yet set up" fixtures (the
+// owner's first-steps card, its billing-modal flow) are unaffected; a test
+// that needs the weekly target populated calls setStubWeeklyHours first.
+let stubWeeklyHours = null;
+export function setStubWeeklyHours(v) {
+  stubWeeklyHours = v;
+}
+// The member-readable subset for real: no labourRate, no iban -- matches
+// what the actual private/reportProfile document ever holds.
+export async function loadReportProfile() {
+  return {
+    weeklyHours: stubWeeklyHours,
+    companyName: "Dach AG",
+    street: "Bahnhofstrasse",
+    buildingNumber: "1",
+    postalCode: "8000",
+    town: "Zürich",
+  };
+}
+export async function saveReportProfile() {}
 export async function migrateFromPersonal() {
   return {};
 }

@@ -953,5 +953,13 @@
   "bexioStCreated": "utworzono",
   "bexioStExists": "już istnieje",
   "bexioStError": "błąd",
-  "bexioStDryRun": "próba"
+  "bexioStDryRun": "próba",
+  "reportWholeCrewLabel": "Wyślij cały zespół",
+  "otherEntriesLabel": "Pozostałe wpisy",
+  "demoButtonLabel": "Wypróbuj demo",
+  "installHintIos": "Aby zainstalować: stuknij Udostępnij, potem “Dodaj do ekranu głównego”.",
+  "installHintAndroid": "Site Log można zainstalować i otwierać jak aplikację.",
+  "installButtonLabel": "Zainstaluj",
+  "ccLogins": "Logowania",
+  "ccLoginsEmpty": "Nikt jeszcze się nie zalogował."
 }

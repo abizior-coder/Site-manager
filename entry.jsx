@@ -43,6 +43,19 @@ installCrashCapture({
 // app wired to an old, unauthenticated storage layer.
 window.storage = storage;
 
+// Chrome/Android's own install prompt: caught once, stored, and handed to
+// the app as an event -- the same pattern site-log:update already uses for
+// "something happened before the app was listening". preventDefault() stops
+// the browser's own mini-infobar so the app's own hint (docs/specs/
+// 2026-09-09_pwa-install.md) is what a visitor actually sees. Never fires on
+// iOS -- Safari has no such event, which is why the hint's iOS side is
+// instructions, not a button.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  window.__siteLogInstallPrompt = e;
+  window.dispatchEvent(new Event("site-log:install-available"));
+});
+
 // German is the UI's first language and English the fallback for any key a
 // translation lacks; both are in hand before the first paint. Other
 // languages load when chosen.

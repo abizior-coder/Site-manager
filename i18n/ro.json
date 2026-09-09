@@ -953,5 +953,13 @@
   "bexioStCreated": "creat",
   "bexioStExists": "există deja",
   "bexioStError": "eroare",
-  "bexioStDryRun": "probă"
+  "bexioStDryRun": "probă",
+  "reportWholeCrewLabel": "Trimite toată echipa",
+  "otherEntriesLabel": "Alte înregistrări",
+  "demoButtonLabel": "Încearcă demo",
+  "installHintIos": "Pentru instalare: atinge Share, apoi “Adaugă pe ecranul principal”.",
+  "installHintAndroid": "Site Log poate fi instalat și deschis ca o aplicație.",
+  "installButtonLabel": "Instalează",
+  "ccLogins": "Autentificări",
+  "ccLoginsEmpty": "Încă nimeni nu s-a autentificat."
 }

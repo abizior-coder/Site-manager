@@ -953,5 +953,13 @@
   "bexioStCreated": "aagleit",
   "bexioStExists": "scho da",
   "bexioStError": "Fähler",
-  "bexioStDryRun": "Probelauf"
+  "bexioStDryRun": "Probelauf",
+  "reportWholeCrewLabel": "Ganzes Team schicke",
+  "otherEntriesLabel": "Wiiteri Iitreig",
+  "demoButtonLabel": "Demo probiere",
+  "installHintIos": "Zum Installiere: Teile-Symbol tippe, denn «Zum Home-Bildschirm».",
+  "installHintAndroid": "Site Log cha me installiere und wie ne App uufmache.",
+  "installButtonLabel": "Installiere",
+  "ccLogins": "Logins",
+  "ccLoginsEmpty": "Na niemert het sich aagmeldet."
 }

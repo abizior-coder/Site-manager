@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "bexioStCreated": "cr\xE9\xE9",
   "bexioStExists": "d\xE9j\xE0 pr\xE9sent",
   "bexioStError": "erreur",
-  "bexioStDryRun": "essai"
+  "bexioStDryRun": "essai",
+  "reportWholeCrewLabel": "Envoyer toute l'\xE9quipe",
+  "otherEntriesLabel": "Autres entr\xE9es",
+  "demoButtonLabel": "Essayer la d\xE9mo",
+  "installHintIos": "Pour installer : appuyez sur Partager, puis \xAB Sur l'\xE9cran d'accueil \xBB.",
+  "installHintAndroid": "Site Log peut \xEAtre install\xE9 et ouvert comme une application.",
+  "installButtonLabel": "Installer",
+  "ccLogins": "Connexions",
+  "ccLoginsEmpty": "Personne ne s'est encore connect\xE9."
 }
 `;export{t as default};

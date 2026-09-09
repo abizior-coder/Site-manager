@@ -953,5 +953,13 @@
   "bexioStCreated": "créé",
   "bexioStExists": "déjà présent",
   "bexioStError": "erreur",
-  "bexioStDryRun": "essai"
+  "bexioStDryRun": "essai",
+  "reportWholeCrewLabel": "Envoyer toute l'équipe",
+  "otherEntriesLabel": "Autres entrées",
+  "demoButtonLabel": "Essayer la démo",
+  "installHintIos": "Pour installer : appuyez sur Partager, puis « Sur l'écran d'accueil ».",
+  "installHintAndroid": "Site Log peut être installé et ouvert comme une application.",
+  "installButtonLabel": "Installer",
+  "ccLogins": "Connexions",
+  "ccLoginsEmpty": "Personne ne s'est encore connecté."
 }

@@ -388,6 +388,23 @@ export async function saveFinance(data) {
   await fs().setDoc(fs().doc(db(), "companies", companyId, "private", "finance"), data);
 }
 
+// --- report profile: readable by every member, never the money ----------
+// Name, address and the weekly target every report is issued under. Kept
+// as a document of its own (not a field-level split of finance, which
+// Firestore's rules cannot express) so the rules can let any member read
+// it while private/finance, with the labour rate and the IBAN, stays
+// owner-only.
+export async function loadReportProfile() {
+  await initFirebase();
+  const snap = await fs().getDoc(fs().doc(db(), "companies", companyId, "private", "reportProfile"));
+  return snap.exists() ? snap.data() : null;
+}
+
+export async function saveReportProfile(data) {
+  await initFirebase();
+  await fs().setDoc(fs().doc(db(), "companies", companyId, "private", "reportProfile"), data);
+}
+
 // --- migration from the single-account blob ------------------------------
 
 /**

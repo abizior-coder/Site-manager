@@ -953,5 +953,13 @@
   "bexioStCreated": "létrehozva",
   "bexioStExists": "már létezik",
   "bexioStError": "hiba",
-  "bexioStDryRun": "próba"
+  "bexioStDryRun": "próba",
+  "reportWholeCrewLabel": "Az egész csapat küldése",
+  "otherEntriesLabel": "Egyéb bejegyzések",
+  "demoButtonLabel": "Demó kipróbálása",
+  "installHintIos": "Telepítéshez: koppints a Megosztásra, majd a “Kezdőképernyőhöz adás” gombra.",
+  "installHintAndroid": "A Site Log telepíthető és alkalmazásként nyitható meg.",
+  "installButtonLabel": "Telepítés",
+  "ccLogins": "Bejelentkezések",
+  "ccLoginsEmpty": "Még senki sem jelentkezett be."
 }

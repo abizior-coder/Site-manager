@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "bexioStCreated": "aagleit",
   "bexioStExists": "scho da",
   "bexioStError": "F\xE4hler",
-  "bexioStDryRun": "Probelauf"
+  "bexioStDryRun": "Probelauf",
+  "reportWholeCrewLabel": "Ganzes Team schicke",
+  "otherEntriesLabel": "Wiiteri Iitreig",
+  "demoButtonLabel": "Demo probiere",
+  "installHintIos": "Zum Installiere: Teile-Symbol tippe, denn \xABZum Home-Bildschirm\xBB.",
+  "installHintAndroid": "Site Log cha me installiere und wie ne App uufmache.",
+  "installButtonLabel": "Installiere",
+  "ccLogins": "Logins",
+  "ccLoginsEmpty": "Na niemert het sich aagmeldet."
 }
 `;export{r as default};

@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "bexioStCreated": "criado",
   "bexioStExists": "j\xE1 existe",
   "bexioStError": "erro",
-  "bexioStDryRun": "ensaio"
+  "bexioStDryRun": "ensaio",
+  "reportWholeCrewLabel": "Enviar toda a equipa",
+  "otherEntriesLabel": "Outros registos",
+  "demoButtonLabel": "Experimentar a demo",
+  "installHintIos": "Para instalar: toque em Partilhar e depois em \u201CAdicionar ao ecr\xE3 principal\u201D.",
+  "installHintAndroid": "O Site Log pode ser instalado e aberto como uma app.",
+  "installButtonLabel": "Instalar",
+  "ccLogins": "Sess\xF5es iniciadas",
+  "ccLoginsEmpty": "Ainda ningu\xE9m iniciou sess\xE3o."
 }
 `;export{o as default};

@@ -953,5 +953,13 @@
   "bexioStCreated": "създаден",
   "bexioStExists": "вече съществува",
   "bexioStError": "грешка",
-  "bexioStDryRun": "проба"
+  "bexioStDryRun": "проба",
+  "reportWholeCrewLabel": "Изпрати целия екип",
+  "otherEntriesLabel": "Други записи",
+  "demoButtonLabel": "Изпробвай демото",
+  "installHintIos": "За инсталиране: докоснете Share, после “Добави към начален екран”.",
+  "installHintAndroid": "Site Log може да се инсталира и отваря като приложение.",
+  "installButtonLabel": "Инсталирай",
+  "ccLogins": "Влизания",
+  "ccLoginsEmpty": "Все още никой не се е вписал."
 }

@@ -10,6 +10,7 @@ import { EmptyState } from "../ui/empty-state.jsx";
 
 export function TodayTab({
   topCard,
+  installHint,
   t,
   lang,
   projects,
@@ -149,6 +150,7 @@ export function TodayTab({
         )}
       </div>
       {topCard}
+      {installHint}
       <div style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }} className="rounded-xl p-4">
         <div className="flex items-center justify-between mb-1">
           <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">

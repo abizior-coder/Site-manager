@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "bexioStCreated": "l\xE9trehozva",
   "bexioStExists": "m\xE1r l\xE9tezik",
   "bexioStError": "hiba",
-  "bexioStDryRun": "pr\xF3ba"
+  "bexioStDryRun": "pr\xF3ba",
+  "reportWholeCrewLabel": "Az eg\xE9sz csapat k\xFCld\xE9se",
+  "otherEntriesLabel": "Egy\xE9b bejegyz\xE9sek",
+  "demoButtonLabel": "Dem\xF3 kipr\xF3b\xE1l\xE1sa",
+  "installHintIos": "Telep\xEDt\xE9shez: koppints a Megoszt\xE1sra, majd a \u201CKezd\u0151k\xE9perny\u0151h\xF6z ad\xE1s\u201D gombra.",
+  "installHintAndroid": "A Site Log telep\xEDthet\u0151 \xE9s alkalmaz\xE1sk\xE9nt nyithat\xF3 meg.",
+  "installButtonLabel": "Telep\xEDt\xE9s",
+  "ccLogins": "Bejelentkez\xE9sek",
+  "ccLoginsEmpty": "M\xE9g senki sem jelentkezett be."
 }
 `;export{a as default};

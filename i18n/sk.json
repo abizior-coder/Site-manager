@@ -953,5 +953,13 @@
   "bexioStCreated": "vytvorené",
   "bexioStExists": "už existuje",
   "bexioStError": "chyba",
-  "bexioStDryRun": "skúška"
+  "bexioStDryRun": "skúška",
+  "reportWholeCrewLabel": "Odoslať celý tím",
+  "otherEntriesLabel": "Ďalšie záznamy",
+  "demoButtonLabel": "Vyskúšať demo",
+  "installHintIos": "Ak chceš nainštalovať: klepni na Zdieľať, potom “Pridať na plochu”.",
+  "installHintAndroid": "Site Log sa dá nainštalovať a otvárať ako appka.",
+  "installButtonLabel": "Inštalovať",
+  "ccLogins": "Prihlásenia",
+  "ccLoginsEmpty": "Zatiaľ sa nikto neprihlásil."
 }

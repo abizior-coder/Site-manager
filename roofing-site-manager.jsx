@@ -87,6 +87,8 @@ import {
   weekOf,
   weekRows,
   weekCsv,
+  dayReportScope,
+  regieIds,
 } from "./reports.js";
 import { validateBillingProfile, normaliseIban, isSwissIban } from "./swiss-qr.js";
 import {
@@ -105,6 +107,8 @@ import {
   getRole,
   loadFinance,
   saveFinance,
+  loadReportProfile,
+  saveReportProfile,
   migrateFromPersonal,
   personalDataSummary,
   resetCompanyState,
@@ -118,6 +122,8 @@ import { breakMeta, breakHours, netHours } from "./breaks.js";
 import { ROOF_TILES, tileMeta, tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-tiles.js";
 import { COLORS } from "./ui/theme.js";
 import { AuthLangPicker } from "./ui/lang-picker.jsx";
+import { InstallHint } from "./ui/install-hint.jsx";
+import { isIOS, isStandalone, installHintDismissed, dismissInstallHint } from "./install.js";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
 import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
@@ -669,6 +675,21 @@ export default function SiteManager() {
     }
   });
 
+  // Add to home screen (docs/specs/2026-09-09_pwa-install.md): dismissed
+  // per device, like the first-steps card above; the captured Android
+  // prompt arrives as an event the same way a new build's own restart bar
+  // does (site-log:update, just above the crash-report effect).
+  const [installDismissed, setInstallDismissed] = useState(() => installHintDismissed());
+  const [androidInstallPrompt, setAndroidInstallPrompt] = useState(
+    () => (typeof window !== "undefined" && window.__siteLogInstallPrompt) || null,
+  );
+  useEffect(() => {
+    const onAvailable = () => setAndroidInstallPrompt(window.__siteLogInstallPrompt || null);
+    window.addEventListener("site-log:install-available", onAvailable);
+    if (window.__siteLogInstallPrompt) onAvailable();
+    return () => window.removeEventListener("site-log:install-available", onAvailable);
+  }, []);
+
   // An invite link lands here: the code comes from the address, the sign-in
   // screen switches to "create account" with a notice, and the onboarding
   // screen is already in join mode. The parameter leaves the address bar.
@@ -886,6 +907,10 @@ export default function SiteManager() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoPreviewId, setPhotoPreviewId] = useState(null);
   const [reportView, setReportView] = useState("daily");
+  // A daily report defaults to the sender's own entries; a manager may
+  // switch it to the whole crew. Reset per session, never persisted, so a
+  // manager cannot forget it is on.
+  const [reportWholeCrew, setReportWholeCrew] = useState(false);
   const [rapportWeekAnchor, setRapportWeekAnchor] = useState(() => todayKey());
   const [rapportPerson, setRapportPerson] = useState(null);
   const [, setTick] = useState(0);
@@ -1185,6 +1210,13 @@ export default function SiteManager() {
   useEffect(() => {
     if (!user || !membership) return;
     (async () => {
+      // Login audit (docs/specs/2026-09-09_login-audit.md): entirely behind
+      // one dynamic import() so none of it is in the eager, first-paint
+      // bundle; recordThisSession guards "once per session, not once per
+      // page load" itself.
+      import("./login-events.js")
+        .then((m) => m.recordThisSession(user.uid, membership.member?.name || "", membership.role))
+        .catch(() => {});
       try {
         const metaRes = await window.storage.get("site-meta");
         if (metaRes && metaRes.value) {
@@ -1273,6 +1305,12 @@ export default function SiteManager() {
             window.storage.set("site-material-catalog", JSON.stringify(merged)).catch(() => {});
           }
         }
+      } catch (e) {}
+      // The firm's name, address and weekly target: every role that issues
+      // a report needs these (the Woche split, printRapport's letterhead).
+      try {
+        const prof = await loadReportProfile();
+        if (prof) setBilling((b) => ({ ...b, ...prof }));
       } catch (e) {}
       // Billing, the labour rate and margins live in an owner-only document.
       // Crew genuinely cannot read it — the rules deny it, not just the UI.
@@ -1807,6 +1845,7 @@ export default function SiteManager() {
     return {
       rows,
       hours: live ? totals.hours : (report.hours ?? totals.hours),
+      regieHours: live ? totals.regieHours : (report.regieHours ?? totals.regieHours),
       transportHours: live ? totals.transportHours : (report.transportHours ?? totals.transportHours),
       materialsCount: live ? totals.materialsCount : (report.materialsCount ?? totals.materialsCount),
       toolsCount: live ? totals.toolsCount : (report.toolsCount ?? totals.toolsCount),
@@ -1824,7 +1863,7 @@ export default function SiteManager() {
     const periodLabel = report.period === "daily" ? t.daily : t.monthly;
     const f = reportFigures(report);
     const subject = `${periodLabel} ${t.sendToSupervisor}: ${report.periodLabel}`;
-    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${f.hours}${f.transportHours > 0 ? `\n${t.reportTransportHours}: ${f.transportHours}` : ""}\n${t.materialsLogged}: ${f.materialsCount}\n${t.toolsLogged}: ${f.toolsCount}\n${t.sitesLabel}: ${f.sites.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
+    const body = `${profile.name || ""}\n${t.hoursFieldLabel}: ${f.hours}${f.regieHours > 0 ? `\n${t.regieLabour}: ${f.regieHours}` : ""}${f.transportHours > 0 ? `\n${t.reportTransportHours}: ${f.transportHours}` : ""}\n${t.materialsLogged}: ${f.materialsCount}\n${t.toolsLogged}: ${f.toolsCount}\n${t.sitesLabel}: ${f.sites.join(", ")}${report.notes ? `\n${t.notesLabel}: ${report.notes}` : ""}`;
     return { subject, body };
   }
 
@@ -1855,7 +1894,12 @@ export default function SiteManager() {
   // exclusions, and adds one more line to its send history -- it never makes
   // a second report. userId is required by the rules; without it the create
   // was refused and nothing was stored.
-  function sendReportToSupervisor(view, summary, list, periodLabelOverride) {
+  // wholeCrew records whether this DAILY report carried every member's
+  // entries (a manager's choice, dayReportScope) rather than just the
+  // sender's own -- unsentMonthEntries reads it back to know whether this
+  // report already covered a colleague's entries too, not only the
+  // sender's. Meaningless for a monthly report, which stays unset.
+  function sendReportToSupervisor(view, summary, list, periodLabelOverride, wholeCrew = false) {
     tracker.track("report.sent");
     const periodLabel = periodLabelOverride || (view === "daily" ? todayKey() : monthKey());
     const id = reportId(user?.uid, view, periodLabel);
@@ -1868,12 +1912,15 @@ export default function SiteManager() {
       period: view,
       periodLabel,
       userId: user?.uid || null,
+      wholeCrew: view === "daily" ? !!wholeCrew : undefined,
       entryIds: scoped.map((e) => e.id),
       entryLabels: entryLabels(scoped),
+      regieIds: regieIds(scoped),
       excludedIds,
       // Kept as a summary of the moment it went out, for the record; the
       // modal and the mail read the live rows.
       hours: totals.hours,
+      regieHours: totals.regieHours,
       materialsCount: totals.materialsCount,
       toolsCount: totals.toolsCount,
       sitesVisited: totals.projIds.map(projectName).filter(Boolean),
@@ -1935,9 +1982,10 @@ export default function SiteManager() {
   }
 
   function generateDayReport(dateStr) {
-    const dayEntries = entries.filter((e) => e.date === dateStr);
+    const wholeCrew = canManage() && reportWholeCrew;
+    const dayEntries = dayReportScope(entries, dateStr, user?.uid, wholeCrew);
     const summary = dailySummary(dayEntries);
-    sendReportToSupervisor("daily", summary, dayEntries, dateStr);
+    sendReportToSupervisor("daily", summary, dayEntries, dateStr, wholeCrew);
   }
 
   function saveReportEdits() {
@@ -1948,143 +1996,9 @@ export default function SiteManager() {
     showToast(t.saveProfile);
   }
 
-  function renderReportDocument(subtitle, sections, remark) {
-    // Notes are free text typed on a roof; the print must not become HTML
-    // because someone wrote "<3" in a comment.
-    const esc = (v) =>
-      String(v == null ? "" : v).replace(
-        /[&<>"']/g,
-        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
-      );
-    const rowsHtml = (items) =>
-      items.map((i) => `<tr><td>${esc(i.description)}</td><td>${esc(i.qty)}</td><td>${esc(i.unit)}</td></tr>`).join("");
-
-    // What was said on site belongs on the record next to what was used.
-    const notesHtml = (notes) =>
-      notes && notes.length
-        ? `<div class="tablabel">${t.notesLabel}</div>
-           <ul class="notes">${notes.map((n) => `<li><span class="when">${esc(fmtDate(n.date, lang))}</span>${esc(n.description)}</li>`).join("")}</ul>`
-        : "";
-
-    const tableHtml = (label, items) =>
-      items.length
-        ? `<div class="tablabel">${label}</div>
-           <table><thead><tr><th>${t.entriesTitle}</th><th>${t.qtyPlaceholder}</th><th>${t.unitPlaceholder}</th></tr></thead>
-           <tbody>${rowsHtml(items)}</tbody></table>`
-        : "";
-
-    const sectionsHtml = sections
-      .map(
-        (s) => `
-      <div class="section">
-        <h2>${esc(s.title)}</h2>
-        ${s.client ? `<div class="meta">${esc(s.client)}</div>` : ""}
-        ${s.address ? `<div class="meta">${esc(s.address)}</div>` : ""}
-        <div class="totalhours">${t.totalHoursLabel}: ${s.hours.toFixed(1)} h</div>
-        ${tableHtml(t.materialsLogged, s.materials)}
-        ${tableHtml(t.machinesToolsLabel, s.machines)}
-        ${notesHtml(s.notes)}
-      </div>`,
-      )
-      .join("");
-
-    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${t.appLabel}</title>
-      <style>
-        body { font-family: -apple-system, system-ui, sans-serif; color: #111; padding: 32px; max-width: 800px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #DA291C; padding-bottom: 12px; margin-bottom: 20px; }
-        .header .sub { color: #666; font-size: 12px; margin-top: 2px; }
-        .header h1 { font-size: 20px; margin: 0; }
-        .header img { opacity: 0.9; max-width: 160px; max-height: 70px; object-fit: contain; }
-        .section { margin-bottom: 28px; page-break-inside: avoid; border: 1px solid #ddd; border-radius: 6px; padding: 16px; }
-        .section h2 { font-size: 16px; margin: 0 0 4px 0; color: #DA291C; }
-        .meta { color: #666; font-size: 12px; }
-        .totalhours { font-weight: 700; font-size: 14px; margin: 10px 0; background: #f5f5f5; padding: 8px 10px; border-radius: 4px; display: inline-block; }
-        .tablabel { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin: 12px 0 4px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; margin-bottom: 8px; }
-        th { text-align: left; background: #fafafa; border-bottom: 2px solid #333; padding: 6px 8px; }
-        td { padding: 6px 8px; border-bottom: 1px solid #eee; word-wrap: break-word; }
-        th:nth-child(1), td:nth-child(1) { width: 60%; }
-        th:nth-child(2), td:nth-child(2) { width: 20%; }
-        th:nth-child(3), td:nth-child(3) { width: 20%; }
-        .notes { list-style: none; padding: 0; margin: 0 0 8px; font-size: 12px; }
-        .notes li { padding: 6px 8px; border-bottom: 1px solid #eee; }
-        .notes .when { color: #888; margin-right: 10px; font-variant-numeric: tabular-nums; }
-        .remark { font-size: 12px; margin: 0 0 16px; padding: 10px 12px; background: #fff7e6; border-left: 3px solid #E0B341; white-space: pre-wrap; }
-        .footer { margin-top: 24px; font-size: 11px; color: #999; }
-        @media print { body { padding: 0; } .section { page-break-inside: avoid; } }
-      </style>
-      </head><body>
-        <div class="header">
-          <div>
-            <h1>${t.appLabel}</h1>
-            <div class="sub">${esc(subtitle)}</div>
-          </div>
-          <img src="${COMPANY_LOGO_DATA_URI}" alt="logo" />
-        </div>
-        ${remark ? `<div class="remark">${esc(remark)}</div>` : ""}
-        ${sectionsHtml || `<div class="meta">${t.noProjectsYet}</div>`}
-        <div class="footer">${t.generatedOnLabel}: ${new Date().toLocaleString()}</div>
-      </body></html>`;
-  }
-
-  // Projects created since customers became records carry a customerId and an
-  // empty client string, so reading project.client alone left the client blank
-  // on their reports.
-  function clientNameFor(project) {
-    if (!project) return "";
-    const c = project.customerId ? customers.find((x) => x.id === project.customerId) : null;
-    return (c && c.name) || project.client || "";
-  }
-
-  function buildReportHtml(report) {
-    const periodLabel = report.period === "daily" ? t.daily : t.monthly;
-    const bySite = {};
-    reportRows(report, allEntries).forEach((e) => {
-      if (e.deleted) return;
-      const key = e.projectName || (e.projectId ? projectName(e.projectId) : "") || t.sitesLabel;
-      (bySite[key] = bySite[key] || []).push(e);
-    });
-    const sections = Object.entries(bySite).map(([siteName, ents]) => {
-      const proj = projects.find((p) => p.name === siteName);
-      const hours = ents.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
-      const materials = ents.filter((e) => e.type === "material");
-      const machines = ents.filter((e) => e.type === "tool");
-      const notes = ents.filter((e) => e.type === "note");
-      return {
-        title: siteName,
-        client: clientNameFor(proj),
-        address: proj?.address || "",
-        hours,
-        materials,
-        machines,
-        notes,
-      };
-    });
-    const subtitle = `${periodLabel} · ${periodTitle(report)}${profile.name ? " · " + profile.name : ""}`;
-    // The author's own remark on the report goes on top, before the sites.
-    return renderReportDocument(subtitle, sections, report.notes);
-  }
-
-  function buildProjectsReportHtml(projectIds) {
-    const orderedProjects =
-      projectIds && projectIds.length
-        ? projectIds.map((id) => projects.find((p) => p.id === id)).filter(Boolean)
-        : projects;
-    const sections = orderedProjects
-      .map((p) => {
-        const pEntries = entries.filter((e) => e.projectId === p.id);
-        const hours = pEntries.filter((e) => e.type === "time").reduce((s, e) => s + parseFloat(e.qty || 0), 0);
-        const materials = pEntries.filter((e) => e.type === "material");
-        const machines = pEntries.filter((e) => e.type === "tool");
-        const notes = pEntries
-          .filter((e) => e.type === "note")
-          .sort((a, b) => String(a.date).localeCompare(String(b.date)) || (a.createdAt || 0) - (b.createdAt || 0));
-        return { title: p.name, client: clientNameFor(p), address: p.address || "", hours, materials, machines, notes };
-      })
-      .filter((s) => s.hours > 0 || s.materials.length > 0 || s.machines.length > 0 || s.notes.length > 0);
-    const subtitle = `${profile.name || ""}${profile.name ? " · " : ""}${new Date().toLocaleDateString()}`;
-    return renderReportDocument(subtitle, sections);
-  }
+  // The day/month report and the whole-projects report are built by
+  // report-document.js, a lazy chunk (printing is rare, the first paint is
+  // not) -- see saveReportAsPdf and generateProjectsReport.
 
   // Every document the app opens in a new tab goes through here: it gets the
   // print toolbar and prints itself once loaded, so «Als PDF speichern» and
@@ -2092,11 +2006,17 @@ export default function SiteManager() {
   // chrome is a lazy chunk (printing is rare, the first paint is not): the
   // tab opens on the tap's own stack, which is what popup blockers want, and
   // gets its document once the chunk is here.
-  function openPrintable(html, where) {
-    let tab = null;
-    try {
-      tab = window.open("", "_blank");
-    } catch {}
+  function openPrintable(html, where, openTab) {
+    // A caller that itself awaits something before the HTML is ready (the
+    // report builder is a lazy chunk too) must open the tab before that
+    // await, on the click's own stack, or the popup blocker eats it -- see
+    // saveReportAsPdf/generateProjectsReport.
+    let tab = openTab !== undefined ? openTab : null;
+    if (openTab === undefined) {
+      try {
+        tab = window.open("", "_blank");
+      } catch {}
+    }
     import("./ui/print.js")
       .then(({ withPrintChrome }) => {
         const blob = new Blob([withPrintChrome(html, { printLabel: t.a11yPrint, closeLabel: t.a11yClose })], {
@@ -2318,26 +2238,61 @@ export default function SiteManager() {
     setReportProjectSelection((sel) => (sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]));
   }
 
-  function generateProjectsReport(projectIds) {
+  async function generateProjectsReport(projectIds) {
+    // The tab opens on the click's own stack, before the lazy chunk's await,
+    // or the popup blocker eats it -- openPrintable then reuses this tab.
+    let tab = null;
+    try {
+      tab = window.open("", "_blank");
+    } catch {}
     let html;
     try {
-      html = buildProjectsReportHtml(projectIds);
+      const { buildProjectsReportHtml } = await import("./report-document.js");
+      html = buildProjectsReportHtml(projectIds, {
+        t,
+        lang,
+        logoDataUri: COMPANY_LOGO_DATA_URI,
+        projects,
+        entries,
+        profile,
+        customers,
+      });
     } catch (e) {
+      if (tab) tab.close();
       saveFailed(e, "generateProjectsReport");
       return;
     }
-    openPrintable(html, "generateProjectsReport");
+    openPrintable(html, "generateProjectsReport", tab);
   }
 
-  function saveReportAsPdf(report) {
+  async function saveReportAsPdf(report) {
+    let tab = null;
+    try {
+      tab = window.open("", "_blank");
+    } catch {}
     let html;
     try {
-      html = buildReportHtml(report);
+      const { buildReportHtml } = await import("./report-document.js");
+      html = buildReportHtml(report, {
+        t,
+        lang,
+        logoDataUri: COMPANY_LOGO_DATA_URI,
+        allEntries,
+        projects,
+        profile,
+        customers,
+        projectName,
+      });
     } catch (e) {
+      if (tab) tab.close();
       saveFailed(e, "saveReportAsPdf");
       return;
     }
-    openPrintable(html, "saveReportAsPdf");
+    openPrintable(html, "saveReportAsPdf", tab);
+  }
+
+  function loadLoginEvents() {
+    return import("./login-events.js").then((m) => m.listLoginEvents());
   }
 
   // A full backup as a downloadable file. The pasteable code has to stay small
@@ -3539,11 +3494,22 @@ export default function SiteManager() {
 
   // Saved to the owner-only finance document, not the shared key/value store:
   // this holds the labour rate and IBAN, which crew must not be able to read.
+  // The name, address and weekly target also go to reportProfile, a second
+  // document every member may read -- kept in step automatically, so a
+  // report is never the reason the owner has to do something twice.
   async function saveBilling() {
     setBilling(billingDraft);
     setBillingModalOpen(false);
     try {
       await saveFinance(billingDraft);
+      await saveReportProfile({
+        weeklyHours: billingDraft.weeklyHours,
+        companyName: billingDraft.companyName,
+        street: billingDraft.street,
+        buildingNumber: billingDraft.buildingNumber,
+        postalCode: billingDraft.postalCode,
+        town: billingDraft.town,
+      });
     } catch (e) {
       saveFailed(e, "saveBilling");
     }
@@ -5298,6 +5264,37 @@ export default function SiteManager() {
       </div>
     ) : null;
 
+  // Add to home screen: iOS gets instructions (there is no button that can
+  // do it for them), Android gets a real button only when a prompt was
+  // actually captured -- never a dead one. Nothing on desktop or a browser
+  // neither check recognises.
+  const alreadyStandalone =
+    typeof navigator !== "undefined" &&
+    isStandalone(navigator, typeof matchMedia === "function" ? matchMedia("(display-mode: standalone)") : null);
+  const installPlatform =
+    installDismissed || alreadyStandalone
+      ? null
+      : isIOS(typeof navigator !== "undefined" ? navigator.userAgent : "")
+        ? "ios"
+        : androidInstallPrompt
+          ? "android"
+          : null;
+  const installHintCard = (
+    <InstallHint
+      t={t}
+      platform={installPlatform}
+      onInstall={() => {
+        androidInstallPrompt?.prompt();
+        setInstallDismissed(true);
+        dismissInstallHint();
+      }}
+      onDismiss={() => {
+        setInstallDismissed(true);
+        dismissInstallHint();
+      }}
+    />
+  );
+
   const updateBar = updateReady ? (
     <div
       data-update-bar
@@ -5410,6 +5407,16 @@ export default function SiteManager() {
           </div>
 
           <AuthLangPicker lang={lang} onChange={changeLang} label={t.languageLabel} />
+          <div className="mt-3 text-center">
+            <a
+              data-demo-button
+              href="?demo=1"
+              style={{ color: COLORS.accentText }}
+              className="tap inline-block text-xs font-bold"
+            >
+              {t.demoButtonLabel}
+            </a>
+          </div>
           <div style={{ color: COLORS.muted }} className="text-xs mt-6 leading-relaxed">
             {t.authPrivacyNote}{" "}
             <a
@@ -5862,6 +5869,7 @@ export default function SiteManager() {
           {tab === "today" && (
             <TodayTab
               topCard={firstStepsCard}
+              installHint={installHintCard}
               t={t}
               lang={lang}
               projects={projects}
@@ -6129,6 +6137,7 @@ export default function SiteManager() {
                 entries={entries}
                 leaveRequests={leaveRequests}
                 hoursBalance={hoursBalance}
+                loadLoginEvents={loadLoginEvents}
                 money={money}
                 onBackup={openBackupExport}
                 projects={projects}
@@ -6457,6 +6466,10 @@ export default function SiteManager() {
               const contractDaily = weekly > 0 ? weekly / 5 : 0;
               const todayMine = entries.filter((e) => e.date === todayKey() && e.userId === user?.uid);
               const split = splitDayHours(todayMine, contractDaily);
+              // What "An Vorgesetzten senden" actually sends: the sender's own
+              // entries, or the whole crew's when a manager has switched it on.
+              const todayWholeCrew = canManage() && reportWholeCrew;
+              const todayScoped = dayReportScope(entries, todayKey(), user?.uid, todayWholeCrew);
               const timeToday = todayMine.filter((e) => e.type === "time");
               const approved = timeToday.length > 0 && timeToday.every((e) => e.approvedBy);
               const personId = (canManage() && rapportPerson) || user?.uid;
@@ -6598,8 +6611,19 @@ export default function SiteManager() {
                           color={COLORS.muted}
                         />
                       </div>
+                      {canManage() && (
+                        <label className="flex items-center gap-2 mt-3 text-xs" style={{ color: COLORS.muted }}>
+                          <input
+                            data-report-whole-crew
+                            type="checkbox"
+                            checked={reportWholeCrew}
+                            onChange={(e) => setReportWholeCrew(e.target.checked)}
+                          />
+                          {t.reportWholeCrewLabel}
+                        </label>
+                      )}
                       <button
-                        onClick={() => sendReportToSupervisor("daily", daily, todayEntries)}
+                        onClick={() => sendReportToSupervisor("daily", daily, todayScoped, undefined, todayWholeCrew)}
                         style={{ background: COLORS.accentDim }}
                         className="w-full mt-3 py-3 rounded-lg font-bold uppercase text-sm flex items-center justify-center gap-2"
                       >

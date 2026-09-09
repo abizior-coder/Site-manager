@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "bexioStCreated": "vytvo\u0159eno",
   "bexioStExists": "u\u017E existuje",
   "bexioStError": "chyba",
-  "bexioStDryRun": "zkou\u0161ka"
+  "bexioStDryRun": "zkou\u0161ka",
+  "reportWholeCrewLabel": "Odeslat cel\xFD t\xFDm",
+  "otherEntriesLabel": "Dal\u0161\xED z\xE1znamy",
+  "demoButtonLabel": "Vyzkou\u0161et demo",
+  "installHintIos": "Pro instalaci: klepni na Sd\xEDlet, pak \u201CP\u0159idat na plochu\u201D.",
+  "installHintAndroid": "Site Log lze nainstalovat a otev\xEDrat jako appku.",
+  "installButtonLabel": "Instalovat",
+  "ccLogins": "P\u0159ihl\xE1\u0161en\xED",
+  "ccLoginsEmpty": "Zat\xEDm se nikdo nep\u0159ihl\xE1sil."
 }
 `;export{t as default};

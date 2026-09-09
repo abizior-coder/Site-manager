@@ -953,5 +953,13 @@
   "bexioStCreated": "u krijua",
   "bexioStExists": "ekziston tashmë",
   "bexioStError": "gabim",
-  "bexioStDryRun": "provë"
+  "bexioStDryRun": "provë",
+  "reportWholeCrewLabel": "Dërgo tërë ekipin",
+  "otherEntriesLabel": "Hyrje të tjera",
+  "demoButtonLabel": "Provo demon",
+  "installHintIos": "Për të instaluar: prek Share, pastaj “Shto në ekranin kryesor”.",
+  "installHintAndroid": "Site Log mund të instalohet dhe të hapet si aplikacion.",
+  "installButtonLabel": "Instalo",
+  "ccLogins": "Hyrjet",
+  "ccLoginsEmpty": "Ende nuk ka hyrë askush."
 }

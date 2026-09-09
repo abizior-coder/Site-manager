@@ -6,7 +6,16 @@ export function getSdk() {
   return {};
 }
 export function currentUser() {
-  return { uid: "u1", email: "owner@example.com" };
+  return stubSignedOut ? null : { uid: "u1", email: "owner@example.com" };
+}
+
+// Stays signed out for a test that needs the sign-in screen itself (the
+// Demo control has no other harness: docs/CODE_MAP.md's render.test.mjs
+// row used to say "no signed-out render harness (use e2e)" -- this is
+// that harness, added for exactly that control).
+let stubSignedOut = false;
+export function setStubSignedOut(v) {
+  stubSignedOut = v;
 }
 
 export async function onAuthChange(cb) {
@@ -15,7 +24,7 @@ export async function onAuthChange(cb) {
   // branch reached the live app because this stub skipped straight to the
   // signed-in state.
   cb(null);
-  cb({ uid: "u1", email: "owner@example.com" });
+  if (!stubSignedOut) cb({ uid: "u1", email: "owner@example.com" });
   return () => {};
 }
 

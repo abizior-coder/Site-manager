@@ -20,6 +20,14 @@ const firebaseConfig = {
 let sdk = null;
 let ready = null;
 
+// Opt-in via ?demo=1, on any host, unlike ?emulator=1 which only works on
+// localhost -- the demo is meant to run on the public, deployed page.
+// Pure so a test can pass an explicit search string instead of touching
+// `location`.
+export function isDemoMode(search = typeof location !== "undefined" ? location.search : "") {
+  return search.includes("demo=1");
+}
+
 async function boot() {
   const [appMod, fsMod, authMod] = await Promise.all([
     import("firebase/app"),
@@ -68,7 +76,24 @@ async function boot() {
   return sdk;
 }
 
+// The one gate the whole demo's isolation rests on: in demo mode this
+// never calls boot(), so `import("firebase/app")` and the other two real
+// SDK imports above are never reached and the real Firebase project is
+// never contacted -- not "blocked", never fetched or parsed at all. The
+// lazily-imported demo-store.js provides the same { app, db, auth, fs,
+// authApi } shape boot() does, so every other function below and every
+// company-store.js function that reads getSdk()/currentUser() keeps
+// working, unmodified, against canned data instead of a real project.
 export function initFirebase() {
+  if (isDemoMode()) {
+    if (!ready) {
+      ready = import("./demo-store.js").then((m) => {
+        sdk = m.createDemoSdk();
+        return sdk;
+      });
+    }
+    return ready;
+  }
   if (!ready) ready = boot();
   return ready;
 }

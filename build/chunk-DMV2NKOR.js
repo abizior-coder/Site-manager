@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "bexioStCreated": "u krijua",
   "bexioStExists": "ekziston tashm\xEB",
   "bexioStError": "gabim",
-  "bexioStDryRun": "prov\xEB"
+  "bexioStDryRun": "prov\xEB",
+  "reportWholeCrewLabel": "D\xEBrgo t\xEBr\xEB ekipin",
+  "otherEntriesLabel": "Hyrje t\xEB tjera",
+  "demoButtonLabel": "Provo demon",
+  "installHintIos": "P\xEBr t\xEB instaluar: prek Share, pastaj \u201CShto n\xEB ekranin kryesor\u201D.",
+  "installHintAndroid": "Site Log mund t\xEB instalohet dhe t\xEB hapet si aplikacion.",
+  "installButtonLabel": "Instalo",
+  "ccLogins": "Hyrjet",
+  "ccLoginsEmpty": "Ende nuk ka hyr\xEB askush."
 }
 `;export{r as default};

@@ -27,6 +27,8 @@ import {
 } from "./accounting-export.js";
 import { documentTotals as docTotalsPure } from "./documents.js";
 import { inviteUrl, joinCodeFromSearch, withoutJoinParam, firstSteps } from "./onboarding.js";
+import { isIOS, isStandalone, installHintDismissed, dismissInstallHint } from "./install.js";
+import { claimLoginSlot, idsToPrune, LOGIN_EVENTS_CAP } from "./login-events.js";
 import { parseCustomersCsv, mergeCustomers } from "./customers-import.js";
 import { readFileSync } from "node:fs";
 import * as fsMod from "node:fs";
@@ -61,6 +63,10 @@ import {
   weekOf,
   weekRows,
   weekCsv,
+  dayReportScope,
+  reportSiteGroups,
+  OTHER_ENTRY_TYPES,
+  regieIds,
 } from "./reports.js";
 import { guessKind, fmtSize, sortFiles, normaliseLink, MAX_FILE_BYTES as MAX_UPLOAD } from "./files.js";
 import { BREAKS, breakHours, netHours, breakTaken } from "./breaks.js";
@@ -69,6 +75,8 @@ import { tileWaste, tilesWaste, summariseInspection, tripHours } from "./roof-ti
 import { routeFor, precacheAllowed } from "./sw-routes.js";
 import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
 import { ERROR_TEXT } from "./errors-text.js";
+import { isDemoMode } from "./firebase-client.js";
+import { createDemoSdk, demoFixture, DEMO_UID, DEMO_CID } from "./demo-store.js";
 import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -299,6 +307,136 @@ t(
   t("an old report still renders from its own copy", reportRows(legacy, []).length, 1);
 }
 {
+  // A day report's scope: the sender's own entries by default, the whole
+  // crew only when a manager switches it on.
+  const day = [
+    { id: "a", date: "2026-09-07", type: "time", qty: "8", userId: "u1" },
+    { id: "b", date: "2026-09-07", type: "material", qty: "3", userId: "u2" },
+    { id: "c", date: "2026-09-06", type: "time", qty: "5", userId: "u1" },
+  ];
+  t(
+    "a day report scopes to the sender by default",
+    dayReportScope(day, "2026-09-07", "u1", false).map((e) => e.id),
+    ["a"],
+  );
+  t(
+    "a manager's whole-crew scope carries every member's entries that day",
+    dayReportScope(day, "2026-09-07", "u1", true).map((e) => e.id),
+    ["a", "b"],
+  );
+  t(
+    "whole-crew scope still excludes other days",
+    dayReportScope(day, "2026-09-07", "u1", true).some((e) => e.id === "c"),
+    false,
+  );
+  // reportRows joins live entries as-is, so the author travels with the row
+  // wherever the report is scoped to the whole crew.
+  const report = { entryIds: ["a", "b"], entryLabels: {}, excludedIds: [] };
+  const rows = reportRows(report, day);
+  t(
+    "report rows carry the entry's author",
+    rows.map((r) => r.userId),
+    ["u1", "u2"],
+  );
+}
+{
+  // The PDF must not drop entry types the modal and the mail already show,
+  // and its hours must never disagree with reportTotals' net-of-breaks
+  // figure -- the two defects behind "not everything" and "two numbers".
+  const rows = [
+    { id: "t1", type: "time", qty: "8", projectId: "p1", projectName: "Dach A" },
+    { id: "br1", type: "break", qty: "0.5", projectId: "p1", projectName: "Dach A" },
+    {
+      id: "m1",
+      type: "material",
+      qty: "3",
+      unit: "Stk",
+      description: "Ziegel",
+      projectId: "p1",
+      projectName: "Dach A",
+    },
+    { id: "w1", type: "tool", qty: "1", description: "Bauaufzug", projectId: "p1", projectName: "Dach A" },
+    {
+      id: "tr1",
+      type: "transport",
+      hours: "1",
+      description: "Lager → Baustelle",
+      projectId: "p1",
+      projectName: "Dach A",
+    },
+    { id: "ph1", type: "photo", projectId: "p1", projectName: "Dach A" },
+    { id: "in1", type: "inspection", description: "Dachkontrolle", projectId: "p1", projectName: "Dach A" },
+    { id: "or1", type: "order", description: "Ziegel nachbestellen", projectId: "p1", projectName: "Dach A" },
+    { id: "pk1", type: "pickup", description: "Abholcode", projectId: "p1", projectName: "Dach A" },
+    { id: "n1", type: "note", description: "Regen ab 14:00", projectId: "p1", projectName: "Dach A" },
+    { id: "del1", type: "material", qty: "1", projectId: "p1", projectName: "Dach A", deleted: true },
+  ];
+  const groups = reportSiteGroups(rows, (e) => e.projectName);
+  t("one group per site", groups.length, 1);
+  const g = groups[0];
+  t(
+    "every OTHER_ENTRY_TYPES entry lands in the other bucket, nothing dropped",
+    g.other.length,
+    OTHER_ENTRY_TYPES.length,
+  );
+  t(
+    "the other bucket names each type",
+    OTHER_ENTRY_TYPES.every((ty) => g.other.some((e) => e.type === ty)),
+    true,
+  );
+  t("material still gets its own table", g.materials.length, 1);
+  t("tool still gets its own table", g.machines.length, 1);
+  t("notes still get their own list", g.notes.length, 1);
+  t(
+    "a deleted entry is dropped from every bucket",
+    g.other.length + g.materials.length + g.machines.length + g.notes.length,
+    9,
+  );
+  t(
+    "the PDF's hours total equals reportTotals' net hours",
+    g.hours,
+    reportTotals(rows.filter((e) => !e.deleted)).hours,
+  );
+  t("a day with a break entry: net hours, not gross", g.hours, 7.5);
+  // Across several sites the per-site figures still add up to the same
+  // net-of-breaks number reportTotals gives for the whole report -- one
+  // figure everywhere, whether read per site or for the day as a whole.
+  const twoSites = [
+    ...rows.filter((e) => !e.deleted),
+    { id: "t2", type: "time", qty: "4", projectId: "p2", projectName: "Dach B" },
+    { id: "br2", type: "break", qty: "0.25", projectId: "p2", projectName: "Dach B" },
+  ];
+  const perSite = reportSiteGroups(twoSites, (e) => e.projectName).reduce((s, g2) => s + g2.hours, 0);
+  t("per-site net hours sum to the report's net hours", perSite, reportTotals(twoSites).hours);
+}
+{
+  // Regie (extra work beyond the quote) marks the report line it belongs
+  // to, and the supervisor sees how much of the hours were Regie -- not
+  // additional to the total, a subset of it.
+  const day = [
+    { id: "a", type: "time", qty: "5", regie: false },
+    { id: "b", type: "time", qty: "2", regie: true },
+    { id: "c", type: "material", qty: "3", unit: "Stk", description: "Ziegel", regie: true },
+    { id: "d", type: "tool", description: "Bauaufzug", regie: false },
+  ];
+  t("regieIds names only the Regie rows", regieIds(day), ["b", "c"]);
+  const totals = reportTotals(day);
+  t("regieHours is a subset of hours, not additional to it", totals.regieHours <= totals.hours, true);
+  t("regieHours counts only the Regie time entries", totals.regieHours, 2);
+  t("hours still counts every time entry", totals.hours, 7);
+  // A deleted entry's fallback row still reads as Regie: reportRows carries
+  // regieIds through for a row it can no longer read live.
+  const report = {
+    entryIds: ["a", "b"],
+    entryLabels: { a: "5 h", b: "2 h" },
+    regieIds: regieIds(day),
+    excludedIds: [],
+  };
+  const rows = reportRows(report, []); // neither entry is in the live log any more
+  t("a deleted Regie row still reads as Regie", rows.find((r) => r.id === "b").regie, true);
+  t("a deleted, non-Regie row does not", rows.find((r) => r.id === "a").regie, false);
+}
+{
   const month = [
     { id: "d1", date: "2026-09-01", type: "time", qty: "8" },
     { id: "d2", date: "2026-09-01", type: "material", qty: "1" },
@@ -330,6 +468,50 @@ t(
     "a daily report from another month does not count",
     unsentMonthEntries(month, [sent[2]], "u1", "2026-09").entries.length,
     3,
+  );
+  // Defect 7: the daily scope (defect 1) is per person by default, whole
+  // crew only on a manager's toggle -- the month subtraction must agree.
+  const wholeCrewDaily = {
+    id: "u2-daily-2026-09-01",
+    period: "daily",
+    periodLabel: "2026-09-01",
+    userId: "u2",
+    wholeCrew: true,
+    entryIds: ["d1", "d2"], // a manager's whole-crew report also carried u1's day
+  };
+  t(
+    "unsentMonthEntries excludes entries already covered by a colleague's whole-crew daily report",
+    unsentMonthEntries(month, [wholeCrewDaily], "u1", "2026-09").entries.map((e) => e.id),
+    ["n1"],
+  );
+  t(
+    "unsentMonthEntries still includes a colleague's entries when no whole-crew report covered them",
+    unsentMonthEntries(month, [sent[1]], "u1", "2026-09").entries.map((e) => e.id), // u2's own person-scoped daily
+    ["d1", "d2", "n1"],
+  );
+  // Defect 8: excluding an entry from a daily report (toggleReportEntry +
+  // saveReportEdits) without a resend must not bury it forever -- entryIds
+  // still names it from the send that included it, excludedIds now also
+  // names it, and it was never actually shown to the supervisor.
+  const excludedNotResent = {
+    id: "u1-daily-2026-09-01",
+    period: "daily",
+    periodLabel: "2026-09-01",
+    userId: "u1",
+    entryIds: ["d1", "d2"],
+    excludedIds: ["d1"], // taken out after sending, never re-sent
+  };
+  t(
+    "reportRows already hides the excluded row from what the supervisor was shown",
+    reportRows(excludedNotResent, month)
+      .map((r) => r.id)
+      .includes("d1"),
+    false,
+  );
+  t(
+    "an entry excluded from a daily report and not re-sent still appears in that month's report",
+    unsentMonthEntries(month, [excludedNotResent], "u1", "2026-09").entries.map((e) => e.id),
+    ["d1", "n1"],
   );
 }
 {
@@ -571,7 +753,7 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
       { type: "transport", hours: 1.5, qty: "1.5" },
       { type: "break", qty: "0.5" },
     ]),
-    { hours: 7.5, breaks: 0.5, transportHours: 1.5, materialsCount: 0, toolsCount: 0, projIds: [] },
+    { hours: 7.5, regieHours: 0, breaks: 0.5, transportHours: 1.5, materialsCount: 0, toolsCount: 0, projIds: [] },
   );
 }
 
@@ -733,6 +915,71 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   );
   const missing = files.filter((f) => !map.includes(f) && !map.includes(f.split("/").pop()));
   t(`docs/CODE_MAP.md names every source file (${files.length} files)`, missing.join(", "), "");
+}
+
+{
+  // The public demo's isolation guarantee (docs/specs/2026-09-09_public-
+  // demo.md): a demo session must never be able to reach the real Firebase
+  // project. The mechanical proof, not just a design intention -- read
+  // demo-store.js's own source and confirm it imports nothing that could
+  // reach the real SDK or the real company layer.
+  const src = fsMod.readFileSync("demo-store.js", "utf8");
+  const forbidden = [
+    /from\s+["']\.\/firebase-client\.js["']/,
+    /from\s+["']\.\/company-store\.js["']/,
+    /from\s+["']firebase\//,
+  ];
+  t(
+    "demo writes go nowhere: demo-store.js imports no real backend module",
+    forbidden.filter((re) => re.test(src)).length,
+    0,
+  );
+
+  // isDemoMode is pure and testable without touching `location`.
+  t("isDemoMode: ?demo=1 is on", isDemoMode("?demo=1"), true);
+  t("isDemoMode: another param plus demo=1 is on", isDemoMode("?foo=1&demo=1"), true);
+  t("isDemoMode: no query string is off", isDemoMode(""), false);
+  t("isDemoMode: demo=0 is off", isDemoMode("?demo=0"), false);
+  t("isDemoMode: ?emulator=1 alone is not demo mode", isDemoMode("?emulator=1"), false);
+
+  // The fixture itself: every entry belongs to the fixture's own owner, and
+  // the fields that would let a "send" reach the outside world are unset --
+  // not merely absent by omission, a test says so.
+  const fixture = demoFixture();
+  const entries = Object.entries(fixture).filter(([path]) => path.includes("/entries/"));
+  t("the demo fixture seeds at least one entry", entries.length > 0, true);
+  t(
+    "every demo entry belongs to the fixture's own member",
+    entries.every(([, e]) => e.userId === DEMO_UID),
+    true,
+  );
+  const member = fixture[`companies/${DEMO_CID}/members/${DEMO_UID}`];
+  t("the demo fixture's own member is an owner", member.role, "owner");
+  t(
+    "the demo fixture never sets a send destination (mail, phone or webhook)",
+    Object.values(fixture).every((doc) =>
+      ["supervisorEmail", "supervisorPhone", "webhookUrl"].every((k) => !(k in doc)),
+    ),
+    true,
+  );
+
+  // The fake Firestore itself: the CRUD a demo session actually exercises,
+  // proven against the seeded fixture -- not only that it is unreachable
+  // from the real SDK, but that it genuinely works as a substitute.
+  const demoSdk = createDemoSdk();
+  const memberRef = demoSdk.fs.doc(demoSdk.db, "companies", DEMO_CID, "members", DEMO_UID);
+  const memberSnap = await demoSdk.fs.getDoc(memberRef);
+  t("the demo Firestore reads a seeded doc", memberSnap.exists() && memberSnap.data().role, "owner");
+  const entriesSnap = await demoSdk.fs.getDocs(demoSdk.fs.collection(demoSdk.db, "companies", DEMO_CID, "entries"));
+  t("the demo Firestore lists a seeded collection", entriesSnap.docs.length, 3);
+  const newRef = demoSdk.fs.doc(demoSdk.db, "companies", DEMO_CID, "entries", "demo-e-new");
+  await demoSdk.fs.setDoc(newRef, { type: "note", description: "test" });
+  const afterWrite = await demoSdk.fs.getDoc(newRef);
+  t("the demo Firestore accepts a write, in memory only", afterWrite.data().description, "test");
+  await demoSdk.fs.deleteDoc(newRef);
+  const afterDelete = await demoSdk.fs.getDoc(newRef);
+  t("the demo Firestore deletes what it just wrote", afterDelete.exists(), false);
+  t("the demo auth already carries a signed-in user", demoSdk.auth.currentUser.uid, DEMO_UID);
 }
 
 {
@@ -1459,6 +1706,61 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     [merged.added.map((r) => r.name), merged.skipped.map((r) => r.name), merged.customers.length, !!merged.added[0].id],
     [["Hans Muster", "Leer GmbH"], ["Anna Meier"], 3, true],
   );
+}
+
+{
+  // Add to home screen (docs/specs/2026-09-09_pwa-install.md): detection is
+  // pure, so the UA string and localStorage are always parameters, never
+  // read from real globals here.
+  t(
+    "isIOS: iPhone/iPad/iPod UAs are iOS, an Android or desktop UA is not",
+    [
+      isIOS("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15"),
+      isIOS("Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15"),
+      isIOS("Mozilla/5.0 (iPod touch; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15"),
+      isIOS("Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/126.0"),
+      isIOS("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0"),
+    ],
+    [true, true, true, false, false],
+  );
+  t(
+    "isStandalone: iOS's own flag or the display-mode media query, either is enough",
+    [
+      isStandalone({ standalone: true }, null),
+      isStandalone({}, { matches: true }),
+      isStandalone({}, { matches: false }),
+      isStandalone({}, null),
+    ],
+    [true, true, false, false],
+  );
+  const store = new Map();
+  const stubStorage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, v),
+  };
+  t("install hint dismissal starts unset", installHintDismissed(stubStorage), false);
+  dismissInstallHint(stubStorage);
+  t("install hint dismissal round-trips through storage once dismissed", installHintDismissed(stubStorage), true);
+}
+
+{
+  // Login audit (docs/specs/2026-09-09_login-audit.md).
+  const loginStore = new Map();
+  const stubLoginStorage = {
+    getItem: (k) => (loginStore.has(k) ? loginStore.get(k) : null),
+    setItem: (k, v) => loginStore.set(k, v),
+  };
+  t("a session claims its login slot the first time", claimLoginSlot(stubLoginStorage, "u1"), true);
+  t("the same uid on the same device does not claim it twice", claimLoginSlot(stubLoginStorage, "u1"), false);
+  t("a different uid on the same device claims its own slot", claimLoginSlot(stubLoginStorage, "u2"), true);
+
+  // Rows are newest-first, the same order listLoginEvents()'s own
+  // `orderBy("at", "desc")` query already returns.
+  const rowsBelowCap = Array.from({ length: LOGIN_EVENTS_CAP - 1 }, (_, i) => ({ id: `r${i}` }));
+  t("below the cap, nothing is pruned", idsToPrune(rowsBelowCap), []);
+  const rowsOverCap = Array.from({ length: LOGIN_EVENTS_CAP + 2 }, (_, i) => ({ id: `r${i}` }));
+  t("past the cap, the tail (oldest) rows are pruned", idsToPrune(rowsOverCap), ["r200", "r201"]);
+  t("a non-array is never pruned", idsToPrune(null), []);
 }
 
 {

@@ -124,6 +124,15 @@ service cloud.firestore {
         allow read, write: if isOwner(cid);
       }
 
+      // The name and address every report is issued under, and the weekly
+      // target hours the GAV split reads: whoever issues a report needs
+      // these, in any role. The money lives only in private/finance above
+      // -- this document never carries labourRate or an IBAN.
+      match /private/reportProfile {
+        allow read: if isMember(cid);
+        allow write: if isOwner(cid);
+      }
+
       match /projects/{id} {
         allow read: if isMember(cid);
         allow write: if canManage(cid);
@@ -203,6 +212,26 @@ service cloud.firestore {
         allow update: if (canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid))
                       && request.resource.data.userId == resource.data.userId;
         allow delete: if canManage(cid) || (isMember(cid) && resource.data.userId == request.auth.uid);
+      }
+
+      // Login audit (docs/specs/2026-09-09_login-audit.md): a record of who
+      // signed in, when and in which role. Owner-only reading -- this is
+      // narrower than canManage(), on purpose: the goal is specifically the
+      // firm owner's own visibility, not a supervisor's. A member may create
+      // only their own row (never on someone else's behalf, unlike
+      // entries/leave/reports, which a manager may file for someone else --
+      // the whole point here is that the row reflects who actually
+      // authenticated). Never updated. Deleting is owner-only too: there is
+      // no Cloud Function on the Spark plan to prune old rows on a schedule,
+      // so the bounded-retention prune in company-store.js's recordLogin()
+      // runs as a second, best-effort write from whichever session just
+      // signed in -- it only actually deletes anything when that session is
+      // the owner's; company-store.js swallows the refusal otherwise.
+      match /loginEvents/{id} {
+        allow read: if isOwner(cid);
+        allow create: if isMember(cid) && request.resource.data.uid == request.auth.uid;
+        allow update: if false;
+        allow delete: if isOwner(cid);
       }
 
       // Plans and documents: the bytes live in R2 behind the Worker, which

@@ -953,6 +953,14 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "bexioStCreated": "creat",
   "bexioStExists": "exist\u0103 deja",
   "bexioStError": "eroare",
-  "bexioStDryRun": "prob\u0103"
+  "bexioStDryRun": "prob\u0103",
+  "reportWholeCrewLabel": "Trimite toat\u0103 echipa",
+  "otherEntriesLabel": "Alte \xEEnregistr\u0103ri",
+  "demoButtonLabel": "\xCEncearc\u0103 demo",
+  "installHintIos": "Pentru instalare: atinge Share, apoi \u201CAdaug\u0103 pe ecranul principal\u201D.",
+  "installHintAndroid": "Site Log poate fi instalat \u0219i deschis ca o aplica\u021Bie.",
+  "installButtonLabel": "Instaleaz\u0103",
+  "ccLogins": "Autentific\u0103ri",
+  "ccLoginsEmpty": "\xCEnc\u0103 nimeni nu s-a autentificat."
 }
 `;export{i as default};

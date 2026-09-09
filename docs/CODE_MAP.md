@@ -46,7 +46,7 @@ password `test1234` (`scripts/seed-emulator.mjs`).
 
 | File | Holds |
 |---|---|
-| `entry.jsx` | crash capture install (`installCrashCapture`, stale-chunk reload-once), preload of en/de + the device language (`localStorage` `site-log-lang`), mount, service-worker registration with version compare (`site-log:update`). |
+| `entry.jsx` | crash capture install (`installCrashCapture`, stale-chunk reload-once), preload of en/de + the device language (`localStorage` `site-log-lang`), mount, service-worker registration with version compare (`site-log:update`), `beforeinstallprompt` capture (`window.__siteLogInstallPrompt`, `site-log:install-available` — see `install.js`/`ui/install-hint.jsx`). |
 | `roofing-site-manager.jsx` (~12.7k lines) | **the app**: constants (TRADES, SAFETY_*, PROJECT_CATEGORIES, PROJECT_STATUSES, VAT_RATES, ORDER_STATES), pure helpers (`encodeProjectCode`/`decodeProjectCode`, `encodeBackup`/`decodeBackup`, `nextDocNumber`, `migrateClientsToCustomers`, `classifyNote`), lazy tab imports, `SiteManager()` = all state + handlers + screens, then `MountainBackground`, `SwissCross`, `Section`, `ReorderList`, `SignaturePad`, `Modal`, `Field` (a `<label>` with visible text above a control). |
 
 Inside `SiteManager()` (grep the name):
@@ -55,10 +55,10 @@ Inside `SiteManager()` (grep the name):
 |---|---|
 | errors / toasts | `showError(e, context)` → error panel (`[data-error-panel]`, codes from `errors.js`), `showToast` |
 | language | `lang` state (initialised from `localStorage`), `changeLang` (loads chunk, `localStorage` + personal kv `site-lang`), `LANG_NAMES` |
-| auth screens | `if (!user)` → sign-in (`submitAuth`, `submitReset`, `AuthLangPicker`), then onboarding (`submitOnboarding`, join codes from `onboarding.js`), `doSignOut`, `deleteOwnAccountFlow` |
+| auth screens | `if (!user)` → sign-in (`submitAuth`, `submitReset`, `AuthLangPicker`, the `[data-demo-button]` link to `?demo=1` — see `demo-store.js`), then onboarding (`submitOnboarding`, join codes from `onboarding.js`), `doSignOut`, `deleteOwnAccountFlow` |
 | persistence | `persist()` (runs `reconcileEntries` from `entries-history.js`, writes company collections via `company-store.js`), `personalKey`/`getPersonal` (per-user kv), `saveFailed` |
 | entries | `openAdd`, `submitAdd`, `newEntry`/`addEntry`, `openEditEntry`, `openEditTime`/`saveEditTime`, `deleteEntryFn`/`confirmDelete`/`restoreEntry`/`purgeEntry`, `approveEntry`, `toggleBreak`, `startDayOn`, `clockOut`, `submitNote`, voice input `toggleVoiceInput` |
-| reports (Rapport) | `generateDayReport`, `renderReportDocument`, `buildReportHtml`, `printRapport`, `sendReportToSupervisor`, `resendReport`, `openRapport`/`saveRapport`, week/day figures from `reports.js` |
+| reports (Rapport) | `generateDayReport` (scope via `dayReportScope`, manager-only whole-crew toggle `[data-report-whole-crew]`), `saveReportAsPdf`/`generateProjectsReport` (lazy `report-document.js`), `printRapport`, `sendReportToSupervisor`, `resendReport`, `openRapport`/`saveRapport`, week/day figures from `reports.js` |
 | documents (Offerte/Rechnung) | `newDocumentFor`, `saveDocument`, `convertQuoteToInvoice`, `printDocument` (QR-bill via lazy `swiss-qr-bill.js`), `saveBilling`, `createRegieDocument`, money helpers from `documents.js` |
 | customers / contacts | `openCustomerForm`, `submitCustomer`, `deleteCustomer` (two-step), `submitContact`, `dueFollowUps`, import via `customers-import.js` (`stageCustomersFile`, `applyCustomersImport`) |
 | projects / dock | `addProject`, `saveProjectEdit`, `reorderProjects`, `togglePin`, `cycleDockSort`, `dropOnProject`, `projectCosting`, `commandCentre`, `dailySummary` |
@@ -80,10 +80,10 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 
 | File | Component(s) | Notes |
 |---|---|---|
-| `tabs/TodayTab.jsx` | `TodayTab` | day card `[data-day-card]`, `[data-today-date]`, `[data-day-action]`, first steps `[data-first-steps]` |
+| `tabs/TodayTab.jsx` | `TodayTab` | day card `[data-day-card]`, `[data-today-date]`, `[data-day-action]`, first steps `[data-first-steps]`, `installHint` slot renders `ui/install-hint.jsx`'s `[data-install-hint]` below `topCard` |
 | `tabs/BoardTab.jsx` | `BoardTab` | Board/Übersicht, month dots `[data-board-dots]`, week `[data-woche]` (pinned name column, today `[data-woche-today]` scrolled into view, touch hint `[data-woche-hint-touch]` under `(hover: none)`) |
 | `tabs/MaterialsTab.jsx` | `MaterialsTab`, `ArticleSheet` | supplier sheet `[data-article-sheet]`, catalogues from `data/catalog.js` |
-| `tabs/CockpitTab.jsx` | `CockpitTab`, `ExportCard`, `UsageCard`, `ErrorsCard`, `BexioCard`, `BackupCard`, `useWorkerData`, `WORKER_URL` | owner cards; each card fetches its own Worker data |
+| `tabs/CockpitTab.jsx` | `CockpitTab`, `ExportCard`, `UsageCard`, `ErrorsCard`, `BexioCard`, `BackupCard`, `LoginsCard`, `useWorkerData`, `WORKER_URL` | owner cards; most fetch their own Worker data. `LoginsCard` (`[data-logins-card]`) is the exception: Firestore, not the Worker, via the `loadLoginEvents` prop `roofing-site-manager.jsx` passes down (lazy `login-events.js`) — newest first, `EmptyState` when empty |
 | `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]` |
 
 ## Shared UI (`ui/`)
@@ -100,14 +100,17 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `ui/download.js` | `downloadText` |
 | `ui/break-chips.jsx` | `BreakChips` (GAV breaks) |
 | `ui/lang-picker.jsx` | `AuthLangPicker` (`[data-auth-lang]`, before sign-in) |
+| `ui/install-hint.jsx` | `InstallHint` (`[data-install-hint]`): dismissible Heute banner, `docs/specs/2026-09-09_pwa-install.md`; iOS gets `t.installHintIos` only, Android also gets `[data-install-button]` calling the captured `beforeinstallprompt`; `[data-install-hint-dismiss]` |
 
 ## Pure modules (root, all unit-tested in `logic.test.mjs` unless noted)
 
 | File | Holds |
 |---|---|
 | `company-store.js` | Firestore access per company: `ENTITY_COLLECTIONS`, roles (`getRole`, `isOwner`, `canManage`), `createCompany`, invites, `leaveCompany`, `setMemberActive`, kv (`test-stubs/company-store.js` in render tests) |
-| `firebase-client.js` | SDK init (npm Firebase, pinned), auth (`signIn`, `signUp`, `reauthenticate`, `deleteOwnAccount`), `storage` (kv facade), `legacyScan`/`importLegacy` (`test-stubs/firebase-client.js` in render tests) |
-| `reports.js` | Rapport model: `reportRows`, `reportTotals`, `splitDayHours` (GAV), `weekOf`, `weekRows`, `weekCsv`, `withSend`, `rapportChanged` |
+| `firebase-client.js` | SDK init (npm Firebase, pinned), auth (`signIn`, `signUp`, `reauthenticate`, `deleteOwnAccount`), `storage` (kv facade), `legacyScan`/`importLegacy` (`test-stubs/firebase-client.js` in render tests); `isDemoMode()` + `initFirebase()` gate — in demo mode (`?demo=1`) `boot()` (the only place the real SDK is imported) is never called, `demo-store.js` supplies the `sdk` shape instead |
+| `demo-store.js` | Public demo (`docs/specs/2026-09-09_public-demo.md`): `createDemoSdk()` (a small in-memory Firestore + Auth stand-in, `getSdk()`-shaped, lazy — loaded only from `firebase-client.js`'s `initFirebase()` in demo mode), `demoFixture()` (the canned data: fictional "Dach AG" / "Chef Muster" / "Steildach Lettenring"). Imports nothing from `firebase-client.js`, `company-store.js` or any `firebase/*` package — a logic test enforces that from the source text |
+| `reports.js` | Rapport model: `reportRows`, `reportTotals`, `dayReportScope` (sender by default, whole crew by manager toggle), `reportSiteGroups`/`OTHER_ENTRY_TYPES` (every entry type sorted into material/tool/note/other, per-site net hours), `splitDayHours` (GAV), `weekOf`, `weekRows`, `weekCsv`, `withSend`, `rapportChanged` |
+| `report-document.js` | `buildReportHtml`, `buildProjectsReportHtml` (the printed/PDF supervisor and projects reports; lazy — loaded only by `saveReportAsPdf`/`generateProjectsReport`) |
 | `documents.js` | `toRappen`/`fromRappen`, `documentTotals` (Rappen, Swiss rounding), `documentState`, `DOC_STATUSES` |
 | `accounting-export.js` | invoice journal + positions, payroll hours, customers for bexio (CSV) |
 | `swiss-qr.js` | IBAN validation, `validateBillingProfile` (static) |
@@ -120,6 +123,8 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `price-list.js` | supplier price-list parsing/merging, article search/sort (lazy) |
 | `customers-import.js` | `parseCustomersCsv` (incl. bexio export), `mergeCustomers` |
 | `onboarding.js` | `inviteUrl`, `joinCodeFromSearch`, `firstSteps` |
+| `install.js` | Add-to-home-screen detection (`docs/specs/2026-09-09_pwa-install.md`), eager: `isIOS`, `isStandalone`, `installHintDismissed`/`dismissInstallHint` (per-device, `localStorage`) |
+| `login-events.js` | Login audit (`docs/specs/2026-09-09_login-audit.md`): `recordLogin`/`listLoginEvents` (Firestore `companies/{cid}/loginEvents`, owner-read-only), `idsToPrune` (bounded retention, 200 rows, pruned in `listLoginEvents`), `claimLoginSlot` (once per session, `sessionStorage`), `recordThisSession` (the mount effect's own entry point). All lazy — reached only through `import("./login-events.js")` from `roofing-site-manager.jsx`'s mount effect and its `loadLoginEvents()` helper (passed to `tabs/CockpitTab.jsx`'s `LoginsCard`); making it eager (tried first) cost more of the first-paint budget than the feature itself, not less — Firestore's path literals do not shrink under minification |
 | `roof-tiles.js` | tile catalogue, waste weights, `summariseInspection`, `tripHours` |
 | `breaks.js` | GAV breaks (`BREAKS`, `netHours`) |
 | `files.js` | file kinds, `MAX_FILE_BYTES`, `normaliseLink` |
@@ -147,11 +152,11 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | Suite | Covers |
 |---|---|
 | `logic.test.mjs` (~300) | every pure module, i18n completeness, error codes ↔ docs, precache list, first-paint budget, palette contrast, this map's completeness |
-| `render.test.mjs` (150) | jsdom renders of the app per role (`renderAs(role)`, stubs in `test-stubs/`), dialogs, a11y names, `[data-*]` hooks; no signed-out harness (use e2e) |
+| `render.test.mjs` (150+) | jsdom renders of the app per role (`renderAs(role, weeklyHours, signedOut)`, stubs in `test-stubs/`), dialogs, a11y names, `[data-*]` hooks; `signedOut` (via `test-stubs/firebase-client.js`'s `setStubSignedOut`) renders the sign-in screen itself — used for the `[data-demo-button]` Demo control |
 | `order-flow.test.mjs`, `dock.test.mjs` | material order flow, dock drag/pins |
 | `rules.test.mjs` | Firestore rules on the emulator (`firebase.test.json`) |
 | `worker/*.test.mjs` | files, limits, metrics, errors, bexio, cors |
-| `e2e/crew-morning.spec.mjs`, `e2e/owner-cockpit.spec.mjs` | Playwright Chromium: the language picker before sign-in, crew sign-in, «+», the hub; the owner's Cockpit cards; helpers in `e2e/helpers.mjs` |
+| `e2e/crew-morning.spec.mjs`, `e2e/owner-cockpit.spec.mjs` | Playwright Chromium: the language picker before sign-in, the `[data-demo-button]` Demo control (opens `?demo=1`, gone once signed in), crew sign-in, «+», the hub; the owner's Cockpit cards; helpers in `e2e/helpers.mjs` |
 
 Test conventions: Preact batches state, wait ~300 ms after dispatched
 clicks; set input values with the native setter + `input` event; select

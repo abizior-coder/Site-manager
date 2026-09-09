@@ -47,6 +47,17 @@ a hypothesis to be tested with roofing firms before any further product
 work. The roofing/Spengler sector is about 850 firms with 4,000
 employees under the GAV: not a multi-million market on its own.
 
+## 1a-2. Decision to continue (owner and his boss, 2026-09-07)
+
+Having read §1a, the owner and his boss decided to continue the app for
+the firm's own use first, and to fix what is wrong before anything new.
+First item: **reporting**. The Rapport does not carry everything that is
+recorded, and its layout is fixed in code; the owner must be able to
+arrange a report the way he wants. The reporting roadmap of 2026-09-07
+(`docs/roadmap-2026-09-07_reporting.md`, from the code readings, the
+vendor research and three verification passes) is the order of work.
+§1a stays true for sales claims; §1b stays true for how things are built.
+
 ## 1b. Product principle: scale without the founder (owner's decision, 2026-09-06)
 
 Site Log is built as a **scalable product**, not a service. Selling it must
