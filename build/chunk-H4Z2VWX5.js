@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "installHintAndroid": "Site Log peut \xEAtre install\xE9 et ouvert comme une application.",
   "installButtonLabel": "Installer",
   "ccLogins": "Connexions",
-  "ccLoginsEmpty": "Personne ne s'est encore connect\xE9."
+  "ccLoginsEmpty": "Personne ne s'est encore connect\xE9.",
+  "tripEditTitle": "Modifier le trajet",
+  "tripEmptyRun": "Trajet \xE0 vide",
+  "tripReturnToYard": "Retour au d\xE9p\xF4t",
+  "tripWaitMin": "Temps d'attente (min)",
+  "tripSlipNo": "N\xB0 bulletin de livraison/pes\xE9e",
+  "tripSlipNoPh": "Num\xE9ro",
+  "tripHelper": "Aide / passager",
+  "tripHelperPh": "Nom",
+  "tripWasteCode": "Code d\xE9chet",
+  "tripWasteCodePh": "Code VeVA",
+  "tripScanning": "Lecture du bulletin\u2026",
+  "tripReadOnly": "Seul le chauffeur ou un manager peut modifier ce trajet."
 }
 `;export{t as default};

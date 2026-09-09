@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "installHintAndroid": "Site Log mo\u017Cna zainstalowa\u0107 i otwiera\u0107 jak aplikacj\u0119.",
   "installButtonLabel": "Zainstaluj",
   "ccLogins": "Logowania",
-  "ccLoginsEmpty": "Nikt jeszcze si\u0119 nie zalogowa\u0142."
+  "ccLoginsEmpty": "Nikt jeszcze si\u0119 nie zalogowa\u0142.",
+  "tripEditTitle": "Edytuj kurs",
+  "tripEmptyRun": "Przejazd pusty",
+  "tripReturnToYard": "Powr\xF3t na plac",
+  "tripWaitMin": "Czas oczekiwania (min)",
+  "tripSlipNo": "Nr dokumentu WZ/wagowego",
+  "tripSlipNoPh": "Numer",
+  "tripHelper": "Pomocnik/pasa\u017Cer",
+  "tripHelperPh": "Imi\u0119",
+  "tripWasteCode": "Kod odpadu",
+  "tripWasteCodePh": "Kod VeVA",
+  "tripScanning": "Odczytywanie dokumentu\u2026",
+  "tripReadOnly": "Tylko kierowca lub mened\u017Cer mo\u017Ce edytowa\u0107 ten kurs."
 }
 `;export{o as default};

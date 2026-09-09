@@ -74,6 +74,7 @@ import {
   getIdToken,
   reauthenticate,
   deleteOwnAccount,
+  isDemoMode,
 } from "./firebase-client.js";
 import { T, LANGS, loadLang, isLang } from "./i18n/index.js";
 import {
@@ -175,6 +176,8 @@ const MaterialsTab = lazy(() => import("./tabs/MaterialsTab.jsx").then((m) => ({
 const BoardTab = lazy(() => import("./tabs/BoardTab.jsx").then((m) => ({ default: m.BoardTab })));
 
 const CockpitTab = lazy(() => import("./tabs/CockpitTab.jsx").then((m) => ({ default: m.CockpitTab })));
+
+const TripModal = lazy(() => import("./ui/trip-modal.jsx").then((m) => ({ default: m.TripModal })));
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -307,11 +310,10 @@ export const DEFAULT_TRADE = "other";
 
 // What a Polier looks at on a roof, in the order they walk it. Tapped, not
 // typed: none → OK → Mangel → none.
-// Transport: what drives, what it carries, which skip. Plain keys; the
-// labels live in i18n.
+// Transport: what drives. Plain keys; the labels live in i18n.
+// LOAD_KINDS and MULDE_SIZES moved into ui/trip-modal.jsx (the only place
+// left that renders them) when the trip modal went lazy.
 const VEHICLES = ["lieferwagen", "pritsche", "anhaenger", "lkw_kran", "mulden_service", "pw"];
-const LOAD_KINDS = ["material", "waste", "tools", "scaffold", "other"];
-const MULDE_SIZES = ["", "3", "7", "10", "15", "20"];
 
 const INSPECTION_ITEMS = [
   "eindeckung",
@@ -923,6 +925,7 @@ export default function SiteManager() {
   const [editProject, setEditProject] = useState(null);
   const [inspectionModal, setInspectionModal] = useState(null);
   const [tripModal, setTripModal] = useState(null);
+  const tripSlipFileRef = useRef(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [quickAddSite, setQuickAddSite] = useState(null);
   // The one place a failure is shown: a panel in the middle with a code.
@@ -4803,7 +4806,43 @@ export default function SiteManager() {
     return Math.max(0, Math.round(produced - carried));
   }
 
-  function openTrip(projectId) {
+  // Who may change a trip: its driver, or anyone who manages -- the same
+  // policy canEditInspection already applies, and the rules already allow
+  // (entries: update by the author or a manager, userId unchanged).
+  function canEditTrip(entry) {
+    return !!entry && (canManage() || entry.userId === user?.uid);
+  }
+
+  function openTrip(projectId, entry) {
+    if (entry) {
+      setTripModal({
+        id: entry.id,
+        userId: entry.userId,
+        readOnly: !canEditTrip(entry),
+        projectId: entry.projectId || "",
+        vehicle: entry.vehicle || VEHICLES[0],
+        from: entry.from || "",
+        to: entry.to || "",
+        departTime: entry.departTime || "",
+        arriveTime: entry.arriveTime || "",
+        km: entry.km ? String(entry.km) : "",
+        loadKind: entry.loadKind || "material",
+        weightKg: entry.weightKg ? String(entry.weightKg) : "",
+        mulde: entry.mulde || "",
+        disposalSite: entry.disposalSite || "",
+        notes: entry.notes || "",
+        date: entry.date || todayKey(),
+        emptyRun: !!entry.emptyRun,
+        returnToYard: !!entry.returnToYard,
+        waitMin: entry.waitMin ? String(entry.waitMin) : "",
+        slipNo: entry.slipNo || "",
+        helper: entry.helper || "",
+        wasteCode: entry.wasteCode || "",
+        scanLoading: false,
+        scanError: null,
+      });
+      return;
+    }
     const pid = projectId || activeClock?.projectId || "";
     const pr = projects.find((p) => p.id === pid);
     setTripModal({
@@ -4820,6 +4859,14 @@ export default function SiteManager() {
       disposalSite: "",
       notes: "",
       date: todayKey(),
+      emptyRun: false,
+      returnToYard: false,
+      waitMin: "",
+      slipNo: "",
+      helper: "",
+      wasteCode: "",
+      scanLoading: false,
+      scanError: null,
     });
   }
 
@@ -4834,43 +4881,103 @@ export default function SiteManager() {
         const w = openWasteKg(n.projectId);
         if (w) n.weightKg = String(w);
       }
+      // Rückfahrt zum Werkhof: a convenience prefill, not a requirement --
+      // only offered while "to" is still blank, and stays editable after.
+      if (k === "returnToYard" && v && !s.to && billing.companyName) {
+        const addr = [billing.street, billing.buildingNumber].filter(Boolean).join(" ");
+        const place = [billing.postalCode, billing.town].filter(Boolean).join(" ");
+        n.to = [billing.companyName, addr, place].filter(Boolean).join(", ");
+      }
       return n;
     });
   }
 
+  // A photo of the paper slip (Lieferschein/Waagschein), read through the
+  // same Worker AI proxy the delivery-note scan already uses. The result
+  // only ever fills the already-open form's own fields -- there is no
+  // separate confirm step, since a trip is one record, not a list of
+  // proposed items the way a material scan's items are (confirmScan).
+  // Never guessed: a field the model could not read comes back null and
+  // the form field it would touch is left exactly as it was.
+  async function scanTripSlip(e) {
+    const file = e.target.files?.[0];
+    if (!file || !tripModal) return;
+    let images;
+    try {
+      const { b64, mediaType } = await fileToScaledImage(file);
+      images = [{ b64, mediaType }];
+      setTripModal((s) => s && { ...s, scanLoading: true, scanError: null, scanDetail: null });
+    } catch {
+      setTripModal((s) => s && { ...s, scanError: t.scanErrorHint });
+      return;
+    }
+    try {
+      const prompt =
+        'Read this delivery note or weighbridge slip (Lieferschein or Waagschein) from a Swiss construction site. Respond ONLY with JSON, no markdown, no prose: {"from":string|null,"to":string|null,"weightKg":number|null,"slipNo":string|null,"wasteCode":string|null,"disposalSite":string|null}. Use null for anything not clearly printed on the slip -- never guess.';
+      const content = [
+        { type: "image", source: { type: "base64", media_type: images[0].mediaType, data: images[0].b64 } },
+        { type: "text", text: prompt },
+      ];
+      const text = await callClaude(content);
+      const parsed = parseJsonSafe(text, {});
+      setTripModal(
+        (s) =>
+          s && {
+            ...s,
+            scanLoading: false,
+            from: parsed.from != null ? String(parsed.from) : s.from,
+            to: parsed.to != null ? String(parsed.to) : s.to,
+            weightKg: parsed.weightKg != null ? String(parsed.weightKg) : s.weightKg,
+            slipNo: parsed.slipNo != null ? String(parsed.slipNo) : s.slipNo,
+            wasteCode: parsed.wasteCode != null ? String(parsed.wasteCode) : s.wasteCode,
+            disposalSite: parsed.disposalSite != null ? String(parsed.disposalSite) : s.disposalSite,
+          },
+      );
+    } catch (err) {
+      setTripModal(
+        (s) => s && { ...s, scanLoading: false, scanError: t.scanErrorHint, scanDetail: errDetail(err, images) },
+      );
+    }
+  }
+
   function saveTrip() {
     const m = tripModal;
-    if (!m) return;
+    if (!m || m.readOnly) return;
     if (!m.from.trim() && !m.to.trim()) {
       showToast(t.tripNeedsRoute);
       return;
     }
     const hours = tripHours(m.departTime, m.arriveTime);
-    persist({
-      entries: [
-        newEntry({
-          type: "transport",
-          projectId: m.projectId || null,
-          date: m.date || todayKey(),
-          description: `${m.from.trim() || "?"} → ${m.to.trim() || "?"}`,
-          vehicle: m.vehicle,
-          from: m.from.trim(),
-          to: m.to.trim(),
-          departTime: m.departTime,
-          arriveTime: m.arriveTime,
-          hours,
-          km: parseFloat(m.km) || 0,
-          loadKind: m.loadKind,
-          weightKg: parseFloat(m.weightKg) || 0,
-          mulde: m.mulde || "",
-          disposalSite: m.disposalSite.trim(),
-          notes: m.notes.trim(),
-          qty: hours ? String(hours) : "",
-          unit: hours ? "h" : "",
-        }),
-        ...entries,
-      ],
-    });
+    const fields = {
+      projectId: m.projectId || null,
+      date: m.date || todayKey(),
+      description: `${m.from.trim() || "?"} → ${m.to.trim() || "?"}`,
+      vehicle: m.vehicle,
+      from: m.from.trim(),
+      to: m.to.trim(),
+      departTime: m.departTime,
+      arriveTime: m.arriveTime,
+      hours,
+      km: parseFloat(m.km) || 0,
+      loadKind: m.loadKind,
+      weightKg: parseFloat(m.weightKg) || 0,
+      mulde: m.mulde || "",
+      disposalSite: m.disposalSite.trim(),
+      notes: m.notes.trim(),
+      qty: hours ? String(hours) : "",
+      unit: hours ? "h" : "",
+      emptyRun: !!m.emptyRun,
+      returnToYard: !!m.returnToYard,
+      waitMin: parseFloat(m.waitMin) || 0,
+      slipNo: m.slipNo.trim(),
+      helper: m.helper.trim(),
+      wasteCode: m.wasteCode.trim(),
+    };
+    if (m.id) {
+      persist({ entries: entries.map((e) => (e.id === m.id ? { ...e, ...fields } : e)) });
+    } else {
+      persist({ entries: [newEntry({ type: "transport", ...fields }), ...entries] });
+    }
     showToast(t.tripSaved);
     setTripModal(null);
   }
@@ -9660,6 +9767,7 @@ export default function SiteManager() {
             onInspect={(pid) => openInspection(pid)}
             onEditInspection={(entry) => openInspection(entry.projectId, entry)}
             canEditInspection={canEditInspection}
+            onEditTrip={(entry) => openTrip(entry.projectId, entry)}
             currentUid={user?.uid}
             onTogglePin={() => togglePin(selectedProject)}
             roster={team.members}
@@ -11851,226 +11959,22 @@ export default function SiteManager() {
         </Modal>
       )}
 
-      {tripModal &&
-        (() => {
-          const wasteOpen = tripModal.loadKind === "waste" ? openWasteKg(tripModal.projectId) : 0;
-          const hours = tripHours(tripModal.departTime, tripModal.arriveTime);
-          const field = { background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text };
-          const lbl = (s) => (
-            <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
-              {s}
-            </div>
-          );
-          return (
-            <Modal t={t} onClose={() => setTripModal(null)} title={t.tripAdd}>
-              <div className="flex flex-col gap-2.5">
-                {lbl(t.tripProject)}
-                <select
-                  aria-label={t.tripProject}
-                  data-trip-project
-                  value={tripModal.projectId || ""}
-                  onChange={(e) => setTripField("projectId", e.target.value)}
-                  style={field}
-                  className="rounded-lg px-2 py-2 text-sm outline-none"
-                >
-                  <option value="">—</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    {lbl(t.tripVehicle)}
-                    <select
-                      aria-label={t.tripVehicle}
-                      data-trip-vehicle
-                      value={tripModal.vehicle}
-                      onChange={(e) => setTripField("vehicle", e.target.value)}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    >
-                      {VEHICLES.map((v) => (
-                        <option key={v} value={v}>
-                          {t[`vehicle_${v}`]}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    {lbl(t.tripDate)}
-                    <input
-                      aria-label={t.tripDate}
-                      type="date"
-                      value={tripModal.date}
-                      onChange={(e) => setTripField("date", e.target.value)}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    {lbl(t.tripFrom)}
-                    <input
-                      aria-label={t.tripFromPh}
-                      data-trip-from
-                      value={tripModal.from}
-                      onChange={(e) => setTripField("from", e.target.value)}
-                      placeholder={t.tripFromPh}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                  <div>
-                    {lbl(t.tripTo)}
-                    <input
-                      aria-label={t.tripToPh}
-                      data-trip-to
-                      value={tripModal.to}
-                      onChange={(e) => setTripField("to", e.target.value)}
-                      placeholder={t.tripToPh}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    {lbl(t.tripDepart)}
-                    <input
-                      aria-label={t.tripDepart}
-                      data-trip-depart
-                      type="time"
-                      value={tripModal.departTime}
-                      onChange={(e) => setTripField("departTime", e.target.value)}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                  <div>
-                    {lbl(t.tripArrive)}
-                    <input
-                      aria-label={t.tripArrive}
-                      data-trip-arrive
-                      type="time"
-                      value={tripModal.arriveTime}
-                      onChange={(e) => setTripField("arriveTime", e.target.value)}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                  <div>
-                    {lbl(t.tripKm)}
-                    <input
-                      aria-label={t.tripKm}
-                      data-trip-km
-                      value={tripModal.km}
-                      onChange={(e) => setTripField("km", e.target.value)}
-                      inputMode="decimal"
-                      placeholder="0"
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                </div>
-                {hours > 0 && (
-                  <div data-trip-hours style={{ color: COLORS.amber }} className="text-xs font-bold">
-                    {t.tripHours}: {hours} h
-                  </div>
-                )}
-                {lbl(t.tripLoad)}
-                <div className="flex flex-wrap gap-1.5">
-                  {LOAD_KINDS.map((k) => (
-                    <button
-                      key={k}
-                      data-trip-load={k}
-                      onClick={() => setTripField("loadKind", k)}
-                      style={{
-                        background: tripModal.loadKind === k ? COLORS.accent : COLORS.card,
-                        border: `1px solid ${COLORS.border}`,
-                      }}
-                      className="px-2.5 py-1.5 rounded-full text-xs font-bold"
-                    >
-                      {t[`load_${k}`]}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    {lbl(t.tripWeight)}
-                    <input
-                      aria-label={t.tripWeight}
-                      data-trip-weight
-                      value={tripModal.weightKg}
-                      onChange={(e) => setTripField("weightKg", e.target.value)}
-                      inputMode="decimal"
-                      placeholder="kg"
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                  {tripModal.loadKind === "waste" && (
-                    <div>
-                      {lbl(t.tripMulde)}
-                      <select
-                        aria-label={t.tripMulde}
-                        data-trip-mulde
-                        value={tripModal.mulde}
-                        onChange={(e) => setTripField("mulde", e.target.value)}
-                        style={field}
-                        className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                      >
-                        {MULDE_SIZES.map((m) => (
-                          <option key={m} value={m}>
-                            {m ? `${m} m³` : "—"}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-                {tripModal.loadKind === "waste" && wasteOpen > 0 && (
-                  <div data-trip-waste-hint style={{ color: COLORS.muted }} className="text-xs">
-                    {t.tripWasteOpen.replace("{kg}", String(wasteOpen))}
-                  </div>
-                )}
-                {tripModal.loadKind === "waste" && (
-                  <div>
-                    {lbl(t.tripDisposal)}
-                    <input
-                      aria-label={t.tripDisposalPh}
-                      data-trip-disposal
-                      value={tripModal.disposalSite}
-                      onChange={(e) => setTripField("disposalSite", e.target.value)}
-                      placeholder={t.tripDisposalPh}
-                      style={field}
-                      className="w-full rounded-lg px-2 py-2 text-sm outline-none"
-                    />
-                  </div>
-                )}
-                {lbl(t.notesLabel)}
-                <textarea
-                  aria-label={t.notesLabel}
-                  value={tripModal.notes}
-                  onChange={(e) => setTripField("notes", e.target.value)}
-                  rows={2}
-                  style={field}
-                  className="rounded-lg px-2 py-2 text-sm outline-none resize-none"
-                />
-                <button
-                  data-trip-save
-                  onClick={saveTrip}
-                  style={{ background: COLORS.accent }}
-                  className="w-full py-3 rounded-lg font-bold uppercase text-sm"
-                >
-                  {t.tripSave}
-                </button>
-              </div>
-            </Modal>
-          );
-        })()}
+      {tripModal && (
+        <Suspense fallback={<Loading t={t} />}>
+          <TripModal
+            t={t}
+            tripModal={tripModal}
+            projects={projects}
+            wasteOpen={tripModal.loadKind === "waste" ? openWasteKg(tripModal.projectId) : 0}
+            demoMode={isDemoMode()}
+            onClose={() => setTripModal(null)}
+            onField={setTripField}
+            onSave={saveTrip}
+            onScanFile={scanTripSlip}
+            tripSlipFileRef={tripSlipFileRef}
+          />
+        </Suspense>
+      )}
       {inspectionModal && (
         <Modal
           t={t}

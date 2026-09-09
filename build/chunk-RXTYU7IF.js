@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "installHintAndroid": "Site Log se puede instalar y abrir como una app.",
   "installButtonLabel": "Instalar",
   "ccLogins": "Inicios de sesi\xF3n",
-  "ccLoginsEmpty": "Todav\xEDa nadie ha iniciado sesi\xF3n."
+  "ccLoginsEmpty": "Todav\xEDa nadie ha iniciado sesi\xF3n.",
+  "tripEditTitle": "Editar el viaje",
+  "tripEmptyRun": "Viaje en vac\xEDo",
+  "tripReturnToYard": "Regreso al dep\xF3sito",
+  "tripWaitMin": "Tiempo de espera (min)",
+  "tripSlipNo": "N.\xBA albar\xE1n/b\xE1scula",
+  "tripSlipNoPh": "N\xFAmero",
+  "tripHelper": "Ayudante/acompa\xF1ante",
+  "tripHelperPh": "Nombre",
+  "tripWasteCode": "C\xF3digo de residuo",
+  "tripWasteCodePh": "C\xF3digo VeVA",
+  "tripScanning": "Leyendo el albar\xE1n\u2026",
+  "tripReadOnly": "Solo el conductor o un manager puede editar este viaje."
 }
 `;export{o as default};

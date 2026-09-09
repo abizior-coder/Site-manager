@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log lze nainstalovat a otevírat jako appku.",
   "installButtonLabel": "Instalovat",
   "ccLogins": "Přihlášení",
-  "ccLoginsEmpty": "Zatím se nikdo nepřihlásil."
+  "ccLoginsEmpty": "Zatím se nikdo nepřihlásil.",
+  "tripEditTitle": "Upravit jízdu",
+  "tripEmptyRun": "Jízda naprázdno",
+  "tripReturnToYard": "Návrat na dvůr",
+  "tripWaitMin": "Čekací doba (min)",
+  "tripSlipNo": "Č. dodacího/váženého lístku",
+  "tripSlipNoPh": "Číslo",
+  "tripHelper": "Pomocník/spolujezdec",
+  "tripHelperPh": "Jméno",
+  "tripWasteCode": "Kód odpadu",
+  "tripWasteCodePh": "Kód VeVA",
+  "tripScanning": "Čtení dokladu…",
+  "tripReadOnly": "Tuto jízdu může upravit jen řidič nebo manažer."
 }

@@ -65,6 +65,7 @@ export function ProjectDetail({
   onAdd,
   onEdit,
   onEditEntry,
+  onEditTrip,
   onCopyEntry,
   onDeleteEntry,
   deletedEntries = [],
@@ -1129,25 +1130,31 @@ export function ProjectDetail({
                     {trips.map((e) => (
                       <div
                         key={e.id}
+                        data-job-trip-row
                         style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}` }}
-                        className="rounded-lg px-3 py-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-0.5"
+                        className="rounded-lg flex items-center gap-1"
                       >
-                        <span style={{ color: COLORS.muted }}>{e.date}</span>
-                        <span className="font-bold">
-                          {e.from || "?"} → {e.to || "?"}
-                        </span>
-                        <span style={{ color: COLORS.muted }}>
-                          {t[`load_${e.loadKind}`] || e.loadKind}
-                          {e.weightKg ? ` · ${e.weightKg} kg` : ""}
-                          {e.hours ? ` · ${e.hours} h` : ""}
-                          {e.km ? ` · ${e.km} km` : ""}
-                        </span>
+                        <button
+                          onClick={() => onEditTrip && onEditTrip(e)}
+                          className="flex-1 min-w-0 text-left px-3 py-2 text-xs flex flex-wrap items-center gap-x-3 gap-y-0.5"
+                        >
+                          <span style={{ color: COLORS.muted }}>{e.date}</span>
+                          <span className="font-bold">
+                            {e.from || "?"} → {e.to || "?"}
+                          </span>
+                          <span style={{ color: COLORS.muted }}>
+                            {t[`load_${e.loadKind}`] || e.loadKind}
+                            {e.weightKg ? ` · ${e.weightKg} kg` : ""}
+                            {e.hours ? ` · ${e.hours} h` : ""}
+                            {e.km ? ` · ${e.km} km` : ""}
+                          </span>
+                        </button>
                         <button
                           aria-label={t.a11yDelete}
                           title={t.a11yDelete}
                           onClick={() => onDeleteEntry(e.id)}
                           style={{ color: COLORS.muted }}
-                          className="tap ml-auto"
+                          className="tap mr-2 shrink-0"
                         >
                           <Trash2 size={13} />
                         </button>

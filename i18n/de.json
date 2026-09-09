@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log lässt sich installieren und wie eine App öffnen.",
   "installButtonLabel": "Installieren",
   "ccLogins": "Logins",
-  "ccLoginsEmpty": "Noch niemand hat sich angemeldet."
+  "ccLoginsEmpty": "Noch niemand hat sich angemeldet.",
+  "tripEditTitle": "Fahrt bearbeiten",
+  "tripEmptyRun": "Leerfahrt",
+  "tripReturnToYard": "Rückfahrt zum Werkhof",
+  "tripWaitMin": "Wartezeit (Min.)",
+  "tripSlipNo": "Lieferschein-/Waagschein-Nr.",
+  "tripSlipNoPh": "Nummer",
+  "tripHelper": "Beifahrer/Helfer",
+  "tripHelperPh": "Name",
+  "tripWasteCode": "Abfallcode",
+  "tripWasteCodePh": "VeVA-Code",
+  "tripScanning": "Beleg wird gelesen…",
+  "tripReadOnly": "Nur die Fahrerin/der Fahrer oder eine Managerin/ein Manager kann diese Fahrt bearbeiten."
 }

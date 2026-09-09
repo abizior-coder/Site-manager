@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "installHintAndroid": "A Site Log telep\xEDthet\u0151 \xE9s alkalmaz\xE1sk\xE9nt nyithat\xF3 meg.",
   "installButtonLabel": "Telep\xEDt\xE9s",
   "ccLogins": "Bejelentkez\xE9sek",
-  "ccLoginsEmpty": "M\xE9g senki sem jelentkezett be."
+  "ccLoginsEmpty": "M\xE9g senki sem jelentkezett be.",
+  "tripEditTitle": "Fuvar szerkeszt\xE9se",
+  "tripEmptyRun": "\xDCresj\xE1rat",
+  "tripReturnToYard": "Vissza\xFAt a telephelyre",
+  "tripWaitMin": "V\xE1rakoz\xE1si id\u0151 (perc)",
+  "tripSlipNo": "Sz\xE1ll\xEDt\xF3lev\xE9l/m\xE9rlegjegy sz\xE1m",
+  "tripSlipNoPh": "Sz\xE1m",
+  "tripHelper": "Seg\xEDt\u0151/utast\xE1rs",
+  "tripHelperPh": "N\xE9v",
+  "tripWasteCode": "Hullad\xE9kk\xF3d",
+  "tripWasteCodePh": "VeVA-k\xF3d",
+  "tripScanning": "Bizonylat beolvas\xE1sa\u2026",
+  "tripReadOnly": "Csak a sof\u0151r vagy egy vezet\u0151 szerkesztheti ezt a fuvart."
 }
 `;export{a as default};

@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log може да се инсталира и отваря като приложение.",
   "installButtonLabel": "Инсталирай",
   "ccLogins": "Влизания",
-  "ccLoginsEmpty": "Все още никой не се е вписал."
+  "ccLoginsEmpty": "Все още никой не се е вписал.",
+  "tripEditTitle": "Редактиране на курса",
+  "tripEmptyRun": "Празен курс",
+  "tripReturnToYard": "Връщане в базата",
+  "tripWaitMin": "Време на изчакване (мин)",
+  "tripSlipNo": "№ на бележка за доставка/кантар",
+  "tripSlipNoPh": "Номер",
+  "tripHelper": "Помощник/спътник",
+  "tripHelperPh": "Име",
+  "tripWasteCode": "Код на отпадъка",
+  "tripWasteCodePh": "Код VeVA",
+  "tripScanning": "Четене на документа…",
+  "tripReadOnly": "Само шофьорът или мениджър може да редактира този курс."
 }

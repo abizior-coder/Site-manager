@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log sa dá nainštalovať a otvárať ako appka.",
   "installButtonLabel": "Inštalovať",
   "ccLogins": "Prihlásenia",
-  "ccLoginsEmpty": "Zatiaľ sa nikto neprihlásil."
+  "ccLoginsEmpty": "Zatiaľ sa nikto neprihlásil.",
+  "tripEditTitle": "Upraviť jazdu",
+  "tripEmptyRun": "Jazda naprázdno",
+  "tripReturnToYard": "Návrat na dvor",
+  "tripWaitMin": "Čakacia doba (min)",
+  "tripSlipNo": "Č. dodacieho/vážneho lístka",
+  "tripSlipNoPh": "Číslo",
+  "tripHelper": "Pomocník/spolujazdec",
+  "tripHelperPh": "Meno",
+  "tripWasteCode": "Kód odpadu",
+  "tripWasteCodePh": "Kód VeVA",
+  "tripScanning": "Čítanie dokladu…",
+  "tripReadOnly": "Túto jazdu môže upraviť len vodič alebo manažér."
 }

@@ -181,12 +181,27 @@ export function setBaseline() {}
 export async function syncCollection() {
   return { written: 0, deleted: 0 };
 }
-export async function loadCollection(name) {
+
+// docs/specs/2026-09-09_transport-detail-and-scan.md: extra entries a test
+// wants without changing SAMPLE.entries for every other test that already
+// assumes an empty Transport tab / a single new-trip save. Empty by
+// default; a test opts in with setStubExtraEntries(...) and nothing else
+// changes.
+let stubExtraEntries = [];
+export function setStubExtraEntries(arr) {
+  stubExtraEntries = arr || [];
+}
+function collectionFor(name) {
+  if (name === "entries") return [...(SAMPLE.entries || []), ...stubExtraEntries];
   return SAMPLE[name] || [];
 }
 
+export async function loadCollection(name) {
+  return collectionFor(name);
+}
+
 export function subscribeCollection(name, cb) {
-  cb(SAMPLE[name] || [], { fromCache: false, pending: false });
+  cb(collectionFor(name), { fromCache: false, pending: false });
   return () => {};
 }
 

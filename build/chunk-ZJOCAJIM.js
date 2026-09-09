@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "installHintAndroid": "Site Log pu\xF2 essere installata e aperta come un'app.",
   "installButtonLabel": "Installa",
   "ccLogins": "Accessi",
-  "ccLoginsEmpty": "Nessuno ha ancora effettuato l'accesso."
+  "ccLoginsEmpty": "Nessuno ha ancora effettuato l'accesso.",
+  "tripEditTitle": "Modifica il trasporto",
+  "tripEmptyRun": "Corsa a vuoto",
+  "tripReturnToYard": "Rientro al deposito",
+  "tripWaitMin": "Tempo di attesa (min)",
+  "tripSlipNo": "N. bolla/pesata",
+  "tripSlipNoPh": "Numero",
+  "tripHelper": "Aiutante/passeggero",
+  "tripHelperPh": "Nome",
+  "tripWasteCode": "Codice rifiuto",
+  "tripWasteCodePh": "Codice VeVA",
+  "tripScanning": "Lettura del documento\u2026",
+  "tripReadOnly": "Solo l'autista o un manager pu\xF2 modificare questo trasporto."
 }
 `;export{o as default};

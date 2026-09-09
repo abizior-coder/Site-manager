@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "installHintAndroid": "Site Log sa d\xE1 nain\u0161talova\u0165 a otv\xE1ra\u0165 ako appka.",
   "installButtonLabel": "In\u0161talova\u0165",
   "ccLogins": "Prihl\xE1senia",
-  "ccLoginsEmpty": "Zatia\u013E sa nikto neprihl\xE1sil."
+  "ccLoginsEmpty": "Zatia\u013E sa nikto neprihl\xE1sil.",
+  "tripEditTitle": "Upravi\u0165 jazdu",
+  "tripEmptyRun": "Jazda napr\xE1zdno",
+  "tripReturnToYard": "N\xE1vrat na dvor",
+  "tripWaitMin": "\u010Cakacia doba (min)",
+  "tripSlipNo": "\u010C. dodacieho/v\xE1\u017Eneho l\xEDstka",
+  "tripSlipNoPh": "\u010C\xEDslo",
+  "tripHelper": "Pomocn\xEDk/spolujazdec",
+  "tripHelperPh": "Meno",
+  "tripWasteCode": "K\xF3d odpadu",
+  "tripWasteCodePh": "K\xF3d VeVA",
+  "tripScanning": "\u010C\xEDtanie dokladu\u2026",
+  "tripReadOnly": "T\xFAto jazdu m\xF4\u017Ee upravi\u0165 len vodi\u010D alebo mana\u017E\xE9r."
 }
 `;export{o as default};

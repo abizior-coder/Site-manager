@@ -961,5 +961,17 @@
   "installHintAndroid": "O Site Log pode ser instalado e aberto como uma app.",
   "installButtonLabel": "Instalar",
   "ccLogins": "Sessões iniciadas",
-  "ccLoginsEmpty": "Ainda ninguém iniciou sessão."
+  "ccLoginsEmpty": "Ainda ninguém iniciou sessão.",
+  "tripEditTitle": "Editar a viagem",
+  "tripEmptyRun": "Viagem em vazio",
+  "tripReturnToYard": "Regresso ao estaleiro",
+  "tripWaitMin": "Tempo de espera (min)",
+  "tripSlipNo": "N.º da guia/balança",
+  "tripSlipNoPh": "Número",
+  "tripHelper": "Ajudante/acompanhante",
+  "tripHelperPh": "Nome",
+  "tripWasteCode": "Código de resíduo",
+  "tripWasteCodePh": "Código VeVA",
+  "tripScanning": "A ler o documento…",
+  "tripReadOnly": "Só o condutor ou um manager pode editar esta viagem."
 }

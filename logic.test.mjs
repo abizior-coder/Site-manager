@@ -746,6 +746,11 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
   t("07:00 to 08:30 is 1.5 h", tripHours("07:00", "08:30"), 1.5);
   t("a trip over midnight counts forward", tripHours("23:30", "00:15"), 0.75);
   t("a missing arrival is 0 h", tripHours("07:00", ""), 0);
+  // docs/specs/2026-09-09_transport-detail-and-scan.md: waitMin is stored
+  // and shown, never subtracted -- tripHours takes only the two times, so
+  // a call site tempted to pass waiting minutes as a third argument finds
+  // it has no effect at all.
+  t("a third argument (e.g. waitMin) changes nothing", tripHours("07:00", "08:30", 45), 1.5);
   t(
     "transport hours are told apart from work",
     reportTotals([

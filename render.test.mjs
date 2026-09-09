@@ -17,14 +17,16 @@ writeFileSync(
   `
 import { createRoot } from "react-dom/client";
 import SiteManager from "./roofing-site-manager.jsx";
-import { setStubRole, setStubWeeklyHours } from "./test-stubs/company-store.js";
-import { setStubSignedOut } from "./test-stubs/firebase-client.js";
+import { setStubRole, setStubWeeklyHours, setStubExtraEntries } from "./test-stubs/company-store.js";
+import { setStubSignedOut, setStubDemoMode } from "./test-stubs/firebase-client.js";
 import { setStubLoginEvents } from "./test-stubs/login-events.js";
 import { loadLang } from "./i18n/index.js";
 window.__setRole = setStubRole;
 window.__setWeeklyHours = setStubWeeklyHours;
 window.__setSignedOut = setStubSignedOut;
 window.__setLoginEvents = setStubLoginEvents;
+window.__setDemoMode = setStubDemoMode;
+window.__setExtraEntries = setStubExtraEntries;
 window.__mount = async () => { await Promise.all([loadLang("en"), loadLang("de")]); createRoot(document.getElementById("root")).render(<SiteManager />); };
 `,
 );
@@ -81,7 +83,15 @@ function check(name, ok, detail) {
   ok ? pass++ : fail++;
 }
 
-async function renderAs(role, weeklyHours = null, signedOut = false, install = null, loginEvents = null) {
+async function renderAs(
+  role,
+  weeklyHours = null,
+  signedOut = false,
+  install = null,
+  loginEvents = null,
+  demoMode = false,
+  extraEntries = null,
+) {
   const dom = new JSDOM(`<!doctype html><html><body><div id="root"></div></body></html>`, {
     url: "https://example.test/",
     pretendToBeVisual: true,
@@ -136,6 +146,8 @@ async function renderAs(role, weeklyHours = null, signedOut = false, install = n
     window.sessionStorage.setItem("site-log-login-recorded-u1", "1");
     dom.window.__setLoginEvents(loginEvents);
   }
+  dom.window.__setDemoMode(demoMode);
+  if (extraEntries !== null) dom.window.__setExtraEntries(extraEntries);
   dom.window.__mount();
 
   // let effects and the stubbed async loads settle
@@ -1238,7 +1250,7 @@ async function renderAs(role, weeklyHours = null, signedOut = false, install = n
     opener?.focus();
     opener?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 300));
-    const dlg = window.document.querySelector('[role="dialog"]');
+    const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
     check(
       "owner: the billing modal is a labelled dialog",
       !!dlg && dlg.getAttribute("aria-modal") === "true" && !!dlg.getAttribute("aria-labelledby"),
@@ -1883,6 +1895,213 @@ async function renderAs(role, weeklyHours = null, signedOut = false, install = n
     "login audit: no rows renders the empty state, not a blank card",
     !!logins?.querySelector('[data-empty="logins"]'),
     logins ? logins.textContent.slice(0, 120) : "no [data-logins-card]",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+// --- transport: tappable job row, every field, the scan control ----------
+// docs/specs/2026-09-09_transport-detail-and-scan.md. e5 is "u1"'s own trip
+// -- the render harness's fixed currentUser().uid, whatever role is
+// stubbed -- e6 is "u2"'s; the pair a read-only-vs-editable test needs.
+// Opt-in via setStubExtraEntries (renderAs's extraEntries param), not
+// SAMPLE.entries itself -- every other Transport-tab test already assumes
+// no trips exist there.
+const TRIP_ENTRIES = [
+  {
+    id: "e5",
+    type: "transport",
+    projectId: "p1",
+    date: new Date().toISOString().slice(0, 10),
+    description: "Werkhof → Baustelle",
+    vehicle: "lieferwagen",
+    from: "Werkhof",
+    to: "Baustelle",
+    departTime: "07:00",
+    arriveTime: "07:30",
+    hours: 0.5,
+    km: 8,
+    loadKind: "material",
+    weightKg: 120,
+    mulde: "",
+    disposalSite: "",
+    notes: "",
+    emptyRun: false,
+    returnToYard: false,
+    waitMin: 0,
+    slipNo: "",
+    helper: "",
+    wasteCode: "",
+    userId: "u1",
+  },
+  {
+    id: "e6",
+    type: "transport",
+    projectId: "p1",
+    date: new Date().toISOString().slice(0, 10),
+    description: "Baustelle → Deponie",
+    vehicle: "pritsche",
+    from: "Baustelle",
+    to: "Deponie",
+    departTime: "14:00",
+    arriveTime: "14:45",
+    hours: 0.75,
+    km: 12,
+    loadKind: "waste",
+    weightKg: 300,
+    mulde: "7",
+    disposalSite: "Deponie Rümlang",
+    notes: "",
+    emptyRun: false,
+    returnToYard: true,
+    waitMin: 15,
+    slipNo: "WS-2026-04",
+    helper: "Peter Helfer",
+    wasteCode: "17 09 04",
+    userId: "u2",
+  },
+];
+async function openJobTrips(role, demoMode = false) {
+  const { window, errors } = await renderAs(role, null, false, null, null, demoMode, TRIP_ENTRIES);
+  const projTab = [...window.document.querySelectorAll("button")].find(
+    (x) => (x.textContent || "").trim().toUpperCase() === "PROJEKTE",
+  );
+  projTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  const jobBtn = [...window.document.querySelectorAll("button")].find((x) =>
+    (x.textContent || "").includes("Trockenbau"),
+  );
+  jobBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 250));
+  return { window, errors };
+}
+function tripRowFor(window, entryId) {
+  return [...window.document.querySelectorAll("[data-job-trip-row]")].find((row) =>
+    entryId === "e5" ? /Werkhof/.test(row.textContent || "") : /Deponie/.test(row.textContent || ""),
+  );
+}
+async function openTripModal(window, row) {
+  row?.querySelector("button")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 400));
+}
+
+{
+  const { window, errors } = await openJobTrips("owner");
+  const rows = window.document.querySelectorAll("[data-job-trip-row]");
+  check("transport: the job's trip rows render", rows.length === 2, `${rows.length} rows`);
+  const row = tripRowFor(window, "e6");
+  check("transport: the trip row is a button", row?.querySelector("button")?.tagName === "BUTTON", "no button in row");
+  await openTripModal(window, row);
+  const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  check("transport: tapping the row opens the modal", !!dlg?.querySelector("[data-trip-save]"), "no trip modal");
+  const fieldHooks = [
+    "data-trip-project",
+    "data-trip-vehicle",
+    "data-trip-from",
+    "data-trip-to",
+    "data-trip-empty-run",
+    "data-trip-return-to-yard",
+    "data-trip-depart",
+    "data-trip-arrive",
+    "data-trip-km",
+    "data-trip-wait",
+    "data-trip-weight",
+    "data-trip-mulde",
+    "data-trip-disposal",
+    "data-trip-waste-code",
+    "data-trip-slip-no",
+    "data-trip-helper",
+  ];
+  const missing = fieldHooks.filter((h) => !dlg?.querySelector(`[${h}]`));
+  check(
+    "transport: the modal shows every field, original and new",
+    missing.length === 0,
+    `missing: ${missing.join(", ")}`,
+  );
+  check(
+    "transport: the scan control is offered (not demo mode)",
+    !!dlg?.querySelector("[data-trip-scan]"),
+    "no [data-trip-scan]",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+{
+  // The demo publishes no Worker call ever (docs/specs/2026-09-09_public-
+  // demo.md's isolation extended to this feature): the scan button is
+  // hidden, not disabled.
+  const { window, errors } = await openJobTrips("owner", true);
+  const row = tripRowFor(window, "e6");
+  await openTripModal(window, row);
+  const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  check(
+    "transport: the scan control is absent in demo mode",
+    !!dlg?.querySelector("[data-trip-save]") && !dlg?.querySelector("[data-trip-scan]"),
+    dlg ? "scan control still present" : "modal did not open",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+{
+  // e5 belongs to "u1" -- the crew stub's own currentUser().uid -- so a
+  // crew render can still edit its own trip, the same "own record" rule
+  // entries already carry.
+  const { window, errors } = await openJobTrips("crew");
+  const row = tripRowFor(window, "e5");
+  await openTripModal(window, row);
+  let dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  check(
+    "transport: the author can open their own trip for editing",
+    !!dlg?.querySelector("[data-trip-save]"),
+    "no save button for the author",
+  );
+  const slip = dlg?.querySelector("[data-trip-slip-no]");
+  if (slip) {
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(slip, "LS-9001");
+    slip.dispatchEvent(new window.Event("input", { bubbles: true }));
+  }
+  await new Promise((r) => setTimeout(r, 250));
+  dlg?.querySelector("[data-trip-save]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 300));
+  const rows = window.document.querySelectorAll("[data-job-trip-row]");
+  check(
+    "transport: saving an edit updates the same entry, no row appended",
+    rows.length === 2,
+    `${rows.length} rows after edit`,
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+{
+  // e6 belongs to "u2" -- a manager (owner/supervisor) may still edit it.
+  const { window, errors } = await openJobTrips("supervisor");
+  const row = tripRowFor(window, "e6");
+  await openTripModal(window, row);
+  const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  check(
+    "transport: a manager can edit another member's trip",
+    !!dlg?.querySelector("[data-trip-save]") && !dlg?.querySelector("[data-trip-readonly]"),
+    "manager could not edit someone else's trip",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+{
+  // e6 belongs to "u2"; crew is neither its author nor a manager.
+  const { window, errors } = await openJobTrips("crew");
+  const row = tripRowFor(window, "e6");
+  await openTripModal(window, row);
+  const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  const inputs = [...(dlg?.querySelectorAll("input:not([type=hidden]), select, textarea") || [])];
+  check(
+    "transport: a non-author, non-manager sees every field disabled",
+    inputs.length > 0 && inputs.every((el) => el.disabled),
+    `${inputs.filter((el) => !el.disabled).length} of ${inputs.length} fields still enabled`,
+  );
+  check(
+    "transport: a non-author, non-manager gets no save button",
+    !dlg?.querySelector("[data-trip-save]"),
+    "save button still offered",
   );
   if (errors.length) problems.push(...errors);
 }

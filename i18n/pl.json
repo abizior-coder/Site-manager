@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log można zainstalować i otwierać jak aplikację.",
   "installButtonLabel": "Zainstaluj",
   "ccLogins": "Logowania",
-  "ccLoginsEmpty": "Nikt jeszcze się nie zalogował."
+  "ccLoginsEmpty": "Nikt jeszcze się nie zalogował.",
+  "tripEditTitle": "Edytuj kurs",
+  "tripEmptyRun": "Przejazd pusty",
+  "tripReturnToYard": "Powrót na plac",
+  "tripWaitMin": "Czas oczekiwania (min)",
+  "tripSlipNo": "Nr dokumentu WZ/wagowego",
+  "tripSlipNoPh": "Numer",
+  "tripHelper": "Pomocnik/pasażer",
+  "tripHelperPh": "Imię",
+  "tripWasteCode": "Kod odpadu",
+  "tripWasteCodePh": "Kod VeVA",
+  "tripScanning": "Odczytywanie dokumentu…",
+  "tripReadOnly": "Tylko kierowca lub menedżer może edytować ten kurs."
 }

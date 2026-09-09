@@ -18,6 +18,18 @@ export function setStubSignedOut(v) {
   stubSignedOut = v;
 }
 
+// docs/specs/2026-09-09_transport-detail-and-scan.md: the trip slip scan
+// control reads this to hide itself in demo mode. Real firebase-client.js
+// reads the `?demo=1` URL param; this stub is a plain toggle instead so a
+// test can flip it without touching the harness's own jsdom URL.
+let stubDemoMode = false;
+export function setStubDemoMode(v) {
+  stubDemoMode = v;
+}
+export function isDemoMode() {
+  return stubDemoMode;
+}
+
 export async function onAuthChange(cb) {
   // Real Firebase reports "nobody" before it reports the persisted user, so
   // the signed-out branch runs on every cold load. A stale setter in that

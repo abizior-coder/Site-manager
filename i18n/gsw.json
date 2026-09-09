@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log cha me installiere und wie ne App uufmache.",
   "installButtonLabel": "Installiere",
   "ccLogins": "Logins",
-  "ccLoginsEmpty": "Na niemert het sich aagmeldet."
+  "ccLoginsEmpty": "Na niemert het sich aagmeldet.",
+  "tripEditTitle": "Fahrt bearbeite",
+  "tripEmptyRun": "Leerfahrt",
+  "tripReturnToYard": "Rückfahrt zum Werkhof",
+  "tripWaitMin": "Wartezyt (Min.)",
+  "tripSlipNo": "Liferschy-/Waagschy-Nr.",
+  "tripSlipNoPh": "Nummer",
+  "tripHelper": "Beifahrer/Helfer",
+  "tripHelperPh": "Name",
+  "tripWasteCode": "Abfallcode",
+  "tripWasteCodePh": "VeVA-Code",
+  "tripScanning": "Beleg wird gläse…",
+  "tripReadOnly": "Nur dr Fahrer/d Fahrerin oder e Manager/Manegerin cha die Fahrt bearbeite."
 }

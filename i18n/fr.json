@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log peut être installé et ouvert comme une application.",
   "installButtonLabel": "Installer",
   "ccLogins": "Connexions",
-  "ccLoginsEmpty": "Personne ne s'est encore connecté."
+  "ccLoginsEmpty": "Personne ne s'est encore connecté.",
+  "tripEditTitle": "Modifier le trajet",
+  "tripEmptyRun": "Trajet à vide",
+  "tripReturnToYard": "Retour au dépôt",
+  "tripWaitMin": "Temps d'attente (min)",
+  "tripSlipNo": "N° bulletin de livraison/pesée",
+  "tripSlipNoPh": "Numéro",
+  "tripHelper": "Aide / passager",
+  "tripHelperPh": "Nom",
+  "tripWasteCode": "Code déchet",
+  "tripWasteCodePh": "Code VeVA",
+  "tripScanning": "Lecture du bulletin…",
+  "tripReadOnly": "Seul le chauffeur ou un manager peut modifier ce trajet."
 }

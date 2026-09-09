@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "installHintAndroid": "Site Log can be installed and opened like an app.",
   "installButtonLabel": "Install",
   "ccLogins": "Logins",
-  "ccLoginsEmpty": "Nobody has signed in yet."
+  "ccLoginsEmpty": "Nobody has signed in yet.",
+  "tripEditTitle": "Edit trip",
+  "tripEmptyRun": "Empty run",
+  "tripReturnToYard": "Return to yard",
+  "tripWaitMin": "Waiting time (min)",
+  "tripSlipNo": "Delivery/weighbridge slip no.",
+  "tripSlipNoPh": "Number",
+  "tripHelper": "Helper",
+  "tripHelperPh": "Name",
+  "tripWasteCode": "Waste code",
+  "tripWasteCodePh": "VeVA code",
+  "tripScanning": "Reading the slip\u2026",
+  "tripReadOnly": "Only the driver or a manager can edit this trip."
 }
 `;export{o as default};

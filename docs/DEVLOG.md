@@ -5,6 +5,83 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-09 — Transport: the full trip record, tappable, and a scanned slip
+
+- **Why:** `docs/specs/2026-09-09_transport-detail-and-scan.md` — the job's
+  trip row showed a four-value summary and nothing was tappable; six
+  fields (empty run, return to yard, waiting minutes, Lieferschein/
+  Waagschein number, helper, Abfallcode) had nowhere to live at all.
+- **What:** `roofing-site-manager.jsx`'s `openTrip(projectId, entry)` now
+  edits in place when `entry` is given (pre-fills every field, carries the
+  entry's `id`/`userId`), the same shape `openInspection`'s own edit path
+  already uses. `saveTrip()` gained an update branch — `userId`, `id` and
+  `createdAt` are never rewritten. `canEditTrip(entry)` mirrors
+  `canEditInspection` exactly (author or manager). `scanTripSlip` sends a
+  photo of the paper slip through the existing Worker AI proxy
+  (`callClaude`, `fileToScaledImage`) with a strict-JSON prompt covering
+  `from`/`to`/`weightKg`/`slipNo`/`wasteCode`/`disposalSite`; a field the
+  model could not read comes back `null` and is left alone — the proposal
+  only ever fills the *already-open* form, there is no separate confirm
+  step, and nothing is written until the person presses the form's own
+  Save. `tabs/ProjectDetail.jsx`'s `[data-job-trip-row]` is now a
+  `<button>` (delete stays a sibling button, not nested inside it —
+  button-in-button is invalid HTML) calling the app's new `onEditTrip`
+  prop. A viewer who is neither the trip's author nor a manager gets every
+  field `disabled` and no Save button.
+- **The scan and demo mode:** `callClaude()` fetches the Worker's
+  `CLAUDE_PROXY_URL` directly, not through `getSdk()`, so the demo's
+  structural Firestore isolation (`isDemoMode()`/`demo-store.js`) does not
+  cover it on its own — `[data-trip-scan]` reads `isDemoMode()` itself and
+  hides entirely (not disabled) whenever `?demo=1` is active, so a demo
+  session can never reach the real Worker either.
+- **Budget, the real story of this commit:** the full field set, built
+  inline the way `inspectionModal`/`scanModal` already are, pushed the
+  eager bundle to 355 KB against the 350 KB cap. Splitting the pure
+  session-marker logic out (the `login-events.js` lesson, 2026-09-09) does
+  not apply here — this is real UI weight, not a phantom esbuild-splitting
+  tax. Fix: the trip modal moved to a genuinely lazy component,
+  `ui/trip-modal.jsx` (`lazy(() => import(...))` + `Suspense`, exactly
+  like every tab already is) — render only, every handler and every byte
+  of state stays in `roofing-site-manager.jsx`. `LOAD_KINDS`/`MULDE_SIZES`
+  moved with it (duplicated as tiny local consts, cheaper than a cross-
+  chunk import); `VEHICLES` stays in the app file (still used by
+  `openTrip`'s own defaults). Landed at 349.x KB.
+- **Tests:** `logic.test.mjs` — a third argument to `tripHours` (e.g.
+  `waitMin`) changes nothing, confirming it is never subtracted (1 check,
+  358 total). `render.test.mjs` — a new opt-in `setStubExtraEntries`
+  (`test-stubs/company-store.js`, a `renderAs` seventh parameter) keeps
+  two fixture trips (`e5` owned by the harness's fixed `currentUser().uid`,
+  `e6` owned by someone else) out of `SAMPLE.entries` itself, since every
+  pre-existing Transport-tab test already assumes no trips exist there;
+  polluting the shared fixture broke four of them on the first attempt,
+  reverted before landing. Nine checks: the row is a button and tapping it
+  opens the modal; every one of the eighteen fields (twelve original, six
+  new) is present; the scan control shows for a real session and hides in
+  demo mode; the trip's own author can edit it; saving does not append a
+  row; a manager can edit someone else's trip; a non-author non-manager
+  gets every field disabled and no Save button. A dialog-selection bug
+  surfaced while writing these — `document.querySelector('[role="dialog"]')`
+  picks the *first* (outer, the job sheet) of two nested dialogs, not the
+  trip modal on top of it; fixed to `[...  .querySelectorAll(...)].pop()`,
+  the same pattern the file's own `topDialog()` helper already uses
+  elsewhere. 358/195/11/21/37 green (logic/render/order/dock/worker);
+  first paint back under budget.
+- **Verified live** on the emulator as chef (owner): saved a new trip with
+  every new field filled (empty run checked, 20 min waiting, a slip
+  number, a helper name) — no error; opened the job, the trip row showed
+  and was tappable; the modal opened pre-filled with all of it, including
+  the scan control (real session, not demo); edited the slip number and
+  saved — the job still showed exactly one trip row, and reopening it
+  read back the edited value, confirming the same entry was updated, not
+  duplicated. The scan call itself (a real slip photo through the Worker)
+  was not exercised — same as every other AI scan feature, PROJECT.md §5
+  already names this untried pending a real photo and API credit.
+- **Not started:** nothing from this spec's Definition of done was
+  skipped except exercising the live AI scan call itself (see above) —
+  storing the slip photo as evidence, a reference list for Abfallcode or
+  helpers, and any rules change were all explicitly out of scope per the
+  spec and remain so.
+
 ## 2026-09-09 — Login audit: who signed in, when, from which role
 
 - **Why:** `docs/specs/2026-09-09_login-audit.md` — the owner asked for a

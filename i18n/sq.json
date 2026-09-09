@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log mund të instalohet dhe të hapet si aplikacion.",
   "installButtonLabel": "Instalo",
   "ccLogins": "Hyrjet",
-  "ccLoginsEmpty": "Ende nuk ka hyrë askush."
+  "ccLoginsEmpty": "Ende nuk ka hyrë askush.",
+  "tripEditTitle": "Ndrysho udhëtimin",
+  "tripEmptyRun": "Udhëtim bosh",
+  "tripReturnToYard": "Kthim në oborr",
+  "tripWaitMin": "Koha e pritjes (min)",
+  "tripSlipNo": "Nr. i fletëdërgesës/peshores",
+  "tripSlipNoPh": "Numri",
+  "tripHelper": "Ndihmësi/pasagjeri",
+  "tripHelperPh": "Emri",
+  "tripWasteCode": "Kodi i mbetjes",
+  "tripWasteCodePh": "Kodi VeVA",
+  "tripScanning": "Duke lexuar dokumentin…",
+  "tripReadOnly": "Vetëm shoferi ose një menaxher mund ta ndryshojë këtë udhëtim."
 }

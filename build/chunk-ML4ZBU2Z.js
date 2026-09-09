@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var i=`{
   "installHintAndroid": "Site Log poate fi instalat \u0219i deschis ca o aplica\u021Bie.",
   "installButtonLabel": "Instaleaz\u0103",
   "ccLogins": "Autentific\u0103ri",
-  "ccLoginsEmpty": "\xCEnc\u0103 nimeni nu s-a autentificat."
+  "ccLoginsEmpty": "\xCEnc\u0103 nimeni nu s-a autentificat.",
+  "tripEditTitle": "Editeaz\u0103 cursa",
+  "tripEmptyRun": "Curs\u0103 goal\u0103",
+  "tripReturnToYard": "\xCEntoarcere la depozit",
+  "tripWaitMin": "Timp de a\u0219teptare (min)",
+  "tripSlipNo": "Nr. aviz de livrare/c\xE2nt\u0103rire",
+  "tripSlipNoPh": "Num\u0103r",
+  "tripHelper": "Ajutor/pasager",
+  "tripHelperPh": "Nume",
+  "tripWasteCode": "Cod de\u0219eu",
+  "tripWasteCodePh": "Cod VeVA",
+  "tripScanning": "Se cite\u0219te documentul\u2026",
+  "tripReadOnly": "Doar \u0219oferul sau un manager poate edita aceast\u0103 curs\u0103."
 }
 `;export{i as default};

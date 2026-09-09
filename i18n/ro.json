@@ -961,5 +961,17 @@
   "installHintAndroid": "Site Log poate fi instalat și deschis ca o aplicație.",
   "installButtonLabel": "Instalează",
   "ccLogins": "Autentificări",
-  "ccLoginsEmpty": "Încă nimeni nu s-a autentificat."
+  "ccLoginsEmpty": "Încă nimeni nu s-a autentificat.",
+  "tripEditTitle": "Editează cursa",
+  "tripEmptyRun": "Cursă goală",
+  "tripReturnToYard": "Întoarcere la depozit",
+  "tripWaitMin": "Timp de așteptare (min)",
+  "tripSlipNo": "Nr. aviz de livrare/cântărire",
+  "tripSlipNoPh": "Număr",
+  "tripHelper": "Ajutor/pasager",
+  "tripHelperPh": "Nume",
+  "tripWasteCode": "Cod deșeu",
+  "tripWasteCodePh": "Cod VeVA",
+  "tripScanning": "Se citește documentul…",
+  "tripReadOnly": "Doar șoferul sau un manager poate edita această cursă."
 }

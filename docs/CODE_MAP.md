@@ -66,7 +66,7 @@ Inside `SiteManager()` (grep the name):
 | files / photos | `uploadFiles` (queue from `upload-queue.js`), `postFile`, `openFile`, `deleteFile`, `addFileLink`, `openPhoto`, `savePhotoEdit`, `handleFile`, `fileToScaledImage` |
 | materials / orders | `addToBasket`, `transferBasketToProject`, `requestBasketForProject`, `setOrderStatus`, `stagePriceList`/`applyPriceList` (`price-list.js`), `openPickup`/`generatePickupCode` (lazy `barcode.js` + `swiss-qr-bill.js`) |
 | AI (Worker `/`) | `callClaude`, `translateEntry`/`translateNote`/`autoTranslateNote`, `runScan`/`confirmScan` (delivery notes), library scans, `runInspection` |
-| inspection / transport | `openInspection`, `saveInspectionPlain`, `confirmInspection`, `openTrip`/`saveTrip` (`roof-tiles.js`) |
+| inspection / transport | `openInspection`, `saveInspectionPlain`, `confirmInspection`, `openTrip`/`setTripField`/`saveTrip` (`roof-tiles.js`; `openTrip(projectId, entry)` edits in place when `entry` is given), `canEditTrip`, `scanTripSlip` (Worker AI proxy reads a Lieferschein/Waagschein photo, proposes fields into the open form only — `docs/specs/2026-09-09_transport-detail-and-scan.md`) |
 | backup | `downloadFullBackup`, `restoreFullBackup` (`import-guard.js`), `recordBackup` (`backup.js`), `openBackupExport`/`submitBackupImport` (codes) |
 | weather | `fetchWeather`, `submitWeatherCity` (open-meteo) |
 | profile | `openProfile`, `saveProfileInfo`, docs/insurance/cert forms, language picker modal (`langPickerOpen`) |
@@ -84,7 +84,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `tabs/BoardTab.jsx` | `BoardTab` | Board/Übersicht, month dots `[data-board-dots]`, week `[data-woche]` (pinned name column, today `[data-woche-today]` scrolled into view, touch hint `[data-woche-hint-touch]` under `(hover: none)`) |
 | `tabs/MaterialsTab.jsx` | `MaterialsTab`, `ArticleSheet` | supplier sheet `[data-article-sheet]`, catalogues from `data/catalog.js` |
 | `tabs/CockpitTab.jsx` | `CockpitTab`, `ExportCard`, `UsageCard`, `ErrorsCard`, `BexioCard`, `BackupCard`, `LoginsCard`, `useWorkerData`, `WORKER_URL` | owner cards; most fetch their own Worker data. `LoginsCard` (`[data-logins-card]`) is the exception: Firestore, not the Worker, via the `loadLoginEvents` prop `roofing-site-manager.jsx` passes down (lazy `login-events.js`) — newest first, `EmptyState` when empty |
-| `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]` |
+| `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]`. Each `[data-job-trip-row]` is tappable (`onEditTrip`, opens `ui/trip-modal.jsx` pre-filled) — delete stays a separate button, not nested inside it. Distinct from the top-level Transport tab's own `[data-trip-row]` list in `roofing-site-manager.jsx` (unrelated, unchanged by `docs/specs/2026-09-09_transport-detail-and-scan.md` — that spec named the job view only) |
 
 ## Shared UI (`ui/`)
 
@@ -101,6 +101,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `ui/break-chips.jsx` | `BreakChips` (GAV breaks) |
 | `ui/lang-picker.jsx` | `AuthLangPicker` (`[data-auth-lang]`, before sign-in) |
 | `ui/install-hint.jsx` | `InstallHint` (`[data-install-hint]`): dismissible Heute banner, `docs/specs/2026-09-09_pwa-install.md`; iOS gets `t.installHintIos` only, Android also gets `[data-install-button]` calling the captured `beforeinstallprompt`; `[data-install-hint-dismiss]` |
+| `ui/trip-modal.jsx` | `TripModal` (`docs/specs/2026-09-09_transport-detail-and-scan.md`): every trip field incl. `emptyRun`/`returnToYard`/`waitMin`/`slipNo`/`helper`/`wasteCode`; render only — `roofing-site-manager.jsx`'s `openTrip`/`setTripField`/`saveTrip`/`scanTripSlip`/`canEditTrip` stay put. Lazy (`lazy(() => import("./ui/trip-modal.jsx"))`, `<Suspense>`): the full field set missed the first-paint budget eager, so unlike `install.js`/`login-audit.js` (small, stayed eager) this one moved out — a genuine net win once a feature is this size. `[data-trip-scan]` hides itself when `demoMode` (the app's own `isDemoMode()`, passed as a prop — no Worker call ever leaves the demo). A viewer who is neither the trip's driver nor a manager gets every field `disabled` and no `[data-trip-save]` (`tripModal.readOnly`, decided by `canEditTrip` before the modal opens) |
 
 ## Pure modules (root, all unit-tested in `logic.test.mjs` unless noted)
 

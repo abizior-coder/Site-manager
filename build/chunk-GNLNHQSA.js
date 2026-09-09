@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var t=`{
   "installHintAndroid": "Site Log lze nainstalovat a otev\xEDrat jako appku.",
   "installButtonLabel": "Instalovat",
   "ccLogins": "P\u0159ihl\xE1\u0161en\xED",
-  "ccLoginsEmpty": "Zat\xEDm se nikdo nep\u0159ihl\xE1sil."
+  "ccLoginsEmpty": "Zat\xEDm se nikdo nep\u0159ihl\xE1sil.",
+  "tripEditTitle": "Upravit j\xEDzdu",
+  "tripEmptyRun": "J\xEDzda napr\xE1zdno",
+  "tripReturnToYard": "N\xE1vrat na dv\u016Fr",
+  "tripWaitMin": "\u010Cekac\xED doba (min)",
+  "tripSlipNo": "\u010C. dodac\xEDho/v\xE1\u017Een\xE9ho l\xEDstku",
+  "tripSlipNoPh": "\u010C\xEDslo",
+  "tripHelper": "Pomocn\xEDk/spolujezdec",
+  "tripHelperPh": "Jm\xE9no",
+  "tripWasteCode": "K\xF3d odpadu",
+  "tripWasteCodePh": "K\xF3d VeVA",
+  "tripScanning": "\u010Cten\xED dokladu\u2026",
+  "tripReadOnly": "Tuto j\xEDzdu m\u016F\u017Ee upravit jen \u0159idi\u010D nebo mana\u017Eer."
 }
 `;export{t as default};

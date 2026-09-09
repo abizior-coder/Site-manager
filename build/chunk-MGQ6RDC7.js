@@ -961,6 +961,18 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "installHintAndroid": "Site Log mund t\xEB instalohet dhe t\xEB hapet si aplikacion.",
   "installButtonLabel": "Instalo",
   "ccLogins": "Hyrjet",
-  "ccLoginsEmpty": "Ende nuk ka hyr\xEB askush."
+  "ccLoginsEmpty": "Ende nuk ka hyr\xEB askush.",
+  "tripEditTitle": "Ndrysho udh\xEBtimin",
+  "tripEmptyRun": "Udh\xEBtim bosh",
+  "tripReturnToYard": "Kthim n\xEB oborr",
+  "tripWaitMin": "Koha e pritjes (min)",
+  "tripSlipNo": "Nr. i flet\xEBd\xEBrges\xEBs/peshores",
+  "tripSlipNoPh": "Numri",
+  "tripHelper": "Ndihm\xEBsi/pasagjeri",
+  "tripHelperPh": "Emri",
+  "tripWasteCode": "Kodi i mbetjes",
+  "tripWasteCodePh": "Kodi VeVA",
+  "tripScanning": "Duke lexuar dokumentin\u2026",
+  "tripReadOnly": "Vet\xEBm shoferi ose nj\xEB menaxher mund ta ndryshoj\xEB k\xEBt\xEB udh\xEBtim."
 }
 `;export{r as default};

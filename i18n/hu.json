@@ -961,5 +961,17 @@
   "installHintAndroid": "A Site Log telepíthető és alkalmazásként nyitható meg.",
   "installButtonLabel": "Telepítés",
   "ccLogins": "Bejelentkezések",
-  "ccLoginsEmpty": "Még senki sem jelentkezett be."
+  "ccLoginsEmpty": "Még senki sem jelentkezett be.",
+  "tripEditTitle": "Fuvar szerkesztése",
+  "tripEmptyRun": "Üresjárat",
+  "tripReturnToYard": "Visszaút a telephelyre",
+  "tripWaitMin": "Várakozási idő (perc)",
+  "tripSlipNo": "Szállítólevél/mérlegjegy szám",
+  "tripSlipNoPh": "Szám",
+  "tripHelper": "Segítő/utastárs",
+  "tripHelperPh": "Név",
+  "tripWasteCode": "Hulladékkód",
+  "tripWasteCodePh": "VeVA-kód",
+  "tripScanning": "Bizonylat beolvasása…",
+  "tripReadOnly": "Csak a sofőr vagy egy vezető szerkesztheti ezt a fuvart."
 }
