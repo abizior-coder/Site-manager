@@ -435,7 +435,13 @@ async function renderAs(
         "no crew section in the job view",
       );
       const hubTabs = window.document.querySelectorAll("[data-hub-tab]");
-      check("owner: the job is a hub with seven tabs", hubTabs.length === 7, `${hubTabs.length} tabs`);
+      // Eight for an owner: the seven crew-visible tabs plus the owner-only
+      // billing tab (docs/specs/2026-09-11_job-rapporte-tab.md).
+      check(
+        "owner: the job is a hub with eight tabs (billing included)",
+        hubTabs.length === 8,
+        `${hubTabs.length} tabs`,
+      );
       const hub = (id) =>
         window.document
           .querySelector(`[data-hub-tab="${id}"]`)
@@ -2137,6 +2143,110 @@ async function openTripModal(window, row) {
     !dlg?.querySelector("[data-trip-save]"),
     "save button still offered",
   );
+  if (errors.length) problems.push(...errors);
+}
+
+// --- job RAPPORTE tab -------------------------------------------------------
+// docs/specs/2026-09-11_job-rapporte-tab.md: the job's own sent reports,
+// not billing. Sends today's report first (covers p1's entries, the same
+// "Trockenbau" job every other job-hub test already opens), then checks
+// the job tab picks it up.
+async function openJobReportsTab(role) {
+  const { window, errors, text } = await renderAs(role);
+  const rapportTab = [...window.document.querySelectorAll("button")].find(
+    (x) => (x.textContent || "").trim().toUpperCase() === "RAPPORT",
+  );
+  rapportTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  const send = () =>
+    [...window.document.querySelectorAll("button")].find((x) =>
+      /An Vorgesetzten senden|Send to supervisor/.test(x.textContent || ""),
+    );
+  send()?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 250));
+  [...window.document.querySelectorAll("[data-dialog-close]")]
+    .pop()
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  const projTab = [...window.document.querySelectorAll("button")].find(
+    (x) => (x.textContent || "").trim().toUpperCase() === "PROJEKTE",
+  );
+  projTab?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  const jobBtn = [...window.document.querySelectorAll("button")].find((x) =>
+    (x.textContent || "").includes("Trockenbau"),
+  );
+  jobBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 300));
+  window.document
+    .querySelector('[data-hub-tab="reports"]')
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  return { window, errors, text };
+}
+
+{
+  const { window, errors, text } = await openJobReportsTab("owner");
+  const row = window.document.querySelector("[data-job-report-row]");
+  check(
+    "job RAPPORTE: a job whose entries were sent today shows that report as a row",
+    !!row,
+    "no [data-job-report-row]",
+  );
+  row?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 250));
+  const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+  check(
+    "job RAPPORTE: tapping the row opens the existing report-review modal",
+    !!dlg?.querySelector("[data-report-actions]"),
+    dlg ? "no [data-report-actions] in the opened dialog" : "no dialog opened",
+  );
+  check(
+    "job RAPPORTE: the owner sees Save and Resend in that modal",
+    [...(dlg?.querySelectorAll("button") || [])].some((b) => /^(Speichern|Save)$/.test((b.textContent || "").trim())) &&
+      dlg?.querySelectorAll("[data-report-actions] button").length === 2,
+    "Save or Resend missing for the owner",
+  );
+  window.document
+    .querySelector('[data-hub-tab="billing"]')
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  check(
+    "job RAPPORTE: the owner has a separate billing tab carrying Neue Offerte/Neue Rechnung",
+    /Neue Offerte|New quote/.test(text()) && /Neue Rechnung|New invoice/.test(text()),
+    "billing tab missing its two buttons",
+  );
+  window.document
+    .querySelector('[data-hub-tab="reports"]')
+    ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  check(
+    "job RAPPORTE: RAPPORTE itself no longer offers Neue Offerte",
+    !/Neue Offerte|New quote/.test(text()),
+    "Neue Offerte still present in RAPPORTE",
+  );
+  if (errors.length) problems.push(...errors);
+}
+
+{
+  const { window, errors } = await openJobReportsTab("crew");
+  check(
+    "job RAPPORTE: crew never sees the billing tab",
+    !window.document.querySelector('[data-hub-tab="billing"]'),
+    "[data-hub-tab=billing] present for crew",
+  );
+  const row = window.document.querySelector("[data-job-report-row]");
+  if (row) {
+    row.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    const dlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+    check(
+      "job RAPPORTE: crew gets no Save/Resend/exclude controls in the report modal",
+      !dlg?.querySelector("[data-report-actions] button:nth-child(2)") &&
+        ![...dlg.querySelectorAll("button")].some((b) => /^(Speichern|Save)$/.test((b.textContent || "").trim())),
+      "a control button is still present for crew",
+    );
+  }
   if (errors.length) problems.push(...errors);
 }
 

@@ -5,6 +5,67 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-11 — The job's RAPPORTE tab: reports sent for this job, not billing
+
+- **Why:** `docs/specs/2026-09-11_job-rapporte-tab.md` — the job hub's
+  Rapporte tab (`hubTab === "reports"`) mixed the signed customer-Rapport
+  list with an owner-only billing block (new quote/invoice buttons, this
+  project's document list, Regie-as-quote/invoice, costing); on a job
+  with no signed Rapport and no documents yet, the tab showed nothing
+  but "Neue Offerte" and "Neue Rechnung" — reported as "RAPPORTE shows
+  only billing." Worse, the job's own sent daily/weekly/monthly reports
+  (`sentReports`, already built, already company-wide-listed on the
+  top-level Rapport tab) never showed up here at all — nothing filtered
+  that collection down to this job.
+- **What:** `tabs/ProjectDetail.jsx`'s Rapporte tab gained a list of this
+  job's `sentReports` (`[data-job-report-row]`) above the existing
+  signed-Rapport list — filtered in `roofing-site-manager.jsx` by whether
+  `reportRows(r, allEntries)` touches this project, the same join
+  `reportFigures` already relies on. Tapping a row calls the new
+  `onOpenReport` prop, which is just `setReportViewModal(r)` — the exact
+  modal the top-level tab already opens; no new modal, no new report
+  engine, `reports.js` gained no exports. The modal's editing controls
+  (notes, the pre-model hours override, exclude/restore, Save, Resend)
+  are now `canManage()`-gated — a real gap this closes, since the modal
+  had no role check at all before (open to whoever had it open, crew
+  included, from the top-level tab too). Viewing stays open to anyone.
+  Billing moved to a new `hubTab === "billing"` tab, spliced into the
+  hub-tabs array only `canBill && [...]` — a crew or supervisor account
+  never renders that tab button, not merely a hidden control inside a
+  reachable one. One new `i18n` key, `hubBilling`, all 14 languages;
+  every other string (`t.sentReports`, `t.daily`/`t.monthly`,
+  `t.reportSentTimes`, `t.reportLastSent`, `t.noReportsYet`) reused from
+  the top-level tab's own markup.
+- **Budget:** the per-row title/hours computation first lived in
+  `roofing-site-manager.jsx` (reusing the closure-bound `reportFigures`/
+  `periodTitle`), which pushed first paint to 350.17 KB against the
+  350.00 KB cap. Moved into `tabs/ProjectDetail.jsx` instead — already a
+  lazy chunk — importing the plain, non-closure `reportRows`/
+  `reportTotals` (`reports.js`) and `fmtDate`/`fmtMonth` (`ui/format.js`)
+  directly and computing each row from the new `jobReports`/`allEntries`
+  props; the eager prop shrank to a one-line filter. Landed at 349.97 KB.
+  Same lesson as `ReportSignModal`'s own budget fix (2026-09-09): logic
+  that only runs once a tab is opened has no business costing every
+  visitor their first paint.
+- **Tests:** `render.test.mjs` (213 total, 8 new/changed): the owner's
+  eight-tab count (seven plus the owner-only billing tab, was seven
+  before this spec); a job whose entries were included in today's sent
+  report shows it as a row; tapping opens the report modal
+  (`[data-report-actions]` present); the owner sees Save and Resend in
+  it; the owner's separate billing tab carries "Neue Offerte"/"Neue
+  Rechnung"; RAPPORTE itself no longer does; crew never sees the billing
+  tab; crew gets no Save/Resend/exclude in the report modal. 366/213/
+  11/21 green (logic/render/order/dock), every worker suite green
+  (bexio 29, cors 7, errors 14, files 37, limits 12, metrics 17); first
+  paint 349.97 KB. ESLint and Prettier clean.
+- **Not started:** nothing from this spec's Definition of done was
+  skipped. Out of scope and untouched, per the spec: `sentReports`' own
+  shape/rules/scoping (`docs/specs/2026-09-02_one-report-system.md`,
+  `docs/specs/2026-09-08_report-correctness.md`), who may *view* an
+  existing report (only who may *control* one changed), the top-level
+  Rapport tab's own report list, and the signed customer-Rapport list,
+  which already belonged in Rapporte and stays there.
+
 ## 2026-09-11 — A direct "+" on the job's Fotos tab
 
 - **Why:** `docs/specs/2026-09-11_photo-add-in-category.md` — the Fotos

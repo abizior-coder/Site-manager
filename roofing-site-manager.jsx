@@ -9733,6 +9733,11 @@ export default function SiteManager() {
             onPrintDocument={printDocument}
             canBill={isOwner()}
             reports={siteReports.filter((r) => r.projectId === selectedProject)}
+            jobReports={sentReports.filter((r) =>
+              reportRows(r, allEntries).some((row) => row.projectId === selectedProject),
+            )}
+            allEntries={allEntries}
+            onOpenReport={(r) => setReportViewModal(r)}
             onOpenRapport={(pid) => openRapport(pid)}
             onPrintRapport={printRapport}
             regie={regieSummary(selectedProject, { unbilledOnly: true })}
@@ -10190,7 +10195,7 @@ export default function SiteManager() {
                 <div style={{ color: COLORS.muted }} className="text-xs">
                   {t.editReportHint}
                 </div>
-                {!live && (
+                {!live && canManage() && (
                   <div className="flex items-center gap-2">
                     <span style={{ color: COLORS.muted }} className="text-xs">
                       {t.hoursFieldLabel}
@@ -10206,15 +10211,23 @@ export default function SiteManager() {
                     />
                   </div>
                 )}
-                <textarea
-                  aria-label={t.notesLabel}
-                  value={reportViewModal.notes}
-                  onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))}
-                  placeholder={t.notesLabel}
-                  rows={3}
-                  style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                  className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
-                />
+                {canManage() ? (
+                  <textarea
+                    aria-label={t.notesLabel}
+                    value={reportViewModal.notes}
+                    onChange={(e) => setReportViewModal((r) => ({ ...r, notes: e.target.value }))}
+                    placeholder={t.notesLabel}
+                    rows={3}
+                    style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                  />
+                ) : (
+                  reportViewModal.notes && (
+                    <div style={{ color: COLORS.muted }} className="text-xs">
+                      {reportViewModal.notes}
+                    </div>
+                  )
+                )}
                 <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto overflow-x-hidden">
                   {f.rows.map((e) => {
                     const meta = typeMeta(e.type, t) || typeMeta("note", t);
@@ -10232,7 +10245,7 @@ export default function SiteManager() {
                           <span style={{ color: COLORS.muted }}>
                             {e.qty ? `${e.qty}${e.unit ? " " + e.unit : ""}` : meta.label}
                           </span>
-                          {live && (
+                          {live && canManage() && (
                             <button
                               className="tap"
                               aria-label={t.a11yClose}
@@ -10259,25 +10272,29 @@ export default function SiteManager() {
                           className="rounded-lg px-3 py-2 text-xs flex items-center justify-between gap-2"
                         >
                           <span className="min-w-0 truncate line-through">{e.description}</span>
-                          <button
-                            onClick={() => toggleReportEntry(e.id)}
-                            style={{ color: COLORS.accentText }}
-                            className="text-xs font-bold uppercase shrink-0"
-                          >
-                            {t.reportRestore}
-                          </button>
+                          {canManage() && (
+                            <button
+                              onClick={() => toggleReportEntry(e.id)}
+                              style={{ color: COLORS.accentText }}
+                              className="text-xs font-bold uppercase shrink-0"
+                            >
+                              {t.reportRestore}
+                            </button>
+                          )}
                         </div>
                       ))}
                     </>
                   )}
                 </div>
-                <button
-                  onClick={saveReportEdits}
-                  style={{ background: COLORS.accent }}
-                  className="w-full py-3 rounded-lg font-bold uppercase text-sm"
-                >
-                  {t.saveLabel}
-                </button>
+                {canManage() && (
+                  <button
+                    onClick={saveReportEdits}
+                    style={{ background: COLORS.accent }}
+                    className="w-full py-3 rounded-lg font-bold uppercase text-sm"
+                  >
+                    {t.saveLabel}
+                  </button>
+                )}
                 <div data-report-actions className="grid gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => saveReportAsPdf(reportViewModal)}
@@ -10286,13 +10303,15 @@ export default function SiteManager() {
                   >
                     <Printer size={14} /> {t.savePdfBtn}
                   </button>
-                  <button
-                    onClick={() => resendReport(reportViewModal)}
-                    style={{ background: COLORS.accentDim }}
-                    className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"
-                  >
-                    <Send size={14} /> {t.resendBtn}
-                  </button>
+                  {canManage() && (
+                    <button
+                      onClick={() => resendReport(reportViewModal)}
+                      style={{ background: COLORS.accentDim }}
+                      className="py-3 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-1"
+                    >
+                      <Send size={14} /> {t.resendBtn}
+                    </button>
+                  )}
                 </div>
               </div>
             </Modal>

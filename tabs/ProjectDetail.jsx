@@ -1,12 +1,13 @@
 // The job view, the photo viewer and the photo editor: loaded when a job
 // is opened, not with the first paint. Helpers come from the app module.
 import { fmtSize, sortFiles } from "../files.js";
-import { rapportChanged } from "../reports.js";
+import { rapportChanged, reportRows, reportTotals } from "../reports.js";
 import { StoredImage } from "../ui/entries.jsx";
-import { todayKey } from "../ui/format.js";
+import { todayKey, fmtDate, fmtMonth } from "../ui/format.js";
 import { COLORS } from "../ui/theme.js";
 import {
   Camera,
+  ChevronRight,
   Circle,
   ClipboardCheck,
   CreditCard,
@@ -82,6 +83,9 @@ export function ProjectDetail({
   onPrintDocument,
   canBill,
   reports,
+  jobReports = [],
+  allEntries = [],
+  onOpenReport,
   onOpenRapport,
   onPrintRapport,
   regie,
@@ -275,7 +279,8 @@ export function ProjectDetail({
               ["material", t.materials, materials.length + tools.length],
               ["photos", t.hubPhotos, photos.length],
               ["plans", t.hubPlans, (files || []).length],
-              ["reports", t.hubReports, (reports || []).length],
+              ["reports", t.hubReports, (reports || []).length + jobReports.length],
+              ...(canBill ? [["billing", t.hubBilling, (documents || []).length]] : []),
               ["chat", t.hubChat, unreadChat],
             ].map(([id, label, count]) => {
               const on = hubTab === id;
@@ -698,6 +703,45 @@ export function ProjectDetail({
               style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
               className="rounded-xl p-4 mb-4"
             >
+              {jobReports.length === 0 && (!reports || reports.length === 0) && (
+                <EmptyState name="job-reports" icon={FileText} title={t.noReportsYet} compact />
+              )}
+              {jobReports.length > 0 && (
+                <div className="mb-4 flex flex-col gap-1.5">
+                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-1">
+                    {t.sentReports}
+                  </div>
+                  {jobReports.map((r) => {
+                    const hours = reportTotals(reportRows(r, allEntries)).hours;
+                    const sends = (r.sends || []).length || 1;
+                    const lastSent = r.sends?.length ? r.sends[r.sends.length - 1].at : r.sentAt || null;
+                    const title = r.period === "daily" ? fmtDate(r.periodLabel, lang) : fmtMonth(r.periodLabel, lang);
+                    return (
+                      <button
+                        key={r.id}
+                        data-job-report-row
+                        onClick={() => onOpenReport(r)}
+                        style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+                        className="w-full text-left rounded-lg p-3 flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold truncate">
+                            {r.period === "daily" ? t.daily : t.monthly} · {title}
+                          </div>
+                          <div style={{ color: COLORS.muted }} className="text-xs truncate">
+                            {hours.toFixed(1)}h · {t.reportSentTimes} {sends}×
+                            {lastSent
+                              ? ` · ${t.reportLastSent} ${new Date(lastSent).toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`
+                              : ""}
+                          </div>
+                        </div>
+                        <ChevronRight size={16} color={COLORS.muted} className="shrink-0" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {reports && reports.length > 0 && (
                 <div className="mb-4 flex flex-col gap-1.5">
                   {reports.map((r) => (
@@ -724,7 +768,14 @@ export function ProjectDetail({
                   ))}
                 </div>
               )}
+            </div>
+          )}
 
+          {hubTab === "billing" && canBill && (
+            <div
+              style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
+              className="rounded-xl p-4 mb-4"
+            >
               {canBill && (
                 <div className="grid grid-cols-2 gap-2 mb-4">
                   <button
