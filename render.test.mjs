@@ -454,6 +454,23 @@ async function renderAs(
       {
         const thumb = window.document.querySelector("[data-photo-thumb]");
         check("owner: a photo thumbnail is tappable", !!thumb, "no photo thumbnail in the job view");
+        const addBtn = window.document.querySelector("[data-photo-add]");
+        check(
+          "owner: the Fotos tab offers a + next to an existing photo grid",
+          !!addBtn,
+          "no [data-photo-add] with photos already present",
+        );
+        addBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 250));
+        check(
+          "owner: tapping + opens the photo-entry modal directly, not the quick-add sheet",
+          !!window.document.querySelector("[data-photo-input]"),
+          "no [data-photo-input] — the add-photo modal did not open",
+        );
+        [...window.document.querySelectorAll("[data-dialog-close]")]
+          .pop()
+          ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 200));
         hub("overview");
         await new Promise((r) => setTimeout(r, 200));
         thumb?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
@@ -1673,6 +1690,23 @@ async function renderAs(
       !!photos && /Noch keine Fotos|No photos/.test(photos.textContent || ""),
       photos ? photos.textContent.slice(0, 80) : job ? "no [data-empty=photos]" : "job not found",
     );
+    const emptyAddBtn = photos?.querySelector("[data-photo-add]");
+    check(
+      "crew: the empty photos state offers a + instead of a hint pointing elsewhere",
+      !!emptyAddBtn,
+      "no [data-photo-add] in the empty state",
+    );
+    emptyAddBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
+    check(
+      "crew: tapping the empty state's + opens the photo-entry modal directly",
+      !!window.document.querySelector("[data-photo-input]"),
+      "no [data-photo-input] — the add-photo modal did not open",
+    );
+    [...window.document.querySelectorAll("[data-dialog-close]")]
+      .pop()
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 250));
     window.document
       .querySelector('[role="dialog"] button[aria-label="Schliessen"]')
       ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));

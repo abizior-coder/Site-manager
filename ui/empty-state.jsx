@@ -3,7 +3,7 @@
 // for tests (`[data-empty="photos"]`).
 import { COLORS } from "./theme.js";
 
-export function EmptyState({ name, icon: Icon, title, hint, action, onAction, compact = false }) {
+export function EmptyState({ name, icon: Icon, title, hint, action, onAction, actionHook, compact = false }) {
   return (
     <div
       data-empty={name}
@@ -17,6 +17,7 @@ export function EmptyState({ name, icon: Icon, title, hint, action, onAction, co
       {hint && <div className="text-xs leading-relaxed max-w-xs">{hint}</div>}
       {action && onAction && (
         <button
+          {...(actionHook ? { [actionHook]: true } : {})}
           onClick={onAction}
           style={{ background: COLORS.cardAlt, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
           className="mt-1 px-4 py-2.5 rounded-lg text-xs font-bold uppercase"

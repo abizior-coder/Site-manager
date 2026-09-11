@@ -1356,12 +1356,32 @@ export function ProjectDetail({
               className="rounded-xl p-4 mb-4"
             >
               {photos.length === 0 && (
-                <EmptyState name="photos" icon={Camera} title={t.emptyPhotosTitle} hint={t.emptyPhotosHint} compact />
+                <EmptyState
+                  name="photos"
+                  icon={Camera}
+                  title={t.emptyPhotosTitle}
+                  action={t.photoLabel}
+                  onAction={() => onAdd("photo")}
+                  actionHook="data-photo-add"
+                  compact
+                />
               )}
               {photos.length > 0 && (
                 <div>
-                  <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide mb-2">
-                    {t.photoLabel}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div style={{ color: COLORS.muted }} className="text-xs uppercase tracking-wide">
+                      {t.photoLabel}
+                    </div>
+                    <button
+                      data-photo-add
+                      aria-label={t.photoLabel}
+                      title={t.photoLabel}
+                      onClick={() => onAdd("photo")}
+                      style={{ color: COLORS.accentText }}
+                      className="tap w-8 h-8 rounded-lg flex items-center justify-center"
+                    >
+                      <Plus size={16} />
+                    </button>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {photos.map((p) => (

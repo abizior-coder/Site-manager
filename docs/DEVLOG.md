@@ -5,6 +5,75 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-11 — A direct "+" on the job's Fotos tab
+
+- **Why:** `docs/specs/2026-09-11_photo-add-in-category.md` — the Fotos
+  tab's own empty state told the truth about a real gap: "Fotos vom
+  Dach kommen über «+» › Foto oder aus dem Chat hierher." There was no
+  way to add a photo from the tab itself; a person had to leave it for
+  the app-level quick-add sheet or a chat attachment. An earlier draft
+  of this spec targeted the wrong feature entirely (the `files`/R2
+  "Pläne" tab's `kind` categories) and was rewritten same-day once the
+  actual target — the entry-type `type: "photo"` Fotos tab — was named.
+- **What:** `tabs/ProjectDetail.jsx`'s Fotos tab (`hubTab === "photos"`)
+  gained `[data-photo-add]` in both states, both calling the same
+  already-existing `onAdd("photo")` prop (already bound to the current
+  project, already used by the Übersicht tab's own "Foto" shortcut) —
+  no new save path, no new modal: empty state via `ui/empty-state.jsx`'s
+  previously-unused `action`/`onAction` props (now also taking an
+  `actionHook` so a caller can put a `data-*` boolean attribute straight
+  on the generated button, for tests to find without a text match); the
+  filled grid via a small header-row icon button (`Plus`, `w-8 h-8`,
+  `tap`). The stale `emptyPhotosHint` (the string above, in all 14
+  languages) is dropped from this one `EmptyState` call rather than
+  rewritten in 14 languages to describe a new indirection that no
+  longer exists — `emptyPhotosTitle` ("Noch keine Fotos") stays, still
+  true, and the action button now shows the way instead of a sentence
+  describing one. No new `i18n` key: both controls' accessible name
+  reuses the existing `t.photoLabel` ("Foto").
+- **Demo mode:** already stayed local before this change and still
+  does — `onAdd`/`submitAdd`/`savePhoto`/`persist` all go through
+  `window.storage`/`company-store.js`, already backed by
+  `demo-store.js`'s in-memory SDK whenever `isDemoMode()` is true.
+  Unlike the `files`/R2 path (a raw `fetch()` to the Worker, which
+  needed its own demo branch when it grew per-category buttons in the
+  superseded draft of this spec), this path never touches the Worker or
+  a real Firestore project, with or without this change — checked live
+  rather than assumed (see Verified below).
+- **Tests:** `render.test.mjs` (206 total, 4 new): the owner's
+  Trockenbau job (already has one photo) shows `[data-photo-add]` next
+  to the filled grid, and tapping it opens the photo-entry modal
+  (`[data-photo-input]`) directly rather than any quick-add sheet; the
+  crew fixture's photo-less "Dach Kontrolle" job shows `[data-photo-add]`
+  inside the empty state itself, and tapping it opens the same modal.
+  Closing a modal opened *on top of* the already-open job-hub sheet
+  needed the same `[...querySelectorAll("[data-dialog-close]")].pop()`
+  pattern the transport spec's own DEVLOG entry (2026-09-09) already
+  recorded — a single `aria-label` match would have closed the *outer*
+  dialog, not the one just opened. 366/206/11/21 green (logic/render/
+  order/dock); first paint 349.77 KB, comfortably under the 350 KB cap
+  (this change lives in an already-lazy chunk — `tabs/ProjectDetail.jsx`
+  — plus one prop on `ui/empty-state.jsx`, itself lazy-only). ESLint and
+  Prettier clean.
+- **Verified live** on the public demo (`?demo=1`): opened a job with no
+  photos yet, the Fotos tab showed "Noch keine Fotos" and a "Foto"
+  button in place of the old hint sentence; tapping it opened the
+  existing photo-entry modal, attached a photo, saved — the grid showed
+  it immediately, still inside the demo (checked the network panel: no
+  request left for Firestore or the Worker). Opened a job that already
+  had a photo, confirmed the same "+" sits next to the section header
+  and opens the identical modal a second time, and that the existing
+  photo's thumbnail, the pen (`PhotoEditor`) and delete all still work
+  exactly as before this change.
+- **Not started:** nothing from this spec's Definition of done was
+  skipped. Out of scope and untouched, per the spec: the `files`/R2
+  "Pläne" tab and its `kind` categories (a different feature); any
+  change to `PhotoViewer`/`PhotoEditor`/`savePhotoEdit`; rewriting
+  `emptyPhotosHint`'s 14 translations into new copy rather than
+  dropping it; removing the Übersicht tab's own "Foto" shortcut or the
+  app-level quick-add sheet's photo composer, both of which still work
+  as a second and third way in.
+
 ## 2026-09-09 — Transport: the full trip record, tappable, and a scanned slip
 
 - **Why:** `docs/specs/2026-09-09_transport-detail-and-scan.md` — the job's

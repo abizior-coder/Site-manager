@@ -84,7 +84,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `tabs/BoardTab.jsx` | `BoardTab` | Board/Übersicht, month dots `[data-board-dots]`, week `[data-woche]` (pinned name column, today `[data-woche-today]` scrolled into view, touch hint `[data-woche-hint-touch]` under `(hover: none)`) |
 | `tabs/MaterialsTab.jsx` | `MaterialsTab`, `ArticleSheet` | supplier sheet `[data-article-sheet]`, catalogues from `data/catalog.js` |
 | `tabs/CockpitTab.jsx` | `CockpitTab`, `ExportCard`, `UsageCard`, `ErrorsCard`, `BexioCard`, `BackupCard`, `LoginsCard`, `useWorkerData`, `WORKER_URL` | owner cards; most fetch their own Worker data. `LoginsCard` (`[data-logins-card]`) is the exception: Firestore, not the Worker, via the `loadLoginEvents` prop `roofing-site-manager.jsx` passes down (lazy `login-events.js`) — newest first, `EmptyState` when empty |
-| `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]`. Each `[data-job-trip-row]` is tappable (`onEditTrip`, opens `ui/trip-modal.jsx` pre-filled) — delete stays a separate button, not nested inside it. Distinct from the top-level Transport tab's own `[data-trip-row]` list in `roofing-site-manager.jsx` (unrelated, unchanged by `docs/specs/2026-09-09_transport-detail-and-scan.md` — that spec named the job view only) |
+| `tabs/ProjectDetail.jsx` | `ProjectDetail`, `PhotoViewer`, `PhotoEditor` | the job hub `[data-hub-tabs]` (chat, files, material, inspections, trips), trash `[data-deleted-block]`. Each `[data-job-trip-row]` is tappable (`onEditTrip`, opens `ui/trip-modal.jsx` pre-filled) — delete stays a separate button, not nested inside it. Distinct from the top-level Transport tab's own `[data-trip-row]` list in `roofing-site-manager.jsx` (unrelated, unchanged by `docs/specs/2026-09-09_transport-detail-and-scan.md` — that spec named the job view only). The Fotos hub tab's `[data-photo-add]` (`docs/specs/2026-09-11_photo-add-in-category.md`) calls the app's existing `onAdd("photo")` directly, in both the empty state (`EmptyState`'s `action`) and next to the filled grid's header — no detour through the app-level quick-add sheet or chat, no new save path |
 
 ## Shared UI (`ui/`)
 
@@ -95,7 +95,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `ui/dialog.js` | `useDialog` (focus trap, Escape, `aria-modal`), `focusable`, `trapTab` |
 | `ui/entries.jsx` | `savePhoto`/`loadPhoto`/`deletePhoto` (photo kv), `StoredImage`, `typeMeta`, `Stat`, `EntryRow`, `EntryGroups`, `ENTRY_TYPE_ORDER` |
 | `ui/loading.jsx` | `Loading`, `LoadingOverlay` (`[data-loading]`) |
-| `ui/empty-state.jsx` | `EmptyState` (`[data-empty]`) |
+| `ui/empty-state.jsx` | `EmptyState` (`[data-empty]`): optional `action`/`onAction` button, `actionHook` sets a boolean data-attribute on it for tests (e.g. `data-photo-add`) |
 | `ui/print.js` | `printChrome`, `withPrintChrome` (toolbar for opened documents) |
 | `ui/download.js` | `downloadText` |
 | `ui/break-chips.jsx` | `BreakChips` (GAV breaks) |
