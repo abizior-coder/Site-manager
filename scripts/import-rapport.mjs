@@ -16,10 +16,12 @@
 //   node scripts/import-rapport.mjs rows.json --commit  # writes for real
 //
 // rows.json: an array of { date: "YYYY-MM-DD", project, description, kind?
-// ("time" default | "material" | "tool"), qty, unit, address? } — a "time"
-// row may give "hours" instead of qty/unit, kept as a legacy alias.
+// ("time" default | "material" | "tool" | "note"), qty, unit, address? } —
+// a "time" row may give "hours" instead of qty/unit (legacy alias); a
+// "note" row needs neither, it becomes a plain chat note on the project.
 // docs/specs/2026-09-13_weekly-rapport-bulk-import.md
 // docs/specs/2026-09-13_material-tool-bulk-import.md
+// docs/specs/2026-09-13_note-bulk-import.md
 
 import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
@@ -88,12 +90,13 @@ console.log(`\nProjects to create (${toCreate.length}):`);
 for (const p of toCreate) console.log(`  + ${p.name}${p.address ? ` — ${p.address}` : ""}`);
 
 console.log(`\nEntries (${plan.length}):`);
-for (const kind of ["time", "material", "tool"]) {
+for (const kind of ["time", "material", "tool", "note"]) {
   const rowsOfKind = plan.filter((r) => r.kind === kind);
   if (!rowsOfKind.length) continue;
   console.log(`  ${kind}:`);
   for (const row of rowsOfKind) {
-    console.log(`    ${row.date}  ${row.projectName.padEnd(20)}  ${row.qty} ${row.unit}  ${row.description}`);
+    const qty = row.qty != null ? `${row.qty} ${row.unit}  ` : "";
+    console.log(`    ${row.date}  ${row.projectName.padEnd(20)}  ${qty}${row.description}`);
   }
 }
 
@@ -128,13 +131,14 @@ for (const row of plan) {
     date: row.date,
     projectId,
     description: row.description,
-    qty: String(row.qty),
-    unit: row.unit,
+    ...(row.qty != null ? { qty: String(row.qty), unit: row.unit } : {}),
     userId: uid,
     createdAt: Date.now(),
     srcLang: "de",
   });
-  console.log(`created ${row.kind} entry ${row.date} ${row.projectName} ${row.qty} ${row.unit}`);
+  console.log(
+    `created ${row.kind} entry ${row.date} ${row.projectName}${row.qty != null ? ` ${row.qty} ${row.unit}` : ""}`,
+  );
 }
 
 console.log("\nDone.");

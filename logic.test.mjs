@@ -2125,5 +2125,21 @@ console.log(`\n${pass} passed, ${fail} failed`);
   t("a material row with no unit throws", threw && threw.startsWith("row 0"), true);
 }
 
+{
+  // docs/specs/2026-09-13_note-bulk-import.md
+  const [note] = normaliseImportRows([
+    { date: "2026-09-11", project: "Waltz", description: "Reparatur Marderschaden", kind: "note" },
+  ]);
+  t("a note row needs no qty/unit at all", [note.kind, note.qty, note.unit], ["note", null, null]);
+
+  let threw = null;
+  try {
+    normaliseImportRows([{ date: "2026-09-11", project: "Waltz", description: "x", kind: "note" }]);
+  } catch (e) {
+    threw = e && e.message;
+  }
+  t("a note row with no qty/unit does not throw", threw, null);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

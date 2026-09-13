@@ -1,17 +1,22 @@
-// Turns a transcribed weekly paper Rapport or a material/tool list (one row
-// per {site, day, qty, unit, description, kind}) into a plan of projects to
-// create and entries to write, against the projects that already exist.
-// Pure — no Firebase here; see scripts/import-rapport.mjs for the script
-// that writes the plan for real.
+// Turns a transcribed weekly paper Rapport, a material/tool list, or a set
+// of work-description chat notes (one row per {site, day, description,
+// kind, qty?, unit?}) into a plan of projects to create and entries to
+// write, against the projects that already exist. Pure — no Firebase here;
+// see scripts/import-rapport.mjs for the script that writes the plan for
+// real.
 // docs/specs/2026-09-13_weekly-rapport-bulk-import.md
 // docs/specs/2026-09-13_material-tool-bulk-import.md
+// docs/specs/2026-09-13_note-bulk-import.md
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const KINDS = ["time", "material", "tool"];
+const KINDS = ["time", "material", "tool", "note"];
+// A chat note has no qty/unit at all (submitNote()'s own shape is just
+// {type: "note", projectId, description}) — only these kinds need one.
+const KINDS_WITH_QTY = ["time", "material", "tool"];
 
 /**
  * @param {Array<{date:string, project:string, description:string, kind?:string, qty?:number|string, unit?:string, hours?:number|string, address?:string}>} rows
- * @returns {Array<{date:string, project:string, description:string, kind:string, qty:number, unit:string, address:string|null}>}
+ * @returns {Array<{date:string, project:string, description:string, kind:string, qty:number|null, unit:string|null, address:string|null}>}
  */
 export function normaliseImportRows(rows) {
   if (!Array.isArray(rows)) throw new Error("rows must be an array");
@@ -26,6 +31,8 @@ export function normaliseImportRows(rows) {
     const kind = row.kind ? String(row.kind).trim() : "time";
     if (!KINDS.includes(kind))
       throw new Error(`row ${i}: kind must be one of ${KINDS.join("/")}, got ${JSON.stringify(row.kind)}`);
+    const address = row.address ? String(row.address).trim() : null;
+    if (!KINDS_WITH_QTY.includes(kind)) return { date, project, description, kind, qty: null, unit: null, address };
     // A time row's quantity was originally just "hours"; kept as the
     // legacy alias so an existing rows file with no kind/qty still works.
     const qtyRaw = row.qty != null ? row.qty : row.hours;
@@ -34,7 +41,6 @@ export function normaliseImportRows(rows) {
       throw new Error(`row ${i}: qty must be a positive number, got ${JSON.stringify(qtyRaw)}`);
     const unit = String(row.unit || (kind === "time" ? "h" : "")).trim();
     if (!unit) throw new Error(`row ${i}: unit is required for a ${kind} row`);
-    const address = row.address ? String(row.address).trim() : null;
     return { date, project, description, kind, qty, unit, address };
   });
 }

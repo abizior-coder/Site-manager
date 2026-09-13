@@ -5,6 +5,28 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-13 — import-rapport: a "note" kind for chat entries
+
+- **Why:** `docs/specs/2026-09-13_note-bulk-import.md` — logged hours say
+  how much was worked, not what was done; the owner wants each job's own
+  transcribed work description to also land as a chat note on that job
+  (`type: "note"`, the same thing the job hub's own comment box writes),
+  not just sit in the hours entry's description field.
+- **What:** `rapport-import.js`'s `KINDS` gains `"note"`; unlike
+  `time`/`material`/`tool`, a note row needs no `qty`/`unit` at all —
+  `submitNote()`'s own entry shape is exactly `{type: "note", projectId,
+  description}`, so demanding a unit for it would be inventing a
+  requirement the app itself doesn't have. `scripts/import-rapport.mjs`
+  omits `qty`/`unit` from the written doc when a row has none, and the
+  dry-run printout drops that portion for a note row.
+- **Tests:** 2 new `logic.test.mjs` cases — a note row normalises with
+  `qty`/`unit` both `null`; a note row with neither does not throw (the
+  same input would throw for `material`/`tool`).
+- **First real use:** one note per work-description line from the
+  2026-09-07…11 Wochen-Rapport, one per project that week touched.
+- **Not started:** combining a day's several descriptions for one project
+  into a single note — out of scope per the spec, one row is one note.
+
 ## 2026-09-13 — import-rapport: material/tool rows, not just time
 
 - **Why:** `docs/specs/2026-09-13_material-tool-bulk-import.md` — the owner
