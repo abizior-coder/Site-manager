@@ -15,8 +15,11 @@
 //   node scripts/import-rapport.mjs rows.json           # dry run
 //   node scripts/import-rapport.mjs rows.json --commit  # writes for real
 //
-// rows.json: an array of { date: "YYYY-MM-DD", project, description, hours,
-// address? }. docs/specs/2026-09-13_weekly-rapport-bulk-import.md
+// rows.json: an array of { date: "YYYY-MM-DD", project, description, kind?
+// ("time" default | "material" | "tool"), qty, unit, address? } — a "time"
+// row may give "hours" instead of qty/unit, kept as a legacy alias.
+// docs/specs/2026-09-13_weekly-rapport-bulk-import.md
+// docs/specs/2026-09-13_material-tool-bulk-import.md
 
 import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
@@ -84,9 +87,14 @@ console.log(`Company: ${companyId}`);
 console.log(`\nProjects to create (${toCreate.length}):`);
 for (const p of toCreate) console.log(`  + ${p.name}${p.address ? ` — ${p.address}` : ""}`);
 
-console.log(`\nEntries (${plan.length}), ${plan.reduce((s, r) => s + r.hours, 0).toFixed(2)}h total:`);
-for (const row of plan) {
-  console.log(`  ${row.date}  ${row.projectName.padEnd(20)}  ${row.hours.toFixed(2)}h  ${row.description}`);
+console.log(`\nEntries (${plan.length}):`);
+for (const kind of ["time", "material", "tool"]) {
+  const rowsOfKind = plan.filter((r) => r.kind === kind);
+  if (!rowsOfKind.length) continue;
+  console.log(`  ${kind}:`);
+  for (const row of rowsOfKind) {
+    console.log(`    ${row.date}  ${row.projectName.padEnd(20)}  ${row.qty} ${row.unit}  ${row.description}`);
+  }
 }
 
 if (!commit) {
@@ -116,17 +124,17 @@ for (const row of plan) {
   const id = crypto.randomUUID();
   await setDoc(doc(db, "companies", companyId, "entries", id), {
     id,
-    type: "time",
+    type: row.kind,
     date: row.date,
     projectId,
     description: row.description,
-    qty: String(row.hours),
-    unit: "h",
+    qty: String(row.qty),
+    unit: row.unit,
     userId: uid,
     createdAt: Date.now(),
     srcLang: "de",
   });
-  console.log(`created entry ${row.date} ${row.projectName} ${row.hours}h`);
+  console.log(`created ${row.kind} entry ${row.date} ${row.projectName} ${row.qty} ${row.unit}`);
 }
 
 console.log("\nDone.");

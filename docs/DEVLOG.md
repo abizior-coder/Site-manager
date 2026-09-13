@@ -5,6 +5,37 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-13 — import-rapport: material/tool rows, not just time
+
+- **Why:** `docs/specs/2026-09-13_material-tool-bulk-import.md` — the owner
+  photographs delivery/material lists too (Gutex board counts, screw
+  counts, saw-usage hours), and wants those into an existing project the
+  same way the weekly Rapport went in, without a second tool.
+- **What:** `rapport-import.js`'s `normaliseImportRows` gains `kind`
+  (`"time" | "material" | "tool"`, default `"time"`) and a `qty`/`unit`
+  pair; a `time` row may still give `hours` instead (a legacy alias, so
+  the already-written `2026-w37-andrzej.json` keeps working unchanged).
+  `matchProjects` needed no change — it already worked on `row.project`/
+  `row.address` generically. `scripts/import-rapport.mjs` now writes
+  `type: row.kind`/`qty: String(row.qty)`/`unit: row.unit` instead of a
+  hardcoded `type: "time"`/`unit: "h"`, and prints the dry-run plan
+  grouped by kind instead of assuming everything is hours.
+- **Fixed in passing:** `logic.test.mjs` had picked up a duplicate copy of
+  the previous commit's own test block during a stash-pop merge (two
+  copies of the same ten cases, one pre-Prettier, one post — harmless
+  since duplicate assertions don't fail, but dead weight). Removed the
+  stale copy while adding this commit's own cases.
+- **Tests:** 5 new `logic.test.mjs` cases — a legacy `hours`-only row
+  still normalises to `kind: "time", unit: "h"`; a material row keeps its
+  own unit (not forced to "h"); a tool row likewise; an unknown `kind`
+  throws naming the row; a non-time row with no `unit` throws.
+- **First real use:** a Gutex/Latten/screws/nails/tape material list plus
+  three saws' usage hours for the existing Waltz project, transcribed
+  from a photo — several words and a couple of struck-through corrections
+  were hard to read and flagged to the owner rather than guessed at.
+- **Not started:** `trade`/`supplier`/`artNo` on the written entry — not
+  asked for, addable later without changing this shape.
+
 ## 2026-09-13 — import-rapport: fix the swallowed email prompt
 
 - **Why:** running `scripts/import-rapport.mjs` for real (its first actual

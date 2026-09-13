@@ -127,7 +127,7 @@ tab bar `[data-tab-bar]` + «+» sheet `[data-quick-add]`, desktop layout
 | `install.js` | Add-to-home-screen detection (`docs/specs/2026-09-09_pwa-install.md`), eager: `isIOS`, `isStandalone`, `installHintDismissed`/`dismissInstallHint` (per-device, `localStorage`) |
 | `login-events.js` | Login audit (`docs/specs/2026-09-09_login-audit.md`): `recordLogin`/`listLoginEvents` (Firestore `companies/{cid}/loginEvents`, owner-read-only), `idsToPrune` (bounded retention, 200 rows, pruned in `listLoginEvents`), `claimLoginSlot` (once per session, `sessionStorage`), `recordThisSession` (the mount effect's own entry point). All lazy — reached only through `import("./login-events.js")` from `roofing-site-manager.jsx`'s mount effect and its `loadLoginEvents()` helper (passed to `tabs/CockpitTab.jsx`'s `LoginsCard`); making it eager (tried first) cost more of the first-paint budget than the feature itself, not less — Firestore's path literals do not shrink under minification |
 | `roof-tiles.js` | tile catalogue, waste weights, `summariseInspection`, `tripHours` |
-| `rapport-import.js` | `normaliseImportRows`, `matchProjects` — pure planning for `scripts/import-rapport.mjs` (`docs/specs/2026-09-13_weekly-rapport-bulk-import.md`): validates a transcribed weekly Rapport's rows and matches each row's project name (case-insensitive, exact) against existing projects, grouping unmatched names into a `toCreate` list |
+| `rapport-import.js` | `normaliseImportRows`, `matchProjects` — pure planning for `scripts/import-rapport.mjs` (`docs/specs/2026-09-13_weekly-rapport-bulk-import.md`): validates a transcribed row and matches its project name (case-insensitive, exact) against existing projects, grouping unmatched names into a `toCreate` list. A row carries a `kind` (`time`/`material`/`tool`, default `time`) and a `qty`/`unit` pair — a `time` row may give `hours` instead, kept as a legacy alias (`docs/specs/2026-09-13_material-tool-bulk-import.md`) |
 | `breaks.js` | GAV breaks (`BREAKS`, `netHours`) |
 | `files.js` | file kinds, `MAX_FILE_BYTES`, `normaliseLink` |
 | `backup.js` | backup nudge (`backupDue`, `backupMeta`) |
@@ -170,9 +170,11 @@ first).
 - `scripts/stamp.mjs` (build stamp + `sw.js`), `scripts/seed-emulator.mjs`
   (the fixture firm), `scripts/extract-tab.py` (cuts a tab out of the app
   file), `scripts/sw.template.js`, `scripts/import-rapport.mjs` (bulk-imports
-  a transcribed weekly Rapport's rows as real projects/entries, signed in as
-  the owner with the client SDK — no admin SDK exists for this app; dry-run
-  unless `--commit`; `docs/specs/2026-09-13_weekly-rapport-bulk-import.md`).
+  a transcribed weekly Rapport's rows, or a material/tool list's, as real
+  projects/entries, signed in as the owner with the client SDK — no admin
+  SDK exists for this app; dry-run unless `--commit`;
+  `docs/specs/2026-09-13_weekly-rapport-bulk-import.md`,
+  `docs/specs/2026-09-13_material-tool-bulk-import.md`).
 - `eslint.config.mjs`, `.prettierrc`, `.prettierignore`, `.editorconfig`,
   `playwright.config.mjs`, `firebase.json` / `firebase.test.json`,
   `tailwind.config.cjs`, `.githooks/pre-commit`, `.github/workflows/`.

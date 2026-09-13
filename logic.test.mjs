@@ -2047,7 +2047,7 @@ console.log(`\n${pass} passed, ${fail} failed`);
     { date: "2026-09-07", project: "Waltz", description: "Material", hours: 1.5 },
     { date: "2026-09-09", project: "reilling", description: "Dachrinnen", hours: "1" },
   ]);
-  t("normaliseImportRows parses a string hours value", rows[1].hours, 1);
+  t("normaliseImportRows parses a string hours value", rows[1].qty, 1);
   t("normaliseImportRows trims project/description", rows[0].project, "Waltz");
 
   let threw = null;
@@ -2089,6 +2089,40 @@ console.log(`\n${pass} passed, ${fail} failed`);
     "Blumenau, 8184 Baechenbuelach",
   );
   t("matchProjects's toCreate has one entry for two rows sharing a name", withAddr.toCreate.length, 1);
+}
+
+{
+  // docs/specs/2026-09-13_material-tool-bulk-import.md
+  const [legacyTime, material, tool] = normaliseImportRows([
+    { date: "2026-09-07", project: "Waltz", description: "old shape", hours: 8 },
+    { date: "2026-09-13", project: "Waltz", description: "Gutex Platten", kind: "material", qty: "17.1", unit: "qm" },
+    { date: "2026-09-13", project: "Waltz", description: "Kettensaege", kind: "tool", qty: 6, unit: "h" },
+  ]);
+  t("a legacy hours-only row still normalises to kind time, unit h", [legacyTime.kind, legacyTime.unit], ["time", "h"]);
+  t(
+    "a material row parses a string qty and keeps its own unit",
+    [material.kind, material.qty, material.unit],
+    ["material", 17.1, "qm"],
+  );
+  t("a tool row is not forced onto unit h", [tool.kind, tool.qty, tool.unit], ["tool", 6, "h"]);
+
+  let threw = null;
+  try {
+    normaliseImportRows([
+      { date: "2026-09-13", project: "Waltz", description: "x", kind: "budget", qty: 1, unit: "h" },
+    ]);
+  } catch (e) {
+    threw = e.message;
+  }
+  t("an unknown kind throws, naming the row", threw && threw.startsWith("row 0"), true);
+
+  threw = null;
+  try {
+    normaliseImportRows([{ date: "2026-09-13", project: "Waltz", description: "x", kind: "material", qty: 1 }]);
+  } catch (e) {
+    threw = e.message;
+  }
+  t("a material row with no unit throws", threw && threw.startsWith("row 0"), true);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
