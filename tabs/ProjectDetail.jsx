@@ -1372,6 +1372,7 @@ export function ProjectDetail({
                 />
                 <div className="flex flex-col gap-2">
                   <button
+                    data-voice-note
                     aria-label={t.a11yVoice}
                     onClick={onVoiceNote}
                     title={t.speakBtn}

@@ -243,6 +243,7 @@ export function TodayTab({
             className="flex-1 rounded-lg px-3 py-2 text-sm outline-none"
           />
           <button
+            data-voice-note
             aria-label={t.a11yVoice}
             title={t.a11yVoice}
             onClick={() => toggleVoiceInput()}

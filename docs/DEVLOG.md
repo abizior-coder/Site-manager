@@ -5,6 +5,37 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-13 — Voice dictation no longer stops at the first pause
+
+- **Why:** reported live: dictating a note "breaks up as soon as I stop
+  speaking and nothing is being added." `toggleVoiceInput`'s
+  `SpeechRecognition` was created with `continuous` left at its default
+  (`false`), so the browser ends recognition at the **first** pause
+  between sentences, not when the mic button is tapped again — `onend`
+  immediately reset `voiceListening`/`voiceTarget`, and whatever was said
+  after that first pause was never captured at all. Describing a whole
+  day out loud needs more than one uninterrupted breath.
+- **What:** `recog.continuous = true` (keeps listening across pauses) and
+  `recog.interimResults = true` (so the field can show live text as it's
+  recognised). `onresult` now walks every result from `e.resultIndex`,
+  appending only the **final** segments — an interim one must not land
+  twice once it firms up — joined with a single space and collapsed
+  (`.replace(/\s+/g, " ")`) so two segments never come out glued together
+  or double-spaced regardless of whether the browser's own transcript
+  already carried a leading space. Added `[data-voice-note]` to both mic
+  buttons (`tabs/TodayTab.jsx`, `tabs/ProjectDetail.jsx`) — the existing
+  `aria-label`/`title` are translated, so they were not a stable test
+  hook.
+- **Tests:** 3 new `render.test.mjs` cases (a fake `SpeechRecognition`
+  captured on `window`): `continuous`/`interimResults` are set on the
+  instance; an interim result followed by two final segments in the next
+  event lands in the note field as both final segments, once, correctly
+  spaced.
+- **Not started:** some browsers still end `continuous` recognition after
+  a long stretch of total silence (not just "reached the first pause") —
+  auto-restarting in that case is a real gap, not addressed here; the
+  reported bug (stops on any pause, not a long silence) is what's fixed.
+
 ## 2026-09-13 — import-rapport: a "note" kind for chat entries
 
 - **Why:** `docs/specs/2026-09-13_note-bulk-import.md` — logged hours say

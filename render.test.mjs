@@ -624,6 +624,66 @@ async function renderAs(
         }
       }
 
+      // Dictation must not stop at the first pause between sentences --
+      // continuous + interimResults, and onresult must land only the final
+      // segments, once, not duplicate an interim one that later firms up.
+      {
+        let capturedRecog = null;
+        class FakeRecognition {
+          constructor() {
+            capturedRecog = this;
+          }
+          start() {}
+          stop() {}
+        }
+        window.SpeechRecognition = FakeRecognition;
+        const draftBefore = window.document.querySelector("[data-note-draft]");
+        if (draftBefore) {
+          const setEmpty = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+          setEmpty.call(draftBefore, "");
+          draftBefore.dispatchEvent(new window.Event("input", { bubbles: true }));
+          await new Promise((r) => setTimeout(r, 30));
+        }
+        window.document
+          .querySelector("[data-voice-note]")
+          ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 50));
+        check(
+          "owner: dictation starts continuous, not one-shot",
+          !!capturedRecog && capturedRecog.continuous === true,
+          "continuous not set on the recognition instance",
+        );
+        check(
+          "owner: interim results are requested",
+          !!capturedRecog && capturedRecog.interimResults === true,
+          "interimResults not set",
+        );
+        capturedRecog?.onresult({
+          resultIndex: 0,
+          results: Object.assign([{ 0: { transcript: "Dach kontrolliert" }, isFinal: false, length: 1 }], {
+            length: 1,
+          }),
+        });
+        await new Promise((r) => setTimeout(r, 30));
+        capturedRecog?.onresult({
+          resultIndex: 0,
+          results: Object.assign(
+            [
+              { 0: { transcript: "Dach kontrolliert" }, isFinal: true, length: 1 },
+              { 0: { transcript: "und Ziegel ersetzt" }, isFinal: true, length: 1 },
+            ],
+            { length: 2 },
+          ),
+        });
+        await new Promise((r) => setTimeout(r, 30));
+        const ta = window.document.querySelector("[data-note-draft]");
+        check(
+          "owner: only final speech segments land in the field, once",
+          (ta?.value || "").trim() === "Dach kontrolliert und Ziegel ersetzt",
+          ta?.value,
+        );
+      }
+
       // The day starts inside the job now, not from a list on Today.
       {
         hub("overview"); // the chat flow above left the hub on Chat

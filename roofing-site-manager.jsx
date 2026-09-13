@@ -3852,11 +3852,27 @@ export default function SiteManager() {
     };
     const recog = new SpeechRecognition();
     recog.lang = localeMap[lang] || "en-US";
-    recog.interimResults = false;
+    // continuous: without it the browser ends recognition at the first
+    // pause between sentences (not just when the mic is stopped), which
+    // dropped everything said after that pause -- describing a whole day
+    // needs more than one uninterrupted breath.
+    recog.continuous = true;
+    recog.interimResults = true;
     recog.maxAlternatives = 1;
     recog.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      setter((prev) => (String(prev || "").trim() ? `${String(prev).trim()} ${transcript}` : transcript));
+      // Only the final segments from this event on -- interimResults is on
+      // so the field can show live text, but a not-yet-final segment must
+      // not be appended twice once it firms up.
+      const parts = [];
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) parts.push(e.results[i][0].transcript);
+      }
+      if (!parts.length) return;
+      // Joined with a single space regardless of whether the browser's own
+      // transcript already carries one -- collapsed below so two segments
+      // never come out glued together or double-spaced.
+      const finalTranscript = parts.join(" ").replace(/\s+/g, " ").trim();
+      setter((prev) => (String(prev || "").trim() ? `${String(prev).trim()} ${finalTranscript}` : finalTranscript));
     };
     recog.onerror = () => {
       setVoiceListening(false);
