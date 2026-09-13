@@ -34,23 +34,29 @@ if (!rowsPath) {
   process.exit(1);
 }
 
+const rl = createInterface({ input: process.stdin, output: process.stdout });
+
+async function promptPlain(question) {
+  return rl.question(question);
+}
+
 async function promptHidden(question) {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  process.stdout.write(question);
-  // Readline has no built-in mask; muting the output stream keeps the
-  // typed password off the terminal without pulling in a dependency.
-  const write = rl._writeToOutput;
+  // rl.question() prints the prompt normally first; only *after* that do we
+  // start muting the interface's own output, so what the user types (not
+  // the prompt itself) is what stays off the terminal. Muting before
+  // asking (the earlier bug here) swallowed the prompt text as well.
+  const answerPromise = rl.question(question);
   rl._writeToOutput = () => {};
-  const answer = await rl.question("");
-  rl._writeToOutput = write;
-  rl.close();
+  const answer = await answerPromise;
+  delete rl._writeToOutput;
   process.stdout.write("\n");
   return answer;
 }
 
 async function resolveCredentials() {
-  const email = process.env.SITE_LOG_EMAIL || (await promptHidden("Site Log email: "));
+  const email = process.env.SITE_LOG_EMAIL || (await promptPlain("Site Log email: "));
   const password = process.env.SITE_LOG_PASSWORD || (await promptHidden("Site Log password: "));
+  rl.close();
   return { email, password };
 }
 

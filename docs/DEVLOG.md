@@ -5,6 +5,24 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-13 — import-rapport: fix the swallowed email prompt
+
+- **Why:** running `scripts/import-rapport.mjs` for real (its first actual
+  use) printed no email prompt at all. `promptHidden` muted the readline
+  interface's output *before* asking the question, for both the email and
+  the password — so even the "Site Log email: " prompt text (which needs
+  no masking) never appeared.
+- **What:** the email prompt is now a plain `rl.question()` — no masking.
+  `promptHidden` (password only) now calls `rl.question()` first, letting
+  it print the prompt normally, and only starts muting output once that
+  call has already returned its promise — so what gets swallowed is the
+  typed password, not the question itself.
+- **Tests:** `npx eslint`/`npx prettier --check` on the file; manually
+  exercised the corrected prompt/mute ordering outside the suite (this
+  script talks to real production Firebase, so it has no automated
+  suite — same as `seed-emulator.mjs` has none against the emulator, by
+  design, PROJECT.md §3).
+
 ## 2026-09-13 — Bulk-importing a paper Wochen-Rapport
 
 - **Why:** `docs/specs/2026-09-13_weekly-rapport-bulk-import.md` — the
