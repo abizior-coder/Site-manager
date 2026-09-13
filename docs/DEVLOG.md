@@ -5,6 +5,44 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-13 — Bulk-importing a paper Wochen-Rapport
+
+- **Why:** `docs/specs/2026-09-13_weekly-rapport-bulk-import.md` — the
+  owner fills a paper Wochen-Rapport by hand and photographs it; getting
+  that week's hours in meant retyping every row through the "+" sheet,
+  once per site, once per day.
+- **What:** `rapport-import.js` (new, pure): `normaliseImportRows`
+  validates a row `{date, project, description, hours, address?}`;
+  `matchProjects` matches each row's project name against existing
+  projects (case-insensitive, exact), grouping unmatched names into a
+  `toCreate` list. `scripts/import-rapport.mjs` (new) takes a rows JSON
+  file, signs in with the owner's own Firebase Auth credentials via the
+  plain client SDK (there is no admin SDK or service account for this
+  app — PROJECT.md §3/§6 — so this is the only way to write for real; the
+  owner types the password when he runs it, never handled by the agent),
+  prints the plan and, only with `--commit`, writes new project docs
+  (`addProject()`'s shape) and one time entry per row (`newEntry()`'s
+  shape) — no new report engine, `reports.js` unchanged.
+  `firebase-client.js`'s `firebaseConfig` is now exported so the script
+  imports it instead of duplicating it (it is public web config, not a
+  secret; the rules are the real access control).
+- **Tests:** 12 new `logic.test.mjs` cases for `rapport-import.js` (row
+  validation incl. a bad date/zero hours throwing with the row index,
+  case-insensitive project matching, two rows sharing an unmatched name
+  producing one `toCreate` entry carrying the first address given).
+- **First real use:** Andrzej's 2026-09-07…11 Rapport, transcribed from a
+  photo, written to `rapport-imports/2026-w37-andrzej.json` (gitignored —
+  real work data, not app source). Waltz, Bosaert and Nützli are meant to
+  match existing projects; Reilling, Ott, Vetter, Knecht, Risch, Blumenau,
+  Wochenbulletin and "An- und Rückfahrt" are new. Not run yet: the script
+  needs the owner's own sign-in, so he runs `--commit` himself after
+  checking the printed dry-run plan — the sheet's own stated total
+  (40.5 h) does not match the per-row sum transcribed from the photo
+  (48.5 h), flagged to the owner rather than guessed at.
+- **Not started:** resolving a row to a crew member other than whoever
+  runs the script (would need a name/email → `members` uid lookup); no UI
+  for this, command line only.
+
 ## 2026-09-11 — The job's RAPPORTE tab: reports sent for this job, not billing
 
 - **Why:** `docs/specs/2026-09-11_job-rapporte-tab.md` — the job hub's

@@ -77,6 +77,7 @@ import { ERROR_CODES, classifyError, errorReport } from "./errors.js";
 import { ERROR_TEXT } from "./errors-text.js";
 import { isDemoMode } from "./firebase-client.js";
 import { createDemoSdk, demoFixture, DEMO_UID, DEMO_CID } from "./demo-store.js";
+import { normaliseImportRows, matchProjects } from "./rapport-import.js";
 import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -2037,6 +2038,57 @@ t("a plain string is not", isPhotoDataUrl("https://example.com/a.jpg"), false);
     r("https://abizior-coder.github.io/other/index.html", "navigate"),
     "network",
   );
+}
+
+console.log(`\n${pass} passed, ${fail} failed`);
+{
+  // docs/specs/2026-09-13_weekly-rapport-bulk-import.md
+  const rows = normaliseImportRows([
+    { date: "2026-09-07", project: "Waltz", description: "Material", hours: 1.5 },
+    { date: "2026-09-09", project: "reilling", description: "Dachrinnen", hours: "1" },
+  ]);
+  t("normaliseImportRows parses a string hours value", rows[1].hours, 1);
+  t("normaliseImportRows trims project/description", rows[0].project, "Waltz");
+
+  let threw = null;
+  try {
+    normaliseImportRows([{ date: "07.09", project: "Waltz", description: "x", hours: 1 }]);
+  } catch (e) {
+    threw = e.message;
+  }
+  t("normaliseImportRows rejects a non-ISO date, naming the row", threw && threw.startsWith("row 0"), true);
+
+  threw = null;
+  try {
+    normaliseImportRows([{ date: "2026-09-07", project: "Waltz", description: "x", hours: 0 }]);
+  } catch (e) {
+    threw = e.message;
+  }
+  t("normaliseImportRows rejects zero/negative hours", threw && threw.startsWith("row 0"), true);
+
+  const existing = [
+    { id: "p1", name: "Waltz" },
+    { id: "p2", name: "Bosaert" },
+  ];
+  const { toCreate, plan } = matchProjects(rows, existing);
+  t("matchProjects matches an existing project case-insensitively", plan[0].projectId, "p1");
+  t("matchProjects groups an unmatched name into toCreate once", toCreate.length, 1);
+  t("matchProjects names the new project", toCreate[0].name, "reilling");
+  t("matchProjects leaves an unmatched row's projectId null", plan[1].projectId, null);
+
+  const withAddr = matchProjects(
+    normaliseImportRows([
+      { date: "2026-09-11", project: "Blumenau", description: "a", hours: 1, address: "Blumenau, 8184 Baechenbuelach" },
+      { date: "2026-09-11", project: "blumenau", description: "b", hours: 1 },
+    ]),
+    [],
+  );
+  t(
+    "matchProjects carries the first address given for a new name",
+    withAddr.toCreate[0].address,
+    "Blumenau, 8184 Baechenbuelach",
+  );
+  t("matchProjects's toCreate has one entry for two rows sharing a name", withAddr.toCreate.length, 1);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

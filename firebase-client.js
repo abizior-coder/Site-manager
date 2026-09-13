@@ -8,7 +8,7 @@
 // gstatic.com at run time: an unpinned version, no integrity check, and the
 // largest part of a cold start invisible to the size budget.
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyA_pf25-mCaig-HL3mJJSJQfFbXttKnADw",
   authDomain: "site-log-ab6a9.firebaseapp.com",
   projectId: "site-log-ab6a9",
