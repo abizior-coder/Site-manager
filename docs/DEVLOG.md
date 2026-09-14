@@ -5,6 +5,47 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-14 — AI day scan: log the day by photo or voice, in the app
+
+- **Why:** `docs/specs/2026-09-14_ai-day-scan.md` — the crew wanted the
+  same thing `scripts/import-rapport.mjs` already does for a photographed
+  paper Rapport, but live, from the job itself, without a CLI or the
+  owner's own password: describe a day out loud or photograph a delivery,
+  and get real time/material/tool/note entries out of it. Checked what
+  already existed first: `runScan`/`confirmScan` already turns a photo
+  into `material` entries, but no tools, no hours, no voice path.
+- **What:** `day-scan.js` (new, pure): `buildDayScanPrompt` and
+  `parseDayScanResponse` — one `callClaude` call, asked for
+  `{hours, items:[{kind,name,qty,unit}], note}`; a malformed item is
+  dropped rather than thrown on, `hours` stays `null` unless the model
+  gave a real positive number (never guessed, same rule
+  `scanTripSlip`'s prompt already states for its own fields). New lazy
+  `ui/day-scan-modal.jsx` (`DayScanModal`), triggered by `[data-day-scan]`
+  in the job's Übersicht tab (`tabs/ProjectDetail.jsx`'s `onOpenDayScan`):
+  same exception `ReportSignModal` already established — it owns its own
+  Claude call and save logic (`persist`/`newEntry` passed in as props),
+  not just render, because that logic living eagerly is exactly the kind
+  of miss the budget has no room for. `dayScanModal` state stays in
+  `roofing-site-manager.jsx` so the app's own `toggleVoiceInput`
+  (continuous dictation, fixed 2026-09-13) can dictate straight into
+  `state.text`, the same way the job's chat composer already does. A
+  review step (editable hours/kind/name/qty/unit per item, a note) always
+  sits between the model's output and anything being saved — nothing
+  writes silently.
+- **Tests:** 10 new `logic.test.mjs` cases for `day-scan.js` (a
+  well-formed response, a code-fenced one, a malformed item dropped
+  without throwing, a string/negative hours rejected, garbage/empty input
+  never throwing, the prompt asking for the right shape and never
+  inventing a number).
+- **Not started:** a manager scanning a day on behalf of someone else
+  (every entry is attributed to whoever is signed in, same as `runScan`
+  today); combining several days in one scan; render-level coverage of
+  the modal itself (a Claude-backed flow with no automated suite for the
+  same reason `scripts/import-rapport.mjs` and `seed-emulator.mjs` have
+  none — real production calls, PROJECT.md §3) — verified by direct code
+  review instead: the prompt/parse pair is unit-tested, the save path
+  reuses `newEntry()`/`persist()` verbatim.
+
 ## 2026-09-14 — Fix: the billing tab's own label was never actually shipped
 
 - **Why:** found while working on a follow-up feature — `tabs/ProjectDetail.jsx`

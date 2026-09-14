@@ -78,6 +78,7 @@ import { ERROR_TEXT } from "./errors-text.js";
 import { isDemoMode } from "./firebase-client.js";
 import { createDemoSdk, demoFixture, DEMO_UID, DEMO_CID } from "./demo-store.js";
 import { normaliseImportRows, matchProjects } from "./rapport-import.js";
+import { buildDayScanPrompt, parseDayScanResponse } from "./day-scan.js";
 import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -2139,6 +2140,57 @@ console.log(`\n${pass} passed, ${fail} failed`);
     threw = e && e.message;
   }
   t("a note row with no qty/unit does not throw", threw, null);
+}
+
+{
+  // docs/specs/2026-09-14_ai-day-scan.md
+  const wellFormed = parseDayScanResponse(
+    '{"hours": 4.5, "items": [{"kind":"material","name":"Gutex Platten","qty":12,"unit":"qm"},{"kind":"tool","name":"Kettensaege","qty":2,"unit":"h"}], "note": "Dach gedeckt"}',
+  );
+  t("parseDayScanResponse reads a well-formed response", wellFormed, {
+    hours: 4.5,
+    items: [
+      { kind: "material", name: "Gutex Platten", qty: 12, unit: "qm" },
+      { kind: "tool", name: "Kettensaege", qty: 2, unit: "h" },
+    ],
+    note: "Dach gedeckt",
+  });
+
+  const codeFenced = parseDayScanResponse('```json\n{"hours": null, "items": [], "note": null}\n```');
+  t("parseDayScanResponse strips a code fence", codeFenced, { hours: null, items: [], note: null });
+
+  const malformedItem = parseDayScanResponse(
+    '{"hours": null, "items": [{"kind":"material","name":"Nagel","qty":50,"unit":"Stk"},{"kind":"other","name":"x","qty":1,"unit":"Stk"},{"kind":"material","name":"","qty":1,"unit":"Stk"},{"kind":"material","name":"y","qty":"lots","unit":"Stk"}], "note": null}',
+  );
+  t("parseDayScanResponse drops a malformed item rather than throwing", malformedItem.items, [
+    { kind: "material", name: "Nagel", qty: 50, unit: "Stk" },
+  ]);
+
+  t(
+    "parseDayScanResponse rejects a non-number hours",
+    parseDayScanResponse('{"hours": "8", "items": [], "note": null}').hours,
+    null,
+  );
+  t(
+    "parseDayScanResponse rejects a negative hours",
+    parseDayScanResponse('{"hours": -1, "items": [], "note": null}').hours,
+    null,
+  );
+  t("parseDayScanResponse never throws on garbage text", parseDayScanResponse("not json at all"), {
+    hours: null,
+    items: [],
+    note: null,
+  });
+  t("parseDayScanResponse never throws on empty input", parseDayScanResponse(""), {
+    hours: null,
+    items: [],
+    note: null,
+  });
+
+  const prompt = buildDayScanPrompt("Dach gedeckt, 8 Stunden");
+  t("buildDayScanPrompt asks for the exact JSON shape", /"hours"[\s\S]*"items"[\s\S]*"note"/.test(prompt), true);
+  t("buildDayScanPrompt carries the given description", prompt.includes("Dach gedeckt, 8 Stunden"), true);
+  t("buildDayScanPrompt never invents a number, told explicitly", /never invent/i.test(prompt), true);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -179,6 +179,8 @@ const CockpitTab = lazy(() => import("./tabs/CockpitTab.jsx").then((m) => ({ def
 
 const TripModal = lazy(() => import("./ui/trip-modal.jsx").then((m) => ({ default: m.TripModal })));
 
+const DayScanModal = lazy(() => import("./ui/day-scan-modal.jsx").then((m) => ({ default: m.DayScanModal })));
+
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
 // leave the app without a way to reach the proxy.
@@ -919,6 +921,7 @@ export default function SiteManager() {
   const [sosOpen, setSosOpen] = useState(false);
   const [cprStep, setCprStep] = useState(0);
   const [scanModal, setScanModal] = useState(null);
+  const [dayScanModal, setDayScanModal] = useState(null); // docs/specs/2026-09-14_ai-day-scan.md
   const scanFileRef = useRef(null);
   const libraryScanFileRef = useRef(null);
   const [pickupModal, setPickupModal] = useState(null);
@@ -4388,6 +4391,22 @@ export default function SiteManager() {
     source.close?.();
     if (!dataUrl.startsWith("data:image/jpeg")) throw new Error("encode");
     return { b64: dataUrl.split(",")[1], mediaType: "image/jpeg", dataUrl };
+  }
+
+  // docs/specs/2026-09-14_ai-day-scan.md
+  function openDayScan(projectId) {
+    setDayScanModal({
+      projectId,
+      step: "capture",
+      text: "",
+      images: [],
+      date: todayKey(),
+      hours: "",
+      items: [],
+      note: "",
+      loading: false,
+      error: null,
+    });
   }
 
   function openScan(mode, projectId) {
@@ -9735,6 +9754,7 @@ export default function SiteManager() {
             onDeleteEntry={deleteEntryFn}
             onShare={(project, ents) => setShareProjectModal({ project, entries: ents })}
             onScanCompare={(projectId) => openScan("compare", projectId)}
+            onOpenDayScan={openDayScan}
             onReorderEntries={reorderEntries}
             costing={projectCosting(selectedProject, projects.find((p) => p.id === selectedProject)?.quotedAmount)}
             money={money}
@@ -10333,6 +10353,27 @@ export default function SiteManager() {
             </Modal>
           );
         })()}
+
+      {dayScanModal && (
+        <Suspense fallback={<Loading t={t} />}>
+          <DayScanModal
+            t={t}
+            state={dayScanModal}
+            onChange={setDayScanModal}
+            onClose={() => setDayScanModal(null)}
+            callClaude={callClaude}
+            persist={persist}
+            entries={entries}
+            newEntry={newEntry}
+            fileToScaledImage={fileToScaledImage}
+            showToast={showToast}
+            onVoiceNote={() =>
+              toggleVoiceInput((updater) => setDayScanModal((s) => s && { ...s, text: updater(s.text) }), "dayScan")
+            }
+            voiceActive={voiceListening && voiceTarget === "dayScan"}
+          />
+        </Suspense>
+      )}
 
       {quickAddOpen &&
         (() => {

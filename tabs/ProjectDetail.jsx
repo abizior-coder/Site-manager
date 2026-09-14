@@ -33,6 +33,7 @@ import {
   RotateCcw,
   Send,
   Share2,
+  Sparkles,
   Square,
   Trash2,
   Truck,
@@ -74,6 +75,7 @@ export function ProjectDetail({
   onPurgeEntry,
   onShare,
   onScanCompare,
+  onOpenDayScan,
   onReorderEntries,
   costing,
   money,
@@ -422,6 +424,14 @@ export function ProjectDetail({
                     className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
                   >
                     <ImagePlus size={13} color={COLORS.success} /> {t.beforeAfter}
+                  </button>
+                  <button
+                    data-day-scan
+                    onClick={() => onOpenDayScan(project.id)}
+                    style={{ background: COLORS.card, border: `1px dashed #B48EAD`, color: "#B48EAD" }}
+                    className="py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"
+                  >
+                    <Sparkles size={13} color="#B48EAD" /> {t.dayScanBtn}
                   </button>
                   <button
                     data-inspect-open
