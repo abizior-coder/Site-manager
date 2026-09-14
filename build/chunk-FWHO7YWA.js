@@ -815,6 +815,7 @@ import"./chunk-6ATBPRIA.js";var r=`{
   "hubPhotos": "Fotot",
   "hubPlans": "Planet",
   "hubReports": "Raportet",
+  "hubBilling": "Oferta/fatura",
   "hubChat": "Biseda",
   "sheetSearch": "K\xEBrko artikull ose num\xEBr\u2026",
   "sheetArticles": "artikuj",

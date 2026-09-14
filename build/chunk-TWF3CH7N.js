@@ -815,6 +815,7 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "hubPhotos": "Fotky",
   "hubPlans": "Pl\xE1ny",
   "hubReports": "V\xFDkazy",
+  "hubBilling": "Ponuky/fakt\xFAry",
   "hubChat": "Chat",
   "sheetSearch": "H\u013Eada\u0165 \u010Dl\xE1nok alebo \u010D\xEDslo\u2026",
   "sheetArticles": "polo\u017Eiek",

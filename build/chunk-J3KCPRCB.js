@@ -815,6 +815,7 @@ import"./chunk-6ATBPRIA.js";var o=`{
   "hubPhotos": "Photos",
   "hubPlans": "Plans",
   "hubReports": "Reports",
+  "hubBilling": "Quotes/invoices",
   "hubChat": "Chat",
   "sheetSearch": "Search article or number\u2026",
   "sheetArticles": "articles",

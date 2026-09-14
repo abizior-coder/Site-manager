@@ -5,6 +5,28 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-14 — Fix: the billing tab's own label was never actually shipped
+
+- **Why:** found while working on a follow-up feature — `tabs/ProjectDetail.jsx`
+  references `t.hubBilling` (the owner-only Offerten/Rechnungen tab,
+  `docs/specs/2026-09-11_job-rapporte-tab.md`), but the key was missing
+  from **every** committed `i18n/*.json` file, so the tab has been
+  rendering with a blank/undefined label since that spec shipped
+  (`c87a212`). The `logic.test.mjs` completeness check only compares
+  every language file against `en.json` — since `en.json` itself never
+  had the key either, nothing flagged the gap. Root cause: the isolated
+  commit that shipped `hubBilling` never actually picked up the i18n
+  additions, and the value sat uncommitted (rediscovered only now,
+  correctly attributed and value verified against each language file's
+  own already-written but never-committed text) rather than shipped.
+- **What:** `hubBilling` added to all 14 `i18n/*.json` files with the
+  values already drafted for the original spec (German "Offerten/
+  Rechnungen", etc.) — no code change, the tab already reads the key
+  correctly.
+- **Not started:** nothing else audited for the same class of gap yet —
+  a key referenced in code but absent from `en.json` itself is invisible
+  to the current completeness test; worth a follow-up test some day.
+
 ## 2026-09-13 — Voice dictation no longer stops at the first pause
 
 - **Why:** reported live: dictating a note "breaks up as soon as I stop

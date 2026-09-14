@@ -815,6 +815,7 @@ import"./chunk-6ATBPRIA.js";var a=`{
   "hubPhotos": "Fot\xF3k",
   "hubPlans": "Tervek",
   "hubReports": "Jelent\xE9sek",
+  "hubBilling": "Aj\xE1nlatok/sz\xE1ml\xE1k",
   "hubChat": "Chat",
   "sheetSearch": "Cikk vagy sz\xE1m keres\xE9se\u2026",
   "sheetArticles": "cikk",
