@@ -1150,6 +1150,39 @@ async function renderAs(
     );
   }
 
+  // Project row hit targets (docs/specs/2026-09-15_project-row-hit-targets.md):
+  // the name/card opens the job, only the address text opens the map, and the
+  // address is not nested inside the row's button (a-in-button is invalid HTML).
+  {
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="projects"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const nameBtn = [...window.document.querySelectorAll("button")].find((x) => /Trockenbau/.test(x.textContent || ""));
+    const addressLink = window.document.querySelector("a[data-project-address]");
+    check(
+      "project row: the address link is not nested inside the name button",
+      !!addressLink && !!nameBtn && !nameBtn.contains(addressLink),
+      `addressLink=${!!addressLink}; nameBtn=${!!nameBtn}; nested=${nameBtn && addressLink ? nameBtn.contains(addressLink) : "n/a"}`,
+    );
+    check(
+      "project row: the address link only opens the map, not the job",
+      addressLink?.tagName === "A" && /google\.com\/maps/.test(addressLink?.getAttribute("href") || ""),
+      addressLink?.outerHTML.slice(0, 120) || "no address link",
+    );
+    nameBtn?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 400));
+    check(
+      "project row: tapping the name opens the job hub, not a map",
+      !!window.document.querySelector("[data-hub-tabs]"),
+      "no job hub after tapping the name",
+    );
+    window.document
+      .querySelector('[role="dialog"] [data-dialog-close]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+  }
+
   // Deleting keeps the record: it leaves the list, lands in the job's trash, comes back on restore.
   {
     window.document
@@ -1157,7 +1190,7 @@ async function renderAs(
       ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 300));
     const job = [...window.document.querySelectorAll("button")].find((x) =>
-      /Steildach|Dachfenster|Lettenring/.test(x.textContent || ""),
+      /Steildach|Dachfenster|Lettenring|Trockenbau/.test(x.textContent || ""),
     );
     job?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 600));
@@ -1227,7 +1260,7 @@ async function renderAs(
       ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 300));
     const job = [...window.document.querySelectorAll("button")].find((x) =>
-      /Steildach|Dachfenster|Lettenring/.test(x.textContent || ""),
+      /Steildach|Dachfenster|Lettenring|Trockenbau/.test(x.textContent || ""),
     );
     job?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     await new Promise((r) => setTimeout(r, 600));

@@ -6544,76 +6544,78 @@ export default function SiteManager() {
                   return (
                     <div
                       style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
-                      className={`w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1${inactive ? " opacity-60" : ""}`}
+                      className={`w-full rounded-xl pl-1 pr-4 py-4 flex flex-col gap-1${inactive ? " opacity-60" : ""}`}
                     >
-                      {handle}
-                      <span
-                        style={{ background: `${projectColour(p.id)}26`, color: projectColour(p.id) }}
-                        className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mr-2"
-                      >
-                        <ProjectIcon category={p.category} size={24} color={projectColour(p.id)} />
-                      </span>
-                      <button
-                        onClick={() => setSelectedProject(p.id)}
-                        className="flex-1 min-w-0 text-left flex items-center justify-between gap-2"
-                      >
-                        <div
-                          className="min-w-0 cursor-grab active:cursor-grabbing"
-                          draggable
-                          onDragStart={(e) => {
-                            e.stopPropagation();
-                            e.dataTransfer.setData("text/project-id", p.id);
-                            e.dataTransfer.effectAllowed = "copy";
-                          }}
+                      <div className="flex items-center justify-between gap-1">
+                        {handle}
+                        <span
+                          style={{ background: `${projectColour(p.id)}26`, color: projectColour(p.id) }}
+                          className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mr-2"
                         >
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <div className="font-bold">{p.name}</div>
-                            {p.category && (
+                          <ProjectIcon category={p.category} size={24} color={projectColour(p.id)} />
+                        </span>
+                        <button
+                          onClick={() => setSelectedProject(p.id)}
+                          className="flex-1 min-w-0 text-left flex items-center justify-between gap-2"
+                        >
+                          <div
+                            className="min-w-0 cursor-grab active:cursor-grabbing"
+                            draggable
+                            onDragStart={(e) => {
+                              e.stopPropagation();
+                              e.dataTransfer.setData("text/project-id", p.id);
+                              e.dataTransfer.effectAllowed = "copy";
+                            }}
+                          >
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <div className="font-bold">{p.name}</div>
+                              {p.category && (
+                                <span
+                                  style={{
+                                    background: COLORS.cardAlt,
+                                    color: COLORS.muted,
+                                    border: `1px solid ${COLORS.border}`,
+                                  }}
+                                  className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                                >
+                                  {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
+                                </span>
+                              )}
                               <span
                                 style={{
-                                  background: COLORS.cardAlt,
-                                  color: COLORS.muted,
-                                  border: `1px solid ${COLORS.border}`,
+                                  background: `${sm.color}22`,
+                                  color: sm.color,
+                                  border: `1px solid ${sm.color}66`,
                                 }}
-                                className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                                className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
                               >
-                                {t[PROJECT_CATEGORIES.find((c) => c.key === p.category)?.labelKey] || p.category}
+                                {t[sm.labelKey]}
                               </span>
-                            )}
-                            <span
-                              style={{
-                                background: `${sm.color}22`,
-                                color: sm.color,
-                                border: `1px solid ${sm.color}66`,
-                              }}
-                              className="text-xs font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap"
-                            >
-                              {t[sm.labelKey]}
-                            </span>
-                          </div>
-                          {(customerFor(p) || p.client) && (
-                            <div style={{ color: COLORS.muted }} className="text-xs mt-0.5 flex items-center gap-1">
-                              <User size={10} /> {customerFor(p)?.name || p.client}
                             </div>
-                          )}
-                          {p.address && (
-                            <a
-                              href={mapsUrl(p.address)}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{ color: COLORS.accentText }}
-                              className="text-xs flex items-center gap-1 mt-0.5"
-                            >
-                              <MapPin size={11} /> {p.address}
-                            </a>
-                          )}
-                          <div style={{ color: COLORS.muted }} className="text-xs mt-1">
-                            {pEntries.length} {t.entriesLabelFmt}
+                            {(customerFor(p) || p.client) && (
+                              <div style={{ color: COLORS.muted }} className="text-xs mt-0.5 flex items-center gap-1">
+                                <User size={10} /> {customerFor(p)?.name || p.client}
+                              </div>
+                            )}
+                            <div style={{ color: COLORS.muted }} className="text-xs mt-1">
+                              {pEntries.length} {t.entriesLabelFmt}
+                            </div>
                           </div>
-                        </div>
-                        <ChevronRight size={18} color={COLORS.muted} />
-                      </button>
+                          <ChevronRight size={18} color={COLORS.muted} />
+                        </button>
+                      </div>
+                      {p.address && (
+                        <a
+                          href={mapsUrl(p.address)}
+                          target="_blank"
+                          rel="noreferrer"
+                          data-project-address
+                          style={{ color: COLORS.accentText, marginLeft: "3.25rem" }}
+                          className="self-start text-xs flex items-center gap-1"
+                        >
+                          <MapPin size={11} /> {p.address}
+                        </a>
+                      )}
                     </div>
                   );
                 }}

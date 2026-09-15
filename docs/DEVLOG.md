@@ -5,6 +5,32 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-15 — Project row: address is no longer nested inside the name button
+
+- **Why:** `docs/specs/2026-09-15_project-row-hit-targets.md` — the
+  Projekte list row's name/category/customer/address/entry-count column
+  rendered its `<MapPin>` address `<a href>` inside the row's own
+  `<button onClick={() => setSelectedProject(p.id)}>`. An anchor is
+  interactive content and a `<button>`'s content model forbids
+  interactive descendants, so the two controls' focus order and
+  screen-reader behaviour were undefined even though `stopPropagation()`
+  happened to keep mouse clicks working.
+- **What:** the address `<a>` (`[data-project-address]`) moved out of
+  the button entirely, now a sibling below it, indented to align under
+  the name text — sized to its own icon+text, not a block over the row.
+  The button (name, category/status chips, customer line, entry count,
+  chevron, still a real `<button>` so existing "find a job by name"
+  tests keep working) is unchanged in behaviour; rows with no address
+  render exactly as before.
+- **Tests:** `render.test.mjs` — "the address link is not nested inside
+  the name button", "the address link only opens the map, not the job",
+  "tapping the name opens the job hub, not a map". Fixed two pre-existing
+  tests that were unknowingly relying on the old nesting bug: they found
+  "the job" by matching a regex against a `<button>`'s `textContent`
+  that included `/Lettenring/` — the fixture project's *address*, leaked
+  into the button only because the address used to be nested inside it.
+  Both now also match the fixture project's actual name, `Trockenbau`.
+
 ## 2026-09-15 — Row action tap targets; project status quick control
 
 - **Why:** `docs/specs/2026-09-15_row-actions-and-project-status.md` —
