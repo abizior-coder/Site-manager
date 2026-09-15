@@ -52,6 +52,7 @@ import {
   DEFAULT_PROJECT_STATUS,
   DEFAULT_TRADE,
   PROJECT_CATEGORIES,
+  PROJECT_STATUSES,
   Section,
   TRADES,
   documentState,
@@ -59,6 +60,11 @@ import {
   statusMeta,
   telHref,
 } from "../roofing-site-manager.jsx";
+
+// The job Übersicht's quick status control offers a focused subset of the
+// full pipeline: "waiting" (won, not started) and "lost" stay reachable only
+// via the project-edit form, not this one-tap control.
+const QUICK_STATUSES = ["lead", "quoted", "construction", "completed", "hold"];
 
 export function ProjectDetail({
   project,
@@ -127,6 +133,8 @@ export function ProjectDetail({
   onEditInspection,
   canEditInspection,
   currentUid,
+  canManageStatus,
+  onChangeStatus,
   t,
 }) {
   const sheetRef = useDialog({ onClose, active: true });
@@ -442,6 +450,29 @@ export function ProjectDetail({
                     <ClipboardCheck size={13} /> {t.newInspection}
                   </button>
                 </div>
+                {canManageStatus && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {QUICK_STATUSES.map((key) => {
+                      const s = PROJECT_STATUSES.find((st) => st.key === key);
+                      const active = (project.status || DEFAULT_PROJECT_STATUS) === key;
+                      return (
+                        <button
+                          key={key}
+                          data-project-status={key}
+                          onClick={() => onChangeStatus(key)}
+                          style={{
+                            background: active ? `${s.color}33` : COLORS.card,
+                            border: `1px solid ${active ? s.color : COLORS.border}`,
+                            color: active ? s.color : COLORS.muted,
+                          }}
+                          className="px-2.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap"
+                        >
+                          {t[s.labelKey]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 {customer && (
                   <div
                     style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}

@@ -55,4 +55,20 @@
     min-height: 100%;
     transform: translate(-50%, -50%);
   }
+  /* Same idea at 24 x 24, for tight button clusters (copy/edit/delete rows)
+     where a 44px invisible hit box would overlap the neighbouring button. */
+  .tap-sm {
+    position: relative;
+  }
+  .tap-sm::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+  }
 }

@@ -439,7 +439,7 @@ const DOCK_SORTS = ["pinned", "name", "status", "recent"];
 // Pipeline, in funnel order: an enquiry becomes a quote, a quote becomes work,
 // work finishes — or it is lost. `waiting` predates the pipeline and means
 // "won, not started yet", so it sits between quoted and construction.
-const PROJECT_STATUSES = [
+export const PROJECT_STATUSES = [
   { key: "lead", labelKey: "projStatusLead", color: "#B48EAD" },
   { key: "quoted", labelKey: "projStatusQuoted", color: "#D08770" },
   { key: "waiting", labelKey: "projStatusWaiting", color: "#6B7280" },
@@ -3430,6 +3430,12 @@ export default function SiteManager() {
     persist({ projects: updated });
     setEditProject(null);
     showToast(t.projectUpdated);
+  }
+
+  function setProjectStatus(id, status) {
+    if (!canManage()) return;
+    const updated = projects.map((p) => (p.id === id ? { ...p, status } : p));
+    persist({ projects: updated });
   }
 
   async function submitAuth() {
@@ -6532,11 +6538,13 @@ export default function SiteManager() {
                 onReorder={reorderProjects}
                 renderItem={(p, handle) => {
                   const pEntries = entries.filter((e) => e.projectId === p.id);
-                  const sm = statusMeta(p.status || DEFAULT_PROJECT_STATUS);
+                  const status = p.status || DEFAULT_PROJECT_STATUS;
+                  const sm = statusMeta(status);
+                  const inactive = ["completed", "lost", "hold"].includes(status);
                   return (
                     <div
                       style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
-                      className="w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1"
+                      className={`w-full rounded-xl pl-1 pr-4 py-4 flex items-center justify-between gap-1${inactive ? " opacity-60" : ""}`}
                     >
                       {handle}
                       <span
@@ -9786,6 +9794,8 @@ export default function SiteManager() {
             roster={team.members}
             canManageCrew={canManage()}
             onToggleCrew={(memberUid) => toggleProjectCrew(selectedProject, memberUid)}
+            canManageStatus={canManage()}
+            onChangeStatus={(status) => setProjectStatus(selectedProject, status)}
             noteDraft={projectNote}
             onNoteDraftChange={setProjectNote}
             onVoiceNote={() => toggleVoiceInput(setProjectNote, "projectNote")}
@@ -12423,9 +12433,9 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
       <span style={{ color: COLORS.muted }} className="shrink-0 tabular-nums">
         {i.qty ? `${i.qty}${i.unit ? " " + i.unit : ""}` : ""}
       </span>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         <button
-          className="tap"
+          className="tap-sm h-6 w-6 flex items-center justify-center"
           aria-label={t.copyBtn}
           onClick={() => onCopyItem(i)}
           title={t.copyBtn}
@@ -12434,7 +12444,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
           <Copy size={13} />
         </button>
         <button
-          className="tap"
+          className="tap-sm h-6 w-6 flex items-center justify-center"
           aria-label={t.a11yEdit}
           onClick={() => onEditItem(i)}
           title={t.editLabel}
@@ -12443,7 +12453,7 @@ export function Section({ title, items, onEditItem, onCopyItem, onDeleteItem, on
           <Pencil size={13} />
         </button>
         <button
-          className="tap"
+          className="tap-sm h-6 w-6 flex items-center justify-center"
           aria-label={t.a11yDelete}
           onClick={() => onDeleteItem(i)}
           title={t.deleteLabel}

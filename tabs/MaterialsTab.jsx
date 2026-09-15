@@ -808,9 +808,9 @@ export function MaterialsTab({
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-3 shrink-0">
                         <button
-                          className="tap"
+                          className="tap-sm h-6 w-6 flex items-center justify-center"
                           aria-label={t.a11yEdit}
                           title={t.a11yEdit}
                           onClick={() => openLibraryEdit(it)}
@@ -819,7 +819,7 @@ export function MaterialsTab({
                           <Pencil size={15} />
                         </button>
                         <button
-                          className="tap"
+                          className="tap-sm h-6 w-6 flex items-center justify-center"
                           aria-label={t.a11yDelete}
                           title={t.a11yDelete}
                           onClick={() => deleteLibraryItem(it.id)}

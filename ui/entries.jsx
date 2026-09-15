@@ -137,10 +137,10 @@ export function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDel
           />
         )}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         {handleEdit && (
           <button
-            className="tap"
+            className="tap-sm h-6 w-6 flex items-center justify-center"
             aria-label={t.a11yEdit}
             title={t.a11yEdit}
             onClick={() => handleEdit(entry)}
@@ -151,7 +151,7 @@ export function EntryRow({ entry, projectName, t, onEditTime, onEditEntry, onDel
         )}
         {onDelete && (
           <button
-            className="tap"
+            className="tap-sm h-6 w-6 flex items-center justify-center"
             aria-label={t.a11yDelete}
             title={t.a11yDelete}
             onClick={() => onDelete(entry)}

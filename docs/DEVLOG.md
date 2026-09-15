@@ -5,6 +5,38 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-15 — Row action tap targets; project status quick control
+
+- **Why:** `docs/specs/2026-09-15_row-actions-and-project-status.md` —
+  `.tap`'s invisible 44×44 hit box, centered on a small icon button, was
+  wide enough to overlap the next button in a tight Copy/Edit/Delete (or
+  Edit/Delete) cluster, so tapping Edit could fire Delete and back. The
+  job Übersicht also had no way to change a project's status, and the
+  main Projekte list didn't visually distinguish closed/inactive projects
+  from active ones (it already listed all of them regardless of status).
+- **What:** new `.tap-sm` utility in `tailwind.src.css` — same centered
+  invisible-hit-box trick as `.tap`, at 24×24 instead of 44×44. Applied
+  (with the cluster's own `gap-2` widened to `gap-3` so adjacent 24px
+  boxes can't touch) to `Section`'s Copy/Edit/Delete row
+  (`roofing-site-manager.jsx` — used by all four material/tool/order/
+  transport lists in the job hub, so no call-site changes needed),
+  `EntryRow`'s Edit/Delete (`ui/entries.jsx`), and the tech-library row's
+  Edit/Delete (`tabs/MaterialsTab.jsx`). `PROJECT_STATUSES` is now
+  exported; `tabs/ProjectDetail.jsx` renders a 5-status quick control
+  below the Übersicht's quick-action grid (Anfrage/Offerte/In Ausführung/
+  Abgeschlossen/Inaktiv — `lead`/`quoted`/`construction`/`completed`/
+  `hold`; `waiting`/`lost` stay reachable only via the project-edit
+  form), gated on a new `canManageStatus` prop, calling a new
+  `setProjectStatus(id, status)` in `roofing-site-manager.jsx` (same
+  `persist({ projects })` shape as `saveProjectEdit`, itself gated on
+  `canManage()`). The main Projekte list (already unfiltered by default)
+  now renders `completed`/`lost`/`hold` rows at `opacity-60` instead of
+  full contrast; active rows are unchanged.
+- **Tests:** `render.test.mjs` — "row actions: Edit opens the edit form,
+  not a delete", "row actions: Delete asks to delete, not Edit" (against
+  the job hub's material list), plus a fixture-restore check so the
+  suite's shared fixture is untouched afterwards.
+
 ## 2026-09-15 — Customer record: the fields a Swiss office actually needs
 
 - **Why:** `docs/specs/2026-09-09_customer-fields.md` — the customer record

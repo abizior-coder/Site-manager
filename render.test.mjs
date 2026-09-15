@@ -1218,6 +1218,85 @@ async function renderAs(
     await new Promise((r) => setTimeout(r, 300));
   }
 
+  // Row action buttons (docs/specs/2026-09-15_row-actions-and-project-status.md):
+  // Copy/Edit/Delete are separate hit targets. Clicking Edit must not delete
+  // the row, and clicking Delete must not open the edit form.
+  {
+    window.document
+      .querySelector('[data-tab-bar] [data-tab="projects"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const job = [...window.document.querySelectorAll("button")].find((x) =>
+      /Steildach|Dachfenster|Lettenring/.test(x.textContent || ""),
+    );
+    job?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 600));
+    window.document
+      .querySelector('[data-hub-tab="material"]')
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const sheet = window.document.querySelector('[role="dialog"][aria-label]');
+    const dels = () => (sheet ? [...sheet.querySelectorAll('button[aria-label="Löschen"]')] : []);
+    const edits = () => (sheet ? [...sheet.querySelectorAll('button[aria-label="Bearbeiten"]')] : []);
+    const before = dels().length;
+
+    // Click Edit on the first row: it opens the edit form, it does not delete.
+    edits()[0]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const editDlg = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+    check(
+      "row actions: Edit opens the edit form, not a delete",
+      dels().length === before &&
+        !window.document.querySelector("[data-delete-reason]") &&
+        !window.document.querySelector("[data-delete-confirm]") &&
+        /Bearbeiten/.test(editDlg?.textContent || ""),
+      `dels ${before}→${dels().length}; dlg=${(editDlg?.textContent || "").slice(0, 60)}`,
+    );
+    editDlg?.querySelector("[data-dialog-close]")?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+
+    // Click Delete on the first row: it asks to confirm, it does not open Edit.
+    dels()[0]?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+    const afterDeleteClick = [...window.document.querySelectorAll('[role="dialog"]')].pop();
+    const deleteAsked = !!window.document.querySelector("[data-delete-reason]") || dels().length < before;
+    check(
+      "row actions: Delete asks to delete, not Edit",
+      deleteAsked && !/^Bearbeiten$/.test((afterDeleteClick?.textContent || "").trim()),
+      `deleteAsked=${deleteAsked}; dlg=${(afterDeleteClick?.textContent || "").slice(0, 60)}`,
+    );
+    if (window.document.querySelector("[data-delete-reason]")) {
+      // Covered item: cancel instead of confirming, nothing was actually deleted.
+      window.document
+        .querySelector('[role="dialog"] [data-dialog-close]')
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 300));
+    } else if (dels().length < before) {
+      // Uncovered item: the click already deleted it outright. Put it back via the trash.
+      window.document
+        .querySelector('[data-hub-tab="overview"]')
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 300));
+      window.document
+        .querySelector("[data-deleted-block] [data-restore-entry]")
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 400));
+      window.document
+        .querySelector('[data-hub-tab="material"]')
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    check(
+      "row actions: the fixture material list is back to its original size",
+      dels().length === before,
+      `${dels().length} vs ${before}`,
+    );
+    [...window.document.querySelectorAll('[role="dialog"] [data-dialog-close]')]
+      .pop()
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise((r) => setTimeout(r, 300));
+  }
+
   // The owner's usage card must render on a Cockpit that has no numbers yet.
   {
     const cockpit = [...window.document.querySelectorAll("button")].find(
