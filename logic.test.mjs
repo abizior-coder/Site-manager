@@ -79,6 +79,7 @@ import { isDemoMode } from "./firebase-client.js";
 import { createDemoSdk, demoFixture, DEMO_UID, DEMO_CID } from "./demo-store.js";
 import { normaliseImportRows, matchProjects } from "./rapport-import.js";
 import { buildDayScanPrompt, parseDayScanResponse } from "./day-scan.js";
+import { customerContact } from "./customer-contact.js";
 import { unlinkSync } from "node:fs";
 
 // The helpers live in the JSX module, so compile it to plain JS first.
@@ -2191,6 +2192,90 @@ console.log(`\n${pass} passed, ${fail} failed`);
   t("buildDayScanPrompt asks for the exact JSON shape", /"hours"[\s\S]*"items"[\s\S]*"note"/.test(prompt), true);
   t("buildDayScanPrompt carries the given description", prompt.includes("Dach gedeckt, 8 Stunden"), true);
   t("buildDayScanPrompt never invents a number, told explicitly", /never invent/i.test(prompt), true);
+}
+
+{
+  // docs/specs/2026-09-09_customer-fields.md
+  const legacyOnly = customerContact({ phone: "044 555 66 77", address: "Bahnhofstrasse 1, 8000 Zürich" });
+  t(
+    "legacy-only: call and WhatsApp both read the old phone",
+    [legacyOnly.callNumber, legacyOnly.whatsAppNumber],
+    ["044 555 66 77", "044 555 66 77"],
+  );
+  t(
+    "legacy-only: both addresses read the old single address",
+    [legacyOnly.objectAddr, legacyOnly.billingAddr],
+    ["Bahnhofstrasse 1, 8000 Zürich", "Bahnhofstrasse 1, 8000 Zürich"],
+  );
+
+  const newOnly = customerContact({
+    phoneMobile: "079 111 22 33",
+    objectAddress: "Baustelle 5, 8003 Zürich",
+    billingAddress: "Rechnungsweg 2, 8004 Zürich",
+  });
+  t(
+    "new-only: the new fields are used",
+    [newOnly.callNumber, newOnly.objectAddr, newOnly.billingAddr],
+    ["079 111 22 33", "Baustelle 5, 8003 Zürich", "Rechnungsweg 2, 8004 Zürich"],
+  );
+
+  const both = customerContact({
+    phone: "044 555 66 77",
+    phoneMobile: "079 111 22 33",
+    address: "Bahnhofstrasse 1, 8000 Zürich",
+    objectAddress: "Baustelle 5, 8003 Zürich",
+    billingAddress: "Rechnungsweg 2, 8004 Zürich",
+  });
+  t(
+    "both set: the new field wins over the legacy one",
+    [both.callNumber, both.objectAddr, both.billingAddr],
+    ["079 111 22 33", "Baustelle 5, 8003 Zürich", "Rechnungsweg 2, 8004 Zürich"],
+  );
+
+  t("call may fall back to the office number; WhatsApp never does", customerContact({ phoneOffice: "044 999 88 77" }), {
+    callNumber: "044 999 88 77",
+    whatsAppNumber: "",
+    objectAddr: "",
+    billingAddr: "",
+  });
+  t("an empty customer never throws", customerContact({}), {
+    callNumber: "",
+    whatsAppNumber: "",
+    objectAddr: "",
+    billingAddr: "",
+  });
+  t("a null/undefined customer never throws", customerContact(null), {
+    callNumber: "",
+    whatsAppNumber: "",
+    objectAddr: "",
+    billingAddr: "",
+  });
+}
+
+{
+  // A key referenced in code but absent from en.json itself is invisible to
+  // "every language file has every key" above, since that check only
+  // compares each language against en.json -- exactly the hubBilling bug
+  // (docs/DEVLOG.md, 2026-09-14): the key was missing from en.json too, so
+  // nothing flagged it. Scans tabs/ and ui/ source text for t.<key> and
+  // checks each key exists in en.json.
+  const en = JSON.parse(readFileSync("i18n/en.json", "utf8"));
+  const dirs = ["tabs", "ui"];
+  const files = dirs.flatMap((d) =>
+    fsMod
+      .readdirSync(d, { withFileTypes: true })
+      .filter((f) => f.isFile() && /\.jsx?$/.test(f.name))
+      .map((f) => `${d}/${f.name}`),
+  );
+  const missing = [];
+  for (const f of files) {
+    const src = readFileSync(f, "utf8");
+    const used = new Set([...src.matchAll(/(?<![\w$.])t\.([A-Za-z_][A-Za-z0-9_]*)/g)].map((m) => m[1]));
+    for (const key of used) {
+      if (!(key in en)) missing.push(`${f}: t.${key}`);
+    }
+  }
+  t(`every t.* key used in tabs/ and ui/ exists in i18n/en.json (${files.length} files)`, missing, []);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

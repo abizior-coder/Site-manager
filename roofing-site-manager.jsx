@@ -126,6 +126,7 @@ import { AuthLangPicker } from "./ui/lang-picker.jsx";
 import { InstallHint } from "./ui/install-hint.jsx";
 import { isIOS, isStandalone, installHintDismissed, dismissInstallHint } from "./install.js";
 import { DOC_STATUSES, documentTotals, documentState } from "./documents.js";
+import { customerContact } from "./customer-contact.js";
 import { downloadText } from "./ui/download.js";
 import { todayKey, monthKey, uid, fmtHM, fmtDate, fmtMonth, fmtDateRange } from "./ui/format.js";
 import { loadPhoto, savePhoto, deletePhoto, typeMeta, Stat, EntryGroups } from "./ui/entries.jsx";
@@ -180,6 +181,8 @@ const CockpitTab = lazy(() => import("./tabs/CockpitTab.jsx").then((m) => ({ def
 const TripModal = lazy(() => import("./ui/trip-modal.jsx").then((m) => ({ default: m.TripModal })));
 
 const DayScanModal = lazy(() => import("./ui/day-scan-modal.jsx").then((m) => ({ default: m.DayScanModal })));
+
+const CustomerFormModal = lazy(() => import("./ui/customer-form.jsx").then((m) => ({ default: m.CustomerFormModal })));
 
 // Cloudflare Worker that holds the Anthropic API key server-side.
 // Kept in the bundle (not only in index.html) so a cached HTML file can't
@@ -2040,6 +2043,7 @@ export default function SiteManager() {
 
   async function printDocument(doc) {
     const customer = customers.find((c) => c.id === doc.customerId);
+    const billingAddr = customerContact(customer).billingAddr;
     const project = projects.find((p) => p.id === doc.projectId);
     const totals = documentTotals(doc);
     const cur = billing.currency || "CHF";
@@ -2073,7 +2077,7 @@ export default function SiteManager() {
             customer && customer.name
               ? {
                   name: customer.name,
-                  street: customer.address || "",
+                  street: billingAddr,
                   buildingNumber: "",
                   postalCode: "",
                   town: "",
@@ -2093,7 +2097,7 @@ export default function SiteManager() {
             <div class="pp-h">${esc(t.qrReceipt)}</div>
             <div class="pp-lbl">${esc(t.qrPayableTo)}</div>
             <div class="pp-val">${esc(normaliseIban(billing.iban))}<br>${esc(billing.companyName)}<br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}</div>
-            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(customer.address || "")}</div>` : ""}
+            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(billingAddr)}</div>` : ""}
             <div class="pp-lbl">${esc(t.qrCurrency)} / ${esc(t.qrAmount)}</div>
             <div class="pp-val">${esc(cur)} ${fmt(totals.gross)}</div>
           </div>
@@ -2109,7 +2113,7 @@ export default function SiteManager() {
             <div class="pp-val">${esc(normaliseIban(billing.iban))}<br>${esc(billing.companyName)}<br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}</div>
             <div class="pp-lbl">${esc(t.qrReference)}</div>
             <div class="pp-val">${esc(creditorReference(doc.number))}</div>
-            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(customer.address || "")}</div>` : ""}
+            ${customer ? `<div class="pp-lbl">${esc(t.qrPayableBy)}</div><div class="pp-val">${esc(customer.name)}<br>${esc(billingAddr)}</div>` : ""}
           </div>
         </div>`;
       } else {
@@ -2156,7 +2160,7 @@ export default function SiteManager() {
     </style></head><body>
       <div class="head">
         <div class="from"><strong>${esc(billing.companyName || profile.name)}</strong><br>${esc(billing.street)} ${esc(billing.buildingNumber)}<br>${esc(billing.postalCode)} ${esc(billing.town)}${billing.vatNumber ? `<br>${esc(t.vatNumberLabel)}: ${esc(billing.vatNumber)}` : ""}${profile.phone ? `<br>${esc(profile.phone)}` : ""}</div>
-        <div class="to">${customer ? `${esc(customer.name)}<br>${esc(customer.company || "")}${customer.company ? "<br>" : ""}${esc(customer.address || "")}` : ""}</div>
+        <div class="to">${customer ? `${esc(customer.name)}<br>${esc(customer.company || "")}${customer.company ? "<br>" : ""}${esc(billingAddr)}` : ""}</div>
       </div>
       <h1>${esc(isInvoice ? t.invoiceLabel : t.quoteLabel)} ${esc(doc.number)}</h1>
       <div class="meta">
@@ -3627,7 +3631,26 @@ export default function SiteManager() {
   function openCustomerForm(existing) {
     setCustomerDeleteAsk(false);
     setCustomerForm(
-      existing ? { ...existing } : { id: null, name: "", company: "", phone: "", email: "", address: "", notes: "" },
+      existing
+        ? { ...existing, contactPersons: existing.contactPersons || [] }
+        : {
+            id: null,
+            anrede: "",
+            name: "",
+            company: "",
+            uidChe: "",
+            role: "",
+            phoneMobile: "",
+            phoneOffice: "",
+            email: "",
+            lang: "",
+            objectAddress: "",
+            billingAddress: "",
+            preferredChannel: "",
+            contactPersons: [],
+            notes: "",
+            source: "",
+          },
     );
   }
 
@@ -6417,9 +6440,9 @@ export default function SiteManager() {
                               </div>
                               <ChevronRight size={18} color={COLORS.muted} className="shrink-0" />
                             </button>
-                            {c.phone && (
+                            {customerContact(c).callNumber && (
                               <a
-                                href={telHref(c.phone)}
+                                href={telHref(customerContact(c).callNumber)}
                                 aria-label={`${t.callLabel}: ${c.name}`}
                                 title={t.callLabel}
                                 style={{ background: COLORS.cardAlt, color: COLORS.success }}
@@ -8615,18 +8638,25 @@ export default function SiteManager() {
           if (!c) return null;
           const jobs = projects.filter((p) => p.customerId === c.id);
           const contacts = c.contacts || [];
+          const { callNumber, whatsAppNumber, objectAddr } = customerContact(c);
+          const channelLabels = { call: t.callLabel, whatsapp: "WhatsApp", email: t.emailLabel, post: t.channelPost };
           return (
             <Modal t={t} onClose={() => setSelectedCustomer(null)} title={c.name}>
               {c.company && (
-                <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-3">
+                <div style={{ color: COLORS.muted }} className="text-sm -mt-2 mb-1">
                   {c.company}
+                </div>
+              )}
+              {c.preferredChannel && channelLabels[c.preferredChannel] && (
+                <div style={{ color: COLORS.muted }} className="text-xs -mt-1 mb-3">
+                  {t.preferredHint}: {channelLabels[c.preferredChannel]}
                 </div>
               )}
 
               <div className="grid grid-cols-4 gap-2 mb-4">
-                {c.phone ? (
+                {callNumber ? (
                   <a
-                    href={telHref(c.phone)}
+                    href={telHref(callNumber)}
                     style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
                     className="py-2.5 rounded-lg flex flex-col items-center gap-1"
                   >
@@ -8636,9 +8666,9 @@ export default function SiteManager() {
                 ) : (
                   <div />
                 )}
-                {c.phone ? (
+                {whatsAppNumber ? (
                   <a
-                    href={waHref(c.phone)}
+                    href={waHref(whatsAppNumber)}
                     target="_blank"
                     rel="noreferrer"
                     style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
@@ -8662,9 +8692,9 @@ export default function SiteManager() {
                 ) : (
                   <div />
                 )}
-                {c.address ? (
+                {objectAddr ? (
                   <a
-                    href={mapsUrl(c.address)}
+                    href={mapsUrl(objectAddr)}
                     target="_blank"
                     rel="noreferrer"
                     style={{ background: COLORS.card, border: `1px solid ${COLORS.border}` }}
@@ -8678,15 +8708,15 @@ export default function SiteManager() {
                 )}
               </div>
 
-              {(c.phone || c.email || c.address) && (
+              {(callNumber || c.email || objectAddr) && (
                 <div style={{ background: COLORS.card }} className="rounded-lg p-3 mb-3 text-xs flex flex-col gap-1">
-                  {c.phone && <div style={{ color: COLORS.muted }}>{c.phone}</div>}
+                  {callNumber && <div style={{ color: COLORS.muted }}>{callNumber}</div>}
                   {c.email && (
                     <div style={{ color: COLORS.muted }} className="break-all">
                       {c.email}
                     </div>
                   )}
-                  {c.address && <div style={{ color: COLORS.muted }}>{c.address}</div>}
+                  {objectAddr && <div style={{ color: COLORS.muted }}>{objectAddr}</div>}
                 </div>
               )}
               {c.notes && (
@@ -8798,80 +8828,22 @@ export default function SiteManager() {
         })()}
 
       {customerForm && (
-        <Modal
-          t={t}
-          onClose={() => {
-            setCustomerForm(null);
-            setCustomerDeleteAsk(false);
-          }}
-          title={customerForm.id ? t.editCustomer : t.newCustomer}
-        >
-          {[
-            ["name", t.customerNameLabel],
-            ["company", t.companyLabel],
-            ["phone", t.phoneLabel],
-            ["email", t.emailLabel],
-            ["address", t.addressLabel],
-          ].map(([field, label]) => (
-            <Field key={field} label={label}>
-              <input
-                value={customerForm[field] || ""}
-                onChange={(e) => setCustomerForm((s) => ({ ...s, [field]: e.target.value }))}
-                type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
-                style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-                className="w-full rounded-lg px-3 py-2 text-sm mb-2 outline-none"
-              />
-            </Field>
-          ))}
-          <Field label={t.notesLabel}>
-            <textarea
-              value={customerForm.notes || ""}
-              onChange={(e) => setCustomerForm((s) => ({ ...s, notes: e.target.value }))}
-              rows={3}
-              style={{ background: COLORS.shell, border: `1px solid ${COLORS.border}`, color: COLORS.text }}
-              className="w-full rounded-lg px-3 py-2 text-sm mb-3 outline-none resize-none"
-            />
-          </Field>
-          <button
-            onClick={submitCustomer}
-            style={{ background: COLORS.accent }}
-            className="w-full py-3 rounded-lg font-bold uppercase text-sm"
-          >
-            {t.saveLabel}
-          </button>
-          {customerForm.id &&
-            (customerDeleteAsk ? (
-              <div data-customer-delete-confirm className="flex flex-wrap items-center justify-center gap-2 mt-2">
-                <span style={{ color: COLORS.dangerText }} className="text-xs font-bold">
-                  {t.customerDeleteConfirm}
-                </span>
-                <button
-                  data-customer-delete-yes
-                  onClick={() => deleteCustomer(customerForm.id)}
-                  style={{ background: COLORS.danger }}
-                  className="px-2.5 py-1.5 rounded text-xs font-bold uppercase"
-                >
-                  {t.deleteLabel}
-                </button>
-                <button
-                  onClick={() => setCustomerDeleteAsk(false)}
-                  style={{ color: COLORS.muted }}
-                  className="tap px-2 py-1.5 text-xs font-bold uppercase"
-                >
-                  {t.back}
-                </button>
-              </div>
-            ) : (
-              <button
-                data-customer-delete
-                onClick={() => setCustomerDeleteAsk(true)}
-                style={{ color: COLORS.dangerText }}
-                className="w-full py-3 text-xs font-bold uppercase"
-              >
-                {t.deleteLabel}
-              </button>
-            ))}
-        </Modal>
+        <Suspense fallback={<Loading t={t} />}>
+          <CustomerFormModal
+            t={t}
+            customerForm={customerForm}
+            onChange={setCustomerForm}
+            onClose={() => {
+              setCustomerForm(null);
+              setCustomerDeleteAsk(false);
+            }}
+            onSubmit={submitCustomer}
+            deleteAsk={customerDeleteAsk}
+            onAskDelete={() => setCustomerDeleteAsk(true)}
+            onCancelDelete={() => setCustomerDeleteAsk(false)}
+            onDelete={deleteCustomer}
+          />
+        </Suspense>
       )}
 
       {contactForm && (

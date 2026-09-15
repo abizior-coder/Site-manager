@@ -5,6 +5,62 @@ Newest first. The pre-commit hook refuses a source change without a new
 entry here; `docs/CODE_MAP.md` is updated in the same commit when a file
 is added, moved or changes its job.
 
+## 2026-09-15 — Customer record: the fields a Swiss office actually needs
+
+- **Why:** `docs/specs/2026-09-09_customer-fields.md` — the customer record
+  only had name/company/phone/email/address/notes; a Swiss trade office
+  also needs a salutation, a UID/CHE number, the contact's role, a mobile
+  and office number kept separate, a preferred language, a site address
+  and a billing address kept separate, a preferred contact channel, more
+  than one contact person, and where the lead came from.
+- **What:** `customer-contact.js` (new, pure): `customerContact(customer)`
+  computes the four fallback pairs (`phoneMobile || phone`, again for
+  WhatsApp specifically — `phoneOffice` is never a WhatsApp number —
+  `objectAddress || address`, `billingAddress || address`) in one place
+  instead of four `||` chains at each read site. `customerForm` gained
+  `anrede`, `uidChe` (shown only while `company` is set), `role`,
+  `phoneMobile`/`phoneOffice`, `lang` (built from the same `LANGS` list
+  the sign-in language picker already uses), `objectAddress`/
+  `billingAddress`, `preferredChannel`, a repeating `contactPersons[]`
+  (add/remove, each its own `id`), and `source` — `phone`/`address` stay
+  on the record, unedited from here on but still read as the fallback, so
+  an old customer keeps working with no migration. The detail view's
+  Call/WhatsApp/Route tap row, the customer list row's Call button, and
+  `printDocument`'s billing address (the QR debtor block, both printed
+  "payable by" blocks, the invoice's "to" address) all read through
+  `customerContact()` now instead of the old fields directly. A
+  `preferredChannel`, if set, shows as a small "prefers: X" hint next to
+  the customer's name.
+- **Budget:** the full field set missed the first-paint budget eager
+  (353 KB against the 350 KB cap) — the same shape `ui/trip-modal.jsx`
+  and `ui/day-scan-modal.jsx` already hit. Moved into new lazy
+  `ui/customer-form.jsx` (`CustomerFormModal`, render only —
+  `customerForm` state and `submitCustomer`/`deleteCustomer` stay in
+  `roofing-site-manager.jsx`); landed at 349 KB.
+- **Also added:** a second i18n completeness test — every `t.*` key used
+  in `tabs/`/`ui/` source exists in `i18n/en.json` itself. The existing
+  "every language has every key" check only ever compared each language
+  against `en.json`, so a key missing from `en.json` too was invisible to
+  it — exactly what happened to `hubBilling` (2026-09-14 DEVLOG entry).
+  The new scan caught a second, unrelated instance immediately:
+  `tabs/ProjectDetail.jsx`'s crew-removal button used `t.removeLabel`,
+  which had never existed in any language file — fixed in the same
+  commit, all 14 languages.
+- **Tests:** 7 new `logic.test.mjs` cases for `customer-contact.js`
+  (legacy-only, new-only, both set — new wins, `phoneOffice` as a
+  call-only fallback, an empty/`null` customer never throwing); the new
+  `t.*`-usage scan. 8 new `render.test.mjs` cases: every new field shows;
+  a company-less customer hides UID/CHE, typing a company reveals it;
+  WhatsApp resolves from the new mobile number even with a different
+  legacy phone on file; adding a contact person survives a save; removing
+  one takes it out of the form; the pre-existing Löschen/visible-label
+  checks on the same customer still pass unchanged.
+- **Not started (per spec):** wiring the new fields into
+  `customers-import.js`/`accounting-export.js`'s bexio push; UID/CHE
+  format validation; a `source` picklist; splitting `name` into
+  first/last (explicitly rejected); duplicate-customer merging (PROJECT.md
+  §5, unrelated pre-existing gap).
+
 ## 2026-09-14 — AI day scan: log the day by photo or voice, in the app
 
 - **Why:** `docs/specs/2026-09-14_ai-day-scan.md` — the crew wanted the

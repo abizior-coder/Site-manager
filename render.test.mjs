@@ -1537,6 +1537,79 @@ async function renderAs(
           fields.map((f) => `${f.tagName}:${f.labels?.length}:${f.placeholder}`).join(",") || "no dialog",
         );
       }
+      // docs/specs/2026-09-09_customer-fields.md
+      {
+        const setVal = (el, v) => {
+          if (!el) return;
+          const proto =
+            el.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
+          Object.getOwnPropertyDescriptor(proto, "value").set.call(el, v);
+          el.dispatchEvent(new window.Event(el.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
+        };
+        const labelText = (el) => el?.labels?.[0]?.textContent || "";
+        const byLabel = (root, txt) =>
+          [...(root?.querySelectorAll("input, select") || [])].find((el) => labelText(el) === txt);
+
+        check(
+          "owner: a company-less customer hides the UID/CHE field",
+          !byLabel(topDialog(), "UID/CHE-Nummer (optional)"),
+          "the field showed up with no company set",
+        );
+
+        setVal(byLabel(topDialog(), "Firma (optional)"), "Bauag AG");
+        await wait(60);
+        check(
+          "owner: setting a company reveals the UID/CHE field",
+          !!byLabel(topDialog(), "UID/CHE-Nummer (optional)"),
+          "still hidden after typing a company",
+        );
+
+        setVal(byLabel(topDialog(), "Mobile"), "+41 79 111 22 33");
+        await wait(60);
+
+        click(topDialog()?.querySelector("[data-contact-person-add]"));
+        await wait(60);
+        const personRow = topDialog()?.querySelector("[data-contact-person-row]");
+        setVal(byLabel(personRow, "Name"), "Peter Muster");
+        await wait(60);
+
+        click(
+          [...(topDialog()?.querySelectorAll("button") || [])].find(
+            (b) => (b.textContent || "").trim() === "Speichern",
+          ),
+        );
+        await wait(300);
+
+        click(window.document.querySelector("[data-customer-row] button"));
+        await wait(300);
+        const waLink = topDialog()?.querySelector('a[href^="https://wa.me/"]');
+        check(
+          "owner: WhatsApp uses the new mobile number even though the legacy phone differs",
+          waLink?.getAttribute("href") === "https://wa.me/41791112233",
+          waLink?.getAttribute("href") || "no WhatsApp link",
+        );
+
+        click(
+          [...(topDialog()?.querySelectorAll("button") || [])].find(
+            (b) => (b.textContent || "").trim() === "Bearbeiten",
+          ),
+        );
+        await wait(300);
+        const savedRow = topDialog()?.querySelector("[data-contact-person-row]");
+        check(
+          "owner: an added contact person survives a save",
+          !!savedRow && byLabel(savedRow, "Name")?.value === "Peter Muster",
+          savedRow ? "row present but name did not persist" : "row missing after save",
+        );
+
+        click(savedRow?.querySelector("[data-contact-person-remove]"));
+        await wait(60);
+        check(
+          "owner: removing a contact person row takes it out of the form",
+          !topDialog()?.querySelector("[data-contact-person-row]"),
+          "row still present after remove",
+        );
+      }
       click(window.document.querySelector("[data-customer-delete]"));
       await wait(300);
       const confirm = window.document.querySelector("[data-customer-delete-confirm]");
